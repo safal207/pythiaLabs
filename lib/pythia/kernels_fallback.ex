@@ -14,7 +14,7 @@ defmodule Pythia.KernelsFallback do
         insert = hd(acc) + 1
         delete = Enum.at(prev_row, j) + 1
         replace = Enum.at(prev_row, j - 1) + cost
-        [min(insert, delete, replace) | acc]
+        [Enum.min([insert, delete, replace]) | acc]
       end)
       |> Enum.reverse()
     end)
