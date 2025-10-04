@@ -7,7 +7,7 @@ defmodule Pythia.MixProject do
       version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      compilers: [:rustler] ++ Mix.compilers(),
+      compilers: compilers(),
       deps: deps()
     ]
   end
@@ -21,5 +21,9 @@ defmodule Pythia.MixProject do
       {:rustler, "~> 0.33"},
       {:jason, "~> 1.4"}
     ]
+  end
+
+  defp compilers do
+    [:rustler_fallback | Mix.compilers()]
   end
 end
