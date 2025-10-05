@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.16'
+          otp-version: '26'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+
+      - name: Deps & compile
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+          mix compile
+
+      - name: Run demo
+        run: |
+          mix run examples/lev_demo.exs
+
+      - name: Run bench
+        run: |
+          mix run benches/bench.exs
+
+      - name: Build port worker
+        run: |
+          cd workers/solver_port && cargo build --release
+
+      - name: Run port demo
+        run: |
+          mix run examples/port_demo.exs
