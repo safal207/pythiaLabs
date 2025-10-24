@@ -1,7 +1,145 @@
-Apache License
-Version 2.0, January 2004
-http://www.apache.org/licenses/
+PYTHIA LABS CUSTOM LICENSE
+Version 1.0, October 2025
 
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+Copyright (c) 2025 Pythia Labs Contributors
 
-[Standard Apache-2.0 text omitted for brevity in this scaffold]
+PREAMBLE
+
+This software implements transparent, explainable AI reasoning systems. We believe
+in open collaboration while ensuring responsible use of AI technology that respects
+human values, transparency, and ethical considerations.
+
+TERMS AND CONDITIONS
+
+1. DEFINITIONS
+
+   "Software" refers to the Pythia Labs codebase, documentation, and associated materials.
+   "You" refers to any individual or legal entity exercising permissions under this License.
+   "Derivative Works" refers to any work based on or derived from the Software.
+   "Commercial Use" refers to use intended for or directed toward commercial advantage.
+
+2. GRANT OF RIGHTS
+
+   Subject to the terms and conditions of this License, You are granted:
+
+   a) Personal and Research Use: Unrestricted rights to use, modify, and distribute
+      the Software for personal, educational, and non-commercial research purposes.
+
+   b) Commercial Use: Rights to use the Software commercially, subject to the
+      Ethical Use Requirements (Section 4) and Attribution Requirements (Section 5).
+
+   c) Derivative Works: Rights to create and distribute Derivative Works under
+      the same license terms.
+
+3. REDISTRIBUTION
+
+   You may reproduce and distribute copies of the Software or Derivative Works in
+   any medium, with or without modifications, provided that You meet the following:
+
+   a) You must give any other recipients a copy of this License;
+   b) You must cause any modified files to carry prominent notices stating that
+      You changed the files;
+   c) You must retain all copyright, patent, trademark, and attribution notices;
+   d) If the Software includes a "NOTICE" file, You must include a readable copy
+      of the attribution notices contained therein.
+
+4. ETHICAL USE REQUIREMENTS
+
+   You agree NOT to use the Software or Derivative Works for:
+
+   a) Development of autonomous weapons systems or military applications intended
+      to cause harm;
+   b) Surveillance systems that violate privacy rights or enable mass surveillance
+      without consent;
+   c) Discriminatory systems that unfairly target individuals based on protected
+      characteristics;
+   d) Deceptive practices including deepfakes, misinformation campaigns, or fraud;
+   e) Any purpose that violates human rights, dignity, or applicable laws.
+
+   TRANSPARENCY PRINCIPLE: Any system built using this Software that makes decisions
+   affecting individuals must provide explainable reasoning traces when technically
+   feasible.
+
+5. ATTRIBUTION REQUIREMENTS
+
+   All use of the Software must include prominent attribution:
+
+   "Powered by Pythia Labs - Transparent AI Reasoning"
+
+   For commercial products, this attribution must be visible to end users in:
+   - Product documentation
+   - About/Credits section of the application
+   - Public-facing materials (if applicable)
+
+6. PATENT GRANT
+
+   Each contributor grants You a perpetual, worldwide, non-exclusive, no-charge,
+   royalty-free, irrevocable patent license to make, use, sell, offer for sale,
+   import, and otherwise transfer the Software, where such license applies only to
+   those patent claims licensable by such contributor that are necessarily infringed
+   by their contribution(s) alone or by combination of their contribution(s) with
+   the Software.
+
+7. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE.
+
+8. LIMITATION OF LIABILITY
+
+   In no event shall any contributor be liable for any direct, indirect, incidental,
+   special, exemplary, or consequential damages (including, but not limited to,
+   procurement of substitute goods or services; loss of use, data, or profits; or
+   business interruption) however caused and on any theory of liability, whether
+   in contract, strict liability, or tort (including negligence or otherwise)
+   arising in any way out of the use of this Software, even if advised of the
+   possibility of such damage.
+
+9. TERMINATION
+
+   This License and the rights granted hereunder will terminate automatically upon
+   any breach by You of the terms of this License. Individuals or entities who have
+   received Derivative Works from You under this License, however, will not have
+   their licenses terminated provided they remain in full compliance.
+
+10. ACCEPTING WARRANTY OR ADDITIONAL LIABILITY
+
+    You may choose to offer and charge a fee for warranty, support, indemnity or
+    liability obligations to recipients of the Software. However, You may do so
+    only on Your own behalf and not on behalf of any contributor.
+
+11. GOVERNING LAW
+
+    This License shall be governed by and construed in accordance with the laws
+    of the jurisdiction in which the primary development occurs, excluding its
+    conflicts of law provisions.
+
+12. COMMUNITY VALUES
+
+    Users of this Software are encouraged to:
+    - Contribute improvements back to the community
+    - Share knowledge and documentation
+    - Report bugs and security issues responsibly
+    - Build systems that enhance rather than replace human judgment
+    - Prioritize transparency and explainability in AI systems
+
+END OF TERMS AND CONDITIONS
+
+---
+
+HOW TO APPLY THIS LICENSE TO YOUR WORK
+
+To apply this License to your Derivative Works, attach the following notice:
+
+   Copyright (c) [year] [your name/organization]
+
+   Licensed under the Pythia Labs Custom License, Version 1.0.
+   You may obtain a copy of the License at:
+   https://github.com/safal207/pythiaLabs/blob/main/LICENSE
+
+For questions about this license, contact the Pythia Labs maintainers.
