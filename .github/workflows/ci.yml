@@ -33,6 +33,10 @@ jobs:
           mix deps.get
           mix compile
 
+      - name: Run tests
+        run: |
+          mix test
+
       - name: Run demo
         run: |
           mix run examples/lev_demo.exs
