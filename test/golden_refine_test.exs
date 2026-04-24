@@ -4,20 +4,20 @@ defmodule Pythia.GoldenRefineTest do
   alias Pythia
 
   @cases [
-    {"", "", 0},
-    {"a", "", 1},
-    {"", "abc", 3},
-    {"abc", "abc", 0},
-    {"kitten", "sitting", 3},
-    {"book", "back", 2},
-    {"flaw", "lawn", 2},
-    {"gumbo", "gambol", 2},
-    {"привет", "привёт", 1},
-    {"mañana", "manana", 1}
+    {"", ""},
+    {"a", ""},
+    {"", "abc"},
+    {"abc", "abc"},
+    {"kitten", "sitting"},
+    {"book", "back"},
+    {"flaw", "lawn"},
+    {"gumbo", "gambol"},
+    {"привет", "привёт"},
+    {"mañana", "manana"}
   ]
 
-  test "golden scenarios produce expected best score" do
-    Enum.each(@cases, fn {source, target, expected_score} ->
+  test "golden scenarios converge to the target" do
+    Enum.each(@cases, fn {source, target} ->
       assert {:ok, result} =
                Pythia.refine_v1(%{
                  source: source,
@@ -25,9 +25,10 @@ defmodule Pythia.GoldenRefineTest do
                  options: [max_steps: 64, threshold: 0, no_improve_limit: 8]
                })
 
-      assert result.best.score == expected_score
+      assert result.best.candidate == target
+      assert result.best.score == 0
+      assert result.stop_reason == :threshold
       assert is_list(result.trace)
-      assert result.stop_reason in [:threshold, :max_steps, :no_improve_limit]
     end)
   end
 

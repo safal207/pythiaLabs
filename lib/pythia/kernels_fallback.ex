@@ -6,7 +6,6 @@ defmodule Pythia.KernelsFallback do
   defp do_lev(xs, []), do: length(xs)
 
   defp do_lev(xs, ys) do
-    m = length(xs)
     n = length(ys)
     row0 = Enum.to_list(0..n)
 
