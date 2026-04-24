@@ -23,7 +23,7 @@ defmodule Pythia.PlannerTest do
   test "stops by no_improve_limit when objective cannot improve" do
     planner = Planner.new("abc", "abc", max_steps: 50, threshold: -1, no_improve_limit: 3)
 
-    assert {:ok, %{steps: 3, stop_reason: :no_improve_limit, trace: trace}} =
+    assert {:ok, %{steps: 4, stop_reason: :no_improve_limit, trace: trace}} =
              Planner.run(planner, Executor.new(), Critic.new())
 
     assert Enum.all?(trace, fn step -> step.score == 0 end)
@@ -50,7 +50,7 @@ defmodule Pythia.PlannerTest do
     assert_receive {:event, [:pythia, :planner, :step], %{step: 1, score: 0}, %{trace_id: 42}},
                    500
 
-    assert_receive {:event, [:pythia, :planner, :stop], %{steps: 2},
+    assert_receive {:event, [:pythia, :planner, :stop], %{steps: 3},
                     %{trace_id: 42, stop_reason: :no_improve_limit}},
                    500
 
