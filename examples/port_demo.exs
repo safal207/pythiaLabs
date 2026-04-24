@@ -9,8 +9,8 @@ req = %{
     [0, 1, 1, 1, 0, 0, 0],
     [0, 0, 0, 0, 1, 1, 0]
   ],
-  start: {0, 0},
-  goal: {4, 6}
+  start: [0, 0],
+  goal: [4, 6]
 }
 
 bin = Jason.encode!(req)
