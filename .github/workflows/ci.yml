@@ -33,6 +33,10 @@ jobs:
           mix deps.get
           mix compile
 
+      - name: Run Elixir tests
+        run: |
+          mix test
+
       - name: Run demo
         run: |
           mix run examples/lev_demo.exs
@@ -44,6 +48,10 @@ jobs:
       - name: Build port worker
         run: |
           cd workers/solver_port && cargo build --release
+
+      - name: Run worker tests
+        run: |
+          cd workers/solver_port && cargo test
 
       - name: Run port demo
         run: |
