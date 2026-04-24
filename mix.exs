@@ -1,3 +1,5 @@
+Code.require_file("mix/tasks/compile.rustler_fallback.ex", __DIR__)
+
 defmodule Pythia.MixProject do
   use Mix.Project
 
