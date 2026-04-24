@@ -35,17 +35,21 @@ defmodule Pythia do
       when is_binary(source) and is_binary(target) do
     opts = Map.get(req, :options, [])
 
-    with {:ok, result} <- refine(source, target, opts) do
-      {:ok,
-       %{
-         version: "v1",
-         source: source,
-         target: target,
-         steps: result.steps,
-         stop_reason: result.stop_reason,
-         best: result.best,
-         trace: result.trace
-       }}
+    if Keyword.keyword?(opts) do
+      with {:ok, result} <- refine(source, target, opts) do
+        {:ok,
+         %{
+           version: "v1",
+           source: source,
+           target: target,
+           steps: result.steps,
+           stop_reason: result.stop_reason,
+           best: result.best,
+           trace: result.trace
+         }}
+      end
+    else
+      {:error, :invalid_request}
     end
   end
 

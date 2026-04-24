@@ -36,4 +36,12 @@ defmodule Pythia.GoldenRefineTest do
     assert {:error, :invalid_request} = Pythia.refine_v1(%{source: "ok"})
     assert {:error, :invalid_request} = Pythia.refine_v1(:bad)
   end
+
+  test "non-keyword options are rejected" do
+    assert {:error, :invalid_request} =
+             Pythia.refine_v1(%{source: "a", target: "b", options: %{max_steps: 10}})
+
+    assert {:error, :invalid_request} =
+             Pythia.refine_v1(%{source: "a", target: "b", options: "nope"})
+  end
 end
