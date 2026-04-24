@@ -20,7 +20,7 @@ defmodule Mix.Tasks.Compile.RustlerFallback do
             Mix.shell().info("Rustler NIFs compiled successfully")
             {:ok, []}
 
-          {:error, _} = error ->
+          {:error, _} ->
             Mix.shell().info("Rustler compilation failed, using fallback implementation")
             {:ok, []}
 
