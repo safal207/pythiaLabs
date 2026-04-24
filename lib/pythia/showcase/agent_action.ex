@@ -18,23 +18,32 @@ defmodule Pythia.Showcase.AgentAction do
   @spec build(map()) :: t()
   def build(attrs) when is_map(attrs) do
     %{
-      action_id: Map.get(attrs, :action_id, "act_default"),
-      action_type: Map.get(attrs, :action_type, ""),
-      actor: Map.get(attrs, :actor, ""),
-      target: Map.get(attrs, :target, ""),
-      required_permission: Map.get(attrs, :required_permission, ""),
-      granted_permissions: Map.get(attrs, :granted_permissions, []),
-      metadata: Map.get(attrs, :metadata, %{})
+      action_id: fetch(attrs, :action_id, "act_default"),
+      action_type: fetch(attrs, :action_type, ""),
+      actor: fetch(attrs, :actor, ""),
+      target: fetch(attrs, :target, ""),
+      required_permission: fetch(attrs, :required_permission, ""),
+      granted_permissions: fetch(attrs, :granted_permissions, []),
+      metadata: fetch(attrs, :metadata, %{})
     }
   end
 
   @spec validate(t()) :: :ok | {:error, atom()}
   def validate(action) when is_map(action) do
-    if Enum.all?(@required_fields, &present?(Map.get(action, &1))) do
+    permissions = Map.get(action, :granted_permissions)
+
+    valid_permissions =
+      is_list(permissions) and Enum.all?(permissions, fn permission -> is_binary(permission) end)
+
+    if Enum.all?(@required_fields, &present?(Map.get(action, &1))) and valid_permissions do
       :ok
     else
       {:error, :invalid_action}
     end
+  end
+
+  defp fetch(attrs, key, default) do
+    Map.get(attrs, key, Map.get(attrs, Atom.to_string(key), default))
   end
 
   defp present?(value) when is_binary(value), do: String.trim(value) != ""

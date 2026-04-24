@@ -57,6 +57,8 @@ defmodule Pythia.Showcase.SafetyGate do
     end
   end
 
+  defp check_permission(_required, _granted_permissions), do: {:error, :invalid_action}
+
   defp invalid_trace(action) do
     [
       %{event: :proposed_action, action_type: Map.get(action, :action_type, nil)},

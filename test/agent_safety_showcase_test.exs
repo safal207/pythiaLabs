@@ -38,6 +38,21 @@ defmodule Pythia.AgentSafetyShowcaseTest do
            end)
   end
 
+  test "string-key input is accepted" do
+    action = %{
+      "action_id" => "act_string_keys",
+      "action_type" => "read_public_report",
+      "actor" => "agent_alpha",
+      "target" => "report_q1",
+      "required_permission" => "report.read",
+      "granted_permissions" => ["report.read"],
+      "metadata" => %{"source" => "json"}
+    }
+
+    assert {:ok, %{status: :accepted, stop_reason: :constraints_satisfied}} =
+             AgentSafetyDemo.run(action)
+  end
+
   test "invalid action shape is rejected" do
     invalid_actions = [
       %{
@@ -80,7 +95,41 @@ defmodule Pythia.AgentSafetyShowcaseTest do
     end)
   end
 
-  test "output is deterministic for same input" do
+  test "malformed granted_permissions is rejected as invalid_action" do
+    invalid_actions = [
+      %{
+        action_id: "act_bad_permissions_1",
+        action_type: "read_public_report",
+        actor: "agent_alpha",
+        target: "report_q1",
+        required_permission: "report.read",
+        granted_permissions: nil
+      },
+      %{
+        action_id: "act_bad_permissions_2",
+        action_type: "read_public_report",
+        actor: "agent_alpha",
+        target: "report_q1",
+        required_permission: "report.read",
+        granted_permissions: "report.read"
+      },
+      %{
+        action_id: "act_bad_permissions_3",
+        action_type: "read_public_report",
+        actor: "agent_alpha",
+        target: "report_q1",
+        required_permission: "report.read",
+        granted_permissions: ["report.read", 7]
+      }
+    ]
+
+    Enum.each(invalid_actions, fn action ->
+      assert {:error, %{status: :rejected, stop_reason: :invalid_action}} =
+               AgentSafetyDemo.run(action)
+    end)
+  end
+
+  test "output is deterministic for same unsafe input" do
     action = %{
       action_id: "act_deterministic",
       action_type: "transfer_funds",
@@ -98,5 +147,23 @@ defmodule Pythia.AgentSafetyShowcaseTest do
     assert {:error, %{stop_reason: stop_reason_1}} = first
     assert {:error, %{stop_reason: stop_reason_2}} = second
     assert stop_reason_1 == stop_reason_2
+  end
+
+  test "invalid action scenario is deterministic" do
+    action = %{
+      action_id: "act_invalid_deterministic",
+      action_type: "",
+      actor: "agent_alpha",
+      target: "report_q1",
+      required_permission: "report.read",
+      granted_permissions: ["report.read"]
+    }
+
+    first = AgentSafetyDemo.run(action)
+    second = AgentSafetyDemo.run(action)
+
+    assert first == second
+    assert {:error, %{status: :rejected, stop_reason: :invalid_action}} = first
+    assert {:error, %{status: :rejected, stop_reason: :invalid_action}} = second
   end
 end

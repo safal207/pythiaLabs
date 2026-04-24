@@ -20,6 +20,16 @@ unsafe_action = %{
   metadata: %{source: "showcase"}
 }
 
+invalid_action = %{
+  action_id: "act_003",
+  action_type: "",
+  actor: "agent_alpha",
+  target: "report_q1",
+  required_permission: "report.read",
+  granted_permissions: ["report.read"],
+  metadata: %{source: "showcase"}
+}
+
 print_result = fn title, result ->
   IO.puts("\nScenario: #{title}")
 
@@ -50,3 +60,7 @@ safe_action
 unsafe_action
 |> AgentSafetyDemo.run()
 |> print_result.("unsafe action")
+
+invalid_action
+|> AgentSafetyDemo.run()
+|> print_result.("invalid action")

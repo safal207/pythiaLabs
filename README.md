@@ -63,6 +63,13 @@ return best
 
 PythiaLabs includes a deterministic showcase for controlled agent actions.
 
+The demo shows two core outcomes:
+- a safe action proceeds when the required permission is present
+- an unsafe action is rejected when authorization is missing
+
+It also includes an invalid action example to show strict shape validation.
+The goal is to demonstrate a core PythiaLabs principle: agent actions should produce observable traces and stable stop reasons, not just outputs.
+
 Run:
 
 ```bash
