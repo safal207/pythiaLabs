@@ -19,7 +19,8 @@ defmodule Pythia.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.33"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:telemetry, "~> 1.2"}
     ]
   end
 

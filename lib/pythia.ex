@@ -2,7 +2,12 @@ defmodule Pythia do
   @moduledoc "Public API for liminal-pythia MVP."
   alias Pythia.{Planner, Executor, Critic}
 
-  @type options :: [max_steps: pos_integer(), threshold: number(), no_improve_limit: pos_integer()]
+  @type options :: [
+          max_steps: pos_integer(),
+          threshold: number(),
+          no_improve_limit: pos_integer(),
+          trace_id: integer()
+        ]
 
   def refine(problem, objective, opts \\ []) do
     planner = Planner.new(problem, objective, opts)
