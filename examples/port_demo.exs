@@ -3,21 +3,23 @@ port = Port.open({:spawn_executable, port_path}, [:binary, args: [], packet: 4])
 
 req = %{
   grid: [
-    [0,0,0,1,0,0,0],
-    [1,1,0,1,0,1,0],
-    [0,0,0,0,0,1,0],
-    [0,1,1,1,0,0,0],
-    [0,0,0,0,1,1,0]
+    [0, 0, 0, 1, 0, 0, 0],
+    [1, 1, 0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0, 1, 0],
+    [0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 0]
   ],
-  start: {0,0},
-  goal: {4,6}
+  start: [0, 0],
+  goal: [4, 6]
 }
 
 bin = Jason.encode!(req)
 Port.command(port, bin)
+
 receive do
   {^port, {:data, resp}} ->
     case Jason.decode(resp) do
+      {:ok, %{"error" => err}} when is_binary(err) -> IO.puts("Worker error: #{err}")
       {:ok, %{"length" => len}} -> IO.puts("Maze path length: #{inspect(len)}")
       other -> IO.inspect(other, label: :unexpected)
     end

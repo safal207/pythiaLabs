@@ -1,3 +1,5 @@
+Code.require_file("mix/tasks/compile.rustler_fallback.ex", __DIR__)
+
 defmodule Pythia.MixProject do
   use Mix.Project
 
@@ -19,7 +21,8 @@ defmodule Pythia.MixProject do
   defp deps do
     [
       {:rustler, "~> 0.33"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:telemetry, "~> 1.2"}
     ]
   end
 

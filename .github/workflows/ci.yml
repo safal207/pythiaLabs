@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +35,10 @@ jobs:
           mix deps.get
           mix compile
 
+      - name: Run Elixir tests
+        run: |
+          mix test
+
       - name: Run demo
         run: |
           mix run examples/lev_demo.exs
@@ -44,6 +50,10 @@ jobs:
       - name: Build port worker
         run: |
           cd workers/solver_port && cargo build --release
+
+      - name: Run worker tests
+        run: |
+          cd workers/solver_port && cargo test
 
       - name: Run port demo
         run: |
