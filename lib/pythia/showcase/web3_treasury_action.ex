@@ -29,6 +29,13 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   @artifact_type "pythia.web3_treasury_action.decision_trace.v1"
   @canonicalization "pythia.canonical_export.v1"
   @integrity_algorithm "sha256"
+  @evidence_envelope_keys MapSet.new([
+                            "schema",
+                            "artifact",
+                            "canonicalization",
+                            "integrity",
+                            "signature"
+                          ])
   @unsigned_signature_keys MapSet.new(["status", "algorithm", "public_key", "signature"])
   @signed_demo_signature_keys MapSet.new(["status", "algorithm", "signer_id", "signature"])
 
@@ -210,6 +217,9 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     signature = Map.get(envelope, "signature")
 
     cond do
+      not valid_evidence_envelope_key_set?(envelope) ->
+        rejected(:invalid_envelope_shape)
+
       not valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) ->
         rejected(:invalid_envelope_shape)
 
@@ -336,6 +346,9 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     signature = Map.get(envelope, "signature")
 
     cond do
+      not valid_evidence_envelope_key_set?(envelope) ->
+        rejected(:invalid_signed_envelope_shape)
+
       not valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) ->
         rejected(:invalid_signed_envelope_shape)
 
@@ -415,6 +428,19 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   defp valid_digest?(digest),
     do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)
+
+  defp exact_key_set?(map, expected_keys) when is_map(map) do
+    map
+    |> Map.keys()
+    |> MapSet.new()
+    |> MapSet.equal?(expected_keys)
+  end
+
+  defp valid_evidence_envelope_key_set?(envelope) when is_map(envelope) do
+    exact_key_set?(envelope, @evidence_envelope_keys)
+  end
+
+  defp valid_evidence_envelope_key_set?(_), do: false
 
   defp invalid_evidence_shape(), do: rejected(:invalid_evidence_shape)
 

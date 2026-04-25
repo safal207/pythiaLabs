@@ -113,6 +113,16 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
              Web3TreasuryAction.verify_signed_evidence_envelope_demo(tampered)
   end
 
+  test "signed demo signature map with unexpected key is rejected", %{unsigned_envelope: envelope} do
+    tampered =
+      envelope
+      |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> put_in(["signature", "sig_v2"], "fake")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_signed_evidence_envelope_demo(tampered)
+  end
+
   test "blank signer_id is rejected", %{unsigned_envelope: envelope} do
     tampered =
       envelope
@@ -134,5 +144,15 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
 
     assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
              Web3TreasuryAction.verify_evidence_envelope(signed)
+  end
+
+  test "signed envelope with unexpected top-level key is rejected", %{unsigned_envelope: envelope} do
+    tampered =
+      envelope
+      |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> Map.put("hidden_policy", "fake")
+
+    assert {:error, %{status: :rejected, reason: :invalid_signed_envelope_shape}} =
+             Web3TreasuryAction.verify_signed_evidence_envelope_demo(tampered)
   end
 end
