@@ -88,6 +88,23 @@ Example evidence shape:
 
 This is not a digital signature yet. It is a deterministic fingerprint of the decision artifact.
 
+## Evidence verification
+
+Evidence artifacts can be verified by recomputing the SHA-256 digest over the canonical payload.
+
+This allows external reviewers to detect whether the exported trace payload has changed.
+
+Verification can detect:
+
+- payload tampering
+- digest mismatch
+- unsupported artifact type
+- unsupported algorithm
+- malformed evidence shape
+
+This is still not a digital signature.
+It verifies artifact integrity, not authorship.
+
 ## How to run
 
 ```bash
@@ -108,6 +125,7 @@ This PR does not add:
 
 - digital signatures
 - key management
+- identity verification
 - blockchain anchoring
 - IPFS/Arweave upload
 - smart contracts
