@@ -107,19 +107,48 @@ It verifies artifact integrity, not authorship.
 
 ## Signature-ready evidence envelope
 
-Evidence can also be wrapped into a deterministic envelope with:
+The envelope wraps an evidence artifact (not a raw payload directly):
 
-- `schema`
-- `artifact_type`
-- `canonicalization` method
-- integrity digest metadata
-- `payload`
-- unsigned signature placeholder
+```elixir
+%{
+  "schema" => "pythia.evidence.envelope.v1",
+  "artifact" => %{
+    "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+    "algorithm" => "sha256",
+    "digest" => "...",
+    "payload" => %{...}
+  },
+  "canonicalization" => "pythia.canonical_export.v1",
+  "integrity" => %{
+    "algorithm" => "sha256",
+    "digest" => "..."
+  },
+  "signature" => %{
+    "status" => "unsigned",
+    "algorithm" => nil,
+    "public_key" => nil,
+    "signature" => nil
+  }
+}
+```
+
+The top-level integrity digest must match the nested artifact digest.
+
+For unsigned envelopes, the signature placeholder must remain empty:
+
+```elixir
+%{
+  "status" => "unsigned",
+  "algorithm" => nil,
+  "public_key" => nil,
+  "signature" => nil
+}
+```
+
+Any non-nil signature fields are rejected until real signature support is implemented.
+Signature status is currently unsigned-only.
 
 This prepares the artifact for future signed evidence without adding keys or signatures yet.
-
-The current signature status is always `unsigned`.
-
 This stage verifies integrity, not authorship.
 
 ## How to run

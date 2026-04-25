@@ -25,6 +25,11 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     :authorization_transaction_time_check,
     :transfer_expiration_check
   ]
+  @envelope_schema "pythia.evidence.envelope.v1"
+  @artifact_type "pythia.web3_treasury_action.decision_trace.v1"
+  @canonicalization "pythia.canonical_export.v1"
+  @integrity_algorithm "sha256"
+  @unsigned_signature_keys MapSet.new(["status", "algorithm", "public_key", "signature"])
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
@@ -100,7 +105,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       |> Base.encode16(case: :lower)
 
     %{
-      "algorithm" => "sha256",
+      "algorithm" => @integrity_algorithm,
       "digest" => digest
     }
   end
@@ -111,7 +116,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     digest = digest_export_payload(payload)
 
     %{
-      "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+      "artifact_type" => @artifact_type,
       "algorithm" => digest["algorithm"],
       "digest" => digest["digest"],
       "payload" => payload
@@ -127,7 +132,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       |> Base.encode16(case: :lower)
 
     %{
-      "algorithm" => "sha256",
+      "algorithm" => @integrity_algorithm,
       "digest" => digest
     }
   end
@@ -143,10 +148,10 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       not valid_evidence_shape?(artifact_type, algorithm, digest, payload) ->
         invalid_evidence_shape()
 
-      artifact_type != "pythia.web3_treasury_action.decision_trace.v1" ->
+      artifact_type != @artifact_type ->
         rejected(:unsupported_artifact_type)
 
-      algorithm != "sha256" ->
+      algorithm != @integrity_algorithm ->
         rejected(:unsupported_algorithm)
 
       true ->
@@ -176,18 +181,16 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   @spec export_evidence_envelope({:ok, map()} | {:error, map()}) :: map()
   def export_evidence_envelope(result) do
-    payload = export_result(result)
-    digest = digest_export_payload(payload)
+    artifact = export_evidence(result)
 
     %{
-      "schema" => "pythia.evidence.envelope.v1",
-      "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
-      "canonicalization" => "pythia.canonical_export.v1",
+      "schema" => @envelope_schema,
+      "artifact" => artifact,
+      "canonicalization" => @canonicalization,
       "integrity" => %{
-        "algorithm" => digest["algorithm"],
-        "digest" => digest["digest"]
+        "algorithm" => @integrity_algorithm,
+        "digest" => artifact["digest"]
       },
-      "payload" => payload,
       "signature" => %{
         "status" => "unsigned",
         "algorithm" => nil,
@@ -200,59 +203,39 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   @spec verify_evidence_envelope(map()) :: {:ok, map()} | {:error, map()}
   def verify_evidence_envelope(envelope) when is_map(envelope) do
     schema = Map.get(envelope, "schema")
-    artifact_type = Map.get(envelope, "artifact_type")
+    artifact = Map.get(envelope, "artifact")
     canonicalization = Map.get(envelope, "canonicalization")
     integrity = Map.get(envelope, "integrity")
-    payload = Map.get(envelope, "payload")
     signature = Map.get(envelope, "signature")
 
     cond do
-      not valid_envelope_shape?(
-        schema,
-        artifact_type,
-        canonicalization,
-        integrity,
-        payload,
-        signature
-      ) ->
+      not valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) ->
         rejected(:invalid_envelope_shape)
 
-      schema != "pythia.evidence.envelope.v1" ->
-        rejected(:unsupported_schema)
+      schema != @envelope_schema ->
+        rejected(:unsupported_envelope_schema)
 
-      artifact_type != "pythia.web3_treasury_action.decision_trace.v1" ->
-        rejected(:unsupported_artifact_type)
-
-      canonicalization != "pythia.canonical_export.v1" ->
+      canonicalization != @canonicalization ->
         rejected(:unsupported_canonicalization)
 
-      integrity["algorithm"] != "sha256" ->
+      integrity["algorithm"] != @integrity_algorithm ->
         rejected(:unsupported_algorithm)
+
+      integrity["digest"] != artifact["digest"] ->
+        rejected(:integrity_mismatch)
 
       not unsigned_signature_placeholder?(signature) ->
         rejected(:unsupported_signature_status)
 
       true ->
-        expected_digest = integrity["digest"]
-        actual_digest = digest_export_payload(payload)["digest"]
-
-        if expected_digest == actual_digest do
+        with {:ok, verified_evidence} <- verify_evidence(artifact) do
           {:ok,
            %{
              status: :verified,
              schema: schema,
-             artifact_type: artifact_type,
-             integrity: :verified,
-             signature: :unsigned,
-             digest: expected_digest
-           }}
-        else
-          {:error,
-           %{
-             status: :rejected,
-             reason: :digest_mismatch,
-             expected_digest: expected_digest,
-             actual_digest: actual_digest
+             canonicalization: canonicalization,
+             digest: integrity["digest"],
+             evidence: verified_evidence
            }}
         end
     end
@@ -282,25 +265,26 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       valid_digest?(digest)
   end
 
-  defp valid_envelope_shape?(
-         schema,
-         artifact_type,
-         canonicalization,
-         integrity,
-         payload,
-         signature
-       ) do
-    is_binary(schema) and is_binary(artifact_type) and is_binary(canonicalization) and
-      is_map(payload) and
-      is_map(integrity) and is_binary(integrity["algorithm"]) and
-      valid_digest?(integrity["digest"]) and
-      is_map(signature) and is_binary(signature["status"])
+  defp valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) do
+    is_binary(schema) and is_map(artifact) and is_binary(canonicalization) and is_map(integrity) and
+      valid_integrity_shape?(integrity) and is_map(signature)
   end
 
-  defp unsigned_signature_placeholder?(signature) do
-    signature["status"] == "unsigned" and is_nil(signature["algorithm"]) and
-      is_nil(signature["public_key"]) and is_nil(signature["signature"])
+  defp valid_integrity_shape?(integrity) do
+    is_binary(integrity["algorithm"]) and valid_digest?(integrity["digest"])
   end
+
+  defp unsigned_signature_placeholder?(signature) when is_map(signature) do
+    signature_keys = signature |> Map.keys() |> MapSet.new()
+
+    signature_keys == @unsigned_signature_keys and
+      signature["status"] == "unsigned" and
+      is_nil(signature["algorithm"]) and
+      is_nil(signature["public_key"]) and
+      is_nil(signature["signature"])
+  end
+
+  defp unsigned_signature_placeholder?(_signature), do: false
 
   defp valid_digest?(digest),
     do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)

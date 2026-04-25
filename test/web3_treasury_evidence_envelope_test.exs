@@ -30,157 +30,129 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
       transfer_expires_at: ~U[2026-04-25 13:00:00Z]
     }
 
-    %{action: action, governance_record: governance_record}
-  end
-
-  test "export_evidence_envelope/1 returns expected envelope shape", ctx do
-    result = Web3TreasuryAction.evaluate(ctx.action, ctx.governance_record)
+    result = Web3TreasuryAction.evaluate(action, governance_record)
     envelope = Web3TreasuryAction.export_evidence_envelope(result)
 
+    %{action: action, governance_record: governance_record, result: result, envelope: envelope}
+  end
+
+  test "valid unsigned signature placeholder verifies successfully", %{envelope: envelope} do
+    assert {:ok, %{status: :verified}} = Web3TreasuryAction.verify_evidence_envelope(envelope)
+  end
+
+  test "envelope contains expected artifact and integrity shape", %{envelope: envelope} do
     assert envelope["schema"] == "pythia.evidence.envelope.v1"
-    assert envelope["artifact_type"] == "pythia.web3_treasury_action.decision_trace.v1"
-    assert envelope["canonicalization"] == "pythia.canonical_export.v1"
+
+    assert envelope["artifact"]["artifact_type"] ==
+             "pythia.web3_treasury_action.decision_trace.v1"
+
+    assert envelope["artifact"]["algorithm"] == "sha256"
+    assert envelope["artifact"]["digest"] =~ ~r/\A[0-9a-f]{64}\z/
+    assert is_map(envelope["artifact"]["payload"])
     assert envelope["integrity"]["algorithm"] == "sha256"
-    assert envelope["integrity"]["digest"] =~ ~r/\A[0-9a-f]{64}\z/
-    assert envelope["payload"] == Web3TreasuryAction.export_result(result)
+    assert envelope["integrity"]["digest"] == envelope["artifact"]["digest"]
+    assert envelope["canonicalization"] == "pythia.canonical_export.v1"
     assert envelope["signature"]["status"] == "unsigned"
   end
 
-  test "envelope export is deterministic", ctx do
-    result = Web3TreasuryAction.evaluate(ctx.action, ctx.governance_record)
-
+  test "envelope export is deterministic", %{result: result} do
     first = Web3TreasuryAction.export_evidence_envelope(result)
     second = Web3TreasuryAction.export_evidence_envelope(result)
 
     assert first == second
   end
 
-  test "valid envelope verifies successfully", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-
+  test "verification result exposes schema, canonicalization and digest", %{envelope: envelope} do
     assert {:ok, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
     assert verification.status == :verified
     assert verification.schema == "pythia.evidence.envelope.v1"
-    assert verification.artifact_type == "pythia.web3_treasury_action.decision_trace.v1"
-    assert verification.integrity == :verified
-    assert verification.signature == :unsigned
+    assert verification.canonicalization == "pythia.canonical_export.v1"
     assert verification.digest == envelope["integrity"]["digest"]
+    assert verification.evidence.status == :verified
   end
 
-  test "tampered payload returns digest_mismatch", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
+  test "top-level integrity mismatch is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["integrity", "digest"], String.duplicate("0", 64))
 
-    tampered = put_in(envelope, ["payload", "stop_reason"], "tampered_stop_reason")
-
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(tampered)
-    assert verification.status == :rejected
-    assert verification.reason == :digest_mismatch
-    assert verification.expected_digest == tampered["integrity"]["digest"]
-    assert verification.actual_digest != tampered["integrity"]["digest"]
+    assert {:error, %{status: :rejected, reason: :integrity_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsupported schema returns unsupported_schema", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> Map.put("schema", "pythia.evidence.envelope.v2")
+  test "tampered artifact payload is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["artifact", "payload", "stop_reason"], "tampered_stop_reason")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_schema
+    assert {:error, %{status: :rejected, reason: :digest_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsupported artifact type returns unsupported_artifact_type", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> Map.put("artifact_type", "pythia.other_artifact.v1")
+  test "unsupported envelope schema is rejected", %{envelope: envelope} do
+    tampered = Map.put(envelope, "schema", "pythia.evidence.envelope.v2")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_artifact_type
+    assert {:error, %{status: :rejected, reason: :unsupported_envelope_schema}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsupported canonicalization returns unsupported_canonicalization", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> Map.put("canonicalization", "pythia.canonical_export.v2")
+  test "unsupported canonicalization is rejected", %{envelope: envelope} do
+    tampered = Map.put(envelope, "canonicalization", "pythia.canonical_export.v2")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_canonicalization
+    assert {:error, %{status: :rejected, reason: :unsupported_canonicalization}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsupported algorithm returns unsupported_algorithm", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> put_in(["integrity", "algorithm"], "sha512")
+  test "unsupported integrity algorithm is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["integrity", "algorithm"], "sha512")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_algorithm
+    assert {:error, %{status: :rejected, reason: :unsupported_algorithm}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "missing integrity returns invalid_envelope_shape", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> Map.delete("integrity")
+  test "unsigned envelope with non-nil signature algorithm is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "algorithm"], "ed25519")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :invalid_envelope_shape
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "missing payload returns invalid_envelope_shape", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> Map.delete("payload")
+  test "unsigned envelope with non-nil public_key is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "public_key"], "fake-public-key")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :invalid_envelope_shape
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsupported signature status returns unsupported_signature_status", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> put_in(["signature", "status"], "signed")
+  test "unsigned envelope with non-nil signature is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "signature"], "fake-signature")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_signature_status
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  test "unsigned signature placeholder requires nil signature fields", ctx do
-    envelope =
-      ctx.action
-      |> Web3TreasuryAction.evaluate(ctx.governance_record)
-      |> Web3TreasuryAction.export_evidence_envelope()
-      |> put_in(["signature", "algorithm"], "ed25519")
-      |> put_in(["signature", "public_key"], "fake_public_key")
-      |> put_in(["signature", "signature"], "fake_signature")
+  test "non-unsigned signature status is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "status"], "signed")
 
-    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
-    assert verification.status == :rejected
-    assert verification.reason == :unsupported_signature_status
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "unsigned signature map with unexpected key is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "sig_v2"], "fake")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "missing signature map returns invalid_envelope_shape", %{envelope: envelope} do
+    malformed = Map.delete(envelope, "signature")
+
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.verify_evidence_envelope(malformed)
+  end
+
+  test "missing integrity map returns invalid_envelope_shape", %{envelope: envelope} do
+    malformed = Map.delete(envelope, "integrity")
+
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.verify_evidence_envelope(malformed)
   end
 
   test "boolean false is preserved inside rejected quorum envelope payload", ctx do
@@ -192,7 +164,7 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     assert {:ok, _verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
 
     quorum_entry =
-      envelope["payload"]["trace"]
+      envelope["artifact"]["payload"]["trace"]
       |> Enum.find(fn entry -> entry["event"] == "quorum_check" end)
 
     assert quorum_entry["actual"] == false

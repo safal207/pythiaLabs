@@ -28,7 +28,9 @@ base_governance_record = %{
 
 accepted_result = Web3TreasuryAction.evaluate(base_action, base_governance_record)
 envelope = Web3TreasuryAction.export_evidence_envelope(accepted_result)
-tampered_envelope = put_in(envelope, ["payload", "stop_reason"], "tampered_stop_reason")
+
+tampered_envelope =
+  put_in(envelope, ["artifact", "payload", "stop_reason"], "tampered_stop_reason")
 
 print_verification = fn label, verification_result ->
   IO.puts("\n#{label}:")
@@ -36,8 +38,9 @@ print_verification = fn label, verification_result ->
   case verification_result do
     {:ok, payload} ->
       IO.puts("Status: #{payload.status}")
-      IO.puts("Integrity: #{payload.integrity}")
-      IO.puts("Signature: #{payload.signature}")
+      IO.puts("Schema: #{payload.schema}")
+      IO.puts("Canonicalization: #{payload.canonicalization}")
+      IO.puts("Digest: #{payload.digest}")
 
     {:error, payload} ->
       IO.puts("Status: #{payload.status}")
@@ -48,7 +51,7 @@ end
 IO.puts("Web3 Treasury Evidence Envelope")
 IO.puts("\nEnvelope:")
 IO.puts("Schema: #{envelope["schema"]}")
-IO.puts("Artifact type: #{envelope["artifact_type"]}")
+IO.puts("Artifact type: #{envelope["artifact"]["artifact_type"]}")
 IO.puts("Canonicalization: #{envelope["canonicalization"]}")
 IO.puts("Integrity algorithm: #{envelope["integrity"]["algorithm"]}")
 IO.puts("Digest: #{envelope["integrity"]["digest"]}")
