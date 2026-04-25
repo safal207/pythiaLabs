@@ -2,37 +2,104 @@
 
 ## Current status
 
-PythiaLabs currently returns trace data per run.
-The current MVP does not require external storage services to run demos, tests, or the Agent Safety Showcase.
+PythiaLabs currently returns traces directly from each run.
+The current MVP does not persist traces into Datomic, Neo4j, or any external database.
+The current MVP does not require persistent storage to run demos, tests, or the Agent Safety Showcase.
 
-This document describes a roadmap for future versions. It is not an implementation claim.
+## Why persistence matters
 
-## Roadmap intent
+A single trace explains one run.
+Persistent reasoning memory would allow PythiaLabs to analyze many runs over time.
 
-Future versions may add persistent reasoning memory to compare behavior across many runs and versions.
+This would help answer:
 
-A minimal first step is:
+- What happened?
+- In what order?
+- Which proposal was executed?
+- Which constraint failed?
+- Why did the loop stop?
+- Which `stop_reason` appears repeatedly?
+- Which actions or failure classes are connected?
 
-- append-only step log for planner and executor traces
-- hypothesis graph for linking related steps, constraints, and outcomes
+## Append-only step log
 
-## Why this roadmap exists
+A Datomic-style step log would store every reasoning step as an immutable event.
 
-Single-run traces are useful for local debugging and explainability.
-Persistent memory may later improve:
+It would capture:
 
-- replay and auditability across runs
-- long-horizon failure analysis
-- critic inputs for recurring error patterns
-- evaluation across model or policy versions
+- run_id
+- step_id
+- timestamp
+- proposal
+- candidate
+- score or confidence
+- stop_reason
+- trace entry
+- version of rules or constraints
 
-## Scope notes
+This is useful for:
 
-This roadmap is documentation-only for the current MVP.
-No storage adapter, schema, or runtime persistence behavior is implemented here.
+- audit
+- replay
+- debugging
+- comparing behavior across versions
+- preserving decision history
+
+## Hypothesis graph
+
+A Neo4j-style hypothesis graph would connect entities such as:
+
+- actions
+- agents
+- constraints
+- proposals
+- failures
+- stop reasons
+- successful paths
+- rejected paths
+
+This is useful for:
+
+- discovering recurring failure patterns
+- understanding relationships between actions and constraints
+- finding which proposals often lead to rejection
+- supporting future critic logic
+- cross-run reasoning analysis
+
+## Future architecture
+
+Conceptual flow:
+
+```text
+Agent / Problem
+↓
+Planner loop
+↓
+Executor / SafetyGate
+↓
+Trace + stop_reason
+↓
+Append-only Step Log
+↓
+Hypothesis Graph
+↓
+Critic / Pattern Analysis / Replay
+```
 
 ## Related roadmap
 
 For a broader future architecture that includes fact memory, graph memory, bitemporal temporal memory, event streams, and metrics timelines, see:
 
 `docs/temporal_causal_memory_stack.md`
+
+## Non-goals for current MVP
+
+The current MVP does not include:
+
+- Datomic adapter
+- Neo4j adapter
+- persistent database schema
+- docker-compose database setup
+- production storage layer
+
+This document is a roadmap, not an implementation claim.

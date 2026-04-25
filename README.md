@@ -70,7 +70,19 @@ They are part of the architectural roadmap.
 
 ## Roadmap: persistent reasoning memory
 
-See `docs/persistent_reasoning_memory.md`.
+Future versions may add persistent reasoning memory with two complementary layers:
+
+1. **Datomic-style append-only step log**  
+   Stores every reasoning step as an immutable event for replay, audit, debugging, and version comparison.
+
+2. **Neo4j-style hypothesis graph**  
+   Connects actions, constraints, proposals, failures, stop reasons, and successful paths.
+
+This would allow PythiaLabs to support replay, audit, recurring failure analysis, and cross-run reasoning patterns.
+
+This layer is not implemented in the current MVP.
+
+For details, see `docs/persistent_reasoning_memory.md`.
 
 For the broader five-layer roadmap, see `docs/temporal_causal_memory_stack.md`.
 
@@ -96,4 +108,3 @@ Run:
 ```bash
 mix run examples/agent_safety_showcase.exs
 ```
-
