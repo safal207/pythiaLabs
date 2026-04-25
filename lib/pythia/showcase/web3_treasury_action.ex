@@ -84,6 +84,40 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     end
   end
 
+  @spec canonical_export_string({:ok, map()} | {:error, map()}) :: String.t()
+  def canonical_export_string(result) do
+    result
+    |> export_result()
+    |> canonical_encode()
+  end
+
+  @spec export_digest({:ok, map()} | {:error, map()}) :: map()
+  def export_digest(result) do
+    digest =
+      result
+      |> canonical_export_string()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+
+    %{
+      "algorithm" => "sha256",
+      "digest" => digest
+    }
+  end
+
+  @spec export_evidence({:ok, map()} | {:error, map()}) :: map()
+  def export_evidence(result) do
+    payload = export_result(result)
+    digest = export_digest(result)
+
+    %{
+      "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+      "algorithm" => digest["algorithm"],
+      "digest" => digest["digest"],
+      "payload" => payload
+    }
+  end
+
   defp ensure_export_status(export) do
     status =
       case Map.get(export, "status") do
@@ -125,6 +159,39 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   defp normalize_key(key) when is_atom(key), do: Atom.to_string(key)
   defp normalize_key(key) when is_binary(key), do: key
   defp normalize_key(key), do: to_string(key)
+
+  defp canonical_encode(value) when is_map(value) do
+    body =
+      value
+      |> Enum.sort_by(fn {key, _value} -> key end)
+      |> Enum.map_join(",", fn {key, item} ->
+        canonical_encode(to_string(key)) <> ":" <> canonical_encode(item)
+      end)
+
+    "{" <> body <> "}"
+  end
+
+  defp canonical_encode(value) when is_list(value) do
+    "[" <> Enum.map_join(value, ",", &canonical_encode/1) <> "]"
+  end
+
+  defp canonical_encode(value) when is_binary(value) do
+    "\"" <> escape_string(value) <> "\""
+  end
+
+  defp canonical_encode(value) when is_number(value), do: to_string(value)
+  defp canonical_encode(true), do: "true"
+  defp canonical_encode(false), do: "false"
+  defp canonical_encode(nil), do: "null"
+
+  defp escape_string(value) do
+    value
+    |> String.replace("\\", "\\\\")
+    |> String.replace("\"", "\\\"")
+    |> String.replace("\n", "\\n")
+    |> String.replace("\r", "\\r")
+    |> String.replace("\t", "\\t")
+  end
 
   defp run_checks(action, governance_record, trace) do
     Enum.reduce_while(@check_order, {:ok, trace}, fn check, {:ok, acc_trace} ->

@@ -67,6 +67,27 @@ This makes traces easier to:
 
 If JSON encoding is available, the showcase can also print JSON output.
 
+## Evidence digest
+
+The exported trace can be wrapped into an evidence artifact with a SHA-256 digest.
+
+This allows external reviewers to verify that a trace artifact has not changed.
+
+The digest is computed over a deterministic canonical representation of the exported trace.
+
+Example evidence shape:
+
+```elixir
+%{
+  "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+  "algorithm" => "sha256",
+  "digest" => "...",
+  "payload" => %{...}
+}
+```
+
+This is not a digital signature yet. It is a deterministic fingerprint of the decision artifact.
+
 ## How to run
 
 ```bash
@@ -80,6 +101,18 @@ This showcase demonstrates the first in-memory Web3 application of the Web3 Cons
 It does not add smart contracts, wallets, RPC calls, indexers, or chain adapters.
 
 It shows how PythiaLabs could reason about DAO treasury safety before any on-chain execution.
+
+## Non-goals in this stage
+
+This PR does not add:
+
+- digital signatures
+- key management
+- blockchain anchoring
+- IPFS/Arweave upload
+- smart contracts
+- wallet integration
+- persistence
 
 ## Relation to existing showcases
 

@@ -159,3 +159,9 @@ The structured trace can also be exported as a deterministic JSON-ready audit ar
 ```bash
 mix run examples/web3_treasury_trace_export.exs
 ```
+
+The exported trace can also be wrapped into a SHA-256 evidence artifact:
+
+```bash
+mix run examples/web3_treasury_trace_evidence.exs
+```
