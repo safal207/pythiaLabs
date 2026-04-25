@@ -30,6 +30,29 @@ It should proceed only when it is:
 - known to the system at decision time
 - replayable through trace
 
+
+## Structured decision trace
+
+The showcase returns a chronological trace where each entry includes:
+
+- `event`
+- `result`
+- optional `reason`
+- relevant `expected` / `actual` values when useful
+- a final decision entry with `stop_reason`
+
+Example:
+
+```elixir
+%{
+  event: :quorum_check,
+  result: :fail,
+  reason: :quorum_not_met
+}
+```
+
+This makes the showcase useful not only as a demo, but as an audit-oriented explanation of why a treasury transfer was accepted or rejected.
+
 ## How to run
 
 ```bash

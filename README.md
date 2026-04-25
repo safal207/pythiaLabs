@@ -152,3 +152,5 @@ The demo shows how a proposed treasury transfer can be accepted or rejected base
 - transfer expiration
 
 This demonstrates the Web3 Consensus Reason Layer roadmap without requiring smart contracts, wallets, RPC nodes, or chain adapters.
+
+The result includes a structured chronological trace explaining which governance check passed or failed.
