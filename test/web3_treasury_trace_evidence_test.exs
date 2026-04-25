@@ -78,15 +78,27 @@ defmodule Pythia.Web3TreasuryTraceEvidenceTest do
        %{
          status: :accepted,
          stop_reason: :treasury_transfer_accepted,
-         trace: [%{event: :decision, result: :accept, reason: "x"}],
-         metadata: %{"b" => 2, "a" => 1}
+         trace: [
+           %{
+             event: :decision,
+             result: :accept,
+             reason: "x",
+             context: %{"z" => 3, "a" => 1, "m" => 2}
+           }
+         ]
        }}
 
     second =
       {:ok,
        %{
-         metadata: %{"a" => 1, "b" => 2},
-         trace: [%{result: :accept, reason: "x", event: :decision}],
+         trace: [
+           %{
+             result: :accept,
+             reason: "x",
+             event: :decision,
+             context: %{"m" => 2, "a" => 1, "z" => 3}
+           }
+         ],
          stop_reason: :treasury_transfer_accepted,
          status: :accepted
        }}
