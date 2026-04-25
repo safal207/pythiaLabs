@@ -54,10 +54,39 @@ repeat up to max_steps:
 return best
 ```
 
-## Next steps (beyond MVP)
-- Datomic (step log) + Neo4j (hypothesis graph)
-- Critic triggers (confidence‑based, rate‑limited) + cache
-- Multi‑domain executors (QA, graphs, puzzles)
+## Current MVP status
+
+PythiaLabs is currently an MVP focused on:
+
+- deterministic refinement loops
+- observable traces
+- stable stop reasons
+- Elixir/BEAM orchestration
+- Rust NIF / Rust Port worker integration
+- deterministic Agent Safety Showcase
+
+The Datomic/Neo4j-style persistent memory layer is not implemented yet.
+It is part of the architectural roadmap.
+
+## Roadmap: persistent reasoning memory
+
+Future versions may add persistent reasoning memory with two complementary layers:
+
+1. **Datomic-style append-only step log**  
+   Stores every reasoning step as an immutable event for replay, audit, debugging, and version comparison.
+
+2. **Neo4j-style hypothesis graph**  
+   Connects actions, constraints, proposals, failures, stop reasons, and successful paths.
+
+This would allow PythiaLabs to support replay, audit, recurring failure analysis, and cross-run reasoning patterns.
+
+This layer is not implemented in the current MVP.
+
+For details, see `docs/persistent_reasoning_memory.md`.
+
+Additional roadmap items:
+- critic triggers based on confidence, repeated failure classes, and trace patterns
+- multi-domain executors for QA, graph problems, puzzles, and agent actions
 
 ## Agent Safety Showcase
 
@@ -75,4 +104,3 @@ Run:
 ```bash
 mix run examples/agent_safety_showcase.exs
 ```
-
