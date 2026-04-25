@@ -148,6 +148,9 @@ For unsigned envelopes, the signature placeholder must remain empty:
 Any non-nil signature fields are rejected until real signature support is implemented.
 Signature status is currently unsigned-only.
 
+This prepares the artifact for future signed evidence without adding keys or signatures yet.
+This stage verifies integrity, not authorship.
+
 ## How to run
 
 ```bash
@@ -164,10 +167,11 @@ It shows how PythiaLabs could reason about DAO treasury safety before any on-cha
 
 ## Non-goals in this stage
 
-This PR does not add:
+This stage does not add:
 
 - digital signatures
 - key management
+- public/private keys
 - identity verification
 - blockchain anchoring
 - IPFS/Arweave upload

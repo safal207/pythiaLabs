@@ -171,3 +171,9 @@ Evidence artifacts can also be verified locally:
 ```bash
 mix run examples/web3_treasury_trace_verify.exs
 ```
+
+Evidence can also be wrapped into a signature-ready envelope:
+
+```bash
+mix run examples/web3_treasury_evidence_envelope.exs
+```

@@ -33,7 +33,7 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     result = Web3TreasuryAction.evaluate(action, governance_record)
     envelope = Web3TreasuryAction.export_evidence_envelope(result)
 
-    %{envelope: envelope}
+    %{action: action, governance_record: governance_record, result: result, envelope: envelope}
   end
 
   test "valid unsigned signature placeholder verifies successfully", %{envelope: envelope} do
@@ -55,6 +55,22 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     assert envelope["signature"]["status"] == "unsigned"
   end
 
+  test "envelope export is deterministic", %{result: result} do
+    first = Web3TreasuryAction.export_evidence_envelope(result)
+    second = Web3TreasuryAction.export_evidence_envelope(result)
+
+    assert first == second
+  end
+
+  test "verification result exposes schema, canonicalization and digest", %{envelope: envelope} do
+    assert {:ok, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
+    assert verification.status == :verified
+    assert verification.schema == "pythia.evidence.envelope.v1"
+    assert verification.canonicalization == "pythia.canonical_export.v1"
+    assert verification.digest == envelope["integrity"]["digest"]
+    assert verification.evidence.status == :verified
+  end
+
   test "top-level integrity mismatch is rejected", %{envelope: envelope} do
     tampered = put_in(envelope, ["integrity", "digest"], String.duplicate("0", 64))
 
@@ -66,6 +82,27 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     tampered = put_in(envelope, ["artifact", "payload", "stop_reason"], "tampered_stop_reason")
 
     assert {:error, %{status: :rejected, reason: :digest_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "unsupported envelope schema is rejected", %{envelope: envelope} do
+    tampered = Map.put(envelope, "schema", "pythia.evidence.envelope.v2")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_envelope_schema}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "unsupported canonicalization is rejected", %{envelope: envelope} do
+    tampered = Map.put(envelope, "canonicalization", "pythia.canonical_export.v2")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_canonicalization}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "unsupported integrity algorithm is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["integrity", "algorithm"], "sha512")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_algorithm}} =
              Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
@@ -90,10 +127,39 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
              Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
+  test "non-unsigned signature status is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "status"], "signed")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
   test "missing signature map returns invalid_envelope_shape", %{envelope: envelope} do
     malformed = Map.delete(envelope, "signature")
 
     assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
              Web3TreasuryAction.verify_evidence_envelope(malformed)
+  end
+
+  test "missing integrity map returns invalid_envelope_shape", %{envelope: envelope} do
+    malformed = Map.delete(envelope, "integrity")
+
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.verify_evidence_envelope(malformed)
+  end
+
+  test "boolean false is preserved inside rejected quorum envelope payload", ctx do
+    envelope =
+      ctx.action
+      |> Web3TreasuryAction.evaluate(%{ctx.governance_record | quorum_met: false})
+      |> Web3TreasuryAction.export_evidence_envelope()
+
+    assert {:ok, _verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
+
+    quorum_entry =
+      envelope["artifact"]["payload"]["trace"]
+      |> Enum.find(fn entry -> entry["event"] == "quorum_check" end)
+
+    assert quorum_entry["actual"] == false
   end
 end
