@@ -101,6 +101,8 @@ When was a fact true, and when did the system know it?
 **Status:**
 Roadmap only. Not implemented in the current MVP.
 
+For a deterministic in-memory demo of this idea, see: `docs/bitemporal_authorization_showcase.md`.
+
 ## Layer 4: Event memory — EventStoreDB-style event stream
 
 **Purpose:**

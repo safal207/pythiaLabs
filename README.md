@@ -108,3 +108,21 @@ Run:
 ```bash
 mix run examples/agent_safety_showcase.exs
 ```
+
+## Bitemporal Authorization Showcase
+
+PythiaLabs includes a deterministic showcase for temporal authorization reasoning.
+
+Run:
+
+```bash
+mix run examples/bitemporal_authorization_showcase.exs
+```
+
+The demo shows how an agent action can be accepted or rejected based on:
+
+- whether the permission was valid at action_time
+- whether the system knew about the permission at decision_time
+- whether the permission was expired or scheduled for the future
+
+This demonstrates the Temporal-Causal Memory Stack idea without requiring XTDB or any external database.
