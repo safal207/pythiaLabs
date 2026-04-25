@@ -131,3 +131,24 @@ The demo shows how an agent action can be accepted or rejected based on:
 - whether the permission was expired or scheduled for the future
 
 This demonstrates the Temporal-Causal Memory Stack idea without requiring XTDB or any external database.
+
+## Web3 Treasury Action Showcase
+
+PythiaLabs includes a deterministic in-memory showcase for DAO treasury transfer reasoning.
+
+Run:
+
+```bash
+mix run examples/web3_treasury_action_showcase.exs
+```
+
+The demo shows how a proposed treasury transfer can be accepted or rejected based on:
+
+- proposal matching
+- quorum
+- voting window
+- timelock
+- temporal authorization
+- transfer expiration
+
+This demonstrates the Web3 Consensus Reason Layer roadmap without requiring smart contracts, wallets, RPC nodes, or chain adapters.
