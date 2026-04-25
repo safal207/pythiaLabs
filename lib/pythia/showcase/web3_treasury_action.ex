@@ -26,8 +26,6 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     :transfer_expiration_check
   ]
 
-  @accepted_events [:proposed_action | @check_order] ++ [:decision]
-
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
     proposed_trace = [proposed_action_trace(action)]
@@ -66,6 +64,67 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   @spec trace_events([map()]) :: [atom()]
   def trace_events(trace), do: Enum.map(trace, & &1.event)
+
+  @spec export_result({:ok, map()} | {:error, map()}) :: map()
+  def export_result({status, payload}) when status in [:ok, :error] and is_map(payload) do
+    payload
+    |> normalize_value()
+    |> ensure_export_status()
+  end
+
+  @spec export_result_json({:ok, map()} | {:error, map()}) ::
+          {:ok, String.t()} | {:error, :json_encoder_unavailable}
+  def export_result_json(result) do
+    export = export_result(result)
+
+    if Code.ensure_loaded?(Jason) and function_exported?(Jason, :encode!, 2) do
+      {:ok, apply(Jason, :encode!, [export, [pretty: true]])}
+    else
+      {:error, :json_encoder_unavailable}
+    end
+  end
+
+  defp ensure_export_status(export) do
+    status =
+      case Map.get(export, "status") do
+        "accepted" -> "accepted"
+        _ -> "rejected"
+      end
+
+    stop_reason = Map.get(export, "stop_reason")
+    trace = Map.get(export, "trace", [])
+
+    %{
+      "status" => status,
+      "stop_reason" => stop_reason,
+      "trace" => trace
+    }
+  end
+
+  defp normalize_value(value) when is_boolean(value) or is_nil(value), do: value
+  defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp normalize_value(%DateTime{} = value), do: DateTime.to_iso8601(value)
+
+  defp normalize_value(%_{} = struct) do
+    struct
+    |> Map.from_struct()
+    |> normalize_value()
+  end
+
+  defp normalize_value(value) when is_map(value) do
+    value
+    |> Enum.map(fn {key, item} -> {normalize_key(key), normalize_value(item)} end)
+    |> Enum.sort_by(fn {key, _item} -> key end)
+    |> Map.new()
+  end
+
+  defp normalize_value(value) when is_list(value), do: Enum.map(value, &normalize_value/1)
+
+  defp normalize_value(value) when is_binary(value) or is_number(value), do: value
+
+  defp normalize_key(key) when is_atom(key), do: Atom.to_string(key)
+  defp normalize_key(key) when is_binary(key), do: key
+  defp normalize_key(key), do: to_string(key)
 
   defp run_checks(action, governance_record, trace) do
     Enum.reduce_while(@check_order, {:ok, trace}, fn check, {:ok, acc_trace} ->

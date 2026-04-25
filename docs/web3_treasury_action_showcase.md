@@ -53,6 +53,20 @@ Example:
 
 This makes the showcase useful not only as a demo, but as an audit-oriented explanation of why a treasury transfer was accepted or rejected.
 
+## JSON trace export
+
+The Web3 Treasury Action Showcase can export structured traces as deterministic maps suitable for JSON encoding.
+
+This makes traces easier to:
+
+- attach to audits
+- include in grant demos
+- share with DAO governance teams
+- inspect in external tools
+- compare across runs
+
+If JSON encoding is available, the showcase can also print JSON output.
+
 ## How to run
 
 ```bash
