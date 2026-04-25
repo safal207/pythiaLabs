@@ -26,8 +26,6 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     :transfer_expiration_check
   ]
 
-  @accepted_events [:proposed_action | @check_order] ++ [:decision]
-
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
     proposed_trace = [proposed_action_trace(action)]
