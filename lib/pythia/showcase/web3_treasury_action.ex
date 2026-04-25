@@ -108,7 +108,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   @spec export_evidence({:ok, map()} | {:error, map()}) :: map()
   def export_evidence(result) do
     payload = export_result(result)
-    digest = export_digest(result)
+    digest = digest_export_payload(payload)
 
     %{
       "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
@@ -117,6 +117,62 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       "payload" => payload
     }
   end
+
+  @spec digest_export_payload(map()) :: map()
+  def digest_export_payload(payload) when is_map(payload) do
+    digest =
+      payload
+      |> canonical_encode()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+
+    %{
+      "algorithm" => "sha256",
+      "digest" => digest
+    }
+  end
+
+  @spec verify_evidence(map()) :: {:ok, map()} | {:error, map()}
+  def verify_evidence(evidence) when is_map(evidence) do
+    artifact_type = Map.get(evidence, "artifact_type")
+    algorithm = Map.get(evidence, "algorithm")
+    digest = Map.get(evidence, "digest")
+    payload = Map.get(evidence, "payload")
+
+    cond do
+      not valid_evidence_shape?(artifact_type, algorithm, digest, payload) ->
+        invalid_evidence_shape()
+
+      artifact_type != "pythia.web3_treasury_action.decision_trace.v1" ->
+        rejected(:unsupported_artifact_type)
+
+      algorithm != "sha256" ->
+        rejected(:unsupported_algorithm)
+
+      true ->
+        actual_digest = digest_export_payload(payload)["digest"]
+
+        if digest == actual_digest do
+          {:ok,
+           %{
+             status: :verified,
+             artifact_type: artifact_type,
+             algorithm: algorithm,
+             digest: digest
+           }}
+        else
+          {:error,
+           %{
+             status: :rejected,
+             reason: :digest_mismatch,
+             expected_digest: digest,
+             actual_digest: actual_digest
+           }}
+        end
+    end
+  end
+
+  def verify_evidence(_evidence), do: invalid_evidence_shape()
 
   defp ensure_export_status(export) do
     status =
@@ -134,6 +190,18 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       "trace" => trace
     }
   end
+
+  defp valid_evidence_shape?(artifact_type, algorithm, digest, payload) do
+    is_binary(artifact_type) and is_binary(algorithm) and is_map(payload) and
+      valid_digest?(digest)
+  end
+
+  defp valid_digest?(digest),
+    do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)
+
+  defp invalid_evidence_shape(), do: rejected(:invalid_evidence_shape)
+
+  defp rejected(reason), do: {:error, %{status: :rejected, reason: reason}}
 
   defp normalize_value(value) when is_boolean(value) or is_nil(value), do: value
   defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)

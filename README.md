@@ -165,3 +165,9 @@ The exported trace can also be wrapped into a SHA-256 evidence artifact:
 ```bash
 mix run examples/web3_treasury_trace_evidence.exs
 ```
+
+Evidence artifacts can also be verified locally:
+
+```bash
+mix run examples/web3_treasury_trace_verify.exs
+```
