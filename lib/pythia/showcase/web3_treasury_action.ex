@@ -42,7 +42,10 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
          trace: trace ++ [decision_trace(:accept, :treasury_transfer_accepted)]
        }}
     else
-      {:error, stop_reason, failed_check} ->
+      {:error, stop_reason, trace} when is_list(trace) ->
+        reject(stop_reason, trace ++ [decision_trace(:reject, stop_reason)])
+
+      {:error, stop_reason, failed_check} when is_atom(failed_check) ->
         trace =
           proposed_trace ++
             [
@@ -53,9 +56,6 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
             ]
 
         reject(stop_reason, trace)
-
-      {:error, stop_reason, trace} ->
-        reject(stop_reason, trace ++ [decision_trace(:reject, stop_reason)])
     end
   end
 

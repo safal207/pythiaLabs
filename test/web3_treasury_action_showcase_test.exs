@@ -238,6 +238,14 @@ defmodule Pythia.Web3TreasuryActionShowcaseTest do
     assert List.last(trace).result == :reject
   end
 
+  test "rejected trace entries always use atom events", ctx do
+    record = %{ctx.governance_record | quorum_met: false}
+
+    assert {:error, %{trace: trace}} = Web3TreasuryAction.evaluate(ctx.action, record)
+
+    assert Enum.all?(trace, fn entry -> is_atom(entry.event) end)
+  end
+
   test "action_time == voting_closed_at is accepted for voting window", ctx do
     action = %{ctx.action | action_time: ctx.governance_record.voting_closed_at}
     voting_closed_at = ctx.governance_record.voting_closed_at
