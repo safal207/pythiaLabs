@@ -65,8 +65,8 @@ PythiaLabs is currently an MVP focused on:
 - Rust NIF / Rust Port worker integration
 - deterministic Agent Safety Showcase
 
-The Datomic/Neo4j-style persistent memory layer is not implemented yet.
-It is part of the architectural roadmap.
+The Datomic/Neo4j/XTDB/EventStoreDB/TimescaleDB-style memory layers are not implemented yet.
+They are part of the architectural roadmap.
 
 ## Roadmap: persistent reasoning memory
 
@@ -84,7 +84,11 @@ This layer is not implemented in the current MVP.
 
 For details, see `docs/persistent_reasoning_memory.md`.
 
+For the broader five-layer roadmap, see `docs/temporal_causal_memory_stack.md`.
+
 Additional roadmap items:
+
+- temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
 - critic triggers based on confidence, repeated failure classes, and trace patterns
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 

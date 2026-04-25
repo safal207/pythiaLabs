@@ -86,6 +86,12 @@ Hypothesis Graph
 Critic / Pattern Analysis / Replay
 ```
 
+## Related roadmap
+
+For a broader future architecture that includes fact memory, graph memory, bitemporal temporal memory, event streams, and metrics timelines, see:
+
+`docs/temporal_causal_memory_stack.md`
+
 ## Non-goals for current MVP
 
 The current MVP does not include:
