@@ -105,6 +105,49 @@ Verification can detect:
 This is still not a digital signature.
 It verifies artifact integrity, not authorship.
 
+## Signature-ready evidence envelope
+
+The envelope wraps an evidence artifact (not a raw payload directly):
+
+```elixir
+%{
+  "schema" => "pythia.evidence.envelope.v1",
+  "artifact" => %{
+    "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+    "algorithm" => "sha256",
+    "digest" => "...",
+    "payload" => %{...}
+  },
+  "canonicalization" => "pythia.canonical_export.v1",
+  "integrity" => %{
+    "algorithm" => "sha256",
+    "digest" => "..."
+  },
+  "signature" => %{
+    "status" => "unsigned",
+    "algorithm" => nil,
+    "public_key" => nil,
+    "signature" => nil
+  }
+}
+```
+
+The top-level integrity digest must match the nested artifact digest.
+
+For unsigned envelopes, the signature placeholder must remain empty:
+
+```elixir
+%{
+  "status" => "unsigned",
+  "algorithm" => nil,
+  "public_key" => nil,
+  "signature" => nil
+}
+```
+
+Any non-nil signature fields are rejected until real signature support is implemented.
+Signature status is currently unsigned-only.
+
 ## How to run
 
 ```bash
