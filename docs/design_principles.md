@@ -17,6 +17,13 @@ A safe agent action must be:
 PythiaLabs treats action maturity as a decision boundary:
 an action should proceed only when the system can explain why it is allowed now.
 
+## Application direction: consensus reason layers
+
+In consensus-driven systems, it is not enough to prove that a transaction happened.
+High-stakes agentic systems also need to explain why an action was allowed, rejected, delayed, or blocked.
+
+This is a future application direction, not part of the current MVP.
+
 ## Why this matters
 
 For high-stakes domains (finance, public sector, regulated operations, critical infrastructure),

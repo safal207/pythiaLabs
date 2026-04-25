@@ -86,6 +86,8 @@ For details, see `docs/persistent_reasoning_memory.md`.
 
 For the broader five-layer roadmap, see `docs/temporal_causal_memory_stack.md`.
 
+For the Web3 application roadmap, see `docs/web3_consensus_reason_layer.md`.
+
 For the design principles behind these decisions, see `docs/design_principles.md`.
 
 Additional roadmap items:
@@ -93,6 +95,7 @@ Additional roadmap items:
 - temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
 - critic triggers based on confidence, repeated failure classes, and trace patterns
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
+- Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
 ## Agent Safety Showcase
 
