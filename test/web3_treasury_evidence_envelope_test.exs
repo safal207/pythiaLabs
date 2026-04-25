@@ -155,6 +155,13 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
              Web3TreasuryAction.verify_evidence_envelope(malformed)
   end
 
+  test "unsigned envelope with unexpected top-level key is rejected", %{envelope: envelope} do
+    tampered = Map.put(envelope, "hidden_policy", "fake")
+
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
   test "boolean false is preserved inside rejected quorum envelope payload", ctx do
     envelope =
       ctx.action

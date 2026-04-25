@@ -29,7 +29,15 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   @artifact_type "pythia.web3_treasury_action.decision_trace.v1"
   @canonicalization "pythia.canonical_export.v1"
   @integrity_algorithm "sha256"
+  @evidence_envelope_keys MapSet.new([
+                            "schema",
+                            "artifact",
+                            "canonicalization",
+                            "integrity",
+                            "signature"
+                          ])
   @unsigned_signature_keys MapSet.new(["status", "algorithm", "public_key", "signature"])
+  @signed_demo_signature_keys MapSet.new(["status", "algorithm", "signer_id", "signature"])
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
@@ -209,6 +217,9 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     signature = Map.get(envelope, "signature")
 
     cond do
+      not valid_evidence_envelope_key_set?(envelope) ->
+        rejected(:invalid_envelope_shape)
+
       not valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) ->
         rejected(:invalid_envelope_shape)
 
@@ -242,6 +253,47 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   end
 
   def verify_evidence_envelope(_envelope), do: rejected(:invalid_envelope_shape)
+
+  @spec sign_evidence_envelope_demo(map(), String.t()) :: map()
+  def sign_evidence_envelope_demo(envelope, signer_id)
+      when is_map(envelope) and is_binary(signer_id) do
+    Map.put(envelope, "signature", %{
+      "status" => "signed_demo",
+      "algorithm" => "sha256-demo",
+      "signer_id" => signer_id,
+      "signature" => demo_signature(envelope, signer_id)
+    })
+  end
+
+  def sign_evidence_envelope_demo(envelope, signer_id) do
+    sign_evidence_envelope_demo(normalize_value(envelope), to_string(signer_id))
+  end
+
+  @spec verify_signed_evidence_envelope_demo(map()) :: {:ok, map()} | {:error, map()}
+  def verify_signed_evidence_envelope_demo(envelope) when is_map(envelope) do
+    signature = Map.get(envelope, "signature")
+
+    with {:ok, digest} <- verify_signed_envelope_integrity(envelope),
+         :ok <- verify_signed_signature_status(signature),
+         :ok <- verify_signed_signature_algorithm(signature),
+         :ok <- verify_signed_signer_id(signature),
+         :ok <- verify_signed_signature_digest(signature),
+         true <- signature["signature"] == demo_signature(envelope, signature["signer_id"]) do
+      {:ok,
+       %{
+         status: :verified,
+         signature: :verified_demo,
+         signer_id: signature["signer_id"],
+         digest: digest
+       }}
+    else
+      {:error, _payload} = error -> error
+      false -> rejected(:signature_mismatch)
+    end
+  end
+
+  def verify_signed_evidence_envelope_demo(_envelope),
+    do: rejected(:invalid_signed_envelope_shape)
 
   defp ensure_export_status(export) do
     status =
@@ -286,8 +338,109 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   defp unsigned_signature_placeholder?(_signature), do: false
 
+  defp verify_signed_envelope_integrity(envelope) do
+    schema = Map.get(envelope, "schema")
+    artifact = Map.get(envelope, "artifact")
+    canonicalization = Map.get(envelope, "canonicalization")
+    integrity = Map.get(envelope, "integrity")
+    signature = Map.get(envelope, "signature")
+
+    cond do
+      not valid_evidence_envelope_key_set?(envelope) ->
+        rejected(:invalid_signed_envelope_shape)
+
+      not valid_evidence_envelope_shape?(schema, artifact, canonicalization, integrity, signature) ->
+        rejected(:invalid_signed_envelope_shape)
+
+      schema != @envelope_schema ->
+        rejected(:invalid_signed_envelope_shape)
+
+      canonicalization != @canonicalization ->
+        rejected(:invalid_signed_envelope_shape)
+
+      integrity["algorithm"] != @integrity_algorithm ->
+        rejected(:invalid_signed_envelope_shape)
+
+      integrity["digest"] != artifact["digest"] ->
+        rejected(:digest_mismatch)
+
+      true ->
+        with {:ok, _verified_evidence} <- verify_evidence(artifact) do
+          {:ok, integrity["digest"]}
+        end
+    end
+  end
+
+  defp verify_signed_signature_status(signature) when is_map(signature) do
+    signature_keys = signature |> Map.keys() |> MapSet.new()
+
+    if signature_keys == @signed_demo_signature_keys and signature["status"] == "signed_demo" do
+      :ok
+    else
+      rejected(:unsupported_signature_status)
+    end
+  end
+
+  defp verify_signed_signature_status(_signature), do: rejected(:unsupported_signature_status)
+
+  defp verify_signed_signature_algorithm(signature) do
+    if signature["algorithm"] == "sha256-demo" do
+      :ok
+    else
+      rejected(:unsupported_signature_algorithm)
+    end
+  end
+
+  defp verify_signed_signer_id(signature) do
+    signer_id = signature["signer_id"]
+
+    if is_binary(signer_id) and String.trim(signer_id) != "" do
+      :ok
+    else
+      rejected(:invalid_signer_id)
+    end
+  end
+
+  defp verify_signed_signature_digest(signature) do
+    if valid_digest?(signature["signature"]) do
+      :ok
+    else
+      rejected(:signature_mismatch)
+    end
+  end
+
+  defp demo_signature_payload(envelope, signer_id) do
+    canonical_encode(%{
+      "schema" => envelope["schema"],
+      "artifact" => envelope["artifact"],
+      "canonicalization" => envelope["canonicalization"],
+      "integrity" => envelope["integrity"],
+      "signer_id" => signer_id
+    })
+  end
+
+  defp demo_signature(envelope, signer_id) do
+    envelope
+    |> demo_signature_payload(signer_id)
+    |> then(&:crypto.hash(:sha256, "demo-signature:" <> &1))
+    |> Base.encode16(case: :lower)
+  end
+
   defp valid_digest?(digest),
     do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)
+
+  defp exact_key_set?(map, expected_keys) when is_map(map) do
+    map
+    |> Map.keys()
+    |> MapSet.new()
+    |> MapSet.equal?(expected_keys)
+  end
+
+  defp valid_evidence_envelope_key_set?(envelope) when is_map(envelope) do
+    exact_key_set?(envelope, @evidence_envelope_keys)
+  end
+
+  defp valid_evidence_envelope_key_set?(_), do: false
 
   defp invalid_evidence_shape(), do: rejected(:invalid_evidence_shape)
 

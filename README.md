@@ -177,3 +177,9 @@ Evidence can also be wrapped into a signature-ready envelope:
 ```bash
 mix run examples/web3_treasury_evidence_envelope.exs
 ```
+
+The project also includes a local deterministic demo signer to show how evidence envelopes may later support authorship verification.
+
+```bash
+mix run examples/web3_treasury_signed_envelope_demo.exs
+```
