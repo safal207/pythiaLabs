@@ -52,15 +52,19 @@ scenario_inputs = [
 print_result = fn scenario_name, result ->
   IO.puts("\nScenario: #{scenario_name}")
 
-  case result do
-    {:ok, payload} ->
-      IO.puts("Status: #{payload.status}")
-      IO.puts("Stop reason: #{payload.stop_reason}")
+  payload =
+    case result do
+      {:ok, payload} -> payload
+      {:error, payload} -> payload
+    end
 
-    {:error, payload} ->
-      IO.puts("Status: #{payload.status}")
-      IO.puts("Stop reason: #{payload.stop_reason}")
-  end
+  IO.puts("Status: #{payload.status}")
+  IO.puts("Stop reason: #{payload.stop_reason}")
+  IO.puts("Trace:")
+
+  Enum.each(payload.trace, fn entry ->
+    IO.puts("- #{entry.event}: #{entry.result}")
+  end)
 end
 
 IO.puts("Web3 Treasury Action Showcase")

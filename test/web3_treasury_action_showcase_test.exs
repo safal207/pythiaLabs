@@ -126,7 +126,7 @@ defmodule Pythia.Web3TreasuryActionShowcaseTest do
   test "accepted trace has exact chronological event order", ctx do
     assert {:ok, %{trace: trace}} = Web3TreasuryAction.evaluate(ctx.action, ctx.governance_record)
 
-    assert trace == [
+    assert Web3TreasuryAction.trace_events(trace) == [
              :proposed_action,
              :proposal_match_check,
              :permission_check,
@@ -140,11 +140,102 @@ defmodule Pythia.Web3TreasuryActionShowcaseTest do
            ]
   end
 
-  test "rejected trace ends with decision", ctx do
+  test "accepted trace has pass results for all checks and ends with accept decision", ctx do
+    assert {:ok, %{trace: trace}} = Web3TreasuryAction.evaluate(ctx.action, ctx.governance_record)
+
+    check_entries = Enum.slice(trace, 1, 8)
+    assert Enum.all?(check_entries, &(&1.result == :pass))
+
+    assert Enum.at(trace, 0) ==
+             %{
+               event: :proposed_action,
+               result: :observed,
+               action_id: "dao_act_001",
+               action_type: "treasury_transfer",
+               proposal_id: "prop_001",
+               actor: "agent_alpha"
+             }
+
+    assert List.last(trace) ==
+             %{event: :decision, result: :accept, stop_reason: :treasury_transfer_accepted}
+  end
+
+  test "quorum failure trace contains quorum fail map and decision reject", ctx do
+    record = %{ctx.governance_record | quorum_met: false}
+
+    assert {:error, %{trace: trace, stop_reason: :quorum_not_met}} =
+             Web3TreasuryAction.evaluate(ctx.action, record)
+
+    assert Enum.at(trace, 3) ==
+             %{event: :quorum_check, result: :fail, actual: false, reason: :quorum_not_met}
+
+    assert List.last(trace) == %{event: :decision, result: :reject, stop_reason: :quorum_not_met}
+  end
+
+  test "voting window failure trace contains voting_window_check fail", ctx do
+    record = %{ctx.governance_record | voting_closed_at: ~U[2026-04-25 12:30:00Z]}
+
+    assert {:error, %{trace: trace, stop_reason: :voting_window_still_open}} =
+             Web3TreasuryAction.evaluate(ctx.action, record)
+
+    assert Enum.at(trace, 4).event == :voting_window_check
+    assert Enum.at(trace, 4).result == :fail
+    assert Enum.at(trace, 4).reason == :voting_window_still_open
+  end
+
+  test "timelock failure trace contains timelock_check fail", ctx do
+    record = %{ctx.governance_record | timelock_until: ~U[2026-04-25 12:30:00Z]}
+
+    assert {:error, %{trace: trace, stop_reason: :timelock_not_satisfied}} =
+             Web3TreasuryAction.evaluate(ctx.action, record)
+
+    assert Enum.at(trace, 5).event == :timelock_check
+    assert Enum.at(trace, 5).result == :fail
+    assert Enum.at(trace, 5).reason == :timelock_not_satisfied
+  end
+
+  test "authorization valid but unknown trace includes recorded_after_decision reason", ctx do
+    record = %{ctx.governance_record | authorization_recorded_at: ~U[2026-04-25 12:30:00Z]}
+
+    assert {:error,
+            %{trace: trace, stop_reason: :authorization_valid_but_unknown_at_decision_time}} =
+             Web3TreasuryAction.evaluate(ctx.action, record)
+
+    assert Enum.at(trace, 7).event == :authorization_transaction_time_check
+    assert Enum.at(trace, 7).result == :fail
+    assert Enum.at(trace, 7).reason == :recorded_after_decision
+
+    assert List.last(trace) ==
+             %{
+               event: :decision,
+               result: :reject,
+               stop_reason: :authorization_valid_but_unknown_at_decision_time
+             }
+  end
+
+  test "transfer expired trace contains transfer_expiration_check fail", ctx do
+    action = %{ctx.action | action_time: ~U[2026-04-25 12:40:00Z]}
+
+    record = %{
+      ctx.governance_record
+      | transfer_expires_at: ~U[2026-04-25 12:30:00Z],
+        authorization_valid_to: ~U[2026-04-25 13:30:00Z]
+    }
+
+    assert {:error, %{trace: trace, stop_reason: :transfer_expired}} =
+             Web3TreasuryAction.evaluate(action, record)
+
+    assert Enum.at(trace, 8).event == :transfer_expiration_check
+    assert Enum.at(trace, 8).result == :fail
+    assert Enum.at(trace, 8).reason == :transfer_expired
+  end
+
+  test "rejected traces always end with decision reject", ctx do
     action = %{ctx.action | proposal_id: "missing"}
 
     assert {:error, %{trace: trace}} = Web3TreasuryAction.evaluate(action, ctx.governance_record)
-    assert List.last(trace) == :decision
+    assert List.last(trace).event == :decision
+    assert List.last(trace).result == :reject
   end
 
   test "action_time == voting_closed_at is accepted for voting window", ctx do

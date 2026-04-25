@@ -15,8 +15,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     :transfer_expires_at
   ]
 
-  @accepted_trace [
-    :proposed_action,
+  @check_order [
     :proposal_match_check,
     :permission_check,
     :quorum_check,
@@ -24,42 +23,193 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     :timelock_check,
     :authorization_valid_time_check,
     :authorization_transaction_time_check,
-    :transfer_expiration_check,
-    :decision
+    :transfer_expiration_check
   ]
+
+  @accepted_events [:proposed_action | @check_order] ++ [:decision]
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
+    proposed_trace = [proposed_action_trace(action)]
+
     with :ok <- validate_governance_record(governance_record),
          :ok <- validate_action_timestamps(action),
-         :ok <- proposal_match_check(action, governance_record),
-         :ok <- permission_check(action, governance_record),
-         :ok <- quorum_check(governance_record),
-         :ok <- voting_window_check(action, governance_record),
-         :ok <- timelock_check(action, governance_record),
-         :ok <- authorization_valid_time_check(action, governance_record),
-         :ok <- authorization_transaction_time_check(action, governance_record),
-         :ok <- transfer_expiration_check(action, governance_record) do
+         {:ok, trace} <- run_checks(action, governance_record, proposed_trace) do
       {:ok,
        %{
          status: :accepted,
          stop_reason: :treasury_transfer_accepted,
-         trace: @accepted_trace
+         trace: trace ++ [decision_trace(:accept, :treasury_transfer_accepted)]
        }}
     else
-      {:error, reason, failed_check} ->
-        reject(reason, build_rejected_trace(failed_check))
+      {:error, stop_reason, failed_check} ->
+        trace =
+          proposed_trace ++
+            [
+              check_trace(failed_check, :fail, %{
+                reason: failure_reason(stop_reason)
+              }),
+              decision_trace(:reject, stop_reason)
+            ]
+
+        reject(stop_reason, trace)
+
+      {:error, stop_reason, trace} ->
+        reject(stop_reason, trace ++ [decision_trace(:reject, stop_reason)])
     end
   end
 
   def evaluate(_action, _governance_record) do
-    reject(:invalid_governance_record, [:proposed_action, :decision])
+    trace = [proposed_action_trace(%{}), decision_trace(:reject, :invalid_governance_record)]
+    reject(:invalid_governance_record, trace)
   end
 
-  defp build_rejected_trace(failed_check) do
-    @accepted_trace
-    |> Enum.take_while(&(&1 != failed_check))
-    |> Kernel.++([failed_check, :decision])
+  @spec trace_events([map()]) :: [atom()]
+  def trace_events(trace), do: Enum.map(trace, & &1.event)
+
+  defp run_checks(action, governance_record, trace) do
+    Enum.reduce_while(@check_order, {:ok, trace}, fn check, {:ok, acc_trace} ->
+      case run_check(check, action, governance_record) do
+        {:ok, details} ->
+          {:cont, {:ok, acc_trace ++ [check_trace(check, :pass, details)]}}
+
+        {:error, stop_reason, details} ->
+          fail_trace = acc_trace ++ [check_trace(check, :fail, details)]
+          {:halt, {:error, stop_reason, fail_trace}}
+      end
+    end)
+  end
+
+  defp run_check(:proposal_match_check, action, governance_record) do
+    expected = fetch(governance_record, :proposal_id)
+    actual = fetch(action, :proposal_id)
+
+    if actual == expected do
+      {:ok, %{expected: expected, actual: actual}}
+    else
+      {:error, :missing_proposal_record,
+       %{expected: expected, actual: actual, reason: :missing_proposal_record}}
+    end
+  end
+
+  defp run_check(:permission_check, action, governance_record) do
+    expected = fetch(governance_record, :permission)
+    actual = fetch(action, :required_permission)
+
+    if actual == expected do
+      {:ok, %{expected: expected, actual: actual}}
+    else
+      {:error, :permission_mismatch,
+       %{expected: expected, actual: actual, reason: :permission_mismatch}}
+    end
+  end
+
+  defp run_check(:quorum_check, _action, governance_record) do
+    quorum_met = fetch(governance_record, :quorum_met)
+
+    if quorum_met do
+      {:ok, %{actual: quorum_met}}
+    else
+      {:error, :quorum_not_met, %{actual: quorum_met, reason: :quorum_not_met}}
+    end
+  end
+
+  defp run_check(:voting_window_check, action, governance_record) do
+    action_time = fetch(action, :action_time)
+    voting_closed_at = fetch(governance_record, :voting_closed_at)
+
+    if DateTime.compare(action_time, voting_closed_at) == :lt do
+      {:error, :voting_window_still_open,
+       %{
+         reason: :voting_window_still_open,
+         action_time: action_time,
+         voting_closed_at: voting_closed_at
+       }}
+    else
+      {:ok, %{action_time: action_time, voting_closed_at: voting_closed_at}}
+    end
+  end
+
+  defp run_check(:timelock_check, action, governance_record) do
+    action_time = fetch(action, :action_time)
+    timelock_until = fetch(governance_record, :timelock_until)
+
+    if DateTime.compare(action_time, timelock_until) == :lt do
+      {:error, :timelock_not_satisfied,
+       %{
+         reason: :timelock_not_satisfied,
+         action_time: action_time,
+         timelock_until: timelock_until
+       }}
+    else
+      {:ok, %{action_time: action_time, timelock_until: timelock_until}}
+    end
+  end
+
+  defp run_check(:authorization_valid_time_check, action, governance_record) do
+    action_time = fetch(action, :action_time)
+    authorization_valid_from = fetch(governance_record, :authorization_valid_from)
+    authorization_valid_to = fetch(governance_record, :authorization_valid_to)
+
+    cond do
+      DateTime.compare(action_time, authorization_valid_from) == :lt ->
+        {:error, :authorization_not_yet_valid,
+         %{
+           reason: :authorization_not_yet_valid,
+           action_time: action_time,
+           authorization_valid_from: authorization_valid_from,
+           authorization_valid_to: authorization_valid_to
+         }}
+
+      DateTime.compare(action_time, authorization_valid_to) == :gt ->
+        {:error, :authorization_expired,
+         %{
+           reason: :authorization_expired,
+           action_time: action_time,
+           authorization_valid_from: authorization_valid_from,
+           authorization_valid_to: authorization_valid_to
+         }}
+
+      true ->
+        {:ok,
+         %{
+           action_time: action_time,
+           authorization_valid_from: authorization_valid_from,
+           authorization_valid_to: authorization_valid_to
+         }}
+    end
+  end
+
+  defp run_check(:authorization_transaction_time_check, action, governance_record) do
+    decision_time = fetch(action, :decision_time)
+    authorization_recorded_at = fetch(governance_record, :authorization_recorded_at)
+
+    if DateTime.compare(authorization_recorded_at, decision_time) == :gt do
+      {:error, :authorization_valid_but_unknown_at_decision_time,
+       %{
+         reason: :recorded_after_decision,
+         decision_time: decision_time,
+         authorization_recorded_at: authorization_recorded_at
+       }}
+    else
+      {:ok, %{decision_time: decision_time, authorization_recorded_at: authorization_recorded_at}}
+    end
+  end
+
+  defp run_check(:transfer_expiration_check, action, governance_record) do
+    action_time = fetch(action, :action_time)
+    transfer_expires_at = fetch(governance_record, :transfer_expires_at)
+
+    if DateTime.compare(action_time, transfer_expires_at) == :gt do
+      {:error, :transfer_expired,
+       %{
+         reason: :transfer_expired,
+         action_time: action_time,
+         transfer_expires_at: transfer_expires_at
+       }}
+    else
+      {:ok, %{action_time: action_time, transfer_expires_at: transfer_expires_at}}
+    end
   end
 
   defp validate_governance_record(governance_record) do
@@ -99,88 +249,29 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     end
   end
 
-  defp proposal_match_check(action, governance_record) do
-    case fetch(action, :proposal_id) == fetch(governance_record, :proposal_id) do
-      true -> :ok
-      false -> {:error, :missing_proposal_record, :proposal_match_check}
-    end
+  defp proposed_action_trace(action) do
+    %{
+      event: :proposed_action,
+      result: :observed,
+      action_id: fetch(action, :action_id),
+      action_type: fetch(action, :action_type),
+      proposal_id: fetch(action, :proposal_id),
+      actor: fetch(action, :actor)
+    }
   end
 
-  defp permission_check(action, governance_record) do
-    case fetch(action, :required_permission) == fetch(governance_record, :permission) do
-      true -> :ok
-      false -> {:error, :permission_mismatch, :permission_check}
-    end
+  defp check_trace(event, result, details) do
+    Map.merge(%{event: event, result: result}, details)
   end
 
-  defp quorum_check(governance_record) do
-    case fetch(governance_record, :quorum_met) do
-      true -> :ok
-      false -> {:error, :quorum_not_met, :quorum_check}
-    end
+  defp decision_trace(result, stop_reason) do
+    %{event: :decision, result: result, stop_reason: stop_reason}
   end
 
-  defp voting_window_check(action, governance_record) do
-    action_time = fetch(action, :action_time)
-    voting_closed_at = fetch(governance_record, :voting_closed_at)
+  defp failure_reason(:authorization_valid_but_unknown_at_decision_time),
+    do: :recorded_after_decision
 
-    if DateTime.compare(action_time, voting_closed_at) == :lt do
-      {:error, :voting_window_still_open, :voting_window_check}
-    else
-      :ok
-    end
-  end
-
-  defp timelock_check(action, governance_record) do
-    action_time = fetch(action, :action_time)
-    timelock_until = fetch(governance_record, :timelock_until)
-
-    if DateTime.compare(action_time, timelock_until) == :lt do
-      {:error, :timelock_not_satisfied, :timelock_check}
-    else
-      :ok
-    end
-  end
-
-  defp authorization_valid_time_check(action, governance_record) do
-    action_time = fetch(action, :action_time)
-    authorization_valid_from = fetch(governance_record, :authorization_valid_from)
-    authorization_valid_to = fetch(governance_record, :authorization_valid_to)
-
-    cond do
-      DateTime.compare(action_time, authorization_valid_from) == :lt ->
-        {:error, :authorization_not_yet_valid, :authorization_valid_time_check}
-
-      DateTime.compare(action_time, authorization_valid_to) == :gt ->
-        {:error, :authorization_expired, :authorization_valid_time_check}
-
-      true ->
-        :ok
-    end
-  end
-
-  defp authorization_transaction_time_check(action, governance_record) do
-    decision_time = fetch(action, :decision_time)
-    authorization_recorded_at = fetch(governance_record, :authorization_recorded_at)
-
-    if DateTime.compare(authorization_recorded_at, decision_time) == :gt do
-      {:error, :authorization_valid_but_unknown_at_decision_time,
-       :authorization_transaction_time_check}
-    else
-      :ok
-    end
-  end
-
-  defp transfer_expiration_check(action, governance_record) do
-    action_time = fetch(action, :action_time)
-    transfer_expires_at = fetch(governance_record, :transfer_expires_at)
-
-    if DateTime.compare(action_time, transfer_expires_at) == :gt do
-      {:error, :transfer_expired, :transfer_expiration_check}
-    else
-      :ok
-    end
-  end
+  defp failure_reason(other), do: other
 
   defp reject(stop_reason, trace) do
     {:error,
