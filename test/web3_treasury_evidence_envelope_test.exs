@@ -134,6 +134,13 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
              Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
+  test "unsigned signature map with unexpected key is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["signature", "sig_v2"], "fake")
+
+    assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
   test "missing signature map returns invalid_envelope_shape", %{envelope: envelope} do
     malformed = Map.delete(envelope, "signature")
 

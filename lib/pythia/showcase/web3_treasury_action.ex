@@ -29,6 +29,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   @artifact_type "pythia.web3_treasury_action.decision_trace.v1"
   @canonicalization "pythia.canonical_export.v1"
   @integrity_algorithm "sha256"
+  @unsigned_signature_keys MapSet.new(["status", "algorithm", "public_key", "signature"])
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
@@ -273,13 +274,17 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     is_binary(integrity["algorithm"]) and valid_digest?(integrity["digest"])
   end
 
-  defp unsigned_signature_placeholder?(signature) do
-    is_map(signature) and
+  defp unsigned_signature_placeholder?(signature) when is_map(signature) do
+    signature_keys = signature |> Map.keys() |> MapSet.new()
+
+    signature_keys == @unsigned_signature_keys and
       signature["status"] == "unsigned" and
       is_nil(signature["algorithm"]) and
       is_nil(signature["public_key"]) and
       is_nil(signature["signature"])
   end
+
+  defp unsigned_signature_placeholder?(_signature), do: false
 
   defp valid_digest?(digest),
     do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)
