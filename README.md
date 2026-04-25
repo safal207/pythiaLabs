@@ -86,6 +86,9 @@ For details, see `docs/persistent_reasoning_memory.md`.
 
 For the broader five-layer roadmap, see `docs/temporal_causal_memory_stack.md`.
 
+For the doctrine behind these decisions, see `docs/design_principles.md`.
+
+
 Additional roadmap items:
 
 - temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
