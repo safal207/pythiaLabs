@@ -27,153 +27,170 @@ defmodule Pythia.Showcase.BitemporalAuthorization do
 
     cond do
       not matching_permission?(required_permission, permission) ->
-        reject(:missing_permission_record, [
-          %{
-            event: :permission_match_check,
-            result: :fail,
-            required: required_permission,
-            record: permission
-          },
-          %{event: :decision, result: :reject}
-          | base_trace
-        ])
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :fail,
+                required: required_permission,
+                record: permission
+              },
+              %{event: :decision, result: :reject}
+            ]
+
+        reject(:missing_permission_record, trace)
 
       not temporal_data_valid?(action_time, decision_time, valid_from, valid_to, recorded_at) ->
-        reject(:invalid_temporal_record, [
-          %{
-            event: :permission_match_check,
-            result: :pass,
-            required: required_permission,
-            record: permission
-          },
-          %{
-            event: :valid_time_check,
-            result: :invalid,
-            valid_from: valid_from,
-            valid_to: valid_to,
-            action_time: action_time
-          },
-          %{
-            event: :transaction_time_check,
-            result: :invalid,
-            recorded_at: recorded_at,
-            decision_time: decision_time
-          },
-          %{event: :decision, result: :reject}
-          | base_trace
-        ])
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :pass,
+                required: required_permission,
+                record: permission
+              },
+              %{
+                event: :valid_time_check,
+                result: :invalid,
+                valid_from: valid_from,
+                valid_to: valid_to,
+                action_time: action_time
+              },
+              %{
+                event: :transaction_time_check,
+                result: :invalid,
+                recorded_at: recorded_at,
+                decision_time: decision_time
+              },
+              %{event: :decision, result: :reject}
+            ]
+
+        reject(:invalid_temporal_record, trace)
 
       DateTime.compare(action_time, valid_from) == :lt ->
-        reject(:authorization_not_yet_valid, [
-          %{
-            event: :permission_match_check,
-            result: :pass,
-            required: required_permission,
-            record: permission
-          },
-          %{
-            event: :valid_time_check,
-            result: :fail,
-            reason: :before_valid_from,
-            valid_from: valid_from,
-            valid_to: valid_to,
-            action_time: action_time
-          },
-          %{
-            event: :transaction_time_check,
-            result: :skipped,
-            reason: :valid_time_failed,
-            recorded_at: recorded_at,
-            decision_time: decision_time
-          },
-          %{event: :decision, result: :reject}
-          | base_trace
-        ])
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :pass,
+                required: required_permission,
+                record: permission
+              },
+              %{
+                event: :valid_time_check,
+                result: :fail,
+                reason: :before_valid_from,
+                valid_from: valid_from,
+                valid_to: valid_to,
+                action_time: action_time
+              },
+              %{
+                event: :transaction_time_check,
+                result: :skipped,
+                reason: :valid_time_failed,
+                recorded_at: recorded_at,
+                decision_time: decision_time
+              },
+              %{event: :decision, result: :reject}
+            ]
+
+        reject(:authorization_not_yet_valid, trace)
 
       DateTime.compare(action_time, valid_to) == :gt ->
-        reject(:authorization_expired, [
-          %{
-            event: :permission_match_check,
-            result: :pass,
-            required: required_permission,
-            record: permission
-          },
-          %{
-            event: :valid_time_check,
-            result: :fail,
-            reason: :after_valid_to,
-            valid_from: valid_from,
-            valid_to: valid_to,
-            action_time: action_time
-          },
-          %{
-            event: :transaction_time_check,
-            result: :skipped,
-            reason: :valid_time_failed,
-            recorded_at: recorded_at,
-            decision_time: decision_time
-          },
-          %{event: :decision, result: :reject}
-          | base_trace
-        ])
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :pass,
+                required: required_permission,
+                record: permission
+              },
+              %{
+                event: :valid_time_check,
+                result: :fail,
+                reason: :after_valid_to,
+                valid_from: valid_from,
+                valid_to: valid_to,
+                action_time: action_time
+              },
+              %{
+                event: :transaction_time_check,
+                result: :skipped,
+                reason: :valid_time_failed,
+                recorded_at: recorded_at,
+                decision_time: decision_time
+              },
+              %{event: :decision, result: :reject}
+            ]
+
+        reject(:authorization_expired, trace)
 
       DateTime.compare(recorded_at, decision_time) == :gt ->
-        reject(:authorization_valid_but_unknown_at_decision_time, [
-          %{
-            event: :permission_match_check,
-            result: :pass,
-            required: required_permission,
-            record: permission
-          },
-          %{
-            event: :valid_time_check,
-            result: :pass,
-            valid_from: valid_from,
-            valid_to: valid_to,
-            action_time: action_time
-          },
-          %{
-            event: :transaction_time_check,
-            result: :fail,
-            reason: :recorded_after_decision,
-            recorded_at: recorded_at,
-            decision_time: decision_time
-          },
-          %{event: :decision, result: :reject}
-          | base_trace
-        ])
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :pass,
+                required: required_permission,
+                record: permission
+              },
+              %{
+                event: :valid_time_check,
+                result: :pass,
+                valid_from: valid_from,
+                valid_to: valid_to,
+                action_time: action_time
+              },
+              %{
+                event: :transaction_time_check,
+                result: :fail,
+                reason: :recorded_after_decision,
+                recorded_at: recorded_at,
+                decision_time: decision_time
+              },
+              %{event: :decision, result: :reject}
+            ]
+
+        reject(:authorization_valid_but_unknown_at_decision_time, trace)
 
       true ->
+        trace =
+          base_trace ++
+            [
+              %{
+                event: :permission_match_check,
+                result: :pass,
+                required: required_permission,
+                record: permission
+              },
+              %{
+                event: :valid_time_check,
+                result: :pass,
+                valid_from: valid_from,
+                valid_to: valid_to,
+                action_time: action_time
+              },
+              %{
+                event: :transaction_time_check,
+                result: :pass,
+                recorded_at: recorded_at,
+                decision_time: decision_time
+              },
+              %{event: :decision, result: :accept}
+            ]
+
         {:ok,
          %{
            status: :accepted,
            stop_reason: :authorization_valid_and_known,
            action: action,
            permission_record: permission_record,
-           trace:
-             Enum.reverse([
-               %{event: :decision, result: :accept},
-               %{
-                 event: :transaction_time_check,
-                 result: :pass,
-                 recorded_at: recorded_at,
-                 decision_time: decision_time
-               },
-               %{
-                 event: :valid_time_check,
-                 result: :pass,
-                 valid_from: valid_from,
-                 valid_to: valid_to,
-                 action_time: action_time
-               },
-               %{
-                 event: :permission_match_check,
-                 result: :pass,
-                 required: required_permission,
-                 record: permission
-               }
-               | base_trace
-             ])
+           trace: trace
          }}
     end
   end
@@ -190,7 +207,7 @@ defmodule Pythia.Showcase.BitemporalAuthorization do
      %{
        status: :rejected,
        stop_reason: stop_reason,
-       trace: Enum.reverse(trace)
+       trace: trace
      }}
   end
 
