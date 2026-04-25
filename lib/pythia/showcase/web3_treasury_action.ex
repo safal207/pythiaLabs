@@ -101,6 +101,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     }
   end
 
+  defp normalize_value(value) when is_boolean(value) or is_nil(value), do: value
   defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_value(%DateTime{} = value), do: DateTime.to_iso8601(value)
 
@@ -119,9 +120,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   defp normalize_value(value) when is_list(value), do: Enum.map(value, &normalize_value/1)
 
-  defp normalize_value(value)
-       when is_binary(value) or is_boolean(value) or is_number(value) or is_nil(value),
-       do: value
+  defp normalize_value(value) when is_binary(value) or is_number(value), do: value
 
   defp normalize_key(key) when is_atom(key), do: Atom.to_string(key)
   defp normalize_key(key) when is_binary(key), do: key
