@@ -74,10 +74,16 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     |> ensure_export_status()
   end
 
-  @spec export_result_json({:ok, map()} | {:error, map()}) :: {:ok, String.t()}
+  @spec export_result_json({:ok, map()} | {:error, map()}) ::
+          {:ok, String.t()} | {:error, :json_encoder_unavailable}
   def export_result_json(result) do
     export = export_result(result)
-    {:ok, Jason.encode!(export, pretty: true)}
+
+    if Code.ensure_loaded?(Jason) and function_exported?(Jason, :encode!, 2) do
+      {:ok, apply(Jason, :encode!, [export, [pretty: true]])}
+    else
+      {:error, :json_encoder_unavailable}
+    end
   end
 
   defp ensure_export_status(export) do
@@ -100,6 +106,12 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)
   defp normalize_value(%DateTime{} = value), do: DateTime.to_iso8601(value)
 
+  defp normalize_value(%_{} = struct) do
+    struct
+    |> Map.from_struct()
+    |> normalize_value()
+  end
+
   defp normalize_value(value) when is_map(value) do
     value
     |> Enum.map(fn {key, item} -> {normalize_key(key), normalize_value(item)} end)
@@ -112,12 +124,6 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   defp normalize_value(value)
        when is_binary(value) or is_boolean(value) or is_number(value) or is_nil(value),
        do: value
-
-  defp normalize_value(%_{} = struct) do
-    struct
-    |> Map.from_struct()
-    |> normalize_value()
-  end
 
   defp normalize_key(key) when is_atom(key), do: Atom.to_string(key)
   defp normalize_key(key) when is_binary(key), do: key

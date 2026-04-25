@@ -82,12 +82,17 @@ defmodule Pythia.Web3TreasuryTraceExportTest do
     assert first == second
   end
 
-  test "export_result_json/1 returns {:ok, json} and includes key fields", ctx do
+  test "export_result_json/1 handles available and unavailable json encoder", ctx do
     accepted_result = Web3TreasuryAction.evaluate(ctx.action, ctx.governance_record)
+    json_result = Web3TreasuryAction.export_result_json(accepted_result)
 
-    assert {:ok, json} = Web3TreasuryAction.export_result_json(accepted_result)
-    assert is_binary(json)
-    assert String.contains?(json, "treasury_transfer_accepted")
-    assert String.contains?(json, "proposed_action")
+    if Code.ensure_loaded?(Jason) and function_exported?(Jason, :encode!, 2) do
+      assert {:ok, json} = json_result
+      assert is_binary(json)
+      assert String.contains?(json, "treasury_transfer_accepted")
+      assert String.contains?(json, "proposed_action")
+    else
+      assert {:error, :json_encoder_unavailable} = json_result
+    end
   end
 end

@@ -43,12 +43,17 @@ IO.puts("\nRejected export:")
 IO.inspect(rejected_export, pretty: true)
 
 if function_exported?(Web3TreasuryAction, :export_result_json, 1) do
-  {:ok, accepted_json} = Web3TreasuryAction.export_result_json(accepted_result)
-  {:ok, rejected_json} = Web3TreasuryAction.export_result_json(rejected_result)
+  case Web3TreasuryAction.export_result_json(accepted_result) do
+    {:ok, accepted_json} ->
+      {:ok, rejected_json} = Web3TreasuryAction.export_result_json(rejected_result)
 
-  IO.puts("\nAccepted JSON export:")
-  IO.puts(accepted_json)
+      IO.puts("\nAccepted JSON export:")
+      IO.puts(accepted_json)
 
-  IO.puts("\nRejected JSON export:")
-  IO.puts(rejected_json)
+      IO.puts("\nRejected JSON export:")
+      IO.puts(rejected_json)
+
+    {:error, :json_encoder_unavailable} ->
+      IO.puts("\nJSON export skipped: json_encoder_unavailable")
+  end
 end
