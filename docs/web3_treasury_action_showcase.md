@@ -105,6 +105,21 @@ Verification can detect:
 This is still not a digital signature.
 It verifies artifact integrity, not authorship.
 
+## Signature-ready evidence envelope
+
+For unsigned envelopes, the signature placeholder must remain empty:
+
+```elixir
+%{
+  "status" => "unsigned",
+  "algorithm" => nil,
+  "public_key" => nil,
+  "signature" => nil
+}
+```
+
+Any non-nil signature fields are rejected until real signature support is implemented.
+
 ## How to run
 
 ```bash
