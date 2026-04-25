@@ -40,6 +40,35 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     assert {:ok, %{status: :verified}} = Web3TreasuryAction.verify_evidence_envelope(envelope)
   end
 
+  test "envelope contains expected artifact and integrity shape", %{envelope: envelope} do
+    assert envelope["schema"] == "pythia.evidence.envelope.v1"
+
+    assert envelope["artifact"]["artifact_type"] ==
+             "pythia.web3_treasury_action.decision_trace.v1"
+
+    assert envelope["artifact"]["algorithm"] == "sha256"
+    assert envelope["artifact"]["digest"] =~ ~r/\A[0-9a-f]{64}\z/
+    assert is_map(envelope["artifact"]["payload"])
+    assert envelope["integrity"]["algorithm"] == "sha256"
+    assert envelope["integrity"]["digest"] == envelope["artifact"]["digest"]
+    assert envelope["canonicalization"] == "pythia.canonical_export.v1"
+    assert envelope["signature"]["status"] == "unsigned"
+  end
+
+  test "top-level integrity mismatch is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["integrity", "digest"], String.duplicate("0", 64))
+
+    assert {:error, %{status: :rejected, reason: :integrity_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  test "tampered artifact payload is rejected", %{envelope: envelope} do
+    tampered = put_in(envelope, ["artifact", "payload", "stop_reason"], "tampered_stop_reason")
+
+    assert {:error, %{status: :rejected, reason: :digest_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
   test "unsigned envelope with non-nil signature algorithm is rejected", %{envelope: envelope} do
     tampered = put_in(envelope, ["signature", "algorithm"], "ed25519")
 
