@@ -154,3 +154,8 @@ The demo shows how a proposed treasury transfer can be accepted or rejected base
 This demonstrates the Web3 Consensus Reason Layer roadmap without requiring smart contracts, wallets, RPC nodes, or chain adapters.
 
 The result includes a structured chronological trace explaining which governance check passed or failed.
+The structured trace can also be exported as a deterministic JSON-ready audit artifact.
+
+```bash
+mix run examples/web3_treasury_trace_export.exs
+```
