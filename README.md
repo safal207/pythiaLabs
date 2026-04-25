@@ -65,17 +65,17 @@ PythiaLabs is currently an MVP focused on:
 - Rust NIF / Rust Port worker integration
 - deterministic Agent Safety Showcase
 
-The Datomic + Neo4j layer is not implemented yet.
+The Datomic/Neo4j-style persistent memory layer is not implemented yet.
 It is part of the architectural roadmap.
 
 ## Roadmap: persistent reasoning memory
 
 Future versions may add persistent reasoning memory with two complementary layers:
 
-1. Append-only step log
-   Stores every reasoning step as an immutable event.
+1. **Datomic-style append-only step log**
+   Stores every reasoning step as an immutable event for replay, audit, debugging, and version comparison.
 
-2. Hypothesis graph
+2. **Neo4j-style hypothesis graph**
    Connects actions, constraints, proposals, failures, stop reasons, and successful paths.
 
 This would allow PythiaLabs to support replay, audit, recurring failure analysis, and cross-run reasoning patterns.
@@ -84,8 +84,7 @@ This layer is not implemented in the current MVP.
 
 For details, see `docs/persistent_reasoning_memory.md`.
 
-- Datomic-style append-only step log for immutable reasoning history
-- Neo4j-style hypothesis graph for relationships between actions, constraints, failures, and decisions
+Additional roadmap items:
 - critic triggers based on confidence, repeated failure classes, and trace patterns
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 

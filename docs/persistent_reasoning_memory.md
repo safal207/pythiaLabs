@@ -4,6 +4,7 @@
 
 PythiaLabs currently returns traces directly from each run.
 The current MVP does not persist traces into Datomic, Neo4j, or any external database.
+The current MVP does not require persistent storage to run demos, tests, or the Agent Safety Showcase.
 
 ## Why persistence matters
 
