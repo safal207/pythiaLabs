@@ -41,6 +41,8 @@ A Web3 agent action should proceed only when it is:
 
 ## Use case 1: DAO treasury transfer
 
+For a deterministic in-memory demo of this use case, see: `docs/web3_treasury_action_showcase.md`.
+
 Scenario:
 An AI agent proposes a treasury transfer.
 

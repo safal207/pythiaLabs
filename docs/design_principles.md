@@ -24,6 +24,8 @@ High-stakes agentic systems also need to explain why an action was allowed, reje
 
 This is a future application direction, not part of the current MVP.
 
+The Web3 Treasury Action Showcase demonstrates this idea with deterministic in-memory DAO treasury transfer checks.
+
 ## Why this matters
 
 For high-stakes domains (finance, public sector, regulated operations, critical infrastructure),
