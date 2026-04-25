@@ -169,6 +169,20 @@ defmodule Pythia.Web3TreasuryEvidenceEnvelopeTest do
     assert verification.reason == :unsupported_signature_status
   end
 
+  test "unsigned signature placeholder requires nil signature fields", ctx do
+    envelope =
+      ctx.action
+      |> Web3TreasuryAction.evaluate(ctx.governance_record)
+      |> Web3TreasuryAction.export_evidence_envelope()
+      |> put_in(["signature", "algorithm"], "ed25519")
+      |> put_in(["signature", "public_key"], "fake_public_key")
+      |> put_in(["signature", "signature"], "fake_signature")
+
+    assert {:error, verification} = Web3TreasuryAction.verify_evidence_envelope(envelope)
+    assert verification.status == :rejected
+    assert verification.reason == :unsupported_signature_status
+  end
+
   test "boolean false is preserved inside rejected quorum envelope payload", ctx do
     envelope =
       ctx.action

@@ -229,7 +229,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       integrity["algorithm"] != "sha256" ->
         rejected(:unsupported_algorithm)
 
-      signature["status"] != "unsigned" ->
+      not unsigned_signature_placeholder?(signature) ->
         rejected(:unsupported_signature_status)
 
       true ->
@@ -295,6 +295,11 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       is_map(integrity) and is_binary(integrity["algorithm"]) and
       valid_digest?(integrity["digest"]) and
       is_map(signature) and is_binary(signature["status"])
+  end
+
+  defp unsigned_signature_placeholder?(signature) do
+    signature["status"] == "unsigned" and is_nil(signature["algorithm"]) and
+      is_nil(signature["public_key"]) and is_nil(signature["signature"])
   end
 
   defp valid_digest?(digest),

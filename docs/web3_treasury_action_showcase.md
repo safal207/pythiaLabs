@@ -138,7 +138,7 @@ It shows how PythiaLabs could reason about DAO treasury safety before any on-cha
 
 ## Non-goals in this stage
 
-This PR does not add:
+This stage does not add:
 
 - digital signatures
 - key management
