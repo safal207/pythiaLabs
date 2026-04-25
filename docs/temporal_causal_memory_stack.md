@@ -25,72 +25,72 @@ Together, these questions help explain not only one agent decision, but patterns
 
 ## Layer 1: Fact memory — Datomic-style fact log
 
-Purpose:
+**Purpose:**
 Stores immutable facts and assertions.
 
-Main question:
+**Main question:**
 What did the system assert or record?
 
-Examples:
+**Examples:**
 - agent_alpha proposed delete_user_data
 - required_permission was user_data.delete
 - stop_reason was missing_authorization
 - confidence was 1.0
 - trace entry was recorded
 
-Useful for:
+**Useful for:**
 - audit
 - immutable reasoning history
 - replay
 - comparing behavior across versions
 - preserving decision records
 
-Status:
+**Status:**
 Roadmap only. Not implemented in the current MVP.
 
 ## Layer 2: Graph memory — Neo4j-style relationship graph
 
-Purpose:
+**Purpose:**
 Stores relationships between entities.
 
-Main question:
+**Main question:**
 How are actions, agents, constraints, failures, and decisions connected?
 
-Examples:
+**Examples:**
 - agent_alpha -> proposed -> delete_user_data
 - delete_user_data -> requires -> user_data.delete
 - missing_authorization -> caused -> reject
 - action_type -> associated_with -> failure_class
 
-Useful for:
+**Useful for:**
 - causal topology
 - relationship analysis
 - recurring failure discovery
 - critic support
 - explainability across related runs
 
-Status:
+**Status:**
 Roadmap only. Not implemented in the current MVP.
 
 ## Layer 3: Temporal memory — XTDB-style bitemporal timeline
 
-Purpose:
+**Purpose:**
 Stores when facts are valid and when the system learned them.
 
-Main question:
+**Main question:**
 When was a fact true, and when did the system know it?
 
-Use two time axes:
+**Use two time axes:**
 - valid_time: when a fact is true in the domain
 - transaction_time: when the system recorded or learned the fact
 
-Examples:
+**Examples:**
 - permission user_data.delete was valid from 10:00 to 10:30
 - the system learned about that permission at 11:00
 - a future grant becomes valid tomorrow at 09:00
 - an action was rejected because permission was not valid at the action time
 
-Useful for:
+**Useful for:**
 - past / present / future reasoning
 - retroactive correction
 - proactive future validity
@@ -98,18 +98,18 @@ Useful for:
 - authorization windows
 - time-aware safety decisions
 
-Status:
+**Status:**
 Roadmap only. Not implemented in the current MVP.
 
 ## Layer 4: Event memory — EventStoreDB-style event stream
 
-Purpose:
+**Purpose:**
 Stores event sequences in order.
 
-Main question:
+**Main question:**
 What happened, in what order?
 
-Examples:
+**Examples:**
 - run_started
 - proposal_created
 - candidate_executed
@@ -117,25 +117,25 @@ Examples:
 - decision_rejected
 - run_stopped
 
-Useful for:
+**Useful for:**
 - event sourcing
 - replay
 - debugging
 - state reconstruction
 - deterministic sequence analysis
 
-Status:
+**Status:**
 Roadmap only. Not implemented in the current MVP.
 
 ## Layer 5: Metrics memory — TimescaleDB-style metrics timeline
 
-Purpose:
+**Purpose:**
 Stores time-series operational signals.
 
-Main question:
+**Main question:**
 How did scores, confidence, latency, retries, failures, and drift change over time?
 
-Examples:
+**Examples:**
 - score per step
 - confidence per run
 - latency per executor
@@ -143,7 +143,7 @@ Examples:
 - failure rate per constraint
 - drift across versions
 
-Useful for:
+**Useful for:**
 - observability
 - SLOs
 - regression detection
@@ -151,7 +151,7 @@ Useful for:
 - operational dashboards
 - critic trigger thresholds
 
-Status:
+**Status:**
 Roadmap only. Not implemented in the current MVP.
 
 ## Summary table
@@ -190,7 +190,7 @@ Critic / Pattern Analysis / Replay / Dashboards
 
 ## Relation to existing docs
 
-docs/persistent_reasoning_memory.md describes the first roadmap step: append-only step log + hypothesis graph.
+`docs/persistent_reasoning_memory.md` describes the first roadmap step: append-only step log + hypothesis graph.
 
 This document expands that roadmap into a broader five-layer memory architecture.
 
@@ -209,4 +209,4 @@ The current MVP does not include:
 - docker-compose storage services
 - production storage layer
 
-Do not imply otherwise.
+This document should not be read as a claim that these storage layers are implemented.

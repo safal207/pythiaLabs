@@ -54,19 +54,31 @@ repeat up to max_steps:
 return best
 ```
 
-## Next steps (beyond MVP)
-- Datomic (step log) + Neo4j (hypothesis graph)
-- Critic triggers (confidence‑based, rate‑limited) + cache
-- Multi‑domain executors (QA, graphs, puzzles)
+## Current MVP status
+
+PythiaLabs is currently an MVP focused on:
+
+- deterministic refinement loops
+- observable traces
+- stable stop reasons
+- Elixir/BEAM orchestration
+- Rust NIF / Rust Port worker integration
+- deterministic Agent Safety Showcase
+
+The Datomic/Neo4j/XTDB/EventStoreDB/TimescaleDB-style memory layers are not implemented yet.
+They are part of the architectural roadmap.
 
 ## Roadmap: persistent reasoning memory
 
-See docs/persistent_reasoning_memory.md.
-For the broader five-layer roadmap, see docs/temporal_causal_memory_stack.md.
+See `docs/persistent_reasoning_memory.md`.
 
-## Additional roadmap items
+For the broader five-layer roadmap, see `docs/temporal_causal_memory_stack.md`.
+
+Additional roadmap items:
 
 - temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
+- critic triggers based on confidence, repeated failure classes, and trace patterns
+- multi-domain executors for QA, graph problems, puzzles, and agent actions
 
 ## Agent Safety Showcase
 

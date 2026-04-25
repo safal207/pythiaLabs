@@ -35,4 +35,4 @@ No storage adapter, schema, or runtime persistence behavior is implemented here.
 
 For a broader future architecture that includes fact memory, graph memory, bitemporal temporal memory, event streams, and metrics timelines, see:
 
-docs/temporal_causal_memory_stack.md
+`docs/temporal_causal_memory_stack.md`
