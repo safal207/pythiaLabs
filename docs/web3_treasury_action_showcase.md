@@ -151,6 +151,20 @@ Signature status is currently unsigned-only.
 This prepares the artifact for future signed evidence without adding keys or signatures yet.
 This stage verifies integrity, not authorship.
 
+## Demo signed evidence envelope
+
+PythiaLabs includes a deterministic demo signer for local showcase purposes.
+
+This demonstrates the transition from:
+
+- unsigned integrity envelope
+- to signed demo envelope
+
+The demo signature is deterministic and based on SHA-256 over canonical envelope fields plus signer_id.
+
+This is not production cryptography.
+It does not include private keys, public keys, wallet signatures, identity verification, or blockchain anchoring.
+
 ## How to run
 
 ```bash
