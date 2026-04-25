@@ -105,6 +105,23 @@ Verification can detect:
 This is still not a digital signature.
 It verifies artifact integrity, not authorship.
 
+## Signature-ready evidence envelope
+
+Evidence can also be wrapped into a deterministic envelope with:
+
+- `schema`
+- `artifact_type`
+- `canonicalization` method
+- integrity digest metadata
+- `payload`
+- unsigned signature placeholder
+
+This prepares the artifact for future signed evidence without adding keys or signatures yet.
+
+The current signature status is always `unsigned`.
+
+This stage verifies integrity, not authorship.
+
 ## How to run
 
 ```bash
@@ -125,6 +142,7 @@ This PR does not add:
 
 - digital signatures
 - key management
+- public/private keys
 - identity verification
 - blockchain anchoring
 - IPFS/Arweave upload

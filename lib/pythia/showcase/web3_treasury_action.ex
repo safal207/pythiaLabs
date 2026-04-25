@@ -174,6 +174,92 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   def verify_evidence(_evidence), do: invalid_evidence_shape()
 
+  @spec export_evidence_envelope({:ok, map()} | {:error, map()}) :: map()
+  def export_evidence_envelope(result) do
+    payload = export_result(result)
+    digest = digest_export_payload(payload)
+
+    %{
+      "schema" => "pythia.evidence.envelope.v1",
+      "artifact_type" => "pythia.web3_treasury_action.decision_trace.v1",
+      "canonicalization" => "pythia.canonical_export.v1",
+      "integrity" => %{
+        "algorithm" => digest["algorithm"],
+        "digest" => digest["digest"]
+      },
+      "payload" => payload,
+      "signature" => %{
+        "status" => "unsigned",
+        "algorithm" => nil,
+        "public_key" => nil,
+        "signature" => nil
+      }
+    }
+  end
+
+  @spec verify_evidence_envelope(map()) :: {:ok, map()} | {:error, map()}
+  def verify_evidence_envelope(envelope) when is_map(envelope) do
+    schema = Map.get(envelope, "schema")
+    artifact_type = Map.get(envelope, "artifact_type")
+    canonicalization = Map.get(envelope, "canonicalization")
+    integrity = Map.get(envelope, "integrity")
+    payload = Map.get(envelope, "payload")
+    signature = Map.get(envelope, "signature")
+
+    cond do
+      not valid_envelope_shape?(
+        schema,
+        artifact_type,
+        canonicalization,
+        integrity,
+        payload,
+        signature
+      ) ->
+        rejected(:invalid_envelope_shape)
+
+      schema != "pythia.evidence.envelope.v1" ->
+        rejected(:unsupported_schema)
+
+      artifact_type != "pythia.web3_treasury_action.decision_trace.v1" ->
+        rejected(:unsupported_artifact_type)
+
+      canonicalization != "pythia.canonical_export.v1" ->
+        rejected(:unsupported_canonicalization)
+
+      integrity["algorithm"] != "sha256" ->
+        rejected(:unsupported_algorithm)
+
+      signature["status"] != "unsigned" ->
+        rejected(:unsupported_signature_status)
+
+      true ->
+        expected_digest = integrity["digest"]
+        actual_digest = digest_export_payload(payload)["digest"]
+
+        if expected_digest == actual_digest do
+          {:ok,
+           %{
+             status: :verified,
+             schema: schema,
+             artifact_type: artifact_type,
+             integrity: :verified,
+             signature: :unsigned,
+             digest: expected_digest
+           }}
+        else
+          {:error,
+           %{
+             status: :rejected,
+             reason: :digest_mismatch,
+             expected_digest: expected_digest,
+             actual_digest: actual_digest
+           }}
+        end
+    end
+  end
+
+  def verify_evidence_envelope(_envelope), do: rejected(:invalid_envelope_shape)
+
   defp ensure_export_status(export) do
     status =
       case Map.get(export, "status") do
@@ -194,6 +280,21 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   defp valid_evidence_shape?(artifact_type, algorithm, digest, payload) do
     is_binary(artifact_type) and is_binary(algorithm) and is_map(payload) and
       valid_digest?(digest)
+  end
+
+  defp valid_envelope_shape?(
+         schema,
+         artifact_type,
+         canonicalization,
+         integrity,
+         payload,
+         signature
+       ) do
+    is_binary(schema) and is_binary(artifact_type) and is_binary(canonicalization) and
+      is_map(payload) and
+      is_map(integrity) and is_binary(integrity["algorithm"]) and
+      valid_digest?(integrity["digest"]) and
+      is_map(signature) and is_binary(signature["status"])
   end
 
   defp valid_digest?(digest),
