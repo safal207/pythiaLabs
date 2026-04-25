@@ -149,9 +149,16 @@ defmodule Pythia.Web3TreasuryActionShowcaseTest do
 
   test "action_time == voting_closed_at is accepted for voting window", ctx do
     action = %{ctx.action | action_time: ctx.governance_record.voting_closed_at}
+    voting_closed_at = ctx.governance_record.voting_closed_at
+
+    record = %{
+      ctx.governance_record
+      | timelock_until: voting_closed_at,
+        authorization_valid_from: voting_closed_at
+    }
 
     assert {:ok, %{status: :accepted}} =
-             Web3TreasuryAction.evaluate(action, ctx.governance_record)
+             Web3TreasuryAction.evaluate(action, record)
   end
 
   test "action_time == timelock_until is accepted for timelock", ctx do
@@ -190,5 +197,45 @@ defmodule Pythia.Web3TreasuryActionShowcaseTest do
     }
 
     assert {:ok, %{status: :accepted}} = Web3TreasuryAction.evaluate(action, record)
+  end
+
+  test "string-key action and governance input works" do
+    action = %{
+      "action_id" => "dao_act_001",
+      "action_type" => "treasury_transfer",
+      "actor" => "agent_alpha",
+      "dao_id" => "dao_pythia",
+      "proposal_id" => "prop_001",
+      "amount" => 10_000,
+      "asset" => "USDC",
+      "recipient" => "0xRecipient",
+      "required_permission" => "treasury.transfer",
+      "action_time" => ~U[2026-04-25 12:00:00Z],
+      "decision_time" => ~U[2026-04-25 12:01:00Z]
+    }
+
+    governance_record = %{
+      "proposal_id" => "prop_001",
+      "permission" => "treasury.transfer",
+      "quorum_met" => true,
+      "voting_closed_at" => ~U[2026-04-25 11:00:00Z],
+      "timelock_until" => ~U[2026-04-25 11:30:00Z],
+      "authorization_valid_from" => ~U[2026-04-25 11:30:00Z],
+      "authorization_valid_to" => ~U[2026-04-25 13:00:00Z],
+      "authorization_recorded_at" => ~U[2026-04-25 11:45:00Z],
+      "transfer_expires_at" => ~U[2026-04-25 13:00:00Z]
+    }
+
+    assert {:ok, %{status: :accepted, stop_reason: :treasury_transfer_accepted}} =
+             Web3TreasuryAction.evaluate(action, governance_record)
+  end
+
+  test "string-key quorum false preserves false value and rejects with quorum_not_met", ctx do
+    action = Map.new(ctx.action, fn {k, v} -> {Atom.to_string(k), v} end)
+    governance_record = Map.new(ctx.governance_record, fn {k, v} -> {Atom.to_string(k), v} end)
+    governance_record = Map.put(governance_record, "quorum_met", false)
+
+    assert {:error, %{status: :rejected, stop_reason: :quorum_not_met}} =
+             Web3TreasuryAction.evaluate(action, governance_record)
   end
 end

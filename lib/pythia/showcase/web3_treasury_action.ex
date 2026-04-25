@@ -63,7 +63,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   end
 
   defp validate_governance_record(governance_record) do
-    with true <- Enum.all?(@required_governance_fields, &Map.has_key?(governance_record, &1)),
+    with true <- Enum.all?(@required_governance_fields, &has_field?(governance_record, &1)),
          true <- is_binary(fetch(governance_record, :proposal_id)),
          true <- is_binary(fetch(governance_record, :permission)),
          true <- is_boolean(fetch(governance_record, :quorum_met)),
@@ -191,5 +191,17 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
      }}
   end
 
-  defp fetch(map, key), do: Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  defp has_field?(map, key) do
+    Map.has_key?(map, key) or Map.has_key?(map, Atom.to_string(key))
+  end
+
+  defp fetch(map, key) do
+    string_key = Atom.to_string(key)
+
+    cond do
+      Map.has_key?(map, key) -> Map.get(map, key)
+      Map.has_key?(map, string_key) -> Map.get(map, string_key)
+      true -> nil
+    end
+  end
 end
