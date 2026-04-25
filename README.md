@@ -72,10 +72,10 @@ It is part of the architectural roadmap.
 
 Future versions may add persistent reasoning memory with two complementary layers:
 
-1. **Datomic-style append-only step log**
+1. **Datomic-style append-only step log**  
    Stores every reasoning step as an immutable event for replay, audit, debugging, and version comparison.
 
-2. **Neo4j-style hypothesis graph**
+2. **Neo4j-style hypothesis graph**  
    Connects actions, constraints, proposals, failures, stop reasons, and successful paths.
 
 This would allow PythiaLabs to support replay, audit, recurring failure analysis, and cross-run reasoning patterns.
