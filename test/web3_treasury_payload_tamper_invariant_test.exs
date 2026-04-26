@@ -3,21 +3,31 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
 
   alias Pythia.Showcase.Web3TreasuryAction
 
+  @payload_field_paths [
+    ["status"],
+    ["stop_reason"],
+    ["trace"],
+    ["trace", Access.at(0), "event"],
+    ["trace", Access.at(-1), "stop_reason"]
+  ]
+
+  @evidence_field_paths Enum.map(@payload_field_paths, &["payload" | &1])
+  @envelope_field_paths Enum.map(@payload_field_paths, &["artifact", "payload" | &1])
+
+  test "valid fixtures include non-empty trace" do
+    evidence_trace = get_in(valid_evidence(), ["payload", "trace"])
+    envelope_trace = get_in(valid_envelope(), ["artifact", "payload", "trace"])
+
+    assert is_list(evidence_trace)
+    assert evidence_trace != []
+    assert is_list(envelope_trace)
+    assert envelope_trace != []
+  end
+
   test "evidence payload field tampering is rejected with digest_mismatch" do
     evidence = valid_evidence()
-    assert is_map(evidence["payload"])
-    assert is_list(evidence["payload"]["trace"])
-    assert evidence["payload"]["trace"] != []
 
-    fields = [
-      ["payload", "status"],
-      ["payload", "stop_reason"],
-      ["payload", "trace"],
-      ["payload", "trace", Access.at(0), "event"],
-      ["payload", "trace", Access.at(-1), "stop_reason"]
-    ]
-
-    Enum.each(fields, fn field_path ->
+    Enum.each(@evidence_field_paths, fn field_path ->
       tampered = put_in(evidence, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
@@ -27,19 +37,8 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
 
   test "envelope artifact payload field tampering is rejected with digest_mismatch" do
     envelope = valid_envelope()
-    assert is_map(envelope["artifact"]["payload"])
-    assert is_list(envelope["artifact"]["payload"]["trace"])
-    assert envelope["artifact"]["payload"]["trace"] != []
 
-    fields = [
-      ["artifact", "payload", "status"],
-      ["artifact", "payload", "stop_reason"],
-      ["artifact", "payload", "trace"],
-      ["artifact", "payload", "trace", Access.at(0), "event"],
-      ["artifact", "payload", "trace", Access.at(-1), "stop_reason"]
-    ]
-
-    Enum.each(fields, fn field_path ->
+    Enum.each(@envelope_field_paths, fn field_path ->
       tampered = put_in(envelope, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
@@ -63,10 +62,8 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     tampered_artifact =
       put_in(valid_envelope(), ["artifact", "digest"], String.duplicate("0", 64))
 
-    assert {:error, %{reason: reason}} =
+    assert {:error, %{reason: :integrity_mismatch}} =
              Web3TreasuryAction.verify_evidence_envelope(tampered_artifact)
-
-    assert reason in [:integrity_mismatch, :digest_mismatch]
   end
 
   defp base_action do
@@ -100,7 +97,7 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   defp valid_result do
-    assert {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
     {:ok, payload}
   end
 
