@@ -269,9 +269,11 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     end
   end
 
-  def sign_evidence_envelope_demo(envelope, signer_id) do
-    sign_evidence_envelope_demo(normalize_value(envelope), to_string(signer_id))
-  end
+  def sign_evidence_envelope_demo(_envelope, signer_id) when not is_binary(signer_id),
+    do: rejected(:invalid_signer_id)
+
+  def sign_evidence_envelope_demo(_envelope, _signer_id),
+    do: rejected(:invalid_envelope_shape)
 
   @spec verify_signed_evidence_envelope_demo(map()) :: {:ok, map()} | {:error, map()}
   def verify_signed_evidence_envelope_demo(envelope) when is_map(envelope) do

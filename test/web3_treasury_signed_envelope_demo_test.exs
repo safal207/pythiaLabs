@@ -179,4 +179,14 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     assert {:error, %{status: :rejected, reason: :invalid_signer_id}} =
              Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "")
   end
+
+  test "signing non-map envelope is rejected" do
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo("bad-envelope", "demo_dao_reviewer")
+  end
+
+  test "signing with non-binary signer_id is rejected", %{unsigned_envelope: envelope} do
+    assert {:error, %{status: :rejected, reason: :invalid_signer_id}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo(envelope, :demo_dao_reviewer)
+  end
 end
