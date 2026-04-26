@@ -150,6 +150,18 @@ Additional roadmap items:
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 - Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
+## Project trust and governance
+
+Project governance and trust materials:
+
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- `CHANGELOG.md`
+- `docs/license_strategy.md`
+
+These documents describe contribution expectations, security reporting, project maturity, release notes, and licensing strategy.
+
 ## Agent Safety Showcase
 
 PythiaLabs includes a deterministic showcase for controlled agent actions.
