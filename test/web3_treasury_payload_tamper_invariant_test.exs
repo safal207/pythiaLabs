@@ -9,6 +9,7 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     ["trace"],
     ["trace", Access.at(0), "event"],
     ["trace", Access.at(-1), "stop_reason"]
+    # Requires non-empty trace; guarded by "valid fixtures include non-empty trace"
   ]
 
   @evidence_field_paths Enum.map(@payload_field_paths, &["payload" | &1])
@@ -27,23 +28,25 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   test "evidence payload field tampering is rejected with digest_mismatch" do
     evidence = valid_evidence()
 
-    Enum.each(@evidence_field_paths, fn field_path ->
+    for field_path <- @evidence_field_paths do
       tampered = put_in(evidence, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
-               Web3TreasuryAction.verify_evidence(tampered)
-    end)
+               Web3TreasuryAction.verify_evidence(tampered),
+             "Failed for path: #{inspect(field_path)}"
+    end
   end
 
   test "envelope artifact payload field tampering is rejected with digest_mismatch" do
     envelope = valid_envelope()
 
-    Enum.each(@envelope_field_paths, fn field_path ->
+    for field_path <- @envelope_field_paths do
       tampered = put_in(envelope, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
-               Web3TreasuryAction.verify_evidence_envelope(tampered)
-    end)
+               Web3TreasuryAction.verify_evidence_envelope(tampered),
+             "Failed for path: #{inspect(field_path)}"
+    end
   end
 
   test "direct digest tampering is rejected for evidence and envelope" do
