@@ -74,9 +74,24 @@ mix format
 mix test
 ```
 
+
+## CI security automation
+
+PythiaLabs includes a GitHub Actions security workflow for secret scanning.
+
+See:
+
+- `.github/workflows/security.yml`
+- `docs/security_automation.md`
+
+This is an initial security hygiene layer.
+
+It does not replace production security review, cryptographic review, smart contract auditing, wallet security, or key management.
+
 For future security hardening, the project may add:
 
-- secret scanning
+- expanded secret scanning configuration
+- custom allowlist policy for false positives
 - dependency vulnerability scanning
 - static analysis
 - property-based testing
