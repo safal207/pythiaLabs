@@ -165,6 +165,19 @@ The demo signature is deterministic and based on SHA-256 over canonical envelope
 This is not production cryptography.
 It does not include private keys, public keys, wallet signatures, identity verification, or blockchain anchoring.
 
+
+## Full showcase
+
+For reviewer-friendly demos, PythiaLabs also includes a single deterministic command that combines the treasury action, evidence, envelope, and `signed_demo` flows end-to-end.
+
+```bash
+mix run examples/web3_treasury_full_showcase.exs
+```
+
+This is useful when you want to show the complete chain in one run:
+
+`decision → trace → evidence → digest → verify → tamper reject → envelope → signed_demo → signed verify`
+
 ## How to run
 
 ```bash
