@@ -142,6 +142,13 @@ For grant preparation materials, see:
 - `docs/threat_model_web3_treasury_reason_layer.md`
 - `docs/grant_one_pager_web3_treasury_reason_layer.md`
 
+Additional roadmap items:
+
+- temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
+- critic triggers based on confidence, repeated failure classes, and trace patterns
+- multi-domain executors for QA, graph problems, puzzles, and agent actions
+- Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
+
 ## Project trust and governance
 
 Project governance and trust materials:
@@ -153,13 +160,6 @@ Project governance and trust materials:
 - `docs/license_strategy.md`
 
 These documents describe contribution expectations, security reporting, project maturity, release notes, and licensing strategy.
-
-Additional roadmap items:
-
-- temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
-- critic triggers based on confidence, repeated failure classes, and trace patterns
-- multi-domain executors for QA, graph problems, puzzles, and agent actions
-- Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
 ## Agent Safety Showcase
 
