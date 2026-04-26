@@ -4,6 +4,11 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   alias Pythia.Showcase.Web3TreasuryAction
 
   test "evidence payload field tampering is rejected with digest_mismatch" do
+    evidence = valid_evidence()
+    assert is_map(evidence["payload"])
+    assert is_list(evidence["payload"]["trace"])
+    assert evidence["payload"]["trace"] != []
+
     fields = [
       ["payload", "status"],
       ["payload", "stop_reason"],
@@ -13,7 +18,7 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     ]
 
     Enum.each(fields, fn field_path ->
-      tampered = put_in(valid_evidence(), field_path, "tampered_value")
+      tampered = put_in(evidence, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
                Web3TreasuryAction.verify_evidence(tampered)
@@ -21,6 +26,11 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   test "envelope artifact payload field tampering is rejected with digest_mismatch" do
+    envelope = valid_envelope()
+    assert is_map(envelope["artifact"]["payload"])
+    assert is_list(envelope["artifact"]["payload"]["trace"])
+    assert envelope["artifact"]["payload"]["trace"] != []
+
     fields = [
       ["artifact", "payload", "status"],
       ["artifact", "payload", "stop_reason"],
@@ -30,7 +40,7 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     ]
 
     Enum.each(fields, fn field_path ->
-      tampered = put_in(valid_envelope(), field_path, "tampered_value")
+      tampered = put_in(envelope, field_path, "tampered_value")
 
       assert {:error, %{reason: :digest_mismatch}} =
                Web3TreasuryAction.verify_evidence_envelope(tampered)
@@ -90,9 +100,8 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   defp valid_result do
-    result = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
-    {:ok, _payload} = result
-    result
+    assert {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    {:ok, payload}
   end
 
   defp valid_evidence do
