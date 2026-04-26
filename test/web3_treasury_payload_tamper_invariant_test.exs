@@ -90,19 +90,18 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   defp valid_result do
-    {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
-    payload
+    result = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    {:ok, _payload} = result
+    result
   end
 
   defp valid_evidence do
     valid_result()
-    |> then(&{:ok, &1})
     |> Web3TreasuryAction.export_evidence()
   end
 
   defp valid_envelope do
     valid_result()
-    |> then(&{:ok, &1})
     |> Web3TreasuryAction.export_evidence_envelope()
   end
 end
