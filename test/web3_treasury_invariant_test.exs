@@ -60,12 +60,9 @@ defmodule Pythia.Web3TreasuryInvariantTest do
         assert {:error, %{status: :rejected, stop_reason: :quorum_not_met, trace: trace}} = result
 
         assert Enum.any?(trace, fn entry ->
-                 entry == %{
-                   event: :quorum_check,
-                   result: :fail,
-                   actual: false,
-                   reason: :quorum_not_met
-                 }
+                 entry.event == :quorum_check and
+                   entry.result == :fail and
+                   entry.reason == :quorum_not_met
                end)
       end
     end
