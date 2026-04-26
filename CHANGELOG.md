@@ -22,8 +22,6 @@ This project is currently pre-release.
 - Grant readiness materials
 - Web3 treasury reason layer threat model
 - Grant one-pager
-- GitHub Actions security workflow for repository secret scanning
-- Security automation documentation
 - Property-based invariant tests for Web3 treasury reasoning and evidence verification
 
 ### Notes

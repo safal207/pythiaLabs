@@ -48,60 +48,63 @@ defmodule Pythia.Web3TreasuryInvariantTest do
     assert payload.stop_reason == :treasury_transfer_accepted
   end
 
-  @tag :property
-  property "quorum false always rejects with quorum invariant" do
-    check all(quorum_met <- boolean(), max_runs: 50) do
-      record = %{base_governance_record() | quorum_met: quorum_met}
-      result = Web3TreasuryAction.evaluate(base_action(), record)
+  test "quorum invariant: true accepts" do
+    record = %{base_governance_record() | quorum_met: true}
 
-      if quorum_met do
-        assert {:ok, %{status: :accepted}} = result
-      else
-        assert {:error, %{status: :rejected, stop_reason: :quorum_not_met, trace: trace}} = result
+    assert {:ok, %{status: :accepted}} = Web3TreasuryAction.evaluate(base_action(), record)
+  end
 
-        assert Enum.any?(trace, fn entry ->
-                 entry.event == :quorum_check and
-                   entry.result == :fail and
-                   entry.reason == :quorum_not_met
-               end)
-      end
-    end
+  test "quorum invariant: false rejects with quorum_check fail" do
+    record = %{base_governance_record() | quorum_met: false}
+
+    assert {:error, %{status: :rejected, stop_reason: :quorum_not_met, trace: trace}} =
+             Web3TreasuryAction.evaluate(base_action(), record)
+
+    assert Enum.any?(trace, fn entry ->
+             entry.event == :quorum_check and
+               entry.result == :fail and
+               entry.reason == :quorum_not_met
+           end)
   end
 
   @tag :property
   property "tampered evidence payload always triggers digest mismatch" do
+    result = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    evidence = Web3TreasuryAction.export_evidence(result)
+    original_reason = get_in(evidence, ["payload", "stop_reason"])
+
+    tampered_reason_gen =
+      string(:alphanumeric, min_length: 1, max_length: 30)
+      |> filter(&(&1 != original_reason))
+
     check all(
-            tampered_reason <- string(:alphanumeric, min_length: 1, max_length: 30),
+            tampered_reason <- tampered_reason_gen,
             max_runs: 50
           ) do
-      result = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
-      evidence = Web3TreasuryAction.export_evidence(result)
-      original_reason = get_in(evidence, ["payload", "stop_reason"])
+      tampered = put_in(evidence, ["payload", "stop_reason"], tampered_reason)
 
-      if tampered_reason != original_reason do
-        tampered = put_in(evidence, ["payload", "stop_reason"], tampered_reason)
-
-        assert {:error, %{reason: :digest_mismatch}} =
-                 Web3TreasuryAction.verify_evidence(tampered)
-      end
+      assert {:error, %{reason: :digest_mismatch}} =
+               Web3TreasuryAction.verify_evidence(tampered)
     end
   end
 
   @tag :property
   property "tampered envelope artifact payload always triggers digest mismatch" do
+    envelope = unsigned_envelope()
+    original_reason = get_in(envelope, ["artifact", "payload", "stop_reason"])
+
+    tampered_reason_gen =
+      string(:alphanumeric, min_length: 1, max_length: 30)
+      |> filter(&(&1 != original_reason))
+
     check all(
-            tampered_reason <- string(:alphanumeric, min_length: 1, max_length: 30),
+            tampered_reason <- tampered_reason_gen,
             max_runs: 50
           ) do
-      envelope = unsigned_envelope()
-      original_reason = get_in(envelope, ["artifact", "payload", "stop_reason"])
+      tampered = put_in(envelope, ["artifact", "payload", "stop_reason"], tampered_reason)
 
-      if tampered_reason != original_reason do
-        tampered = put_in(envelope, ["artifact", "payload", "stop_reason"], tampered_reason)
-
-        assert {:error, %{reason: :digest_mismatch}} =
-                 Web3TreasuryAction.verify_evidence_envelope(tampered)
-      end
+      assert {:error, %{reason: :digest_mismatch}} =
+               Web3TreasuryAction.verify_evidence_envelope(tampered)
     end
   end
 
@@ -109,6 +112,8 @@ defmodule Pythia.Web3TreasuryInvariantTest do
 
   @tag :property
   property "unknown top-level envelope fields are rejected" do
+    envelope = unsigned_envelope()
+
     key_gen =
       string(:alphanumeric, min_length: 1, max_length: 20)
       |> filter(fn key -> key not in @reserved_top_level_keys end)
@@ -118,7 +123,6 @@ defmodule Pythia.Web3TreasuryInvariantTest do
             value <- one_of([string(:printable, min_length: 0, max_length: 20), integer()]),
             max_runs: 50
           ) do
-      envelope = unsigned_envelope()
       tampered = Map.put(envelope, key, value)
 
       assert {:error, %{reason: :invalid_envelope_shape}} =
@@ -128,13 +132,13 @@ defmodule Pythia.Web3TreasuryInvariantTest do
 
   @tag :property
   property "signed demo verification succeeds and signer_id changes signature" do
+    envelope = unsigned_envelope()
+
     check all(
             signer_id <- string(:alphanumeric, min_length: 1, max_length: 24),
-            alt_signer_id <- string(:alphanumeric, min_length: 1, max_length: 24),
-            signer_id != alt_signer_id,
             max_runs: 50
           ) do
-      envelope = unsigned_envelope()
+      alt_signer_id = signer_id <> "_alt"
 
       assert {:ok, signed_envelope} =
                Web3TreasuryAction.sign_evidence_envelope_demo(envelope, signer_id)
@@ -150,27 +154,12 @@ defmodule Pythia.Web3TreasuryInvariantTest do
     end
   end
 
-  @tag :property
-  property "blank signer_id values are rejected" do
-    blank_gen =
-      member_of([
-        "",
-        " ",
-        "  ",
-        "\t",
-        "\n",
-        "\r\n",
-        " \t "
-      ])
+  test "blank signer_id values are rejected" do
+    envelope = unsigned_envelope()
 
-    check all(
-            blank_signer_id <- blank_gen,
-            max_runs: 50
-          ) do
-      envelope = unsigned_envelope()
-
+    Enum.each(["", " ", "  ", "\t", "\n", "\r\n", " \t "], fn blank_signer_id ->
       assert {:error, %{reason: :invalid_signer_id}} =
                Web3TreasuryAction.sign_evidence_envelope_demo(envelope, blank_signer_id)
-    end
+    end)
   end
 end
