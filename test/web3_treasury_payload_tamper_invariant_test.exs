@@ -10,9 +10,9 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   ]
 
   setup do
-    result = valid_result()
-    evidence = Web3TreasuryAction.export_evidence(result)
-    envelope = Web3TreasuryAction.export_evidence_envelope(result)
+    {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    evidence = Web3TreasuryAction.export_evidence({:ok, payload})
+    envelope = Web3TreasuryAction.export_evidence_envelope({:ok, payload})
 
     evidence_trace = get_in(evidence, ["payload", "trace"])
     envelope_trace = get_in(envelope, ["artifact", "payload", "trace"])
@@ -130,10 +130,5 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
       authorization_recorded_at: ~U[2026-04-25 11:45:00Z],
       transfer_expires_at: ~U[2026-04-25 13:00:00Z]
     }
-  end
-
-  defp valid_result do
-    {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
-    {:ok, payload}
   end
 end
