@@ -3,6 +3,8 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
 
   alias Pythia.Showcase.Web3TreasuryAction
 
+  @replacement_values ["tampered_value", nil, 123, %{"x" => "y"}]
+
   @static_payload_field_paths [
     ["status"],
     ["stop_reason"],
@@ -48,10 +50,31 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   test "evidence payload field tampering is rejected with digest_mismatch", ctx do
-    for path <- ctx.evidence_paths do
+    for path <- ctx.evidence_paths,
+        replacement <- @replacement_values do
       assert_tamper_rejected(ctx.evidence, path, :digest_mismatch,
-        via: &Web3TreasuryAction.verify_evidence/1
+        via: &Web3TreasuryAction.verify_evidence/1,
+        replacement: replacement
       )
+    end
+  end
+
+  test "evidence middle trace tampering is rejected when middle index exists", %{
+    evidence: evidence
+  } do
+    trace = get_in(evidence, ["payload", "trace"])
+
+    if length(trace) >= 3 do
+      field_path = ["payload", "trace", Access.at(1), "event"]
+
+      for replacement <- @replacement_values do
+        assert_tamper_rejected(evidence, field_path, :digest_mismatch,
+          via: &Web3TreasuryAction.verify_evidence/1,
+          replacement: replacement
+        )
+      end
+    else
+      assert true
     end
   end
 
@@ -63,10 +86,31 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   test "envelope artifact payload field tampering is rejected with digest_mismatch", ctx do
-    for path <- ctx.envelope_paths do
+    for path <- ctx.envelope_paths,
+        replacement <- @replacement_values do
       assert_tamper_rejected(ctx.envelope, path, :digest_mismatch,
-        via: &Web3TreasuryAction.verify_evidence_envelope/1
+        via: &Web3TreasuryAction.verify_evidence_envelope/1,
+        replacement: replacement
       )
+    end
+  end
+
+  test "envelope middle trace tampering is rejected when middle index exists", %{
+    envelope: envelope
+  } do
+    trace = get_in(envelope, ["artifact", "payload", "trace"])
+
+    if length(trace) >= 3 do
+      field_path = ["artifact", "payload", "trace", Access.at(1), "event"]
+
+      for replacement <- @replacement_values do
+        assert_tamper_rejected(envelope, field_path, :digest_mismatch,
+          via: &Web3TreasuryAction.verify_evidence_envelope/1,
+          replacement: replacement
+        )
+      end
+    else
+      assert true
     end
   end
 
@@ -88,16 +132,18 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
              Web3TreasuryAction.verify_evidence_envelope(tampered)
   end
 
-  defp assert_tamper_rejected(artifact, field_path, expected_reason, via: verify_fun) do
-    tampered = put_in(artifact, field_path, "tampered_value")
+  defp assert_tamper_rejected(artifact, field_path, expected_reason, opts) do
+    verify_fun = Keyword.fetch!(opts, :via)
+    replacement = Keyword.get(opts, :replacement, "tampered_value")
+    tampered = put_in(artifact, field_path, replacement)
 
-    assert get_in(tampered, field_path) == "tampered_value",
+    assert get_in(tampered, field_path) == replacement,
            "Mutation did not apply — path may be wrong: #{inspect(field_path)}"
 
     verification = verify_fun.(tampered)
 
     assert {:error, %{reason: ^expected_reason}} = verification,
-           "Expected #{inspect(expected_reason)} after tampering #{inspect(field_path)}, got: #{inspect(verification)}"
+           "Expected #{inspect(expected_reason)} after tampering #{inspect(field_path)} with #{inspect(replacement)}, got: #{inspect(verification)}"
   end
 
   defp zeroed_digest, do: String.duplicate("0", 64)
