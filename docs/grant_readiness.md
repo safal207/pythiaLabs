@@ -1,7 +1,7 @@
 # Grant Readiness Pack — PythiaLabs
 
 ## One-sentence pitch
-PythiaLabs is a deterministic reasoning-and-governance safety layer that explains why a Web3 treasury action is allowed or denied before any execution path is taken.
+PythiaLabs is a temporal-causal reason layer for agentic governance actions, producing deterministic pre-execution decisions, audit traces, and verifiable evidence artifacts for Web3 treasury safety.
 
 ## Problem statement
 Grant-funded ecosystems increasingly rely on autonomous tooling and AI-assisted operations, while governance and treasury decisions remain vulnerable to opaque logic, inconsistent policy checks, and weak auditability. Teams often cannot answer basic high-stakes questions with confidence: who authorized an action, whether that authorization was valid at the action time, whether it was known at the decision time, and which exact gate failed when a decision was rejected.
