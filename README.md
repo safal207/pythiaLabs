@@ -1,8 +1,54 @@
 # liminal-pythia — MVP
 
+PythiaLabs is a deterministic temporal-causal reasoning layer for agentic actions. It evaluates whether an action should proceed before execution, produces stable stop reasons, and exports replayable evidence traces for audit and review.
+
+## Current focus
+
+- deterministic reasoning loops
+- agent action safety gates
+- bitemporal authorization reasoning
+- Web3 DAO treasury action review
+- evidence export, verification, and tamper detection
+- local deterministic demos for grant and reviewer evaluation
+
+## Main demo for reviewers
+
+Run:
+
+```bash
+mix run examples/web3_treasury_full_showcase.exs
+```
+
+This demo shows:
+
+- accepted treasury action
+- rejected treasury action when quorum is not met
+- rejected treasury action when authorization was valid but unknown at decision time
+- evidence export
+- SHA-256 digest generation
+- evidence verification
+- tamper rejection
+- unsigned envelope verification
+- signed_demo envelope generation and verification
+
+Expected output guide: `docs/web3_treasury_full_showcase_expected_output.md`
+
+## What PythiaLabs is not yet
+
+PythiaLabs currently does not claim:
+
+- production cryptography
+- wallet integration
+- smart contract execution
+- RPC/indexer integration
+- on-chain enforcement
+- production identity verification
+- persistent external storage
+
 **Mission**: Minimal HRM-style reasoning loop for LIMINAL: `propose → run → measure → refine` with transparent step traces, fast kernels, and safe isolation.
 
 ## Stack
+
 - Elixir/BEAM for orchestration
 - Rust NIF (via rustler) for fast kernels
 - Rust Port worker for sandboxed solvers (BFS maze)
@@ -37,7 +83,7 @@ mix run examples/lev_demo.exs
 cd workers/solver_port && cargo build --release && cd ../../
 mix run examples/port_demo.exs
 
-# benchmark (NIF vs fallback)
+# benchmarks (NIF vs fallback)
 mix run benches/bench.exs
 ```
 
