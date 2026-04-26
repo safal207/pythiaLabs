@@ -44,7 +44,23 @@ find_failed_check = fn trace ->
   end
 end
 
+print_verification = fn verification_result ->
+  case verification_result do
+    {:ok, payload} ->
+      IO.puts("verification_status: #{payload.status}")
+
+      if Map.has_key?(payload, :algorithm), do: IO.puts("algorithm: #{payload.algorithm}")
+      if Map.has_key?(payload, :schema), do: IO.puts("schema: #{payload.schema}")
+      if Map.has_key?(payload, :signer_id), do: IO.puts("signer_id: #{payload.signer_id}")
+
+    {:error, payload} ->
+      IO.puts("verification_status: #{payload.status}")
+      IO.puts("reason: #{payload.reason}")
+  end
+end
+
 IO.puts("Web3 Treasury Full Showcase")
+IO.puts("Note: signed_demo is deterministic local demo logic only, not production cryptography.")
 
 print_step.("A. Accepted treasury action")
 accepted_result = Web3TreasuryAction.evaluate(base_action, base_governance_record)
@@ -91,19 +107,19 @@ IO.puts("digest: #{digest["digest"]}")
 print_step.("F. Evidence verification")
 evidence = Web3TreasuryAction.export_evidence(accepted_result)
 verified_evidence = Web3TreasuryAction.verify_evidence(evidence)
-IO.inspect(verified_evidence, label: "verified_result")
+print_verification.(verified_evidence)
 
 print_step.("G. Tampered evidence rejection")
 tampered_evidence = put_in(evidence, ["payload", "stop_reason"], "tampered_stop_reason")
 rejected_tampered_evidence = Web3TreasuryAction.verify_evidence(tampered_evidence)
-IO.inspect(rejected_tampered_evidence, label: "tamper_rejection")
+print_verification.(rejected_tampered_evidence)
 
 print_step.("H. Unsigned evidence envelope")
 unsigned_envelope = Web3TreasuryAction.export_evidence_envelope(accepted_result)
 verified_envelope = Web3TreasuryAction.verify_evidence_envelope(unsigned_envelope)
 IO.puts("schema: #{unsigned_envelope["schema"]}")
 IO.puts("digest: #{unsigned_envelope["integrity"]["digest"]}")
-IO.inspect(verified_envelope, label: "verification_status")
+print_verification.(verified_envelope)
 
 print_step.("I. Signed demo envelope")
 {:ok, signed_envelope} =
@@ -115,7 +131,7 @@ IO.puts("signer_id: #{signed_envelope["signature"]["signer_id"]}")
 
 print_step.("J. Signed demo verification")
 verified_signed_envelope = Web3TreasuryAction.verify_signed_evidence_envelope_demo(signed_envelope)
-IO.inspect(verified_signed_envelope, label: "signed_verification")
+print_verification.(verified_signed_envelope)
 
 print_step.("K. Tampered signed demo envelope rejection")
 tampered_signed_envelope =
@@ -124,4 +140,6 @@ tampered_signed_envelope =
 rejected_tampered_signed =
   Web3TreasuryAction.verify_signed_evidence_envelope_demo(tampered_signed_envelope)
 
-IO.inspect(rejected_tampered_signed, label: "tampered_signed_rejection")
+print_verification.(rejected_tampered_signed)
+
+IO.puts("\nFull showcase completed.")
