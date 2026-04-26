@@ -25,16 +25,17 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     assert is_list(envelope_trace) and envelope_trace != [],
            "export_evidence_envelope produced empty or missing trace — fixture is invalid"
 
+    trace_fields = extract_trace_fields(evidence_trace)
+
     first = 0
     last = length(evidence_trace) - 1
 
     dynamic_payload_paths =
-      Enum.uniq([
-        ["trace", Access.at(first), "event"],
-        ["trace", Access.at(first), "stop_reason"],
-        ["trace", Access.at(last), "event"],
-        ["trace", Access.at(last), "stop_reason"]
-      ])
+      for pos <- [first, last],
+          field <- trace_fields do
+        ["trace", Access.at(pos), field]
+      end
+      |> Enum.uniq()
 
     all_payload_paths = @static_payload_field_paths ++ dynamic_payload_paths
 
@@ -45,79 +46,102 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
       evidence: evidence,
       envelope: envelope,
       evidence_paths: evidence_paths,
-      envelope_paths: envelope_paths
+      envelope_paths: envelope_paths,
+      trace_fields: trace_fields,
+      trace_len: length(evidence_trace)
     }
   end
 
   test "evidence payload field tampering is rejected with digest_mismatch", ctx do
-    for path <- ctx.evidence_paths,
-        replacement <- @replacement_values do
-      assert_tamper_rejected(ctx.evidence, path, :digest_mismatch,
-        via: &Web3TreasuryAction.verify_evidence/1,
-        replacement: replacement
-      )
-    end
+    test_tampering(
+      ctx.evidence,
+      ctx.evidence_paths,
+      &Web3TreasuryAction.verify_evidence/1,
+      :digest_mismatch
+    )
   end
 
-  test "evidence middle trace tampering is rejected when middle index exists", %{
-    evidence: evidence
-  } do
-    trace = get_in(evidence, ["payload", "trace"])
+  test "evidence middle trace element tampering is rejected", ctx do
+    assert ctx.trace_len >= 3,
+           "expected trace length >= 3 for middle-index tamper coverage, got #{ctx.trace_len}"
 
-    if length(trace) >= 3 do
-      field_path = ["payload", "trace", Access.at(1), "event"]
-
-      for replacement <- @replacement_values do
-        assert_tamper_rejected(evidence, field_path, :digest_mismatch,
-          via: &Web3TreasuryAction.verify_evidence/1,
-          replacement: replacement
-        )
+    middle_paths =
+      for i <- 1..(ctx.trace_len - 2),
+          field <- ctx.trace_fields do
+        ["payload", "trace", Access.at(i), field]
       end
-    else
-      assert true
-    end
+
+    test_tampering(
+      ctx.evidence,
+      middle_paths,
+      &Web3TreasuryAction.verify_evidence/1,
+      :digest_mismatch
+    )
   end
 
   test "evidence direct digest tampering is rejected with digest_mismatch", %{evidence: evidence} do
-    tampered = put_in(evidence, ["digest"], zeroed_digest())
+    tampered = put_in(evidence, ["digest"], tampered_digest())
 
     assert {:error, %{reason: :digest_mismatch}} =
              Web3TreasuryAction.verify_evidence(tampered)
   end
 
-  test "envelope artifact payload field tampering is rejected with digest_mismatch", ctx do
-    for path <- ctx.envelope_paths,
-        replacement <- @replacement_values do
-      assert_tamper_rejected(ctx.envelope, path, :digest_mismatch,
-        via: &Web3TreasuryAction.verify_evidence_envelope/1,
-        replacement: replacement
-      )
-    end
+  test "evidence trace list tampering (append/remove) is rejected", %{evidence: evidence} do
+    trace = get_in(evidence, ["payload", "trace"])
+
+    appended = put_in(evidence, ["payload", "trace"], trace ++ [%{"event" => "tampered"}])
+    dropped = put_in(evidence, ["payload", "trace"], Enum.drop(trace, -1))
+
+    assert {:error, %{reason: :digest_mismatch}} = Web3TreasuryAction.verify_evidence(appended)
+    assert {:error, %{reason: :digest_mismatch}} = Web3TreasuryAction.verify_evidence(dropped)
   end
 
-  test "envelope middle trace tampering is rejected when middle index exists", %{
-    envelope: envelope
-  } do
+  test "envelope artifact payload field tampering is rejected with digest_mismatch", ctx do
+    test_tampering(
+      ctx.envelope,
+      ctx.envelope_paths,
+      &Web3TreasuryAction.verify_evidence_envelope/1,
+      :digest_mismatch
+    )
+  end
+
+  test "envelope middle trace element tampering is rejected", ctx do
+    assert ctx.trace_len >= 3,
+           "expected trace length >= 3 for middle-index tamper coverage, got #{ctx.trace_len}"
+
+    middle_paths =
+      for i <- 1..(ctx.trace_len - 2),
+          field <- ctx.trace_fields do
+        ["artifact", "payload", "trace", Access.at(i), field]
+      end
+
+    test_tampering(
+      ctx.envelope,
+      middle_paths,
+      &Web3TreasuryAction.verify_evidence_envelope/1,
+      :digest_mismatch
+    )
+  end
+
+  test "envelope trace list tampering (append/remove) is rejected", %{envelope: envelope} do
     trace = get_in(envelope, ["artifact", "payload", "trace"])
 
-    if length(trace) >= 3 do
-      field_path = ["artifact", "payload", "trace", Access.at(1), "event"]
+    appended =
+      put_in(envelope, ["artifact", "payload", "trace"], trace ++ [%{"event" => "tampered"}])
 
-      for replacement <- @replacement_values do
-        assert_tamper_rejected(envelope, field_path, :digest_mismatch,
-          via: &Web3TreasuryAction.verify_evidence_envelope/1,
-          replacement: replacement
-        )
-      end
-    else
-      assert true
-    end
+    dropped = put_in(envelope, ["artifact", "payload", "trace"], Enum.drop(trace, -1))
+
+    assert {:error, %{reason: :digest_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(appended)
+
+    assert {:error, %{reason: :digest_mismatch}} =
+             Web3TreasuryAction.verify_evidence_envelope(dropped)
   end
 
   test "envelope integrity digest tampering is rejected with integrity_mismatch", %{
     envelope: envelope
   } do
-    tampered = put_in(envelope, ["integrity", "digest"], zeroed_digest())
+    tampered = put_in(envelope, ["integrity", "digest"], tampered_digest())
 
     assert {:error, %{reason: :integrity_mismatch}} =
              Web3TreasuryAction.verify_evidence_envelope(tampered)
@@ -126,10 +150,20 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   test "envelope artifact digest tampering is rejected with integrity_mismatch", %{
     envelope: envelope
   } do
-    tampered = put_in(envelope, ["artifact", "digest"], zeroed_digest())
+    tampered = put_in(envelope, ["artifact", "digest"], tampered_digest())
 
     assert {:error, %{reason: :integrity_mismatch}} =
              Web3TreasuryAction.verify_evidence_envelope(tampered)
+  end
+
+  defp test_tampering(artifact, paths, verify_fun, expected_reason) do
+    for path <- paths,
+        replacement <- @replacement_values do
+      assert_tamper_rejected(artifact, path, expected_reason,
+        via: verify_fun,
+        replacement: replacement
+      )
+    end
   end
 
   defp assert_tamper_rejected(artifact, field_path, expected_reason, opts) do
@@ -146,7 +180,15 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
            "Expected #{inspect(expected_reason)} after tampering #{inspect(field_path)} with #{inspect(replacement)}, got: #{inspect(verification)}"
   end
 
-  defp zeroed_digest, do: String.duplicate("0", 64)
+  defp extract_trace_fields(trace) do
+    [List.first(trace), List.last(trace)]
+    |> Enum.filter(&is_map/1)
+    |> Enum.flat_map(&Map.keys/1)
+    |> Enum.filter(&is_binary/1)
+    |> Enum.uniq()
+  end
+
+  defp tampered_digest, do: String.duplicate("0", 64)
 
   defp base_action do
     %{
