@@ -12,7 +12,7 @@ The project currently demonstrates:
 - SHA-256 digest verification
 - tamper detection
 - unsigned evidence envelopes
-- local signed_demo envelope flow
+- local `signed_demo` envelope flow
 
 ## Important limitations
 
@@ -27,7 +27,7 @@ PythiaLabs currently does not claim:
 - production key management
 - persistent external storage
 
-The signed_demo flow is deterministic local demo logic only and is not production cryptography.
+The `signed_demo` flow is deterministic local demo logic only and is not production cryptography.
 
 ## Reporting security issues
 

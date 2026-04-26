@@ -16,12 +16,12 @@ This project is currently pre-release.
 - SHA-256 evidence artifact flow
 - Evidence verification and tamper rejection
 - Signature-ready unsigned evidence envelope
-- Local deterministic signed_demo envelope flow
+- Local deterministic `signed_demo` envelope flow
 - Full Web3 Treasury Showcase
 - Expected output guide for reviewers
 - Grant readiness materials
 - Web3 treasury reason layer threat model
-- Grant one-pager and application summary
+- Grant one-pager
 
 ### Notes
 
