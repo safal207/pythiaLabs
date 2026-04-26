@@ -22,6 +22,7 @@ This project is currently pre-release.
 - Grant readiness materials
 - Web3 treasury reason layer threat model
 - Grant one-pager
+- Property-based invariant tests for Web3 treasury reasoning and evidence verification
 
 ### Notes
 
