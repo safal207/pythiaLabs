@@ -29,7 +29,7 @@ base_governance_record = %{
 accepted_result = Web3TreasuryAction.evaluate(base_action, base_governance_record)
 unsigned_envelope = Web3TreasuryAction.export_evidence_envelope(accepted_result)
 
-signed_envelope =
+{:ok, signed_envelope} =
   Web3TreasuryAction.sign_evidence_envelope_demo(unsigned_envelope, "demo_dao_reviewer")
 
 tampered_signed_envelope =

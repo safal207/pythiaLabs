@@ -254,20 +254,26 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
 
   def verify_evidence_envelope(_envelope), do: rejected(:invalid_envelope_shape)
 
-  @spec sign_evidence_envelope_demo(map(), String.t()) :: map()
+  @spec sign_evidence_envelope_demo(map(), String.t()) :: {:ok, map()} | {:error, map()}
   def sign_evidence_envelope_demo(envelope, signer_id)
       when is_map(envelope) and is_binary(signer_id) do
-    Map.put(envelope, "signature", %{
-      "status" => "signed_demo",
-      "algorithm" => "sha256-demo",
-      "signer_id" => signer_id,
-      "signature" => demo_signature(envelope, signer_id)
-    })
+    with :ok <- validate_demo_signer_id(signer_id),
+         {:ok, _verified_unsigned_envelope} <- verify_evidence_envelope(envelope) do
+      {:ok,
+       Map.put(envelope, "signature", %{
+         "status" => "signed_demo",
+         "algorithm" => "sha256-demo",
+         "signer_id" => signer_id,
+         "signature" => demo_signature(envelope, signer_id)
+       })}
+    end
   end
 
-  def sign_evidence_envelope_demo(envelope, signer_id) do
-    sign_evidence_envelope_demo(normalize_value(envelope), to_string(signer_id))
-  end
+  def sign_evidence_envelope_demo(_envelope, signer_id) when not is_binary(signer_id),
+    do: rejected(:invalid_signer_id)
+
+  def sign_evidence_envelope_demo(_envelope, _signer_id),
+    do: rejected(:invalid_envelope_shape)
 
   @spec verify_signed_evidence_envelope_demo(map()) :: {:ok, map()} | {:error, map()}
   def verify_signed_evidence_envelope_demo(envelope) when is_map(envelope) do
@@ -394,11 +400,7 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   defp verify_signed_signer_id(signature) do
     signer_id = signature["signer_id"]
 
-    if is_binary(signer_id) and String.trim(signer_id) != "" do
-      :ok
-    else
-      rejected(:invalid_signer_id)
-    end
+    validate_demo_signer_id(signer_id)
   end
 
   defp verify_signed_signature_digest(signature) do
@@ -441,6 +443,14 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
   end
 
   defp valid_evidence_envelope_key_set?(_), do: false
+
+  defp validate_demo_signer_id(signer_id) do
+    if is_binary(signer_id) and String.trim(signer_id) != "" do
+      :ok
+    else
+      rejected(:invalid_signer_id)
+    end
+  end
 
   defp invalid_evidence_shape(), do: rejected(:invalid_evidence_shape)
 

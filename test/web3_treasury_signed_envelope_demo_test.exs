@@ -41,7 +41,8 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
   test "sign_evidence_envelope_demo/2 returns signed_demo envelope", %{
     unsigned_envelope: envelope
   } do
-    signed = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+    assert {:ok, signed} =
+             Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
 
     assert signed["signature"]["status"] == "signed_demo"
     assert signed["signature"]["algorithm"] == "sha256-demo"
@@ -50,21 +51,23 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
   end
 
   test "signing is deterministic", %{unsigned_envelope: envelope} do
-    first = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
-    second = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+    {:ok, first} = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+    {:ok, second} = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
 
     assert first["signature"]["signature"] == second["signature"]["signature"]
   end
 
   test "different signer_id changes signature", %{unsigned_envelope: envelope} do
-    first = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
-    second = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_security_reviewer")
+    {:ok, first} = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+
+    {:ok, second} =
+      Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_security_reviewer")
 
     refute first["signature"]["signature"] == second["signature"]["signature"]
   end
 
   test "valid signed envelope verifies", %{unsigned_envelope: envelope} do
-    signed = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+    {:ok, signed} = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
 
     assert {:ok, verification} = Web3TreasuryAction.verify_signed_evidence_envelope_demo(signed)
     assert verification.status == :verified
@@ -77,6 +80,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["artifact", "payload", "stop_reason"], "tampered_stop_reason")
 
     assert {:error, %{status: :rejected, reason: :digest_mismatch}} =
@@ -87,6 +91,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["signature", "signature"], String.duplicate("f", 64))
 
     assert {:error, %{status: :rejected, reason: :signature_mismatch}} =
@@ -97,6 +102,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["signature", "algorithm"], "sha512-demo")
 
     assert {:error, %{status: :rejected, reason: :unsupported_signature_algorithm}} =
@@ -107,6 +113,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["signature", "status"], "signed")
 
     assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
@@ -117,6 +124,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["signature", "sig_v2"], "fake")
 
     assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
@@ -127,6 +135,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> put_in(["signature", "signer_id"], "")
 
     assert {:error, %{status: :rejected, reason: :invalid_signer_id}} =
@@ -140,7 +149,7 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
   end
 
   test "signed_demo envelope is rejected by unsigned verifier", %{unsigned_envelope: envelope} do
-    signed = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
+    {:ok, signed} = Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "demo_dao_reviewer")
 
     assert {:error, %{status: :rejected, reason: :unsupported_signature_status}} =
              Web3TreasuryAction.verify_evidence_envelope(signed)
@@ -150,9 +159,34 @@ defmodule Pythia.Web3TreasurySignedEnvelopeDemoTest do
     tampered =
       envelope
       |> Web3TreasuryAction.sign_evidence_envelope_demo("demo_dao_reviewer")
+      |> then(fn {:ok, signed} -> signed end)
       |> Map.put("hidden_policy", "fake")
 
     assert {:error, %{status: :rejected, reason: :invalid_signed_envelope_shape}} =
              Web3TreasuryAction.verify_signed_evidence_envelope_demo(tampered)
+  end
+
+  test "signing invalid unsigned envelope returns invalid_envelope_shape", %{
+    unsigned_envelope: envelope
+  } do
+    malformed = Map.put(envelope, "hidden_policy", "fake")
+
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo(malformed, "demo_dao_reviewer")
+  end
+
+  test "signing with blank signer_id is rejected", %{unsigned_envelope: envelope} do
+    assert {:error, %{status: :rejected, reason: :invalid_signer_id}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo(envelope, "")
+  end
+
+  test "signing non-map envelope is rejected" do
+    assert {:error, %{status: :rejected, reason: :invalid_envelope_shape}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo("bad-envelope", "demo_dao_reviewer")
+  end
+
+  test "signing with non-binary signer_id is rejected", %{unsigned_envelope: envelope} do
+    assert {:error, %{status: :rejected, reason: :invalid_signer_id}} =
+             Web3TreasuryAction.sign_evidence_envelope_demo(envelope, :demo_dao_reviewer)
   end
 end
