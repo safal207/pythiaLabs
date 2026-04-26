@@ -90,6 +90,11 @@ For the Web3 application roadmap, see `docs/web3_consensus_reason_layer.md`.
 
 For the design principles behind these decisions, see `docs/design_principles.md`.
 
+For grant preparation materials, see:
+
+- `docs/grant_readiness.md`
+- `docs/threat_model_web3_treasury_reason_layer.md`
+
 Additional roadmap items:
 
 - temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
@@ -179,6 +184,7 @@ mix run examples/web3_treasury_evidence_envelope.exs
 ```
 
 The project also includes a local deterministic demo signer to show how evidence envelopes may later support authorship verification.
+This `signed_demo` flow is a deterministic local demo only and is not production cryptography.
 
 ```bash
 mix run examples/web3_treasury_signed_envelope_demo.exs
