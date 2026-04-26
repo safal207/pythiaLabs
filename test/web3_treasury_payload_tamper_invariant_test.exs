@@ -22,20 +22,26 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     assert is_list(evidence_trace) and evidence_trace != [],
            "export_evidence produced empty or missing trace — fixture is invalid"
 
+    assert Enum.all?(evidence_trace, &is_map/1),
+           "export_evidence trace entries must be maps"
+
     assert is_list(envelope_trace) and envelope_trace != [],
            "export_evidence_envelope produced empty or missing trace — fixture is invalid"
+
+    assert Enum.all?(envelope_trace, &is_map/1),
+           "export_evidence_envelope trace entries must be maps"
 
     trace_fields = extract_trace_fields(evidence_trace)
 
     first = 0
     last = length(evidence_trace) - 1
+    positions = Enum.uniq([first, last])
 
     dynamic_payload_paths =
-      for pos <- [first, last],
+      for pos <- positions,
           field <- trace_fields do
         ["trace", Access.at(pos), field]
       end
-      |> Enum.uniq()
 
     all_payload_paths = @static_payload_field_paths ++ dynamic_payload_paths
 
@@ -75,9 +81,6 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
         &Web3TreasuryAction.verify_evidence/1,
         :digest_mismatch
       )
-    else
-      IO.warn("Trace too short (#{ctx.trace_len}) for evidence middle tamper test")
-      assert true
     end
   end
 
@@ -122,9 +125,6 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
         &Web3TreasuryAction.verify_evidence_envelope/1,
         :digest_mismatch
       )
-    else
-      IO.warn("Trace too short (#{ctx.trace_len}) for envelope middle tamper test")
-      assert true
     end
   end
 
@@ -158,22 +158,34 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   defp test_tampering(artifact, paths, verify_fun, expected_reason) do
-    for path <- paths,
-        replacement <- @replacement_values do
-      assert_tamper_rejected(artifact, path, expected_reason,
-        via: verify_fun,
-        replacement: replacement
-      )
+    for path <- paths do
+      applied_replacements =
+        Enum.count(@replacement_values, fn replacement ->
+          if get_in(artifact, path) == replacement do
+            false
+          else
+            assert_tamper_rejected(artifact, path, expected_reason,
+              via: verify_fun,
+              replacement: replacement
+            )
+
+            true
+          end
+        end)
+
+      assert applied_replacements > 0,
+             "No effective replacements available for path: #{inspect(path)}"
     end
   end
 
   defp assert_tamper_rejected(artifact, field_path, expected_reason, opts) do
     verify_fun = Keyword.fetch!(opts, :via)
     replacement = Keyword.get(opts, :replacement, "tampered_value")
+    original = get_in(artifact, field_path)
     tampered = put_in(artifact, field_path, replacement)
 
-    assert get_in(tampered, field_path) == replacement,
-           "Mutation did not apply — path may be wrong: #{inspect(field_path)}"
+    assert get_in(tampered, field_path) != original,
+           "Replacement equals original — no tamper occurred at #{inspect(field_path)}"
 
     verification = verify_fun.(tampered)
 
@@ -189,7 +201,7 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     trace
     |> Enum.filter(&is_map/1)
     |> Enum.flat_map(&Map.keys/1)
-    |> Enum.filter(&is_binary/1)
+    |> Enum.filter(&(is_binary(&1) or is_atom(&1)))
     |> Enum.uniq()
   end
 
