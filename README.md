@@ -3,6 +3,7 @@
 PythiaLabs is a deterministic temporal-causal reasoning layer for agentic actions. It evaluates whether an action should proceed before execution, produces stable stop reasons, and exports replayable evidence traces for audit and review.
 
 ## Current focus
+
 - deterministic reasoning loops
 - agent action safety gates
 - bitemporal authorization reasoning
@@ -47,6 +48,7 @@ PythiaLabs currently does not claim:
 **Mission**: Minimal HRM-style reasoning loop for LIMINAL: `propose → run → measure → refine` with transparent step traces, fast kernels, and safe isolation.
 
 ## Stack
+
 - Elixir/BEAM for orchestration
 - Rust NIF (via rustler) for fast kernels
 - Rust Port worker for sandboxed solvers (BFS maze)
