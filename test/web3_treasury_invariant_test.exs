@@ -40,15 +40,12 @@ defmodule Pythia.Web3TreasuryInvariantTest do
     |> Web3TreasuryAction.export_evidence_envelope()
   end
 
-  @tag :property
-  property "accepted valid input preserves accepted decision invariants" do
-    check all(max_runs: 50) do
-      assert {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
-      assert payload.status == :accepted
-      assert List.last(payload.trace).event == :decision
-      assert List.last(payload.trace).result == :accept
-      assert payload.stop_reason == :treasury_transfer_accepted
-    end
+  test "accepted valid input preserves accepted decision invariants" do
+    assert {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    assert payload.status == :accepted
+    assert List.last(payload.trace).event == :decision
+    assert List.last(payload.trace).result == :accept
+    assert payload.stop_reason == :treasury_transfer_accepted
   end
 
   @tag :property
@@ -159,9 +156,14 @@ defmodule Pythia.Web3TreasuryInvariantTest do
   @tag :property
   property "blank signer_id values are rejected" do
     blank_gen =
-      one_of([
-        constant(""),
-        string([?	, ?\s], min_length: 1, max_length: 8)
+      member_of([
+        "",
+        " ",
+        "  ",
+        "\t",
+        "\n",
+        "\r\n",
+        " \t "
       ])
 
     check all(
