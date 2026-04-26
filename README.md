@@ -199,6 +199,8 @@ Run:
 mix run examples/web3_treasury_full_showcase.exs
 ```
 
+For expected reviewer-facing output, see: `docs/web3_treasury_full_showcase_expected_output.md`
+
 This single deterministic demo shows:
 
 - accepted and rejected treasury actions
