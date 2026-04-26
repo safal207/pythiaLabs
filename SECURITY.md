@@ -90,7 +90,8 @@ It does not replace production security review, cryptographic review, smart cont
 
 For future security hardening, the project may add:
 
-- secret scanning
+- expanded secret scanning configuration
+- custom allowlist policy for false positives
 - dependency vulnerability scanning
 - static analysis
 - property-based testing
