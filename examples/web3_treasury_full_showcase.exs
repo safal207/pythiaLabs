@@ -36,9 +36,7 @@ print_step = fn title ->
 end
 
 find_failed_check = fn trace ->
-  trace
-  |> Enum.find(fn entry -> entry[:result] == :fail end)
-  |> case do
+  case Enum.find(trace, fn entry -> entry[:result] == :fail end) do
     nil -> "none"
     failed -> to_string(failed[:event] || :unknown)
   end
