@@ -38,7 +38,8 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   test "direct digest tampering is rejected for evidence and envelope" do
-    tampered_evidence = Map.put(valid_evidence(), "digest", String.duplicate("0", 64))
+    tampered_evidence =
+      put_in(valid_evidence(), ["digest"], String.duplicate("0", 64))
 
     assert {:error, %{reason: :digest_mismatch}} =
              Web3TreasuryAction.verify_evidence(tampered_evidence)
@@ -89,16 +90,19 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
   end
 
   defp valid_result do
-    Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    {:ok, payload} = Web3TreasuryAction.evaluate(base_action(), base_governance_record())
+    payload
   end
 
   defp valid_evidence do
     valid_result()
+    |> then(&{:ok, &1})
     |> Web3TreasuryAction.export_evidence()
   end
 
   defp valid_envelope do
     valid_result()
+    |> then(&{:ok, &1})
     |> Web3TreasuryAction.export_evidence_envelope()
   end
 end
