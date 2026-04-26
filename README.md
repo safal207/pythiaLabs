@@ -142,6 +142,18 @@ For grant preparation materials, see:
 - `docs/threat_model_web3_treasury_reason_layer.md`
 - `docs/grant_one_pager_web3_treasury_reason_layer.md`
 
+## Project trust and governance
+
+Project governance and trust materials:
+
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- `CHANGELOG.md`
+- `docs/license_strategy.md`
+
+These documents describe contribution expectations, security reporting, project maturity, release notes, and licensing strategy.
+
 Additional roadmap items:
 
 - temporal-causal memory stack for facts, relations, bitemporal validity, events, and metrics
