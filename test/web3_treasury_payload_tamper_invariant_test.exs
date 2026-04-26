@@ -86,14 +86,15 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
              Web3TreasuryAction.verify_evidence(tampered)
   end
 
-  test "evidence trace list tampering (append/remove) is rejected", %{evidence: evidence} do
+  test "evidence trace list structural tampering is rejected", %{evidence: evidence} do
     trace = get_in(evidence, ["payload", "trace"])
 
-    appended = put_in(evidence, ["payload", "trace"], trace ++ [%{"event" => "tampered"}])
-    dropped = put_in(evidence, ["payload", "trace"], Enum.drop(trace, -1))
+    for tampered_trace <- trace_tamper_cases(trace) do
+      tampered = put_in(evidence, ["payload", "trace"], tampered_trace)
 
-    assert {:error, %{reason: :digest_mismatch}} = Web3TreasuryAction.verify_evidence(appended)
-    assert {:error, %{reason: :digest_mismatch}} = Web3TreasuryAction.verify_evidence(dropped)
+      assert {:error, %{reason: :digest_mismatch}} =
+               Web3TreasuryAction.verify_evidence(tampered)
+    end
   end
 
   test "envelope artifact payload field tampering is rejected with digest_mismatch", ctx do
@@ -123,19 +124,15 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     )
   end
 
-  test "envelope trace list tampering (append/remove) is rejected", %{envelope: envelope} do
+  test "envelope trace list structural tampering is rejected", %{envelope: envelope} do
     trace = get_in(envelope, ["artifact", "payload", "trace"])
 
-    appended =
-      put_in(envelope, ["artifact", "payload", "trace"], trace ++ [%{"event" => "tampered"}])
+    for tampered_trace <- trace_tamper_cases(trace) do
+      tampered = put_in(envelope, ["artifact", "payload", "trace"], tampered_trace)
 
-    dropped = put_in(envelope, ["artifact", "payload", "trace"], Enum.drop(trace, -1))
-
-    assert {:error, %{reason: :digest_mismatch}} =
-             Web3TreasuryAction.verify_evidence_envelope(appended)
-
-    assert {:error, %{reason: :digest_mismatch}} =
-             Web3TreasuryAction.verify_evidence_envelope(dropped)
+      assert {:error, %{reason: :digest_mismatch}} =
+               Web3TreasuryAction.verify_evidence_envelope(tampered)
+    end
   end
 
   test "envelope integrity digest tampering is rejected with integrity_mismatch", %{
@@ -177,14 +174,32 @@ defmodule Pythia.Web3TreasuryPayloadTamperInvariantTest do
     verification = verify_fun.(tampered)
 
     assert {:error, %{reason: ^expected_reason}} = verification,
-           "Expected #{inspect(expected_reason)} after tampering #{inspect(field_path)} with #{inspect(replacement)}, got: #{inspect(verification)}"
+           """
+           Expected #{inspect(expected_reason)} after tampering
+           path #{inspect(field_path)} with #{inspect(replacement)},
+           got: #{inspect(verification)}
+           """
   end
 
-  defp extract_trace_fields(trace) do
-    [List.first(trace), List.last(trace)]
+  defp extract_trace_fields(trace) when is_list(trace) do
+    trace
     |> Enum.filter(&is_map/1)
     |> Enum.flat_map(&Map.keys/1)
     |> Enum.filter(&is_binary/1)
+    |> Enum.uniq()
+  end
+
+  defp trace_tamper_cases(trace) when is_list(trace) do
+    base_cases = [
+      [],
+      trace ++ [%{"event" => "tampered"}],
+      Enum.drop(trace, -1),
+      List.insert_at(trace, 1, %{"event" => "inserted"})
+    ]
+
+    maybe_reversed = if length(trace) > 1, do: [Enum.reverse(trace)], else: []
+
+    (base_cases ++ maybe_reversed)
     |> Enum.uniq()
   end
 
