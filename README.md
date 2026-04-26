@@ -159,8 +159,11 @@ Project governance and trust materials:
 - `SECURITY.md`
 - `CHANGELOG.md`
 - `docs/license_strategy.md`
+- `docs/security_automation.md`
 
 These documents describe contribution expectations, security reporting, project maturity, release notes, and licensing strategy.
+
+The repository also includes a minimal GitHub Actions security workflow for secret scanning.
 
 ## Agent Safety Showcase
 
