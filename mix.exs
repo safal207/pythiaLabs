@@ -22,7 +22,8 @@ defmodule Pythia.MixProject do
     [
       {:rustler, "~> 0.33"},
       {:jason, "~> 1.4"},
-      {:telemetry, "~> 1.2"}
+      {:telemetry, "~> 1.2"},
+      {:stream_data, "~> 1.0", only: :test}
     ]
   end
 

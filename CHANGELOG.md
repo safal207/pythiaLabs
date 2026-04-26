@@ -24,6 +24,7 @@ This project is currently pre-release.
 - Grant one-pager
 - GitHub Actions security workflow for repository secret scanning
 - Security automation documentation
+- Property-based invariant tests for Web3 treasury reasoning and evidence verification
 
 ### Notes
 
