@@ -189,3 +189,26 @@ This `signed_demo` flow is a deterministic local demo only and is not production
 ```bash
 mix run examples/web3_treasury_signed_envelope_demo.exs
 ```
+
+
+## Full Web3 Treasury Showcase
+
+Run:
+
+```bash
+mix run examples/web3_treasury_full_showcase.exs
+```
+
+This single deterministic demo shows:
+
+- accepted and rejected treasury actions
+- chronological decision traces
+- evidence export
+- SHA-256 digest generation
+- evidence verification
+- tamper rejection
+- unsigned evidence envelope verification
+- signed_demo envelope generation
+- signed_demo verification
+
+The `signed_demo` flow is deterministic local demo logic only and is not production cryptography.
