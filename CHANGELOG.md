@@ -28,6 +28,7 @@ This project is currently pre-release.
 - Payload-wide tamper invariant tests for Web3 treasury evidence artifacts
 - Elixir formatter configuration for consistent `mix format` checks
 - CI formatting check for Elixir code
+- Git ignore rules for local build, dependency, coverage, and editor artifacts
 
 ### Notes
 

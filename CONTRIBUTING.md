@@ -20,6 +20,8 @@ Please avoid large architectural rewrites unless discussed first.
 
 ## Development setup
 
+Build outputs such as `_build/`, `deps/`, Rust `target/` directories, and compiled NIF artifacts under `priv/` are listed in `.gitignore` so they are not committed by mistake.
+
 ```bash
 mix deps.get
 mix compile
