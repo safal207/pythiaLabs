@@ -31,6 +31,11 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
              BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
   end
 
+  test "accepted trace includes account_id in proposed_action", ctx do
+    assert {:ok, %{trace: trace}} = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+    assert hd(trace).account_id == "acct_demo_01"
+  end
+
   test "missing operator approval returns missing_operator_approval", ctx do
     record = %{ctx.governance_record | operator_approval_present: false}
 
@@ -118,5 +123,50 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
 
     assert {:error, %{status: :rejected, stop_reason: :missing_decision_time_knowledge}} =
              BankingRiskAction.evaluate(ctx.action, record)
+  end
+
+  test "decision_time_before_action_time is rejected", ctx do
+    action = %{ctx.action | decision_time: ~U[2026-04-26 08:59:00Z]}
+
+    assert {:error, %{status: :rejected, stop_reason: :decision_time_before_action_time}} =
+             BankingRiskAction.evaluate(action, ctx.governance_record)
+  end
+
+  test "missing required action field reports missing_field details", ctx do
+    action = Map.delete(ctx.action, :account_id)
+
+    assert {:error, %{status: :rejected, stop_reason: :invalid_action_shape, trace: trace}} =
+             BankingRiskAction.evaluate(action, ctx.governance_record)
+
+    assert Enum.at(trace, 1).missing_field == :account_id
+  end
+
+  test "invalid governance record boolean shape reports invalid field", ctx do
+    record = %{ctx.governance_record | operator_approval_present: "yes"}
+
+    assert {:error, %{status: :rejected, stop_reason: :invalid_governance_record, trace: trace}} =
+             BankingRiskAction.evaluate(ctx.action, record)
+
+    assert Enum.at(trace, 1).invalid_field == :operator_approval_present
+    assert Enum.at(trace, 1).expected_type == :boolean
+  end
+
+  test "evaluate fallback rejects non-map inputs" do
+    assert {:error, %{status: :rejected, stop_reason: :invalid_action_or_governance_record}} =
+             BankingRiskAction.evaluate(nil, nil)
+  end
+
+  test "verify_evidence rejects non-map input" do
+    assert {:error, %{status: :rejected, reason: :invalid_evidence_shape}} =
+             BankingRiskAction.verify_evidence("not-a-map")
+  end
+
+  test "verify_evidence remains stable when payload keys are reordered", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+    evidence = BankingRiskAction.export_evidence(result)
+    reordered_payload = evidence["payload"] |> Enum.reverse() |> Map.new()
+    reordered_evidence = Map.put(evidence, "payload", reordered_payload)
+
+    assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(reordered_evidence)
   end
 end

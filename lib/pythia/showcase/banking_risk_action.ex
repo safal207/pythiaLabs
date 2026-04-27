@@ -1,6 +1,7 @@
 defmodule Pythia.Showcase.BankingRiskAction do
   @moduledoc """
-  Deterministic local showcase for banking AI-risk pre-execution action control.
+  Deterministic local showcase for banking AI-risk decision-time replay and audit reasoning.
+  This module is a local governance/audit showcase and does not implement real banking controls.
   """
 
   @supported_action_types MapSet.new([
@@ -15,6 +16,7 @@ defmodule Pythia.Showcase.BankingRiskAction do
     :action_id,
     :action_type,
     :operator_id,
+    :account_id,
     :action_time,
     :decision_time
   ]
@@ -43,7 +45,9 @@ defmodule Pythia.Showcase.BankingRiskAction do
   @evidence_keys MapSet.new(["artifact_type", "algorithm", "digest", "payload"])
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
-  def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
+  def evaluate(action, governance_record)
+      when is_map(action) and not is_struct(action) and is_map(governance_record) and
+             not is_struct(governance_record) do
     proposed_trace = [proposed_action_trace(action)]
 
     with :ok <- validate_action(action),
@@ -68,6 +72,17 @@ defmodule Pythia.Showcase.BankingRiskAction do
             ]
 
         reject(stop_reason, trace)
+
+      {:error, stop_reason, failed_check, details}
+      when is_atom(failed_check) and is_map(details) ->
+        trace =
+          proposed_trace ++
+            [
+              check_trace(failed_check, :fail, Map.put(details, :reason, stop_reason)),
+              decision_trace(:reject, stop_reason)
+            ]
+
+        reject(stop_reason, trace)
     end
   end
 
@@ -82,7 +97,7 @@ defmodule Pythia.Showcase.BankingRiskAction do
   def export_result({status, payload}) when status in [:ok, :error] and is_map(payload) do
     payload
     |> normalize_value()
-    |> ensure_export_status()
+    |> whitelist_payload_fields()
   end
 
   @spec export_digest({:ok, map()} | {:error, map()}) :: map()
@@ -192,18 +207,23 @@ defmodule Pythia.Showcase.BankingRiskAction do
   end
 
   defp validate_required_fields(record, fields, stop_reason) do
-    if Enum.all?(fields, &Map.has_key?(record, &1)) do
-      :ok
-    else
-      {:error, stop_reason, :shape_validation_check}
+    case Enum.find(fields, &(not Map.has_key?(record, &1))) do
+      nil ->
+        :ok
+
+      missing_field ->
+        {:error, stop_reason, :shape_validation_check, %{missing_field: missing_field}}
     end
   end
 
   defp validate_datetime_fields(record, fields, stop_reason) do
-    if Enum.all?(fields, &match?(%DateTime{}, record[&1])) do
-      :ok
-    else
-      {:error, stop_reason, :shape_validation_check}
+    case Enum.find(fields, &(not match?(%DateTime{}, record[&1]))) do
+      nil ->
+        :ok
+
+      invalid_field ->
+        {:error, stop_reason, :shape_validation_check,
+         %{invalid_field: invalid_field, expected_type: :datetime}}
     end
   end
 
@@ -211,7 +231,8 @@ defmodule Pythia.Showcase.BankingRiskAction do
     if is_boolean(record[field]) do
       :ok
     else
-      {:error, :invalid_governance_record, :shape_validation_check}
+      {:error, :invalid_governance_record, :shape_validation_check,
+       %{invalid_field: field, expected_type: :boolean}}
     end
   end
 
@@ -336,13 +357,23 @@ defmodule Pythia.Showcase.BankingRiskAction do
     end
   end
 
-  defp ensure_export_status(export) do
-    status = if export["status"] == "accepted", do: "accepted", else: "rejected"
+  defp whitelist_payload_fields(export) do
+    status = Map.fetch!(export, "status")
+    stop_reason = Map.fetch!(export, "stop_reason")
+    trace = Map.fetch!(export, "trace")
+
+    unless status in ["accepted", "rejected"] do
+      raise ArgumentError, "unsupported export status: #{inspect(status)}"
+    end
+
+    unless is_list(trace) do
+      raise ArgumentError, "trace must be a list, got: #{inspect(trace)}"
+    end
 
     %{
       "status" => status,
-      "stop_reason" => export["stop_reason"],
-      "trace" => export["trace"] || []
+      "stop_reason" => stop_reason,
+      "trace" => trace
     }
   end
 
@@ -379,7 +410,8 @@ defmodule Pythia.Showcase.BankingRiskAction do
       result: :observed,
       action_id: action[:action_id],
       action_type: action[:action_type],
-      operator_id: action[:operator_id]
+      operator_id: action[:operator_id],
+      account_id: action[:account_id]
     }
   end
 
@@ -434,17 +466,29 @@ defmodule Pythia.Showcase.BankingRiskAction do
   end
 
   defp canonical_encode(value) when is_binary(value), do: "\"" <> escape_string(value) <> "\""
-  defp canonical_encode(value) when is_number(value), do: to_string(value)
+  defp canonical_encode(value) when is_integer(value), do: Integer.to_string(value)
+  defp canonical_encode(value) when is_float(value), do: :erlang.float_to_binary(value, [:short])
   defp canonical_encode(true), do: "true"
   defp canonical_encode(false), do: "false"
   defp canonical_encode(nil), do: "null"
 
   defp escape_string(value) do
     value
-    |> String.replace("\\", "\\\\")
-    |> String.replace("\"", "\\\"")
-    |> String.replace("\n", "\\n")
-    |> String.replace("\r", "\\r")
-    |> String.replace("\t", "\\t")
+    |> String.to_charlist()
+    |> Enum.map_join(&escape_codepoint/1)
   end
+
+  defp escape_codepoint(?\\), do: "\\\\"
+  defp escape_codepoint(?"), do: "\\\""
+  defp escape_codepoint(?\n), do: "\\n"
+  defp escape_codepoint(?\r), do: "\\r"
+  defp escape_codepoint(?\t), do: "\\t"
+  defp escape_codepoint(?\b), do: "\\b"
+  defp escape_codepoint(?\f), do: "\\f"
+
+  defp escape_codepoint(codepoint) when codepoint in 0..31 do
+    "\\u" <> (codepoint |> Integer.to_string(16) |> String.pad_leading(4, "0"))
+  end
+
+  defp escape_codepoint(codepoint), do: <<codepoint::utf8>>
 end

@@ -82,4 +82,6 @@ Expected lines include:
 
 ## Reviewer note
 
-Banking AI risk is not only about model outputs. This deterministic demo focuses on whether high-risk AI-enabled actions should proceed **before** execution, with stable stop reasons and replayable evidence for audit/review.
+Banking AI risk is not only about model outputs. This deterministic demo focuses on decision-time replay reasoning for high-risk AI-enabled actions, with stable stop reasons and replayable evidence for audit/review.
+
+This banking showcase currently focuses on decision traces and evidence verification only. It does not yet include envelope/signed-demo flows from the Web3 treasury showcase.

@@ -33,6 +33,8 @@ This project is currently pre-release.
 - Draft ESP Office Hours prep note (official EF links only) (`docs/grant_office_hours_ef_esp.md`)
 - Draft OpenAI Safety Fellowship application text (official program page only) (`docs/fellowship_openai_safety_2026_application.md`)
 - Deterministic Banking AI Risk Showcase for pre-execution reasoning over high-risk financial/agentic actions
+- Reviewer-facing expected output guide for Banking AI Risk Showcase
+- Unit tests for Banking AI Risk Showcase decisioning and evidence verification paths
 
 ### Changed
 
