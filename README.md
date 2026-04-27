@@ -39,7 +39,7 @@ PythiaLabs currently does not claim:
 - IAM enforcement
 - backup management
 - regulatory compliance
-- cybersecurity protection
+- production-grade cybersecurity protection
 
 ## Agent Infrastructure Action Safety Showcase
 
@@ -204,7 +204,10 @@ PythiaLabs is currently an MVP focused on:
 - stable stop reasons
 - Elixir/BEAM orchestration
 - Rust NIF / Rust Port worker integration
-- deterministic Agent Safety Showcase
+- deterministic evidence gates for high-risk agentic actions
+- Agent Infrastructure Action Safety Showcase
+- Banking AI Risk Showcase
+- Web3 Treasury Governance Showcase
 
 The Datomic/Neo4j/XTDB/EventStoreDB/TimescaleDB-style memory layers are not implemented yet.
 They are part of the architectural roadmap.
