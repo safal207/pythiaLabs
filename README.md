@@ -253,6 +253,20 @@ This `signed_demo` flow is a deterministic local demo only and is not production
 mix run examples/web3_treasury_signed_envelope_demo.exs
 ```
 
+## Banking AI Risk Showcase
+
+PythiaLabs includes a deterministic banking-risk action showcase for AI-enabled financial workflows.
+It demonstrates how a proposed high-risk action can be accepted or rejected before execution based on operator approval, evidence freshness, temporal authorization, and decision-time knowledge.
+The showcase emits stable stop reasons and replayable evidence artifacts for audit and review.
+
+Run:
+
+```bash
+mix run examples/banking_ai_risk_showcase.exs
+```
+
+This is a deterministic local showcase. It does not claim production banking integration, regulatory compliance, or cybersecurity protection.
+
 
 ## Full Web3 Treasury Showcase
 
