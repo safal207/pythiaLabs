@@ -54,7 +54,7 @@ PythiaLabs currently does not claim:
 - Rust Port worker for sandboxed solvers (BFS maze)
 - JSON via `jason`
 - CI: GitHub Actions
-- License: Pythia Labs Custom License v1.0
+- License: Apache License 2.0
 
 ## Values
 ### Business Value
