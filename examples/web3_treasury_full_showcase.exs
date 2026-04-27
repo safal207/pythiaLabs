@@ -70,6 +70,7 @@ IO.puts("trace_event_count: #{length(accepted_payload.trace)}")
 IO.puts("final_decision: #{List.last(accepted_payload.trace).result}")
 
 print_step.("B. Rejected treasury action: quorum_not_met")
+
 rejected_quorum_result =
   Web3TreasuryAction.evaluate(base_action, %{base_governance_record | quorum_met: false})
 
@@ -80,6 +81,7 @@ IO.puts("stop_reason: #{rejected_quorum_payload.stop_reason}")
 IO.puts("failed_check: #{find_failed_check.(rejected_quorum_payload.trace)}")
 
 print_step.("C. Rejected treasury action: authorization_valid_but_unknown_at_decision_time")
+
 rejected_unknown_result =
   Web3TreasuryAction.evaluate(base_action, %{
     base_governance_record
@@ -120,6 +122,7 @@ IO.puts("digest: #{unsigned_envelope["integrity"]["digest"]}")
 print_verification.(verified_envelope)
 
 print_step.("I. Signed demo envelope")
+
 {:ok, signed_envelope} =
   Web3TreasuryAction.sign_evidence_envelope_demo(unsigned_envelope, "demo_dao_reviewer")
 
@@ -128,10 +131,14 @@ IO.puts("algorithm: #{signed_envelope["signature"]["algorithm"]}")
 IO.puts("signer_id: #{signed_envelope["signature"]["signer_id"]}")
 
 print_step.("J. Signed demo verification")
-verified_signed_envelope = Web3TreasuryAction.verify_signed_evidence_envelope_demo(signed_envelope)
+
+verified_signed_envelope =
+  Web3TreasuryAction.verify_signed_evidence_envelope_demo(signed_envelope)
+
 print_verification.(verified_signed_envelope)
 
 print_step.("K. Tampered signed demo envelope rejection")
+
 tampered_signed_envelope =
   put_in(signed_envelope, ["artifact", "payload", "stop_reason"], "tampered_stop_reason")
 
