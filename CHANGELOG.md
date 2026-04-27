@@ -35,6 +35,9 @@ This project is currently pre-release.
 - Deterministic Banking AI Risk Showcase for decision-time replay reasoning over high-risk financial/agentic actions
 - Reviewer-facing expected output guide for Banking AI Risk Showcase
 - Unit tests for Banking AI Risk Showcase decisioning and evidence verification paths
+- Deterministic Agent Infrastructure Action Safety Showcase for destructive AI-agent infrastructure actions
+- Reviewer-facing expected output guide for Agent Infrastructure Action Safety Showcase
+- Unit tests for destructive action decisioning and evidence verification paths
 
 ### Changed
 
