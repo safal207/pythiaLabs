@@ -161,6 +161,45 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
              BankingRiskAction.verify_evidence("not-a-map")
   end
 
+  test "verify_evidence rejects evidence with payload missing trace", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+
+    malformed_evidence =
+      result
+      |> BankingRiskAction.export_evidence()
+      |> put_in(["payload"], %{
+        "status" => "accepted",
+        "stop_reason" => "banking_risk_action_accepted"
+      })
+
+    assert {:error, %{status: :rejected, reason: :invalid_evidence_shape}} =
+             BankingRiskAction.verify_evidence(malformed_evidence)
+  end
+
+  test "verify_evidence rejects evidence with unsupported payload status", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+
+    malformed_evidence =
+      result
+      |> BankingRiskAction.export_evidence()
+      |> put_in(["payload", "status"], "pending")
+
+    assert {:error, %{status: :rejected, reason: :invalid_evidence_shape}} =
+             BankingRiskAction.verify_evidence(malformed_evidence)
+  end
+
+  test "verify_evidence rejects evidence with non-list trace", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+
+    malformed_evidence =
+      result
+      |> BankingRiskAction.export_evidence()
+      |> put_in(["payload", "trace"], "not_a_list")
+
+    assert {:error, %{status: :rejected, reason: :invalid_evidence_shape}} =
+             BankingRiskAction.verify_evidence(malformed_evidence)
+  end
+
   test "verify_evidence remains stable when payload keys are reordered", ctx do
     result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
     evidence = BankingRiskAction.export_evidence(result)

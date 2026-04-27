@@ -44,7 +44,7 @@ end
 IO.puts("Banking AI Risk Showcase")
 
 IO.puts(
-  "Deterministic local showcase only; not production banking integration or regulatory compliance."
+  "Deterministic local showcase only; not production banking integration, regulatory compliance, or cybersecurity protection."
 )
 
 print_step.("A. Accepted banking risk action")
