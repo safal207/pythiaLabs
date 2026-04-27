@@ -164,9 +164,39 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
   test "verify_evidence remains stable when payload keys are reordered", ctx do
     result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
     evidence = BankingRiskAction.export_evidence(result)
-    reordered_payload = evidence["payload"] |> Enum.reverse() |> Map.new()
+    shuffled_payload_pairs = evidence["payload"] |> Map.to_list() |> Enum.shuffle()
+    reordered_payload = Map.new(shuffled_payload_pairs)
     reordered_evidence = Map.put(evidence, "payload", reordered_payload)
 
     assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(reordered_evidence)
+
+    assert evidence["digest"] ==
+             BankingRiskAction.digest_export_payload(reordered_payload)["digest"]
+  end
+
+  test "evidence digest is stable for accepted snapshot", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+    digest = BankingRiskAction.export_digest(result)
+
+    assert digest["algorithm"] == "sha256"
+    assert digest["digest"] == "db3eaf5416545ea0d6cd50e61a904dd703b6b3933ec62b599316566f07825865"
+  end
+
+  test "canonicalization handles control characters and float values" do
+    payload = %{
+      status: :accepted,
+      stop_reason: :banking_risk_action_accepted,
+      trace: [
+        %{
+          event: :decision,
+          result: :accept,
+          note: "line1\nline2\ttab\bbackspace\fform" <> <<1>>,
+          confidence: 0.85
+        }
+      ]
+    }
+
+    evidence = BankingRiskAction.export_evidence({:ok, payload})
+    assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(evidence)
   end
 end

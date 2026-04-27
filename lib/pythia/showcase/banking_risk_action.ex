@@ -63,16 +63,6 @@ defmodule Pythia.Showcase.BankingRiskAction do
       {:error, stop_reason, trace} when is_list(trace) ->
         reject(stop_reason, trace ++ [decision_trace(:reject, stop_reason)])
 
-      {:error, stop_reason, failed_check} when is_atom(failed_check) ->
-        trace =
-          proposed_trace ++
-            [
-              check_trace(failed_check, :fail, %{reason: stop_reason}),
-              decision_trace(:reject, stop_reason)
-            ]
-
-        reject(stop_reason, trace)
-
       {:error, stop_reason, failed_check, details}
       when is_atom(failed_check) and is_map(details) ->
         trace =
@@ -115,7 +105,7 @@ defmodule Pythia.Showcase.BankingRiskAction do
   @spec export_evidence({:ok, map()} | {:error, map()}) :: map()
   def export_evidence(result) do
     payload = export_result(result)
-    digest = digest_payload(payload)
+    digest = digest_export_payload(payload)
 
     %{
       "artifact_type" => @artifact_type,
@@ -146,7 +136,7 @@ defmodule Pythia.Showcase.BankingRiskAction do
         rejected(:unsupported_algorithm)
 
       true ->
-        actual_digest = digest_payload(payload)["digest"]
+        actual_digest = digest_export_payload(payload)["digest"]
 
         if digest == actual_digest do
           {:ok,
@@ -169,6 +159,17 @@ defmodule Pythia.Showcase.BankingRiskAction do
   end
 
   def verify_evidence(_evidence), do: rejected(:invalid_evidence_shape)
+
+  @spec digest_export_payload(map()) :: map()
+  def digest_export_payload(payload) when is_map(payload) do
+    digest =
+      payload
+      |> canonical_encode()
+      |> then(&:crypto.hash(:sha256, &1))
+      |> Base.encode16(case: :lower)
+
+    %{"algorithm" => @integrity_algorithm, "digest" => digest}
+  end
 
   defp validate_action(action) do
     with :ok <- validate_required_fields(action, @required_action_fields, :invalid_action_shape),
@@ -238,8 +239,12 @@ defmodule Pythia.Showcase.BankingRiskAction do
 
   defp validate_decision_time(action) do
     case DateTime.compare(action.action_time, action.decision_time) do
-      :gt -> {:error, :decision_time_before_action_time, :decision_time_check}
-      _ -> :ok
+      :gt ->
+        {:error, :decision_time_before_action_time, :decision_time_check,
+         %{action_time: action.action_time, decision_time: action.decision_time}}
+
+      _ ->
+        :ok
     end
   end
 
@@ -375,16 +380,6 @@ defmodule Pythia.Showcase.BankingRiskAction do
       "stop_reason" => stop_reason,
       "trace" => trace
     }
-  end
-
-  defp digest_payload(payload) do
-    digest =
-      payload
-      |> canonical_encode()
-      |> then(&:crypto.hash(:sha256, &1))
-      |> Base.encode16(case: :lower)
-
-    %{"algorithm" => @integrity_algorithm, "digest" => digest}
   end
 
   defp valid_evidence_shape?(artifact_type, algorithm, digest, payload) do
