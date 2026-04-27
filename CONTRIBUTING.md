@@ -44,6 +44,8 @@ mix format
 mix test
 ```
 
+The repository includes `.formatter.exs` so formatter inputs are consistent across contributors and CI.
+
 For documentation-only PRs, still run tests when possible.
 
 ## PR guidelines

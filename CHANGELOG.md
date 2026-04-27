@@ -26,6 +26,7 @@ This project is currently pre-release.
 - Security automation documentation
 - Property-based invariant tests for Web3 treasury reasoning and evidence verification
 - Payload-wide tamper invariant tests for Web3 treasury evidence artifacts
+- Elixir formatter configuration for consistent `mix format` checks
 
 ### Notes
 
