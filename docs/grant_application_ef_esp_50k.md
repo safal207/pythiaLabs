@@ -12,7 +12,7 @@ PythiaLabs is a deterministic temporal-causal reasoning layer for agentic govern
 
 ## Problem
 
-Web3 treasuries and DAOs increasingly rely on automated agents, scripts, and structured playbooks to move significant amounts of value on Ethereum and related ecosystems.  
+Web3 treasuries and DAOs increasingly rely on scripts, multisig workflows, automation, and structured playbooks to coordinate significant amounts of value on Ethereum and related ecosystems. As agentic workflows become more common, these systems need clearer pre-execution reasoning and review boundaries.  
 Today, there is no widely adopted deterministic reasoning layer that sits between these agentic workflows and execution, evaluates proposed actions before they hit on-chain systems, and produces reproducible, reviewer-facing explanations.  
 Existing governance and treasury tooling focuses on proposal submission, voting flows, and execution, but not on a transparent, auditable “reason layer” for pre-execution decisions and agent safety.  
 As a result, DAO treasuries are exposed to avoidable errors (misconfigured treasury transfers, incorrect payouts, mismatched authorizations in time, and ambiguous approvals) that are hard to audit after the fact and difficult to simulate before execution.
@@ -23,7 +23,7 @@ As a result, DAO treasuries are exposed to avoidable errors (misconfigured treas
 
 The Ethereum ecosystem is in a phase where governance and treasury scale faster than security and verification practices.  
 Agentic workflows and multi-step automations are becoming more common around treasuries and protocol operations, but the verification tooling available to DAOs is still largely ad hoc and specific to particular products.  
-The Ecosystem Support Program has shifted toward proactive, needs-driven grantmaking via wishlists and targeted RFPs, including calls related to programmable institutional design and verifiable governance.  
+The Ecosystem Support Program supports public-goods work that strengthens the Ethereum ecosystem. PythiaLabs fits this direction by focusing on reproducible governance safety tooling, pre-execution reasoning, and reviewer-facing evidence artifacts.  
 This creates a timely opportunity to fund an independent, deterministic reasoning and evidence layer that can be evaluated, replayed, and integrated into a variety of governance and treasury tools without requiring immediate on-chain or wallet integration.
 
 ---
