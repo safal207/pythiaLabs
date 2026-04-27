@@ -48,7 +48,7 @@ Without deterministic, reviewable **pre-execution** artifacts, oversight degrade
 - **Evidence layer:** export traces; compute digests; verify; detect tamper; optional envelope-style packaging for reviewer workflows. Demos are **explicitly** non-production crypto (local, educational); see repository limitations.
 
 **CML / LTP (conceptual stack).**  
-*CML (causal / temporal memory lens) and LTP (lightweight temporal policy / trace persistence direction)* name the **research arc**: connect causal-temporal policy state to **durable, replayable** evaluation—not fully realized as production storage in the current MVP, but listed here as the long-term alignment target for the same evidence object.
+*CML (Causal Memory Layer) and LTP (Liminal Thread Protocol)* name the broader research arc: connecting causal-temporal policy state to durable, replayable evaluation and auditable agent handoffs. These components are not production storage or enforcement systems in the current PythiaLabs MVP, but they inform the long-term direction for evidence objects, trace continuity, and agentic oversight.
 
 **Evaluation stance:** property-style and scenario-based tests; emphasis on invariants (authorization windows, monotonicity of checks, tamper detection) over opaque end-to-end scores.
 
