@@ -40,11 +40,11 @@ mix test
 Please run:
 
 ```bash
-mix format
+mix format --check-formatted
 mix test
 ```
 
-The repository includes `.formatter.exs` so formatter inputs are consistent across contributors and CI.
+The repository includes `.formatter.exs` so formatter inputs are consistent across contributors and CI. CI also runs `mix format --check-formatted`; run it locally before opening a PR.
 
 For documentation-only PRs, still run tests when possible.
 

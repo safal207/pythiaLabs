@@ -35,6 +35,10 @@ jobs:
           mix deps.get
           mix compile
 
+      - name: Check Elixir formatting
+        run: |
+          mix format --check-formatted
+
       - name: Run Elixir tests
         run: |
           mix test
