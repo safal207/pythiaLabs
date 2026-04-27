@@ -164,20 +164,26 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
   test "verify_evidence remains stable when payload keys are reordered", ctx do
     result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
     evidence = BankingRiskAction.export_evidence(result)
-    shuffled_payload_pairs = evidence["payload"] |> Map.to_list() |> Enum.shuffle()
-    reordered_payload = Map.new(shuffled_payload_pairs)
-    reordered_evidence = Map.put(evidence, "payload", reordered_payload)
 
-    assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(reordered_evidence)
+    Enum.each(1..20, fn _iteration ->
+      shuffled_payload_pairs = evidence["payload"] |> Map.to_list() |> Enum.shuffle()
+      reordered_payload = Map.new(shuffled_payload_pairs)
+      reordered_evidence = Map.put(evidence, "payload", reordered_payload)
 
-    assert evidence["digest"] ==
-             BankingRiskAction.digest_export_payload(reordered_payload)["digest"]
+      assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(reordered_evidence)
+
+      assert evidence["digest"] ==
+               BankingRiskAction.digest_export_payload(reordered_payload)["digest"]
+    end)
   end
 
   test "evidence digest is stable for accepted snapshot", ctx do
     result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
     digest = BankingRiskAction.export_digest(result)
 
+    # Snapshot test:
+    # If the evidence schema intentionally changes, regenerate with:
+    #   BankingRiskAction.export_digest(BankingRiskAction.evaluate(action, governance_record))
     assert digest["algorithm"] == "sha256"
     assert digest["digest"] == "db3eaf5416545ea0d6cd50e61a904dd703b6b3933ec62b599316566f07825865"
   end

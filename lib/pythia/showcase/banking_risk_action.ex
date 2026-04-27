@@ -92,14 +92,9 @@ defmodule Pythia.Showcase.BankingRiskAction do
 
   @spec export_digest({:ok, map()} | {:error, map()}) :: map()
   def export_digest(result) do
-    digest =
-      result
-      |> export_result()
-      |> canonical_encode()
-      |> then(&:crypto.hash(:sha256, &1))
-      |> Base.encode16(case: :lower)
-
-    %{"algorithm" => @integrity_algorithm, "digest" => digest}
+    result
+    |> export_result()
+    |> digest_export_payload()
   end
 
   @spec export_evidence({:ok, map()} | {:error, map()}) :: map()
@@ -160,10 +155,21 @@ defmodule Pythia.Showcase.BankingRiskAction do
 
   def verify_evidence(_evidence), do: rejected(:invalid_evidence_shape)
 
+  @doc """
+  Returns a canonical SHA-256 digest for an export-shaped payload.
+
+  The payload is normalized and then validated against the export schema
+  (`status`, `stop_reason`, `trace`) before digesting.
+  """
   @spec digest_export_payload(map()) :: map()
   def digest_export_payload(payload) when is_map(payload) do
-    digest =
+    normalized_payload =
       payload
+      |> normalize_value()
+      |> whitelist_payload_fields()
+
+    digest =
+      normalized_payload
       |> canonical_encode()
       |> then(&:crypto.hash(:sha256, &1))
       |> Base.encode16(case: :lower)

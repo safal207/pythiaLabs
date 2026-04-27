@@ -55,6 +55,7 @@ PythiaLabs currently does not claim:
 - JSON via `jason`
 - CI: GitHub Actions
 - License: Apache License 2.0
+- Runtime note: canonical float encoding in evidence paths uses Erlang/OTP 25+ behavior (`:erlang.float_to_binary/2` with `[:short]`)
 
 ## Values
 ### Business Value
