@@ -255,6 +255,22 @@ This `signed_demo` flow is a deterministic local demo only and is not production
 mix run examples/web3_treasury_signed_envelope_demo.exs
 ```
 
+
+## Agent Infrastructure Action Safety Showcase
+
+PythiaLabs includes a deterministic local showcase for high-risk agent infrastructure actions.
+It demonstrates decision-time replay / pre-execution reasoning for destructive operations such as production database volume deletion.
+
+Run:
+
+```bash
+mix run examples/agent_infra_action_showcase.exs
+```
+
+For expected reviewer-facing output, see: `docs/agent_infra_action_showcase_expected_output.md`
+
+This is a deterministic local showcase only. It does not implement production infrastructure controls and does not claim cloud-provider integration, IAM enforcement, backup management, or cybersecurity protection.
+
 ## Banking AI Risk Showcase
 
 PythiaLabs includes a deterministic banking-risk action showcase for AI-enabled financial workflows.
