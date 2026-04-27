@@ -31,6 +31,10 @@ This project is currently pre-release.
 - Git ignore rules for local build, dependency, coverage, and editor artifacts
 - Draft EF Ecosystem Support Program (USD 50k) grant application text (`docs/grant_application_ef_esp_50k.md`)
 
+### Changed
+
+- Switched project license from Pythia Labs Custom License v1.0 to Apache License 2.0
+
 ### Notes
 
 The project is an MVP and local deterministic demo stack.
