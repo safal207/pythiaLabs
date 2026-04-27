@@ -68,6 +68,22 @@ defmodule Pythia.Showcase.AgentInfraActionTest do
              })
   end
 
+  test "credential_scope Admin rejects as credential_scope_too_broad", ctx do
+    assert {:error, %{status: :rejected, stop_reason: :credential_scope_too_broad}} =
+             AgentInfraAction.evaluate(ctx.action, %{
+               ctx.safety_context
+               | credential_scope: "Admin"
+             })
+  end
+
+  test "credential_scope admin with trailing space rejects as credential_scope_too_broad", ctx do
+    assert {:error, %{status: :rejected, stop_reason: :credential_scope_too_broad}} =
+             AgentInfraAction.evaluate(ctx.action, %{
+               ctx.safety_context
+               | credential_scope: "admin "
+             })
+  end
+
   test "same-volume/same-resource backup isolation rejects", ctx do
     assert {:error, %{status: :rejected, stop_reason: :backup_not_isolated_from_target}} =
              AgentInfraAction.evaluate(ctx.action, %{
@@ -80,6 +96,22 @@ defmodule Pythia.Showcase.AgentInfraActionTest do
                ctx.safety_context
                | backup_isolation: "same_resource"
              })
+  end
+
+  test "backup_isolation same_volume with trailing space rejects", ctx do
+    assert {:error, %{status: :rejected, stop_reason: :backup_not_isolated_from_target}} =
+             AgentInfraAction.evaluate(ctx.action, %{
+               ctx.safety_context
+               | backup_isolation: "same_volume "
+             })
+  end
+
+  test "target_environment Production is treated as production checks", ctx do
+    action = %{ctx.action | target_environment: "Production"}
+    context = %{ctx.safety_context | environment_scope_verified: false}
+
+    assert {:error, %{status: :rejected, stop_reason: :production_target_requires_verified_scope}} =
+             AgentInfraAction.evaluate(action, context)
   end
 
   test "documentation_not_verified rejects", ctx do
@@ -108,6 +140,24 @@ defmodule Pythia.Showcase.AgentInfraActionTest do
 
     assert {:error, %{status: :rejected, stop_reason: :unsupported_action_type}} =
              AgentInfraAction.evaluate(action, ctx.safety_context)
+  end
+
+  test "unknown target_environment rejects fail-closed", ctx do
+    action = %{ctx.action | target_environment: "prod"}
+
+    assert {:error, %{status: :rejected, stop_reason: :invalid_action_shape, trace: trace}} =
+             AgentInfraAction.evaluate(action, ctx.safety_context)
+
+    assert Enum.at(trace, 1).invalid_field == :target_environment
+  end
+
+  test "unknown backup_isolation rejects fail-closed", ctx do
+    context = %{ctx.safety_context | backup_isolation: "cross_region"}
+
+    assert {:error, %{status: :rejected, stop_reason: :invalid_safety_context, trace: trace}} =
+             AgentInfraAction.evaluate(ctx.action, context)
+
+    assert Enum.at(trace, 1).invalid_field == :backup_isolation
   end
 
   test "evidence verification succeeds for clean evidence", ctx do

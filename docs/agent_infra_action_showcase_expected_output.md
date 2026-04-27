@@ -6,7 +6,7 @@ This guide describes the expected output sections for:
 mix run examples/agent_infra_action_showcase.exs
 ```
 
-The showcase is deterministic and local. It demonstrates decision-time replay / pre-execution reasoning and does not implement production infrastructure controls.
+The showcase is deterministic and local. It demonstrates decision-time replay reasoning and does not implement production infrastructure controls.
 
 ## Header
 

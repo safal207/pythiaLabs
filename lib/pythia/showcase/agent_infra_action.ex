@@ -1,7 +1,7 @@
 defmodule Pythia.Showcase.AgentInfraAction do
   @moduledoc """
   Deterministic local showcase for agent infrastructure action safety reasoning.
-  This module models decision-time replay / pre-execution reasoning and does not implement
+  This module models decision-time replay reasoning and does not implement
   production infrastructure controls.
   """
 
@@ -16,6 +16,16 @@ defmodule Pythia.Showcase.AgentInfraAction do
   @destructive_action_types MapSet.new(["volume_delete", "database_drop"])
   @broad_credential_scopes MapSet.new(["admin", "global_admin", "full_api"])
   @unsafe_backup_isolation MapSet.new(["same_resource", "same_volume"])
+  @allowed_target_environments MapSet.new(["production", "staging", "development", "test"])
+  @allowed_credential_scopes MapSet.new([
+                               "scoped_operator",
+                               "read_only",
+                               "limited_ci",
+                               "admin",
+                               "global_admin",
+                               "full_api"
+                             ])
+  @allowed_backup_isolation MapSet.new(["off_target", "same_resource", "same_volume"])
 
   @required_action_fields [
     :action_id,
@@ -196,6 +206,13 @@ defmodule Pythia.Showcase.AgentInfraAction do
              @required_action_fields -- [:action_time, :decision_time],
              :invalid_action_shape
            ),
+         :ok <-
+           validate_enum_field(
+             action,
+             :target_environment,
+             @allowed_target_environments,
+             :invalid_action_shape
+           ),
          :ok <- validate_decision_time(action) do
       :ok
     end
@@ -220,6 +237,20 @@ defmodule Pythia.Showcase.AgentInfraAction do
            validate_string_fields(
              safety_context,
              [:credential_scope, :backup_isolation],
+             :invalid_safety_context
+           ),
+         :ok <-
+           validate_enum_field(
+             safety_context,
+             :credential_scope,
+             @allowed_credential_scopes,
+             :invalid_safety_context
+           ),
+         :ok <-
+           validate_enum_field(
+             safety_context,
+             :backup_isolation,
+             @allowed_backup_isolation,
              :invalid_safety_context
            ) do
       :ok
@@ -266,6 +297,17 @@ defmodule Pythia.Showcase.AgentInfraAction do
       invalid_field ->
         {:error, stop_reason, :shape_validation_check,
          %{invalid_field: invalid_field, expected_type: :non_empty_string}}
+    end
+  end
+
+  defp validate_enum_field(record, field, allowed_values, stop_reason) do
+    normalized_value = normalize_token(record[field])
+
+    if MapSet.member?(allowed_values, normalized_value) do
+      :ok
+    else
+      {:error, stop_reason, :shape_validation_check,
+       %{invalid_field: field, invalid_value: record[field], expected: :enum}}
     end
   end
 
@@ -330,10 +372,12 @@ defmodule Pythia.Showcase.AgentInfraAction do
   end
 
   defp run_check(:target_environment_check, action, safety_context) do
-    if action.target_environment == "production" and not safety_context.environment_scope_verified do
+    target_environment = normalize_token(action.target_environment)
+
+    if target_environment == "production" and not safety_context.environment_scope_verified do
       {:error, :production_target_requires_verified_scope,
        %{
-         target_environment: action.target_environment,
+         target_environment: target_environment,
          action_id: action.action_id,
          environment_scope_verified: safety_context.environment_scope_verified,
          reason: :production_target_requires_verified_scope
@@ -342,32 +386,36 @@ defmodule Pythia.Showcase.AgentInfraAction do
       {:ok,
        %{
          action_id: action.action_id,
-         target_environment: action.target_environment,
+         target_environment: target_environment,
          environment_scope_verified: safety_context.environment_scope_verified
        }}
     end
   end
 
   defp run_check(:credential_scope_check, action, safety_context) do
-    if MapSet.member?(@broad_credential_scopes, safety_context.credential_scope) do
+    credential_scope = normalize_token(safety_context.credential_scope)
+
+    if MapSet.member?(@broad_credential_scopes, credential_scope) do
       {:error, :credential_scope_too_broad,
        %{
          action_id: action.action_id,
-         credential_scope: safety_context.credential_scope,
+         credential_scope: credential_scope,
          reason: :credential_scope_too_broad
        }}
     else
-      {:ok, %{action_id: action.action_id, credential_scope: safety_context.credential_scope}}
+      {:ok, %{action_id: action.action_id, credential_scope: credential_scope}}
     end
   end
 
   defp run_check(:approval_check, action, safety_context) do
-    if action.target_environment == "production" and
+    target_environment = normalize_token(action.target_environment)
+
+    if target_environment == "production" and
          not safety_context.explicit_user_approval_present do
       {:error, :missing_explicit_user_approval,
        %{
          action_id: action.action_id,
-         target_environment: action.target_environment,
+         target_environment: target_environment,
          explicit_user_approval_present: safety_context.explicit_user_approval_present,
          reason: :missing_explicit_user_approval
        }}
@@ -381,11 +429,13 @@ defmodule Pythia.Showcase.AgentInfraAction do
   end
 
   defp run_check(:environment_scope_check, action, safety_context) do
+    target_environment = normalize_token(action.target_environment)
+
     if not safety_context.environment_scope_verified do
       {:error, :environment_scope_not_verified,
        %{
          action_id: action.action_id,
-         target_environment: action.target_environment,
+         target_environment: target_environment,
          environment_scope_verified: false,
          reason: :environment_scope_not_verified
        }}
@@ -423,16 +473,18 @@ defmodule Pythia.Showcase.AgentInfraAction do
   end
 
   defp run_check(:backup_isolation_check, action, safety_context) do
-    if MapSet.member?(@unsafe_backup_isolation, safety_context.backup_isolation) do
+    backup_isolation = normalize_token(safety_context.backup_isolation)
+
+    if MapSet.member?(@unsafe_backup_isolation, backup_isolation) do
       {:error, :backup_not_isolated_from_target,
        %{
          action_id: action.action_id,
          resource_id: action.resource_id,
-         backup_isolation: safety_context.backup_isolation,
+         backup_isolation: backup_isolation,
          reason: :backup_not_isolated_from_target
        }}
     else
-      {:ok, %{action_id: action.action_id, backup_isolation: safety_context.backup_isolation}}
+      {:ok, %{action_id: action.action_id, backup_isolation: backup_isolation}}
     end
   end
 
@@ -529,6 +581,13 @@ defmodule Pythia.Showcase.AgentInfraAction do
   defp rejected(reason), do: {:error, %{status: :rejected, reason: reason}}
 
   defp valid_string?(value), do: is_binary(value) and String.trim(value) != ""
+
+  defp normalize_token(value) when is_binary(value) do
+    value
+    |> String.trim()
+    |> String.downcase()
+    |> String.replace(~r/[-\s]+/, "_")
+  end
 
   defp normalize_value(value) when is_boolean(value) or is_nil(value), do: value
   defp normalize_value(value) when is_atom(value), do: Atom.to_string(value)

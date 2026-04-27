@@ -259,7 +259,7 @@ mix run examples/web3_treasury_signed_envelope_demo.exs
 ## Agent Infrastructure Action Safety Showcase
 
 PythiaLabs includes a deterministic local showcase for high-risk agent infrastructure actions.
-It demonstrates decision-time replay / pre-execution reasoning for destructive operations such as production database volume deletion.
+It demonstrates decision-time replay reasoning for destructive operations such as production database volume deletion.
 
 Run:
 

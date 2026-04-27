@@ -46,7 +46,7 @@ end
 IO.puts("Production Volume Deletion Safety Showcase")
 
 IO.puts(
-  "Deterministic local showcase only; decision-time replay / pre-execution reasoning. It does not implement production infrastructure controls, cloud-provider integration, IAM enforcement, backup management, or cybersecurity protection."
+  "Deterministic local showcase only; decision-time replay reasoning. It does not implement production infrastructure controls, cloud-provider integration, IAM enforcement, backup management, or cybersecurity protection."
 )
 
 print_step.("A. Rejected destructive production volume delete: missing explicit approval")
