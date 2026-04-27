@@ -32,6 +32,9 @@ This project is currently pre-release.
 - Draft EF Ecosystem Support Program (USD 50k) grant application text (`docs/grant_application_ef_esp_50k.md`)
 - Draft ESP Office Hours prep note (official EF links only) (`docs/grant_office_hours_ef_esp.md`)
 - Draft OpenAI Safety Fellowship application text (official program page only) (`docs/fellowship_openai_safety_2026_application.md`)
+- Deterministic Banking AI Risk Showcase for decision-time replay reasoning over high-risk financial/agentic actions
+- Reviewer-facing expected output guide for Banking AI Risk Showcase
+- Unit tests for Banking AI Risk Showcase decisioning and evidence verification paths
 
 ### Changed
 
