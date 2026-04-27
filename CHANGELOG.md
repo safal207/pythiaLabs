@@ -30,6 +30,7 @@ This project is currently pre-release.
 - CI formatting check for Elixir code
 - Git ignore rules for local build, dependency, coverage, and editor artifacts
 - Draft EF Ecosystem Support Program (USD 50k) grant application text (`docs/grant_application_ef_esp_50k.md`)
+- Draft ESP Office Hours prep note (official EF links only) (`docs/grant_office_hours_ef_esp.md`)
 
 ### Changed
 
