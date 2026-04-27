@@ -161,7 +161,7 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
              BankingRiskAction.verify_evidence("not-a-map")
   end
 
-  test "verify_evidence rejects evidence with payload missing trace", ctx do
+  test "verify_evidence rejects evidence with missing payload key set", ctx do
     result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
 
     malformed_evidence =
@@ -242,6 +242,10 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
     }
 
     evidence = BankingRiskAction.export_evidence({:ok, payload})
+
+    assert evidence["digest"] ==
+             "5bf235299710b8fd15b33db799a326a7075a620d056af29a2fd8f34b29d89767"
+
     assert {:ok, %{status: :verified}} = BankingRiskAction.verify_evidence(evidence)
   end
 end

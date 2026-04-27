@@ -2,6 +2,9 @@ defmodule Pythia.Showcase.BankingRiskAction do
   @moduledoc """
   Deterministic local showcase for banking AI-risk decision-time replay and audit reasoning.
   This module is a local governance/audit showcase and does not implement real banking controls.
+
+  DateTime values are canonicalized with `DateTime.to_iso8601/1`. Evidence digests are therefore
+  sensitive to timestamp precision (e.g., second-level literals vs microsecond timestamps).
   """
 
   @supported_action_types MapSet.new([
@@ -164,6 +167,8 @@ defmodule Pythia.Showcase.BankingRiskAction do
 
   The payload is normalized and then validated against the export schema
   (`status`, `stop_reason`, `trace`) before digesting.
+  Raises `ArgumentError` if keys are missing, unexpected keys are present, status is unsupported,
+  or trace is not a list.
   """
   @spec digest_export_payload(map()) :: map()
   def digest_export_payload(payload) when is_map(payload) do
@@ -373,6 +378,12 @@ defmodule Pythia.Showcase.BankingRiskAction do
   end
 
   defp whitelist_payload_fields(export) do
+    keys = export |> Map.keys() |> MapSet.new()
+
+    unless MapSet.equal?(keys, @export_payload_keys) do
+      raise ArgumentError, "export payload must contain only status, stop_reason, trace"
+    end
+
     status = Map.fetch!(export, "status")
     stop_reason = Map.fetch!(export, "stop_reason")
     trace = Map.fetch!(export, "trace")

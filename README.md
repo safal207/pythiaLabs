@@ -55,7 +55,8 @@ PythiaLabs currently does not claim:
 - JSON via `jason`
 - CI: GitHub Actions
 - License: Apache License 2.0
-- Runtime note: canonical float encoding in evidence paths uses Erlang/OTP 25+ behavior (`:erlang.float_to_binary/2` with `[:short]`)
+
+Runtime note: canonical float encoding in evidence paths uses Erlang/OTP 25+ behavior (`:erlang.float_to_binary/2` with `[:short]`).
 
 ## Values
 ### Business Value
@@ -265,6 +266,8 @@ Run:
 ```bash
 mix run examples/banking_ai_risk_showcase.exs
 ```
+
+For expected reviewer-facing output, see: `docs/banking_ai_risk_showcase_expected_output.md`
 
 This is a deterministic local showcase for governance/audit reasoning. It does not claim production banking integration, regulatory compliance, or cybersecurity protection.
 
