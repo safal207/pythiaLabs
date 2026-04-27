@@ -1,0 +1,35 @@
+# Elixir / Mix
+/_build/
+/deps/
+*.ez
+/priv/
+
+# Erlang / Elixir releases
+/rel/
+*.beam
+
+# Rust
+/target/
+**/target/
+
+# Logs and crash dumps
+erl_crash.dump
+*.log
+
+# Coverage / test artifacts
+/cover/
+/coverage/
+.junit/
+tmp/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
