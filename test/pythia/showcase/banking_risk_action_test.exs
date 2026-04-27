@@ -72,4 +72,51 @@ defmodule Pythia.Showcase.BankingRiskActionTest do
     assert {:error, %{status: :rejected, reason: :digest_mismatch}} =
              BankingRiskAction.verify_evidence(tampered)
   end
+
+  test "evidence with unexpected top-level key is rejected", ctx do
+    result = BankingRiskAction.evaluate(ctx.action, ctx.governance_record)
+
+    tampered =
+      result
+      |> BankingRiskAction.export_evidence()
+      |> Map.put("hidden_policy", "fake")
+
+    assert {:error, %{status: :rejected, reason: :invalid_evidence_shape}} =
+             BankingRiskAction.verify_evidence(tampered)
+  end
+
+  test "unsupported action_type returns unsupported_action_type", ctx do
+    action = %{ctx.action | action_type: "wire_override"}
+
+    assert {:error, %{status: :rejected, stop_reason: :unsupported_action_type}} =
+             BankingRiskAction.evaluate(action, ctx.governance_record)
+  end
+
+  test "authorization_not_yet_valid is rejected", ctx do
+    record = %{ctx.governance_record | authorization_valid_from: ~U[2026-04-26 09:30:00Z]}
+
+    assert {:error, %{status: :rejected, stop_reason: :authorization_not_yet_valid}} =
+             BankingRiskAction.evaluate(ctx.action, record)
+  end
+
+  test "authorization_expired is rejected", ctx do
+    record = %{ctx.governance_record | authorization_valid_to: ~U[2026-04-26 08:50:00Z]}
+
+    assert {:error, %{status: :rejected, stop_reason: :authorization_expired}} =
+             BankingRiskAction.evaluate(ctx.action, record)
+  end
+
+  test "evidence_recorded_after_decision_time is rejected", ctx do
+    record = %{ctx.governance_record | evidence_observed_at: ~U[2026-04-26 09:03:00Z]}
+
+    assert {:error, %{status: :rejected, stop_reason: :evidence_recorded_after_decision_time}} =
+             BankingRiskAction.evaluate(ctx.action, record)
+  end
+
+  test "missing_decision_time_knowledge is rejected", ctx do
+    record = %{ctx.governance_record | decision_time_knowledge_present: false}
+
+    assert {:error, %{status: :rejected, stop_reason: :missing_decision_time_knowledge}} =
+             BankingRiskAction.evaluate(ctx.action, record)
+  end
 end

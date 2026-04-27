@@ -40,6 +40,7 @@ defmodule Pythia.Showcase.BankingRiskAction do
 
   @artifact_type "pythia.banking_risk_action.decision_trace.v1"
   @integrity_algorithm "sha256"
+  @evidence_keys MapSet.new(["artifact_type", "algorithm", "digest", "payload"])
 
   @spec evaluate(map(), map()) :: {:ok, map()} | {:error, map()}
   def evaluate(action, governance_record) when is_map(action) and is_map(governance_record) do
@@ -117,6 +118,9 @@ defmodule Pythia.Showcase.BankingRiskAction do
     payload = evidence["payload"]
 
     cond do
+      not valid_evidence_key_set?(evidence) ->
+        rejected(:invalid_evidence_shape)
+
       not valid_evidence_shape?(artifact_type, algorithm, digest, payload) ->
         rejected(:invalid_evidence_shape)
 
@@ -356,6 +360,15 @@ defmodule Pythia.Showcase.BankingRiskAction do
     is_binary(artifact_type) and is_binary(algorithm) and valid_digest?(digest) and
       is_map(payload)
   end
+
+  defp valid_evidence_key_set?(evidence) when is_map(evidence) do
+    evidence
+    |> Map.keys()
+    |> MapSet.new()
+    |> MapSet.equal?(@evidence_keys)
+  end
+
+  defp valid_evidence_key_set?(_evidence), do: false
 
   defp valid_digest?(digest),
     do: is_binary(digest) and String.match?(digest, ~r/\A[0-9a-f]{64}\z/)
