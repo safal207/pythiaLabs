@@ -296,6 +296,10 @@ Additional roadmap items:
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 - Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
+## Research / Positioning / Docs
+
+- Open agentic models need evidence gates: `docs/open_agentic_models_need_evidence_gates.md`
+
 ## Project trust and governance
 
 Project governance and trust materials:
