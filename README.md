@@ -4,6 +4,15 @@ Deterministic evidence gates for high-risk agentic actions.
 
 PythiaLabs evaluates whether an AI/agent action should be allowed, blocked, or escalated under current evidence, authorization, environment, credential, and recovery context — producing replayable traces, stable stop reasons, and tamper-checkable evidence artifacts.
 
+## Project summary
+
+For a concise reviewer-facing overview, see:
+
+- **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
+- **Demo video:** https://youtu.be/IUk3iO0N4YU
+
+PythiaLabs is currently an open-source MVP with deterministic local demos. It is not presented as a production enforcement system, regulatory compliance product, or certified safety framework.
+
 ## Why this matters
 
 AI agents are moving from text generation into real actions: infrastructure changes, financial decisions, governance actions, and treasury operations. Prompt instructions alone are not a reliable safety boundary. PythiaLabs explores deterministic action gates that make high-risk decisions reviewable, replayable, and auditable.
