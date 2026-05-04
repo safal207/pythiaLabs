@@ -33,3 +33,8 @@ tmp/
 .env
 .env.*
 !.env.example
+
+# Node / Vite (site/)
+node_modules/
+site/dist/
+site/node_modules/

@@ -14,20 +14,19 @@ For a concise reviewer-facing overview, see:
 
 ## Landing Page
 
-A static landing page for PythiaLabs lives in [`site/`](site/). It is a
-lightweight HTML/CSS site with no build step, suitable for deployment via
+A landing page for PythiaLabs lives in [`site/`](site/). It is a
+lightweight TypeScript + Vite project optimized for fast loading
+(minification, tree-shaking, hashed assets), suitable for deployment via
 GitHub Pages.
 
 ### Local preview
 
 ```bash
-# Option 1: open the file directly
-open site/index.html        # macOS
-xdg-open site/index.html    # Linux
-
-# Option 2: serve locally with Python
-python3 -m http.server --directory site 8000
-# then open http://localhost:8000
+cd site
+npm install
+npm run dev       # http://localhost:5173
+npm run build     # outputs to site/dist
+npm run preview   # serve the production build
 ```
 
 ### Deploy to GitHub Pages
