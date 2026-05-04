@@ -22,7 +22,12 @@
     <meta name="twitter:card" content="summary" />
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E%E2%97%87%3C/text%3E%3C/svg%3E" />
-    <script type="module" src="/src/main.ts"></script>
+
+    <link rel="dns-prefetch" href="https://github.com" />
+    <link rel="dns-prefetch" href="https://youtu.be" />
+    <link rel="preconnect" href="https://github.com" crossorigin />
+
+    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <header class="site-header">
@@ -203,7 +208,7 @@
 
     <footer class="site-footer">
       <div class="container">
-        <p>© <span id="year"></span> PythiaLabs · Open-source MVP</p>
+        <p>© <span id="year">%BUILD_YEAR%</span> PythiaLabs · Open-source MVP</p>
       </div>
     </footer>
 
