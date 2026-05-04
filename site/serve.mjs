@@ -17,24 +17,35 @@ const mime = {
   ".ico": "image/x-icon",
 };
 
+const isInsideRoot = (p) => p === root || p.startsWith(root + path.sep);
+
 createServer(async (req, res) => {
   try {
-    const url = decodeURIComponent((req.url ?? "/").split("?")[0]);
-    let filePath = path.join(root, url);
-    const safe = path.normalize(filePath);
-    if (!safe.startsWith(root)) {
+    let url;
+    try {
+      url = decodeURIComponent((req.url ?? "/").split("?")[0]);
+    } catch {
+      res.writeHead(400).end("Bad Request");
+      return;
+    }
+    let filePath = path.normalize(path.join(root, url));
+    if (!isInsideRoot(filePath)) {
       res.writeHead(403).end("Forbidden");
       return;
     }
     let info;
     try {
-      info = await stat(safe);
+      info = await stat(filePath);
     } catch {
       res.writeHead(404).end("Not Found");
       return;
     }
     if (info.isDirectory()) {
-      filePath = path.join(safe, "index.html");
+      filePath = path.join(filePath, "index.html");
+      if (!isInsideRoot(filePath)) {
+        res.writeHead(403).end("Forbidden");
+        return;
+      }
     }
     const data = await readFile(filePath);
     const ext = path.extname(filePath);

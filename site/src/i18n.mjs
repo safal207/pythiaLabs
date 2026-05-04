@@ -293,3 +293,34 @@ export const locales = {
 };
 
 export const localeOrder = ["en", "ru", "zh"];
+
+function collectKeys(obj, prefix = "") {
+  const keys = [];
+  for (const [k, v] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${k}` : k;
+    if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+      keys.push(...collectKeys(v, path));
+    } else {
+      keys.push(path);
+    }
+  }
+  return keys;
+}
+
+export function validateLocales(reference = "en") {
+  const refKeys = new Set(collectKeys(locales[reference]));
+  const errors = [];
+  for (const id of localeOrder) {
+    if (id === reference) continue;
+    const keys = new Set(collectKeys(locales[id]));
+    for (const k of refKeys) {
+      if (!keys.has(k)) errors.push(`locale ${id}: missing key '${k}'`);
+    }
+    for (const k of keys) {
+      if (!refKeys.has(k)) errors.push(`locale ${id}: extra key '${k}'`);
+    }
+  }
+  if (errors.length) {
+    throw new Error(`locale validation failed:\n  ${errors.join("\n  ")}`);
+  }
+}

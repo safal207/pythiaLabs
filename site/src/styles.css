@@ -60,6 +60,24 @@ a:focus {
   text-decoration: underline;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--accent-strong);
+  color: #0b0d10;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+  text-decoration: none;
+}
+
 .container {
   max-width: var(--max-width);
   margin: 0 auto;

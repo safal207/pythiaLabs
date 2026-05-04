@@ -3,38 +3,58 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { transform } from "lightningcss";
 
-import { localeOrder } from "./src/i18n.mjs";
+import { localeOrder, validateLocales } from "./src/i18n.mjs";
 import { renderPage } from "./src/render.mjs";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const distDir = path.join(here, "dist");
-const cssPath = path.join(here, "src", "styles.css");
+// lightningcss browser version encoding: major << 16 | minor << 8 | patch
+const browserVersion = (major, minor = 0, patch = 0) =>
+  (major << 16) | (minor << 8) | patch;
 
-const cssSource = await readFile(cssPath);
-const { code } = transform({
-  filename: "styles.css",
-  code: cssSource,
-  minify: true,
-  sourceMap: false,
-  targets: { chrome: 100, firefox: 100, safari: 14 << 16 },
-});
-const minifiedCss = code.toString();
+async function main() {
+  validateLocales();
 
-await rm(distDir, { recursive: true, force: true });
-await mkdir(distDir, { recursive: true });
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const distDir = path.join(here, "dist");
+  const cssPath = path.join(here, "src", "styles.css");
 
-const year = new Date().getFullYear();
-let total = 0;
+  const cssSource = await readFile(cssPath);
+  const { code } = transform({
+    filename: "styles.css",
+    code: cssSource,
+    minify: true,
+    sourceMap: false,
+    targets: {
+      chrome: browserVersion(100),
+      firefox: browserVersion(100),
+      safari: browserVersion(14),
+    },
+  });
+  const minifiedCss = code.toString();
 
-for (const id of localeOrder) {
-  const html = renderPage(id, year).replace("__INLINE_CSS__", minifiedCss);
-  const outDir = id === "en" ? distDir : path.join(distDir, id);
-  if (id !== "en") await mkdir(outDir, { recursive: true });
-  const outPath = path.join(outDir, "index.html");
-  await writeFile(outPath, html, "utf8");
-  total += Buffer.byteLength(html);
-  const rel = path.relative(distDir, outPath);
-  process.stdout.write(`  ${rel.padEnd(20)} ${(Buffer.byteLength(html) / 1024).toFixed(2)} KB\n`);
+  await rm(distDir, { recursive: true, force: true });
+  await mkdir(distDir, { recursive: true });
+
+  const year = new Date().getFullYear();
+  let total = 0;
+
+  for (const id of localeOrder) {
+    const html = renderPage(id, year).replace("__INLINE_CSS__", minifiedCss);
+    const outDir = id === "en" ? distDir : path.join(distDir, id);
+    if (id !== "en") await mkdir(outDir, { recursive: true });
+    const outPath = path.join(outDir, "index.html");
+    await writeFile(outPath, html, "utf8");
+    const size = Buffer.byteLength(html);
+    total += size;
+    const rel = path.relative(distDir, outPath);
+    process.stdout.write(`  ${rel.padEnd(20)} ${(size / 1024).toFixed(2)} KB\n`);
+  }
+
+  process.stdout.write(
+    `\nbuilt ${localeOrder.length} pages (${(total / 1024).toFixed(2)} KB total)\n`,
+  );
 }
 
-process.stdout.write(`\nbuilt ${localeOrder.length} pages (${(total / 1024).toFixed(2)} KB total)\n`);
+main().catch((err) => {
+  process.stderr.write(`build failed: ${err?.stack ?? err}\n`);
+  process.exit(1);
+});
