@@ -15,18 +15,27 @@ For a concise reviewer-facing overview, see:
 ## Landing Page
 
 A landing page for PythiaLabs lives in [`site/`](site/). It is a
-lightweight TypeScript + Vite project optimized for fast loading
-(minification, tree-shaking, hashed assets), suitable for deployment via
-GitHub Pages.
+zero-runtime-JS static site optimized for fast loading: a small Node build
+script renders three localized pages (English, Russian, Chinese) with all
+CSS inlined, so each page is a single HTTP request.
+
+Output structure:
+
+- `dist/index.html`   — English (default)
+- `dist/ru/index.html` — Русский
+- `dist/zh/index.html` — 中文 (Simplified)
+
+`<link rel="alternate" hreflang>` tags and a header language switcher
+connect the three locales.
 
 ### Local preview
 
 ```bash
 cd site
 npm install
-npm run dev       # http://localhost:5173
-npm run build     # outputs to site/dist
-npm run preview   # serve the production build
+npm run build     # writes dist/
+npm run preview   # serves dist/ at http://localhost:5173
+npm run dev       # build + serve in one step
 ```
 
 ### Deploy to GitHub Pages
