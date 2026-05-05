@@ -68,8 +68,7 @@ defmodule Pythia.Mcp.JsonEvaluator do
         {:error,
          %{
            error: "missing_gate",
-           message:
-             "required field \"gate\" (one of: #{Enum.join(@supported_gates, ", ")})"
+           message: "required field \"gate\" (one of: #{Enum.join(@supported_gates, ", ")})"
          }}
 
       other ->
