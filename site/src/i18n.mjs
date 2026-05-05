@@ -1,11 +1,16 @@
 export const locales = {
   en: {
     htmlLang: "en",
+    ogLocale: "en_US",
     langLabel: "EN",
     meta: {
       title: "Pre-execution safety gate for AI agents — PythiaLabs",
       description:
-        "PythiaLabs is the pre-execution safety gate for AI agents. Decides whether an agent's action should ALLOW, BLOCK, or ESCALATE — before it executes — with replayable evidence.",
+        "Open-source pre-execution gate for AI and agentic systems: ALLOW, BLOCK, or ESCALATE before tools run. Deterministic checks, replayable traces, audit-ready evidence — self-hosted Elixir library, Apache-2.0.",
+      keywords:
+        "AI agent safety, pre-execution gate, agentic AI, AI governance, ALLOW BLOCK ESCALATE, deterministic policy gate, audit trail, open source AI safety, Apache-2.0, Elixir agent guard, OPA RBAC complement, DevOps AI agents, fintech AI risk, Web3 treasury governance",
+      ogImageAlt:
+        "PythiaLabs — pre-execution safety gate for AI agents: verify actions before they execute",
     },
     nav: {
       problem: "Problem",
@@ -328,11 +333,16 @@ export const locales = {
 
   ru: {
     htmlLang: "ru",
+    ogLocale: "ru_RU",
     langLabel: "RU",
     meta: {
       title: "Pre-execution safety gate для AI-агентов — PythiaLabs",
       description:
-        "PythiaLabs — pre-execution safety gate для AI-агентов. Решает, должно ли действие агента быть ALLOW, BLOCK или ESCALATE до выполнения, с воспроизводимыми доказательствами.",
+        "Open-source шлюз до выполнения для AI и agentic-систем: ALLOW, BLOCK или ESCALATE до запуска tools. Детерминированные проверки, воспроизводимые трассы, артефакты для аудита — self-hosted Elixir-библиотека, Apache-2.0.",
+      keywords:
+        "безопасность AI-агентов, pre-execution gate, agentic AI, governance AI, ALLOW BLOCK ESCALATE, детерминированный policy gate, audit trail, open source AI safety, Apache-2.0, Elixir guard, OPA RBAC, DevOps агенты, финтех риск AI, Web3 treasury",
+      ogImageAlt:
+        "PythiaLabs — pre-execution safety gate для AI-агентов: проверка действий до выполнения",
     },
     nav: {
       problem: "Проблема",
@@ -655,11 +665,15 @@ export const locales = {
 
   zh: {
     htmlLang: "zh-Hans",
+    ogLocale: "zh_CN",
     langLabel: "中文",
     meta: {
       title: "面向 AI Agent 的执行前安全门控 — PythiaLabs",
       description:
-        "PythiaLabs 是面向 AI Agent 的执行前安全门控。在执行前判定行动应 ALLOW、BLOCK 或 ESCALATE，并产出可重放的证据。",
+        "面向 AI 与 agentic 系统的开源执行前门控：在工具运行前给出 ALLOW、BLOCK 或 ESCALATE。确定性检查、可重放轨迹、审计友好证据——自托管 Elixir 库，Apache-2.0。",
+      keywords:
+        "AI Agent 安全, 执行前门控, agentic AI, AI 治理, ALLOW BLOCK ESCALATE, 确定性策略门控, 审计轨迹, 开源 AI 安全, Apache-2.0, Elixir, OPA RBAC, DevOps Agent, 金融科技 AI 风险, Web3 金库治理",
+      ogImageAlt: "PythiaLabs — AI Agent 执行前安全门控：先验证再执行",
     },
     nav: {
       problem: "问题",
