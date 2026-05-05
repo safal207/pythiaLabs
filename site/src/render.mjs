@@ -234,7 +234,7 @@ export function renderPage(currentId, year, buildDate) {
     .join("");
 
   return `<!doctype html>
-<html lang="${t.htmlLang}">
+<html lang="${t.htmlLang}" translate="no">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
