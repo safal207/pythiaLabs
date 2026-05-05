@@ -38,6 +38,7 @@ export const locales = {
         "In one sitting: clone the repo, run `mix test`, run a showcase, and compare stdout to the golden outputs in `docs/` — a replayable decision record you can show to security.",
       startHereLabel: "New here? Start with Quick start",
       starsAlt: "GitHub stars",
+      mcpBadgeAlt: "MCP-ready: Cursor & IDE bridge",
     },
     trustStrip: [
       "100% open-source",
@@ -487,6 +488,7 @@ export const locales = {
         "За одну сессию: клонируйте репозиторий, выполните `mix test`, запустите showcase и сравните stdout с эталонами в `docs/` — воспроизводимую запись решения можно показать security.",
       startHereLabel: "Новичок здесь? Начните с «Быстрого старта»",
       starsAlt: "Звёзды на GitHub",
+      mcpBadgeAlt: "MCP-ready: мост в Cursor и IDE",
     },
     trustStrip: [
       "100% open-source",
@@ -935,6 +937,7 @@ export const locales = {
         "用一晚上就够：克隆仓库、运行 `mix test`、执行 showcase，并将标准输出与 `docs/` 中的预期输出对照——这是可给安全团队看的、可重放的决策记录。",
       startHereLabel: "第一次来？从「快速上手」开始",
       starsAlt: "GitHub 星标",
+      mcpBadgeAlt: "支持 MCP：连接 Cursor 与 IDE",
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
     cta: {
