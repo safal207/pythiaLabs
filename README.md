@@ -275,6 +275,19 @@ This demonstrates the Temporal-Causal Memory Stack idea without requiring XTDB o
 
 Runtime note: canonical float encoding in evidence paths uses Erlang/OTP 25+ behavior (`:erlang.float_to_binary/2` with `[:short]`).
 
+## Storage Architecture
+
+PythiaLabs separates three kinds of truth:
+
+- Postgres — product truth: teams, paid reviews, pilots, workflow submissions.
+- TimescaleDB — temporal measurement truth: decision events, latency, outcome trends, failure classes.
+- LiminalDB — adaptive causal-memory truth: agentic state, causal transitions, evidence evolution, and replayable decision context.
+
+The gate decides before execution.
+The storage architecture preserves why that decision was valid, measurable, and auditable.
+
+[Read the database architecture](docs/database_architecture.md)
+
 ## Current MVP status
 
 PythiaLabs is currently an MVP focused on:
