@@ -100,6 +100,7 @@ export const locales = {
       coreLabel: "Core message",
       core: "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
       fallback: "Watch on YouTube",
+      iframeTitle: "PythiaLabs demo video",
     },
     problem: {
       title: "The dangerous gap in agentic AI",
@@ -536,6 +537,7 @@ export const locales = {
       coreLabel: "Главный тезис",
       core: "Будущее agent safety — не пост-фактум дебаг. Это контроль до выполнения.",
       fallback: "Смотреть на YouTube",
+      iframeTitle: "Видео-демо PythiaLabs",
     },
     problem: {
       title: "Опасный разрыв в agentic AI",
@@ -964,6 +966,7 @@ export const locales = {
       coreLabel: "核心信息",
       core: "Agent 安全的未来不是事后调试，而是执行前的控制。",
       fallback: "在 YouTube 观看",
+      iframeTitle: "PythiaLabs 演示视频",
     },
     problem: {
       title: "Agentic AI 中的危险缺口",

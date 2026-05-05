@@ -407,7 +407,7 @@ export function renderPage(currentId, year, buildDate) {
           <div class="video-frame">
             <iframe
               src="${siteConfig.demoEmbedUrl}"
-              title="PythiaLabs demo"
+              title="${escape(t.videoBlock.iframeTitle)}"
               loading="lazy"
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
