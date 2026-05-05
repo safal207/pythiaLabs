@@ -153,6 +153,7 @@ export function renderPage(currentId, year) {
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
           <a href="#demo">${escape(t.nav.demo)}</a>
+          <a href="#faq">${escape(t.nav.faq)}</a>
           <a href="#contact">${escape(t.nav.contact)}</a>
         </nav>
         <div class="lang-switcher" role="group" aria-label="Language">${langSwitcher}</div>
@@ -180,6 +181,12 @@ export function renderPage(currentId, year) {
           </p>
         </div>
       </section>
+
+      <aside class="trust-strip" aria-label="Trust signals">
+        <div class="container">
+          <ul>${t.trustStrip.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
+        </div>
+      </aside>
 
       <section id="problem" class="section">
         <div class="container">
@@ -219,6 +226,30 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
+      <section id="value" class="section section-alt">
+        <div class="container">
+          <h2>${escape(t.valueStack.title)}</h2>
+          <ul class="value-stack">${t.valueStack.items.map((s) => `<li><span class="check" aria-hidden="true">✓</span><span>${escape(s)}</span></li>`).join("")}</ul>
+          <p class="value-stack-footer"><span class="value-price">${escape(t.valueStack.footer)}</span></p>
+        </div>
+      </section>
+
+      <section id="comparison" class="section">
+        <div class="container">
+          <h2>${escape(t.comparison.title)}</h2>
+          <div class="compare-grid">
+            <div class="compare-col compare-without">
+              <h3><span class="compare-mark" aria-hidden="true">✕</span> ${escape(t.comparison.withoutTitle)}</h3>
+              <ul>${t.comparison.withoutItems.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
+            </div>
+            <div class="compare-col compare-with">
+              <h3><span class="compare-mark" aria-hidden="true">✓</span> ${escape(t.comparison.withTitle)}</h3>
+              <ul>${t.comparison.withItems.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="demo" class="section section-alt">
         <div class="container">
           <h2>${escape(t.demo.title)}</h2>
@@ -243,14 +274,29 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
+      <section id="faq" class="section section-alt">
+        <div class="container">
+          <h2>${escape(t.faq.title)}</h2>
+          <div class="faq-list">
+            ${t.faq.items
+              .map(
+                (item) => `<details class="faq-item"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`,
+              )
+              .join("")}
+          </div>
+        </div>
+      </section>
+
       <section id="pilot" class="section section-cta">
         <div class="container">
+          <p class="cta-eyebrow">${escape(t.finalCta.eyebrow)}</p>
           <h2>${escape(t.finalCta.title)}</h2>
           <p>${escape(t.finalCta.text)}</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
             <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "pilot_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
           </div>
+          <p class="cta-reassurance">${escape(t.finalCta.reassurance)}</p>
         </div>
       </section>
 
@@ -263,13 +309,15 @@ export function renderPage(currentId, year) {
 
       <section id="founder" class="section section-alt">
         <div class="container">
-          <h2>${escape(t.founder.title)}</h2>
-          <div class="founder">
-            <p class="founder-name">${escape(siteConfig.founderName)}</p>
-            <p class="founder-role">${escape(t.founder.role)}</p>
-            <p>${escape(t.founder.exp)}</p>
-            <p>${escape(t.founder.focus)}</p>
-          </div>
+          <h2>${escape(t.founderLetter.title)}</h2>
+          <blockquote class="founder-letter">
+            <p>${escape(t.founderLetter.body)}</p>
+            <footer>
+              <p class="founder-name">${escape(siteConfig.founderName)}</p>
+              <p class="founder-role">${escape(t.founder.role)} · ${escape(t.founder.exp)}</p>
+              <p class="founder-signoff">${escape(t.founderLetter.signoff)}</p>
+            </footer>
+          </blockquote>
         </div>
       </section>
 
@@ -286,6 +334,13 @@ export function renderPage(currentId, year) {
         </div>
       </section>
     </main>
+
+    <div class="sticky-bar" role="complementary" aria-label="Pilot CTA">
+      <div class="container sticky-bar-row">
+        <span class="sticky-bar-label">${escape(t.stickyBar.label)}</span>
+        <a class="btn btn-primary btn-compact" href="${pilotHref}" rel="noopener noreferrer">${escape(t.stickyBar.cta)} →</a>
+      </div>
+    </div>
 
     <footer class="site-footer">
       <div class="container footer-row">
