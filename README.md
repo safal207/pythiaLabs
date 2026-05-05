@@ -77,9 +77,23 @@ Run:
 make demo
 ```
 
-This deterministic local demo shows a risky proposed Web3 treasury transfer of 25,000 USDC, runs evidence checks, returns an `ESCALATE` decision with a stable stop reason, and writes a JSON artifact to `examples/output/paid_review_demo_artifact.json`.
+A single-command, deterministic demo that drives the real
+`Pythia.Showcase.Web3TreasuryAction` engine through four Web3 treasury
+scenarios — one accepted transfer plus three orthogonal rejection reasons
+(quorum, timelock, transfer-window expiration) — and a counterfactual that
+flips one evidence field to show the decision flip.
 
-For expected reviewer-facing output, see `examples/paid_review_demo_expected_output.md`.
+For each scenario the demo:
+
+- runs the engine and prints the per-check evidence trace,
+- builds an evidence envelope with a real SHA-256 digest, and
+- calls `Pythia.Showcase.Web3TreasuryAction.verify_evidence/1` to confirm the
+  digest round-trips.
+
+Inputs live in `examples/paid_review_demo_input.json`; the run writes a bundle
+of evidence envelopes to `examples/output/paid_review_demo_artifact.json`
+(gitignored — regenerated each run). For expected reviewer-facing output, see
+`examples/paid_review_demo_expected_output.md`.
 
 ## Cursor / IDE bridge (MCP)
 
