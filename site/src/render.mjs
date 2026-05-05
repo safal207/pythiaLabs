@@ -13,15 +13,19 @@ const li = (s) => `<li>${escape(s)}</li>`;
 const ARTIFACT_JSON = `{
   "outcome": "BLOCK",
   "stop_reason": "evidence_stale",
+  "canonicalization": "pythia.canonical_export.v1",
   "checks": {
-    "authorization":      "pass",
-    "evidence_freshness": "fail",
+    "authorization":       "pass",
+    "evidence_freshness":  "fail",
     "permission_boundary": "pass",
-    "credentials":        "pass",
-    "action_risk":        "high"
+    "credentials":         "pass",
+    "action_risk":         "high"
   },
   "trace_id": "01HXR7Q9P3K4...",
-  "digest":   "sha256:9f86d081884c..."
+  "digest": {
+    "algorithm": "sha256",
+    "digest":    "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+  }
 }`;
 
 const exampleDecisions = {
@@ -211,6 +215,7 @@ export function renderPage(currentId, year) {
           <a href="#problem">${escape(t.nav.problem)}</a>
           <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
+          <a href="#integration">${escape(t.nav.integration)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
           <a href="#videos">${escape(t.nav.videos)}</a>
           <a href="#faq">${escape(t.nav.faq)}</a>
@@ -349,6 +354,20 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
+      <section id="integration" class="section">
+        <div class="container">
+          <h2>${escape(t.integration.title)}</h2>
+          <p>${escape(t.integration.intro)}</p>
+          <div class="card-grid">${t.integration.items
+            .map(
+              (item) =>
+                `<article class="card"><h3>${escape(item.name)}</h3><p>${escape(item.desc)}</p></article>`,
+            )
+            .join("")}</div>
+          <p class="integration-repo-note">${escape(t.integration.repoNote)}</p>
+        </div>
+      </section>
+
       <section id="value" class="section">
         <div class="container">
           <h2>${escape(t.valueStack.title)}</h2>
@@ -443,7 +462,8 @@ export function renderPage(currentId, year) {
           <div class="faq-list">
             ${t.faq.items
               .map(
-                (item) => `<details class="faq-item"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`,
+                (item) =>
+                  `<details class="faq-item"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`,
               )
               .join("")}
           </div>
