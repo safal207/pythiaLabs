@@ -1,13 +1,22 @@
 defmodule Pythia.Mcp.JsonEvaluator do
   @moduledoc """
-  JSON bridge for IDE / MCP clients: decodes a proposal + safety context,
-  runs `Pythia.Showcase.AgentInfraAction.evaluate/2`, returns JSON-friendly maps.
+  JSON bridge for IDE / MCP clients: decodes a proposal plus context maps,
+  runs the matching deterministic showcase gate, returns JSON-friendly maps.
 
-  Input is a JSON object with string keys. Required top-level key `"gate"`.
-  Currently supported: `"agent_infra_action"` (matches the infrastructure showcase gate).
+  Input uses string keys. Required top-level key `"gate"`:
+
+  - `"agent_infra_action"` — requires `"action"` and `"safety_context"` (see infra showcase).
+  - `"banking_risk_action"` — requires `"action"` and `"governance"` (see banking showcase).
+  - `"web3_treasury_action"` — requires `"action"` and `"governance"` (see treasury showcase).
   """
 
-  alias Pythia.Showcase.AgentInfraAction
+  alias Pythia.Showcase.{
+    AgentInfraAction,
+    BankingRiskAction,
+    Web3TreasuryAction
+  }
+
+  @supported_gates ~w(agent_infra_action banking_risk_action web3_treasury_action)
 
   @doc """
   Parses `json_string` and returns `{:ok, response_map}` or `{:error, error_map}`.
@@ -32,47 +41,75 @@ defmodule Pythia.Mcp.JsonEvaluator do
 
     case gate do
       "agent_infra_action" ->
-        with {:ok, action} <- decode_action(Map.get(decoded, "action", %{})),
+        with {:ok, action} <- decode_infra_action(Map.get(decoded, "action", %{})),
              {:ok, ctx} <- decode_safety_context(Map.get(decoded, "safety_context", %{})) do
           raw = AgentInfraAction.evaluate(action, ctx)
           evidence = AgentInfraAction.export_evidence(raw)
-          {:ok, build_response(raw, evidence)}
+          {:ok, build_response(AgentInfraAction, raw, evidence)}
+        end
+
+      "banking_risk_action" ->
+        with {:ok, action} <- decode_banking_action(Map.get(decoded, "action", %{})),
+             {:ok, gov} <- decode_banking_governance(get_governance(decoded)) do
+          raw = BankingRiskAction.evaluate(action, gov)
+          evidence = BankingRiskAction.export_evidence(raw)
+          {:ok, build_response(BankingRiskAction, raw, evidence)}
+        end
+
+      "web3_treasury_action" ->
+        with {:ok, action} <- decode_web3_action(Map.get(decoded, "action", %{})),
+             {:ok, gov} <- decode_web3_governance(get_governance(decoded)) do
+          raw = Web3TreasuryAction.evaluate(action, gov)
+          evidence = Web3TreasuryAction.export_evidence(raw)
+          {:ok, build_response(Web3TreasuryAction, raw, evidence)}
         end
 
       nil ->
         {:error,
          %{
            error: "missing_gate",
-           message: "required field \"gate\" (e.g. \"agent_infra_action\")"
+           message: "required field \"gate\" (one of: #{Enum.join(@supported_gates, ", ")})"
          }}
 
       other ->
         {:error,
-         %{error: "unknown_gate", gate: other, message: "supported: [\"agent_infra_action\"]"}}
+         %{
+           error: "unknown_gate",
+           gate: other,
+           message: "supported: #{inspect(@supported_gates)}"
+         }}
     end
   end
 
   defp evaluate_decoded(_),
     do: {:error, %{error: "invalid_body", message: "JSON root must be an object"}}
 
-  defp build_response({:ok, payload}, evidence) do
+  defp get_governance(decoded) do
+    cond do
+      Map.has_key?(decoded, "governance") -> Map.get(decoded, "governance") || %{}
+      Map.has_key?(decoded, "governance_record") -> Map.get(decoded, "governance_record") || %{}
+      true -> %{}
+    end
+  end
+
+  defp build_response(mod, {:ok, payload}, evidence) do
     %{
       ok: true,
       outcome: "ALLOW",
       status: "accepted",
       stop_reason: format_stop_reason(payload[:stop_reason]),
-      export: AgentInfraAction.export_result({:ok, payload}),
+      export: mod.export_result({:ok, payload}),
       evidence: evidence
     }
   end
 
-  defp build_response({:error, payload}, evidence) do
+  defp build_response(mod, {:error, payload}, evidence) do
     %{
       ok: true,
       outcome: "BLOCK",
       status: "rejected",
       stop_reason: format_stop_reason(payload[:stop_reason]),
-      export: AgentInfraAction.export_result({:error, payload}),
+      export: mod.export_result({:error, payload}),
       evidence: evidence
     }
   end
@@ -81,7 +118,7 @@ defmodule Pythia.Mcp.JsonEvaluator do
   defp format_stop_reason(atom) when is_atom(atom), do: Atom.to_string(atom)
   defp format_stop_reason(other), do: to_string(other)
 
-  defp decode_action(raw) when is_map(raw) do
+  defp decode_infra_action(raw) when is_map(raw) do
     required = [
       :action_id,
       :action_type,
@@ -101,6 +138,81 @@ defmodule Pythia.Mcp.JsonEvaluator do
          action_time: action_time,
          decision_time: decision_time
        })}
+    end
+  end
+
+  defp decode_banking_action(raw) when is_map(raw) do
+    strings = [:action_id, :action_type, :operator_id, :account_id]
+
+    with {:ok, fields} <- fetch_required_string(raw, strings),
+         {:ok, action_time} <- fetch_iso_datetime(raw, "action_time", :action_time),
+         {:ok, decision_time} <- fetch_iso_datetime(raw, "decision_time", :decision_time) do
+      {:ok,
+       Map.merge(fields, %{
+         action_time: action_time,
+         decision_time: decision_time
+       })}
+    end
+  end
+
+  defp decode_banking_governance(raw) when is_map(raw) do
+    datetimes = [
+      :authorization_valid_from,
+      :authorization_valid_to,
+      :authorization_recorded_at,
+      :evidence_observed_at,
+      :evidence_valid_until
+    ]
+
+    bools = [:decision_time_knowledge_present, :operator_approval_present]
+
+    with {:ok, dt} <- fetch_iso_datetimes(raw, datetimes),
+         {:ok, bo} <- fetch_required_bool(raw, bools) do
+      {:ok, Map.merge(dt, bo)}
+    end
+  end
+
+  defp decode_web3_action(raw) when is_map(raw) do
+    strings = [
+      :action_id,
+      :action_type,
+      :actor,
+      :dao_id,
+      :proposal_id,
+      :asset,
+      :recipient,
+      :required_permission
+    ]
+
+    with {:ok, fields} <- fetch_required_string(raw, strings),
+         {:ok, amount} <- get_int(raw, "amount", :amount),
+         {:ok, action_time} <- fetch_iso_datetime(raw, "action_time", :action_time),
+         {:ok, decision_time} <- fetch_iso_datetime(raw, "decision_time", :decision_time) do
+      {:ok,
+       Map.merge(fields, %{
+         amount: amount,
+         action_time: action_time,
+         decision_time: decision_time
+       })}
+    end
+  end
+
+  defp decode_web3_governance(raw) when is_map(raw) do
+    strings = [:proposal_id, :permission]
+
+    datetimes = [
+      :voting_closed_at,
+      :timelock_until,
+      :authorization_valid_from,
+      :authorization_valid_to,
+      :authorization_recorded_at,
+      :transfer_expires_at
+    ]
+
+    with {:ok, str} <- fetch_required_string(raw, strings),
+         {:ok, quorum_met} <- get_bool(raw, "quorum_met", :quorum_met),
+         {:ok, dt} <- fetch_iso_datetimes(raw, datetimes) do
+      {:ok, Map.merge(str, Map.put(dt, :quorum_met, quorum_met))}
     end
   end
 
@@ -180,6 +292,33 @@ defmodule Pythia.Mcp.JsonEvaluator do
       false -> {:ok, false}
       nil -> {:error, %{error: "missing_field", field: key}}
       _ -> {:error, %{error: "invalid_field", field: key, expected: "boolean"}}
+    end
+  end
+
+  defp fetch_iso_datetimes(raw, fields) do
+    Enum.reduce_while(fields, {:ok, %{}}, fn field, {:ok, acc} ->
+      key = Atom.to_string(field)
+
+      case fetch_iso_datetime(raw, key, field) do
+        {:ok, dt} -> {:cont, {:ok, Map.put(acc, field, dt)}}
+        {:error, e} -> {:halt, {:error, e}}
+      end
+    end)
+  end
+
+  defp get_int(raw, key, field) do
+    val =
+      cond do
+        Map.has_key?(raw, key) -> Map.fetch!(raw, key)
+        Map.has_key?(raw, field) -> Map.fetch!(raw, field)
+        true -> nil
+      end
+
+    case val do
+      nil -> {:error, %{error: "missing_field", field: key}}
+      v when is_integer(v) -> {:ok, v}
+      v when is_float(v) and trunc(v) == v -> {:ok, trunc(v)}
+      _ -> {:error, %{error: "invalid_field", field: key, expected: "integer"}}
     end
   end
 
