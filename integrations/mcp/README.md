@@ -150,6 +150,21 @@ echo '{"gate":"banking_risk_action", ... }' | mix pythia.eval_json
 mix pythia.eval_json --file proposal.json
 ```
 
+## Smoke test
+
+A standalone Node script drives the server through stdio with a stub `mix` on
+`$PATH`, so it runs without any Elixir installed. Useful as a fast regression
+check when changing `server.mjs`:
+
+```bash
+node integrations/mcp/smoke.mjs
+# or
+npm --prefix integrations/mcp run smoke
+```
+
+The same script runs in CI on PRs that touch `integrations/mcp/**` or
+`schemas/mcp/**` (see `.github/workflows/mcp.yml`).
+
 ## Limitations (MVP)
 
 - Deterministic local showcases only; MCP is a bridge, not a remote API.

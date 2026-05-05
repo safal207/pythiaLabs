@@ -8,7 +8,8 @@
     "pythialabs-mcp": "./server.mjs"
   },
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "smoke": "node smoke.mjs"
   },
   "engines": {
     "node": ">=18"

@@ -1,0 +1,33 @@
+name: MCP
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "integrations/mcp/**"
+      - "schemas/mcp/**"
+      - ".github/workflows/mcp.yml"
+  pull_request:
+    paths:
+      - "integrations/mcp/**"
+      - "schemas/mcp/**"
+      - ".github/workflows/mcp.yml"
+
+jobs:
+  smoke:
+    name: server.mjs smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Syntax check (server + smoke)
+        run: |
+          node --check integrations/mcp/server.mjs
+          node --check integrations/mcp/smoke.mjs
+
+      - name: Run MCP smoke test
+        run: node integrations/mcp/smoke.mjs
