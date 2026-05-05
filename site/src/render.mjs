@@ -216,6 +216,7 @@ export function renderPage(currentId, year) {
           <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#integration">${escape(t.nav.integration)}</a>
+          <a href="#pilot-outcome">${escape(t.nav.pilot)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
           <a href="#videos">${escape(t.nav.videos)}</a>
           <a href="#faq">${escape(t.nav.faq)}</a>
@@ -234,9 +235,9 @@ export function renderPage(currentId, year) {
           <p class="hero-text">${escape(t.hero.body)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
-            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.tertiary)}</a>
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-badges">
             <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
@@ -273,6 +274,20 @@ export function renderPage(currentId, year) {
               <dd>${escape(example.evidence)}</dd>
             </div>
           </dl>
+        </div>
+      </section>
+
+      <section id="pilot-outcome" class="section">
+        <div class="container">
+          <h2>${escape(t.pilotOutcome.title)}</h2>
+          <p>${escape(t.pilotOutcome.intro)}</p>
+          <ul class="value-stack pilot-outcome-list">${t.pilotOutcome.items
+            .map(
+              (s) =>
+                `<li><span class="check" aria-hidden="true">✓</span><span>${escape(s)}</span></li>`,
+            )
+            .join("")}</ul>
+          <p class="pilot-outcome-footnote">${escape(t.pilotOutcome.footnote)}</p>
         </div>
       </section>
 
@@ -349,7 +364,11 @@ export function renderPage(currentId, year) {
       <section id="artifact" class="section section-alt">
         <div class="container">
           <h2>${escape(t.artifact.title)}</h2>
-          <p>${escape(t.artifact.intro)}</p>
+          <p>${escape(t.artifact.introPlain)}</p>
+          <details class="artifact-technical">
+            <summary>${escape(t.artifact.technicalSummary)}</summary>
+            <p>${escape(t.artifact.introTechnical)}</p>
+          </details>
           <pre class="code-block" aria-label="Example evidence artifact JSON"><code>${escape(ARTIFACT_JSON)}</code></pre>
         </div>
       </section>
@@ -484,9 +503,9 @@ export function renderPage(currentId, year) {
           <h2>${escape(t.finalCta.title)}</h2>
           <p>${escape(t.finalCta.body)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
-            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.tertiary)}</a>
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
           </div>
           <p class="cta-reassurance">${escape(t.finalCta.reassurance)}</p>
         </div>
