@@ -130,6 +130,55 @@ const buildCssFixes = `
   color: var(--text-muted);
   font-size: 0.92rem;
 }
+
+.support-section .support-intro {
+  max-width: 780px;
+  color: var(--text-muted);
+  font-size: 1.03rem;
+}
+
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.support-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.support-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.support-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.support-card .btn {
+  align-self: flex-start;
+}
+
+.support-note {
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
 `;
 
 const escapeHtml = (value) =>
@@ -289,6 +338,145 @@ const downloadCopy = {
   },
 };
 
+const supportCopy = {
+  en: {
+    eyebrow: "Support the project",
+    title: "Fund open-source pre-execution safety for AI agents",
+    intro:
+      "PythiaLabs is open source. Support helps fund deterministic ALLOW / BLOCK / ESCALATE decisions, structured decision-time evidence, replayable traces, and reviewer-facing artifacts for high-risk agent workflows.",
+    note: "All paths use email until payment accounts are configured.",
+    cards: [
+      {
+        title: "Support open-source development",
+        desc: "For individuals, builders, and researchers. Helps fund docs, demos, evaluators, integrations, and reviewer-facing artifacts.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20support",
+        button: "Support the work",
+      },
+      {
+        title: "Sponsor a deterministic safety showcase",
+        desc: "Fund a concrete scenario: AI coding agents before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
+        button: "Sponsor a showcase",
+      },
+      {
+        title: "Start a paid pilot",
+        desc: "For teams whose agents touch code, infrastructure, money, or governance. Map one high-risk workflow into a pre-execution gate.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20pilot",
+        button: "Discuss a pilot",
+      },
+      {
+        title: "Read the sponsorship doc",
+        desc: "Full breakdown of support tiers, paid pilot scope, and what funded work produces.",
+        href: "https://github.com/safal207/pythiaLabs/blob/main/docs/SPONSORSHIP.md",
+        button: "Open SPONSORSHIP.md",
+      },
+    ],
+  },
+  ru: {
+    eyebrow: "Поддержать проект",
+    title: "Поддержите open-source pre-execution safety для AI-агентов",
+    intro:
+      "PythiaLabs — open source. Поддержка помогает развивать детерминированные ALLOW / BLOCK / ESCALATE решения, decision-time evidence, replayable traces и артефакты для ревьюеров.",
+    note: "Пока все каналы — через email, до настройки платёжных аккаунтов.",
+    cards: [
+      {
+        title: "Поддержать open-source разработку",
+        desc: "Для тех, кто хочет, чтобы проект продолжал двигаться: документация, демо, evaluator-улучшения, интеграции.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20support",
+        button: "Поддержать",
+      },
+      {
+        title: "Спонсировать showcase",
+        desc: "Профинансировать конкретный сценарий: AI coding agents, DevOps, fintech-риски, DAO governance.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
+        button: "Спонсировать showcase",
+      },
+      {
+        title: "Запустить paid pilot",
+        desc: "Для команд, чьи агенты трогают код, инфраструктуру, деньги или governance. Один high-risk workflow → pre-execution gate.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20pilot",
+        button: "Обсудить pilot",
+      },
+      {
+        title: "Полный документ о поддержке",
+        desc: "Уровни поддержки, объём paid pilot, что получает спонсор.",
+        href: "https://github.com/safal207/pythiaLabs/blob/main/docs/SPONSORSHIP.md",
+        button: "Открыть SPONSORSHIP.md",
+      },
+    ],
+  },
+  zh: {
+    eyebrow: "Support the project",
+    title: "Fund open-source pre-execution safety for AI agents",
+    intro:
+      "PythiaLabs is open source. Support helps fund deterministic ALLOW / BLOCK / ESCALATE decisions, structured decision-time evidence, replayable traces, and reviewer-facing artifacts for high-risk agent workflows.",
+    note: "All paths use email until payment accounts are configured.",
+    cards: [
+      {
+        title: "Support open-source development",
+        desc: "For individuals, builders, and researchers. Helps fund docs, demos, evaluators, integrations, and reviewer-facing artifacts.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20support",
+        button: "Support the work",
+      },
+      {
+        title: "Sponsor a deterministic safety showcase",
+        desc: "Fund a concrete scenario: AI coding agents before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
+        button: "Sponsor a showcase",
+      },
+      {
+        title: "Start a paid pilot",
+        desc: "For teams whose agents touch code, infrastructure, money, or governance. Map one high-risk workflow into a pre-execution gate.",
+        href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20pilot",
+        button: "Discuss a pilot",
+      },
+      {
+        title: "Read the sponsorship doc",
+        desc: "Full breakdown of support tiers, paid pilot scope, and what funded work produces.",
+        href: "https://github.com/safal207/pythiaLabs/blob/main/docs/SPONSORSHIP.md",
+        button: "Open SPONSORSHIP.md",
+      },
+    ],
+  },
+};
+
+function renderSupportSection(currentId) {
+  const copy = supportCopy[currentId] ?? supportCopy.en;
+  const cards = copy.cards
+    .map(
+      (card) => `
+          <article class="support-card">
+            <div>
+              <h3>${escapeHtml(card.title)}</h3>
+              <p>${escapeHtml(card.desc)}</p>
+            </div>
+            <p><a class="btn btn-secondary" href="${escapeHtml(card.href)}" rel="noopener noreferrer">${escapeHtml(card.button)} →</a></p>
+          </article>`,
+    )
+    .join("");
+
+  return `
+      <section id="support" class="section support-section" aria-labelledby="support-title">
+        <div class="container">
+          <p class="cta-eyebrow">${escapeHtml(copy.eyebrow)}</p>
+          <h2 id="support-title">${escapeHtml(copy.title)}</h2>
+          <p class="support-intro">${escapeHtml(copy.intro)}</p>
+          <div class="support-grid">${cards}
+          </div>
+          <p class="support-note">${escapeHtml(copy.note)}</p>
+        </div>
+      </section>`;
+}
+
+function injectSupportSection(html, currentId) {
+  const section = renderSupportSection(currentId);
+  const contactMarker = "      <section id=\"contact\"";
+  if (html.includes(contactMarker)) {
+    return html.replace(contactMarker, `${section}\n\n${contactMarker}`);
+  }
+  return html.replace("\n    </main>", `\n${section}\n    </main>`);
+}
+
 function downloadHref(currentId, filename) {
   const prefix = currentId === "en" ? "./" : "../";
   return `${prefix}downloads/${filename}`;
@@ -373,8 +561,11 @@ async function main() {
   let total = 0;
 
   for (const id of localeOrder) {
-    const html = injectDownloadsSection(
-      renderPage(id, year, buildDate).replace("__INLINE_CSS__", minifiedCss),
+    const html = injectSupportSection(
+      injectDownloadsSection(
+        renderPage(id, year, buildDate).replace("__INLINE_CSS__", minifiedCss),
+        id,
+      ),
       id,
     );
     const outDir = id === "en" ? distDir : path.join(distDir, id);
