@@ -78,6 +78,23 @@ A minimal **stdio MCP server** in [`integrations/mcp/`](integrations/mcp/) calls
 echo '{"gate":"agent_infra_action","action":{...},"safety_context":{...}}' | mix pythia.eval_json
 ```
 
+For users who do not want to remember the `mix` invocation, a thin wrapper at
+[`bin/pythia`](bin/pythia) exposes the same gate as `pythia eval`:
+
+```bash
+# Stdin (auto-locates the repo from the script path)
+echo '{"gate":"agent_infra_action", ...}' | ./bin/pythia eval
+
+# Or from a file
+./bin/pythia eval --file proposal.json
+
+# Help and supported gates
+./bin/pythia --help
+```
+
+Set `PYTHIA_REPO_ROOT` if you symlink the script into your `$PATH` from outside
+the repository.
+
 Setup steps and `mcp.json` snippet: [`integrations/mcp/README.md`](integrations/mcp/README.md).
 
 ## What PythiaLabs is not yet

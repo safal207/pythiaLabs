@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Thin CLI wrapper around `mix pythia.eval_json`.
+#
+# Usage:
+#   pythia eval [--file path.json | -f path.json]    # reads stdin if no --file
+#   pythia --help
+#
+# Repo location is resolved as:
+#   $PYTHIA_REPO_ROOT  (if set)  →  the repo containing this script
+#
+# Output: a single JSON line on stdout. Exit codes match `mix pythia.eval_json`
+# (0 ok, 1 evaluator error, 2 empty input).
+
+set -euo pipefail
+
+print_usage() {
+  cat <<'USAGE'
+pythia — deterministic pre-execution gate (CLI wrapper)
+
+Usage:
+  pythia eval [--file PATH | -f PATH]
+      Evaluate one JSON proposal. Reads from stdin if --file is omitted.
+      Prints a single JSON line on stdout.
+
+  pythia --help | -h
+      Show this help.
+
+Environment:
+  PYTHIA_REPO_ROOT  Override repo root (defaults to the repo containing
+                    this script).
+
+Examples:
+  echo '{"gate":"agent_infra_action", ...}' | pythia eval
+  pythia eval --file proposal.json
+
+Gates: agent_infra_action, banking_risk_action, web3_treasury_action.
+See integrations/mcp/README.md for full request/response shapes.
+USAGE
+}
+
+resolve_repo_root() {
+  if [[ -n "${PYTHIA_REPO_ROOT:-}" ]]; then
+    printf '%s\n' "$PYTHIA_REPO_ROOT"
+    return
+  fi
+  local script_path
+  script_path=$(readlink -f "$0" 2>/dev/null || python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "$0")
+  dirname "$(dirname "$script_path")"
+}
+
+cmd_eval() {
+  local file=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --file|-f)
+        [[ $# -ge 2 ]] || { echo "pythia: --file needs a path" >&2; exit 64; }
+        file=$2
+        shift 2
+        ;;
+      -h|--help)
+        print_usage
+        return 0
+        ;;
+      *)
+        echo "pythia: unknown argument: $1" >&2
+        echo "Try: pythia --help" >&2
+        exit 64
+        ;;
+    esac
+  done
+
+  local root
+  root=$(resolve_repo_root)
+  if [[ ! -f "$root/mix.exs" ]]; then
+    echo "pythia: no mix.exs found at '$root' — set PYTHIA_REPO_ROOT" >&2
+    exit 66
+  fi
+
+  if [[ -n "$file" ]]; then
+    (cd "$root" && exec mix pythia.eval_json --file "$file")
+  else
+    (cd "$root" && exec mix pythia.eval_json)
+  fi
+}
+
+main() {
+  if [[ $# -eq 0 ]]; then
+    print_usage
+    exit 0
+  fi
+  case "$1" in
+    eval)
+      shift
+      cmd_eval "$@"
+      ;;
+    -h|--help|help)
+      print_usage
+      ;;
+    *)
+      echo "pythia: unknown command: $1" >&2
+      echo "Try: pythia --help" >&2
+      exit 64
+      ;;
+  esac
+}
+
+main "$@"
