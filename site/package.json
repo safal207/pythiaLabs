@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs && node src/inject_demo_proof.mjs",
-    "dev": "node build.mjs && node src/inject_demo_proof.mjs && node serve.mjs",
+    "build": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs",
+    "dev": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs && node serve.mjs",
     "preview": "node serve.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
