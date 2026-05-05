@@ -228,6 +228,29 @@ a:focus {
   margin: 0 0 0.75rem;
 }
 
+.hero-outcome-line {
+  font-size: 1.02rem;
+  max-width: 720px;
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.hero-start-here {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+}
+
+.hero-start-here a {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.hero-start-here a:hover,
+.hero-start-here a:focus {
+  color: var(--accent-strong);
+}
+
 .hero-support {
   color: var(--text-muted);
   max-width: 680px;
@@ -714,6 +737,16 @@ blockquote {
   left: 0;
   color: var(--allow);
   font-weight: 700;
+}
+
+.section-if-not-you {
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-if-not-you h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
 }
 
 .mid-cta {

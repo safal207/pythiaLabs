@@ -318,12 +318,16 @@ export function renderPage(currentId, year, buildDate) {
           <h1 class="hero-headline">${escape(t.hero.headline)}</h1>
           <p class="hero-subtitle">${escape(t.hero.subtitle)}</p>
           <p class="hero-text">${escape(t.hero.body)}</p>
+          <p class="hero-outcome-line">${inlineCodeToHtml(t.hero.outcomeLine)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
             <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
             <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
+          <p class="hero-start-here">
+            <a href="#quickstart">${escape(t.hero.startHereLabel)} →</a>
+          </p>
           <p class="hero-badges">
             <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
               <img src="https://img.shields.io/github/stars/${siteConfig.repoSlug}?style=flat-square&label=stars&color=0b0d10" alt="${escape(t.hero.starsAlt)}" loading="lazy" decoding="async" width="90" height="20" />
@@ -348,6 +352,13 @@ export function renderPage(currentId, year, buildDate) {
         <div class="container">
           <h2>${escape(t.ifYou.title)}</h2>
           <ul class="if-you-list">${t.ifYou.items.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
+        </div>
+      </section>
+
+      <section id="if-not-you" class="section section-if-not-you" aria-labelledby="if-not-you-title">
+        <div class="container">
+          <h2 id="if-not-you-title">${escape(t.ifNotYou.title)}</h2>
+          <ul class="not-list">${t.ifNotYou.items.map((s) => `<li><span class="not-mark" aria-hidden="true">✕</span>${escape(s)}</li>`).join("")}</ul>
         </div>
       </section>
 

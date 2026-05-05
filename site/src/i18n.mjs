@@ -33,6 +33,9 @@ export const locales = {
         "The gate returns ALLOW, BLOCK, or ESCALATE before your agent runs destructive tools — deterministic, replayable, on your infrastructure.",
       body: "Code, infra, banking, governance: when agents act, PythiaLabs evaluates the proposal and evidence first, not the chat transcript.",
       tagline: "Verify before execute. Evidence your reviewers can replay.",
+      outcomeLine:
+        "In one sitting: clone the repo, run `mix test`, run a showcase, and compare stdout to the golden outputs in `docs/` — a replayable decision record you can show to security.",
+      startHereLabel: "New here? Start with Quick start",
       starsAlt: "GitHub stars",
     },
     trustStrip: [
@@ -64,6 +67,14 @@ export const locales = {
         "Post-hoc logs are not enough: you need a decision record before the tool fires.",
         "RBAC and coarse policy are necessary but do not answer “should this exact action run right now, with this evidence?”",
         "Reviewers and security want the same replayable artifact every time — not screenshots of a thread.",
+      ],
+    },
+    ifNotYou: {
+      title: "Probably not a fit (yet) if:",
+      items: [
+        "You want a hosted control plane or a black-box SaaS that blocks actions without wiring the library into your stack.",
+        "You are not ready to model proposed actions and decision-time evidence as structured inputs to an evaluator.",
+        "You only need chat moderation or prompt filters — not a pre-execution gate before real tools run.",
       ],
     },
     quickstart: {
@@ -452,6 +463,9 @@ export const locales = {
         "Шлюз возвращает ALLOW, BLOCK или ESCALATE до того, как агент запустит разрушительные tools — детерминированно, воспроизводимо, на вашей инфре.",
       body: "Код, инфра, банки, governance: когда агент действует, PythiaLabs сначала оценивает предложение и доказательства, а не расшифровку чата.",
       tagline: "Проверка до исполнения. Доказательства, которые ревьюер может перепроиграть.",
+      outcomeLine:
+        "За одну сессию: клонируйте репозиторий, выполните `mix test`, запустите showcase и сравните stdout с эталонами в `docs/` — воспроизводимую запись решения можно показать security.",
+      startHereLabel: "Новичок здесь? Начните с «Быстрого старта»",
       starsAlt: "Звёзды на GitHub",
     },
     trustStrip: [
@@ -483,6 +497,14 @@ export const locales = {
         "Постфактум логов мало: нужна запись решения до вызова tool.",
         "RBAC и грубая политика нужны, но не отвечают: «должно ли выполниться именно это действие прямо сейчас с этими доказательствами?»",
         "Security и ревьюерам нужен один и тот же воспроизводимый артефакт — не скриншот треда.",
+      ],
+    },
+    ifNotYou: {
+      title: "Скорее всего не ваш вариант (пока), если:",
+      items: [
+        "Нужен hosted control plane или «чёрный ящик» SaaS, который режет действия без встраивания библиотеки в ваш стек.",
+        "Вы не готовы описывать предложения действий и decision-time evidence как структурированные входы evaluator'а.",
+        "Нужна только модерация чата или фильтры промптов — а не шлюз до выполнения реальных tools.",
       ],
     },
     quickstart: {
@@ -870,6 +892,9 @@ export const locales = {
         "在 Agent 运行破坏性工具之前，门控先返回 ALLOW、BLOCK 或 ESCALATE——确定性、可重放，跑在你自己的基础设施上。",
       body: "代码、基础设施、银行、治理：当 Agent 要行动时，PythiaLabs 先评估提案与证据，而不是聊天记录本身。",
       tagline: "先验证再执行。审阅者可重放的证据。",
+      outcomeLine:
+        "用一晚上就够：克隆仓库、运行 `mix test`、执行 showcase，并将标准输出与 `docs/` 中的预期输出对照——这是可给安全团队看的、可重放的决策记录。",
+      startHereLabel: "第一次来？从「快速上手」开始",
       starsAlt: "GitHub 星标",
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
@@ -895,6 +920,14 @@ export const locales = {
         "事后日志不够：你需要在工具执行前就留下决策记录。",
         "仅有 RBAC 与粗粒度策略不够回答「在当前证据下，这一具体操作此刻是否应执行？」",
         "安全与审查需要每次都可重放的同一类产物——而不是线程截图。",
+      ],
+    },
+    ifNotYou: {
+      title: "可能暂时不适合你，如果：",
+      items: [
+        "你期望的是托管控制面或无需把库接入栈内的黑盒 SaaS。",
+        "你还没准备好把拟议行动与决策时证据建模成评估器的结构化输入。",
+        "你只想做对话审核或提示过滤——而不是在真实工具执行前加一道门控。",
       ],
     },
     quickstart: {
