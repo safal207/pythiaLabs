@@ -338,6 +338,13 @@ blockquote {
   margin-top: 1.5rem;
 }
 
+/* Let grid tracks shrink so long copy wraps instead of widening the row */
+.card-grid > *,
+.two-col > *,
+.step-list > * {
+  min-width: 0;
+}
+
 .card {
   min-width: 0;
   background: var(--surface);
@@ -1409,6 +1416,7 @@ blockquote {
 .step-body h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
+  overflow-wrap: anywhere;
 }
 
 .step-body p {
@@ -1432,6 +1440,9 @@ blockquote {
   border-radius: 4px;
   padding: 0.06em 0.35em;
   color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Video block — core message pull */
