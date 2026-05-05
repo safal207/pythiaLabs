@@ -33,4 +33,5 @@ export const siteConfig = {
   ogImagePath: "/og.svg",
   showcaseScriptCount: 6,
   testFileCount: 17,
+  mcpReadmePath: "integrations/mcp/README.md",
 };

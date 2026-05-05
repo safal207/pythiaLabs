@@ -8,7 +8,7 @@ export const locales = {
       description:
         "Open-source pre-execution gate for AI and agentic systems: ALLOW, BLOCK, or ESCALATE before tools run. Deterministic checks, replayable traces, audit-ready evidence — self-hosted Elixir library, Apache-2.0.",
       keywords:
-        "AI agent safety, pre-execution gate, agentic AI, AI governance, ALLOW BLOCK ESCALATE, deterministic policy gate, audit trail, open source AI safety, Apache-2.0, Elixir agent guard, OPA RBAC complement, DevOps AI agents, fintech AI risk, Web3 treasury governance",
+        "AI agent safety, pre-execution gate, agentic AI, AI governance, ALLOW BLOCK ESCALATE, deterministic policy gate, audit trail, open source AI safety, Apache-2.0, Elixir agent guard, OPA RBAC complement, DevOps AI agents, fintech AI risk, Web3 treasury governance, Cursor MCP, VS Code, IDE agent tools",
       ogImageAlt:
         "PythiaLabs — pre-execution safety gate for AI agents: verify actions before they execute",
     },
@@ -17,6 +17,7 @@ export const locales = {
       idea: "Big idea",
       solution: "How it works",
       integration: "Integration",
+      cursorIde: "Cursor & IDE",
       quickstart: "Quick start",
       fit: "Who it's for",
       pilot: "Pilot",
@@ -205,6 +206,18 @@ export const locales = {
       repoNote:
         "Reviewer quickstart: clone the repo, run `mix test`, then `mix run examples/agent_infra_action_showcase.exs` (and the banking / Web3 showcases). Expected reviewer-facing output lives under `docs/*_expected_output.md`.",
     },
+    ideBridge: {
+      title: "Use the gate from Cursor (and compatible IDEs)",
+      intro:
+        "Connect the repo once: an MCP server calls `mix pythia.eval_json` on your machine — no separate SaaS. Evaluate deterministic ALLOW/BLOCK outcomes for infra, banking, and Web3 showcase gates from the agent workflow.",
+      items: [
+        "Add the stdio MCP server from `integrations/mcp/` (Node + local Mix).",
+        "Tool `pythia_evaluate`: pass JSON with `gate`, `action`, and `safety_context` or `governance`.",
+        "Same JSON works from the CLI — copy examples from the README.",
+      ],
+      docsCta: "MCP setup & JSON examples →",
+      note: "Runs locally in your clone; see repository for prerequisites.",
+    },
     valueStack: {
       title: "Stop dangerous agent actions before they happen",
       intro:
@@ -353,6 +366,10 @@ export const locales = {
           a: "Start from the Elixir library in this repository: wire your orchestrator to call the evaluator before tool execution, pass structured proposals plus decision-time snapshots, and store or forward the trace plus optional SHA-256 digest exports for reviewers. Follow README “Reviewer quickstart” (`mix test` and the `examples/*_showcase.exs` scripts) and compare stdout to the `docs/*_expected_output.md` files.",
         },
         {
+          q: "Can I call the gate from Cursor?",
+          a: "Yes. The repo includes a small MCP server under `integrations/mcp/` that runs `mix pythia.eval_json` locally. Add it in Cursor’s MCP settings, then use the `pythia_evaluate` tool with JSON (`gate`, `action`, and `safety_context` or `governance`). Full setup and examples: `integrations/mcp/README.md` on GitHub.",
+        },
+        {
           q: "Does the gate call an LLM?",
           a: "No. The decision path is deterministic by design. Same input, same decision, every time. LLMs propose actions; PythiaLabs decides whether they execute.",
         },
@@ -427,7 +444,7 @@ export const locales = {
       description:
         "Open-source шлюз до выполнения для AI и agentic-систем: ALLOW, BLOCK или ESCALATE до запуска tools. Детерминированные проверки, воспроизводимые трассы, артефакты для аудита — self-hosted Elixir-библиотека, Apache-2.0.",
       keywords:
-        "безопасность AI-агентов, pre-execution gate, agentic AI, governance AI, ALLOW BLOCK ESCALATE, детерминированный policy gate, audit trail, open source AI safety, Apache-2.0, Elixir guard, OPA RBAC, DevOps агенты, финтех риск AI, Web3 treasury",
+        "безопасность AI-агентов, pre-execution gate, agentic AI, governance AI, ALLOW BLOCK ESCALATE, детерминированный policy gate, audit trail, open source AI safety, Apache-2.0, Elixir guard, OPA RBAC, DevOps агенты, финтех риск AI, Web3 treasury, Cursor MCP, IDE",
       ogImageAlt:
         "PythiaLabs — pre-execution safety gate для AI-агентов: проверка действий до выполнения",
     },
@@ -436,6 +453,7 @@ export const locales = {
       idea: "Идея",
       solution: "Как работает",
       integration: "Интеграция",
+      cursorIde: "Cursor и IDE",
       quickstart: "Быстрый старт",
       fit: "Кому подходит",
       pilot: "Пилот",
@@ -624,6 +642,18 @@ export const locales = {
       repoNote:
         "Быстрый старт для ревьюеров: клонировать репозиторий, выполнить `mix test`, затем `mix run examples/agent_infra_action_showcase.exs` (и banking / Web3 showcase). Ожидаемый вывод для ревью — в `docs/*_expected_output.md`.",
     },
+    ideBridge: {
+      title: "Шлюз из Cursor и совместимых IDE",
+      intro:
+        "Подключите репозиторий один раз: MCP-сервер вызывает локально `mix pythia.eval_json` — без отдельного SaaS. Детерминированные исходы ALLOW/BLOCK для showcase-шлюзов (инфра, банкинг, Web3) прямо из потока агента.",
+      items: [
+        "stdio MCP из `integrations/mcp/` (Node + локальный Mix).",
+        "Инструмент `pythia_evaluate`: JSON с `gate`, `action` и `safety_context` или `governance`.",
+        "Тот же JSON из CLI — примеры в README репозитория.",
+      ],
+      docsCta: "Установка MCP и примеры JSON →",
+      note: "Всё выполняется локально в клоне; зависимости — в репозитории.",
+    },
     valueStack: {
       title: "Останавливайте опасные действия агентов до того, как они произойдут",
       intro:
@@ -772,6 +802,10 @@ export const locales = {
           a: "Начните с Elixir-библиотеки в этом репозитории: подключите оркестратор к evaluator'у до выполнения инструментов, передавайте структурированные предложения и снимки контекста на момент решения, сохраняйте или передайте trace и при необходимости экспорт SHA-256 для ревьюеров. Следуйте README «Reviewer quickstart» (`mix test` и скрипты `examples/*_showcase.exs`) и сверяйте stdout с файлами `docs/*_expected_output.md`.",
         },
         {
+          q: "Можно ли вызывать шлюз из Cursor?",
+          a: "Да. В репозитории есть небольшой MCP-сервер в `integrations/mcp/`, который локально запускает `mix pythia.eval_json`. Добавьте его в настройках MCP в Cursor и используйте инструмент `pythia_evaluate` с JSON (`gate`, `action`, `safety_context` или `governance`). Инструкция и примеры: `integrations/mcp/README.md` на GitHub.",
+        },
+        {
           q: "Шлюз вызывает LLM?",
           a: "Нет. Путь принятия решения детерминированный по дизайну. Один и тот же вход — одно и то же решение. LLM предлагают действия; PythiaLabs решает, выполнятся ли они.",
         },
@@ -846,7 +880,7 @@ export const locales = {
       description:
         "面向 AI 与 agentic 系统的开源执行前门控：在工具运行前给出 ALLOW、BLOCK 或 ESCALATE。确定性检查、可重放轨迹、审计友好证据——自托管 Elixir 库，Apache-2.0。",
       keywords:
-        "AI Agent 安全, 执行前门控, agentic AI, AI 治理, ALLOW BLOCK ESCALATE, 确定性策略门控, 审计轨迹, 开源 AI 安全, Apache-2.0, Elixir, OPA RBAC, DevOps Agent, 金融科技 AI 风险, Web3 金库治理",
+        "AI Agent 安全, 执行前门控, agentic AI, AI 治理, ALLOW BLOCK ESCALATE, 确定性策略门控, 审计轨迹, 开源 AI 安全, Apache-2.0, Elixir, OPA RBAC, DevOps Agent, 金融科技 AI 风险, Web3 金库治理, Cursor MCP, IDE",
       ogImageAlt: "PythiaLabs — AI Agent 执行前安全门控：先验证再执行",
     },
     nav: {
@@ -854,6 +888,7 @@ export const locales = {
       idea: "核心理念",
       solution: "工作原理",
       integration: "集成",
+      cursorIde: "Cursor 与 IDE",
       quickstart: "快速上手",
       fit: "适合谁",
       pilot: "试点",
@@ -1020,6 +1055,18 @@ export const locales = {
       repoNote:
         "审阅者快速上手：克隆仓库，运行 `mix test`，再执行 `mix run examples/agent_infra_action_showcase.exs`（以及 banking / Web3 showcase）。面向审阅的预期输出见 `docs/*_expected_output.md`。",
     },
+    ideBridge: {
+      title: "在 Cursor 与兼容 IDE 中使用门控",
+      intro:
+        "连接本仓库一次：MCP 通过 stdio 调用本机的 `mix pythia.eval_json`，无需单独 SaaS。可在 Agent 工作流中对确定性 showcase 门控（基础设施、银行风险、Web3 金库）求值 ALLOW/BLOCK。",
+      items: [
+        "从 `integrations/mcp/` 启动 stdio MCP（Node + 本地 Mix）。",
+        "工具 `pythia_evaluate`：传入含 `gate`、`action` 以及 `safety_context` 或 `governance` 的 JSON。",
+        "同一 JSON 也可通过 CLI 运行 — 示例见 README。",
+      ],
+      docsCta: "MCP 配置与 JSON 示例 →",
+      note: "在本地克隆中运行；前置依赖见仓库说明。",
+    },
     valueStack: {
       title: "在危险的 Agent 行动发生之前阻止它",
       intro: "PythiaLabs 帮助团队构建不能仅凭“信任”交付的 AI Agent。你将获得：",
@@ -1159,6 +1206,10 @@ export const locales = {
         {
           q: "如何把 PythiaLabs 接入我的 Agent？",
           a: "从本仓库的 Elixir 库开始：在工具执行前让编排器调用评估器，传入结构化提案与决策时快照，并保存或转发轨迹与可选的 SHA-256 导出供审阅。按 README 的“Reviewer quickstart”运行 `mix test` 与 `examples/*_showcase.exs` 脚本，将标准输出与 `docs/*_expected_output.md` 对照。",
+        },
+        {
+          q: "能在 Cursor 里调用门控吗？",
+          a: "可以。仓库包含 `integrations/mcp/` 下的 MCP 服务，在本机执行 `mix pythia.eval_json`。在 Cursor 的 MCP 设置中添加后，使用 `pythia_evaluate` 工具并传入 JSON（`gate`、`action` 以及 `safety_context` 或 `governance`）。完整步骤与示例见 GitHub 上的 `integrations/mcp/README.md`。",
         },
         {
           q: "门控会调用 LLM 吗？",

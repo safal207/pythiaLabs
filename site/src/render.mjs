@@ -299,6 +299,7 @@ export function renderPage(currentId, year, buildDate) {
           <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#integration">${escape(t.nav.integration)}</a>
+          <a href="#cursor-ide">${escape(t.nav.cursorIde)}</a>
           <a href="#quickstart">${escape(t.nav.quickstart)}</a>
           <a href="#if-you">${escape(t.nav.fit)}</a>
           <a href="#pilot-outcome">${escape(t.nav.pilot)}</a>
@@ -488,7 +489,19 @@ export function renderPage(currentId, year, buildDate) {
         </div>
       </section>
 
-      <section id="quickstart" class="section section-alt">
+      <section id="cursor-ide" class="section section-alt section-ide-bridge" aria-labelledby="cursor-ide-title">
+        <div class="container">
+          <h2 id="cursor-ide-title">${escape(t.ideBridge.title)}</h2>
+          <p>${escape(t.ideBridge.intro)}</p>
+          <ul class="ide-bridge-list">${t.ideBridge.items.map((line) => `<li>${escape(line)}</li>`).join("")}</ul>
+          <p class="ide-bridge-cta">
+            <a class="btn btn-secondary" href="${utm(`${siteConfig.repoUrl}/blob/main/${siteConfig.mcpReadmePath}`, "ide_mcp_docs")}" rel="noopener noreferrer">${escape(t.ideBridge.docsCta)}</a>
+          </p>
+          <p class="ide-bridge-note">${escape(t.ideBridge.note)}</p>
+        </div>
+      </section>
+
+      <section id="quickstart" class="section">
         <div class="container">
           <h2>${escape(t.quickstart.title)}</h2>
           <p>${escape(t.quickstart.intro)}</p>
