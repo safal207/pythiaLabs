@@ -11,6 +11,14 @@ import { renderRobots, renderSitemap } from "./src/sitemap.mjs";
 // lightningcss browser version encoding: major << 16 | minor << 8 | patch
 const browserVersion = (major, minor = 0, patch = 0) => (major << 16) | (minor << 8) | patch;
 
+const buildCssFixes = `
+/* Build-time rendering fixes */
+.step-list {
+  list-style: none;
+  padding-left: 0;
+}
+`;
+
 async function main() {
   validateLocales();
 
@@ -18,7 +26,7 @@ async function main() {
   const distDir = path.join(here, "dist");
   const cssPath = path.join(here, "src", "styles.css");
 
-  const cssSource = await readFile(cssPath);
+  const cssSource = Buffer.concat([await readFile(cssPath), Buffer.from(buildCssFixes)]);
   const { code } = transform({
     filename: "styles.css",
     code: cssSource,
