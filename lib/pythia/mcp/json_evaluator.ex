@@ -138,9 +138,18 @@ defmodule Pythia.Mcp.JsonEvaluator do
 
   defp get_str(raw, key, field) do
     case Map.get(raw, key) || Map.get(raw, field) do
-      v when is_binary(v) and String.trim(v) != "" -> {:ok, v}
-      nil -> {:error, %{error: "missing_field", field: key}}
-      _ -> {:error, %{error: "invalid_field", field: key, expected: "non-empty string"}}
+      v when is_binary(v) ->
+        if String.trim(v) != "" do
+          {:ok, v}
+        else
+          {:error, %{error: "invalid_field", field: key, expected: "non-empty string"}}
+        end
+
+      nil ->
+        {:error, %{error: "missing_field", field: key}}
+
+      _ ->
+        {:error, %{error: "invalid_field", field: key, expected: "non-empty string"}}
     end
   end
 
