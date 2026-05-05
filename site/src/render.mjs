@@ -24,6 +24,45 @@ const ARTIFACT_JSON = `{
   "digest":   "sha256:9f86d081884c..."
 }`;
 
+const exampleDecisions = {
+  en: {
+    eyebrow: "Example decision",
+    title: "An agent wants to move treasury funds. The gate stops first.",
+    actionLabel: "Proposed action",
+    action: "Transfer 25,000 USDC from treasury",
+    decisionLabel: "Decision",
+    decision: "ESCALATE",
+    reasonLabel: "Reason",
+    reason: "Missing quorum approval and stale policy state",
+    evidenceLabel: "Evidence",
+    evidence: "Replayable trace, check results, and tamper-checkable digest",
+  },
+  ru: {
+    eyebrow: "Пример решения",
+    title: "Агент хочет перевести средства казначейства. Сначала срабатывает шлюз.",
+    actionLabel: "Предложенное действие",
+    action: "Перевести 25 000 USDC из казначейства",
+    decisionLabel: "Решение",
+    decision: "ESCALATE",
+    reasonLabel: "Причина",
+    reason: "Нет кворума подтверждений, а состояние политики устарело",
+    evidenceLabel: "Доказательства",
+    evidence: "Воспроизводимый trace, результаты проверок и tamper-checkable digest",
+  },
+  zh: {
+    eyebrow: "决策示例",
+    title: "Agent 想要转移金库资金。门控会先拦截。",
+    actionLabel: "拟执行动作",
+    action: "从金库转出 25,000 USDC",
+    decisionLabel: "决策",
+    decision: "ESCALATE",
+    reasonLabel: "原因",
+    reason: "缺少 quorum approval，且 policy state 已过期",
+    evidenceLabel: "证据",
+    evidence: "可重放 trace、检查结果和可校验 digest",
+  },
+};
+
 function pathsFor(currentId) {
   const fromRoot = (id) => (id === "en" ? "./" : `./${id}/`);
   const fromSub = (id) => (id === "en" ? "../" : id === currentId ? "./" : `../${id}/`);
@@ -74,7 +113,7 @@ export function renderPage(currentId, year) {
   const canonical = canonicalFor(currentId);
   const ogImage = `${siteConfig.canonicalOrigin.replace(/\/$/, "")}${siteConfig.ogImagePath}`;
   const pilotHref = pilotMailto(siteConfig.pilotEmailSubject);
-  const example = t.exampleDecision || locales.en.exampleDecision;
+  const example = exampleDecisions[currentId] || exampleDecisions.en;
 
   const langSwitcher = localeOrder
     .map((id) => {

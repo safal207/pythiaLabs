@@ -26,18 +26,6 @@ export const locales = {
       tagline: "Not trust. Verification before execution.",
       starsAlt: "GitHub stars",
     },
-    exampleDecision: {
-      eyebrow: "Example decision",
-      title: "An agent wants to move treasury funds. The gate stops first.",
-      actionLabel: "Proposed action",
-      action: "Transfer 25,000 USDC from treasury",
-      decisionLabel: "Decision",
-      decision: "ESCALATE",
-      reasonLabel: "Reason",
-      reason: "Missing quorum approval and stale policy state",
-      evidenceLabel: "Evidence",
-      evidence: "Replayable trace, check results, and tamper-checkable digest",
-    },
     trustStrip: [
       "100% open-source",
       "Apache-2.0",
@@ -901,12 +889,6 @@ export const locales = {
 
 export const localeOrder = ["en", "ru", "zh"];
 
-const optionalLocalePrefixes = ["exampleDecision."];
-
-function isOptionalLocaleKey(key) {
-  return optionalLocalePrefixes.some((prefix) => key.startsWith(prefix));
-}
-
 function collectKeys(obj, prefix = "") {
   const keys = [];
   for (const [k, v] of Object.entries(obj)) {
@@ -927,7 +909,6 @@ export function validateLocales(reference = "en") {
     if (id === reference) continue;
     const keys = new Set(collectKeys(locales[id]));
     for (const k of refKeys) {
-      if (isOptionalLocaleKey(k)) continue;
       if (!keys.has(k)) errors.push(`locale ${id}: missing key '${k}'`);
     }
     for (const k of keys) {
