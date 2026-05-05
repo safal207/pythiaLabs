@@ -36,10 +36,11 @@ async function main() {
   await mkdir(distDir, { recursive: true });
 
   const year = new Date().getFullYear();
+  const buildDate = new Date().toISOString();
   let total = 0;
 
   for (const id of localeOrder) {
-    const html = renderPage(id, year).replace("__INLINE_CSS__", minifiedCss);
+    const html = renderPage(id, year, buildDate).replace("__INLINE_CSS__", minifiedCss);
     const outDir = id === "en" ? distDir : path.join(distDir, id);
     if (id !== "en") await mkdir(outDir, { recursive: true });
     const outPath = path.join(outDir, "index.html");

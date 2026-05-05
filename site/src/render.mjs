@@ -89,10 +89,17 @@ function utm(url, campaign) {
   return `${url}${sep}utm_source=landing&utm_medium=cta&utm_campaign=${encodeURIComponent(campaign)}`;
 }
 
-function jsonLd(currentId, canonical) {
+function jsonLdGraph(currentId, canonical, buildDate) {
   const t = locales[currentId];
-  const data = {
-    "@context": "https://schema.org",
+  const base = siteConfig.canonicalOrigin.replace(/\/$/, "");
+  const publisher = {
+    "@type": "Organization",
+    name: "PythiaLabs",
+    url: `${base}/`,
+    sameAs: [siteConfig.repoUrl, siteConfig.xUrl],
+  };
+
+  const softwareApplication = {
     "@type": "SoftwareApplication",
     name: "PythiaLabs",
     applicationCategory: "DeveloperApplication",
@@ -102,22 +109,71 @@ function jsonLd(currentId, canonical) {
     inLanguage: t.htmlLang,
     license: `https://opensource.org/licenses/${siteConfig.license}`,
     codeRepository: siteConfig.repoUrl,
+    isAccessibleForFree: true,
+    dateModified: buildDate,
+    keywords: t.meta.keywords,
     author: {
       "@type": "Person",
       name: siteConfig.founderName,
     },
+    publisher,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
-  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+
+  const webSite = {
+    "@type": "WebSite",
+    name: "PythiaLabs",
+    description: t.meta.description,
+    url: `${base}/`,
+    inLanguage: localeOrder.map((id) => locales[id].htmlLang),
+    publisher,
+    potentialAction: {
+      "@type": "ReadAction",
+      target: `${base}/`,
+    },
+  };
+
+  const faqPage = {
+    "@type": "FAQPage",
+    mainEntity: t.faq.items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
+  };
+
+  const graphNodes = [softwareApplication, faqPage];
+  if (currentId === "en") {
+    graphNodes.push(webSite);
+  }
+
+  const graph = {
+    "@context": "https://schema.org",
+    "@graph": graphNodes,
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(graph)}</script>`;
 }
 
-export function renderPage(currentId, year) {
+export function renderPage(currentId, year, buildDate) {
   const t = locales[currentId];
   const hrefs = pathsFor(currentId);
   const canonical = canonicalFor(currentId);
   const ogImage = `${siteConfig.canonicalOrigin.replace(/\/$/, "")}${siteConfig.ogImagePath}`;
+  const ogLocale = t.ogLocale || t.htmlLang.replace("-", "_");
   const pilotHref = pilotMailto(siteConfig.pilotEmailSubject);
   const example = exampleDecisions[currentId] || exampleDecisions.en;
+
+  const ogAlternateLocales = localeOrder
+    .filter((id) => id !== currentId)
+    .map(
+      (id) =>
+        `<meta property="og:locale:alternate" content="${escape(locales[id].ogLocale || locales[id].htmlLang.replace("-", "_"))}" />`,
+    )
+    .join("\n    ");
 
   const langSwitcher = localeOrder
     .map((id) => {
@@ -172,6 +228,12 @@ export function renderPage(currentId, year) {
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <title>${escape(t.meta.title)}</title>
     <meta name="description" content="${escape(t.meta.description)}" />
+    <meta name="keywords" content="${escape(t.meta.keywords)}" />
+    <meta name="author" content="${escape(siteConfig.founderName)}" />
+    <meta name="application-name" content="PythiaLabs" />
+    <meta
+      name="audience"
+      content="Developers, security engineers, platform teams, AI product teams, compliance reviewers" />
     <meta name="color-scheme" content="dark light" />
     <meta name="robots" content="index, follow" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
@@ -179,16 +241,23 @@ export function renderPage(currentId, year) {
 
     <link rel="canonical" href="${canonical}" />
 
+    <meta property="og:site_name" content="PythiaLabs" />
     <meta property="og:title" content="${escape(t.meta.title)}" />
     <meta property="og:description" content="${escape(t.meta.description)}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonical}" />
-    <meta property="og:locale" content="${t.htmlLang.replace("-", "_")}" />
+    <meta property="og:locale" content="${escape(ogLocale)}" />
+    ${ogAlternateLocales}
     <meta property="og:image" content="${ogImage}" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${escape(t.meta.ogImageAlt)}" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="article:modified_time" content="${escape(buildDate)}" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="${escape(siteConfig.twitterSite)}" />
+    <meta name="twitter:title" content="${escape(t.meta.title)}" />
+    <meta name="twitter:description" content="${escape(t.meta.description)}" />
     <meta name="twitter:image" content="${ogImage}" />
+    <meta name="twitter:image:alt" content="${escape(t.meta.ogImageAlt)}" />
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E%E2%97%87%3C/text%3E%3C/svg%3E" />
 
@@ -199,7 +268,7 @@ export function renderPage(currentId, year) {
 
     ${hreflangLinks}
 
-    ${jsonLd(currentId, canonical)}
+    ${jsonLdGraph(currentId, canonical, buildDate)}
 
     <style>__INLINE_CSS__</style>
   </head>
