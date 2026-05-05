@@ -1,0 +1,16 @@
+{
+  "name": "pythialabs-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP stdio server that bridges Cursor to mix pythia.eval_json",
+  "type": "module",
+  "bin": {
+    "pythialabs-mcp": "./server.mjs"
+  },
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

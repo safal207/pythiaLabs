@@ -38,3 +38,5 @@ tmp/
 node_modules/
 site/dist/
 site/node_modules/
+
+integrations/mcp/node_modules/
