@@ -204,8 +204,9 @@ export const locales = {
           desc: "Evaluator outputs are canonicalized (see `pythia.canonical_export.v1` in the repository) and hashed with SHA-256. Tests pin expected digests for accepted snapshots and reject tampered payloads — that is the concrete meaning of “same inputs, same digest.”",
         },
       ],
+      repoNoteTitle: "Reviewer quickstart",
       repoNote:
-        "Reviewer quickstart: clone the repo, run `mix test`, then `mix run examples/agent_infra_action_showcase.exs` (and the banking / Web3 showcases). Expected reviewer-facing output lives under `docs/*_expected_output.md`.",
+        "Clone the repo, run `mix test`, then `mix run examples/agent_infra_action_showcase.exs` (and the banking / Web3 showcases). Expected reviewer-facing output lives under `docs/*_expected_output.md`.",
     },
     ideBridge: {
       title: "Use the gate from Cursor (and compatible IDEs)",
@@ -641,8 +642,9 @@ export const locales = {
           desc: "Выходы evaluators канонизируются (см. `pythia.canonical_export.v1` в репозитории) и хешируются SHA-256. Тесты закрепляют ожидаемые дайджесты для принятых снапшотов и отклоняют подменённые payload'ы — это конкретный смысл формулировки «те же входы → тот же дайджест».",
         },
       ],
+      repoNoteTitle: "Быстрый старт для ревьюеров",
       repoNote:
-        "Быстрый старт для ревьюеров: клонировать репозиторий, выполнить `mix test`, затем `mix run examples/agent_infra_action_showcase.exs` (и banking / Web3 showcase). Ожидаемый вывод для ревью — в `docs/*_expected_output.md`.",
+        "Клонируйте репозиторий, выполните `mix test`, затем `mix run examples/agent_infra_action_showcase.exs` (и banking / Web3 showcase). Ожидаемый вывод для ревью — в `docs/*_expected_output.md`.",
     },
     ideBridge: {
       title: "Шлюз из Cursor и совместимых IDE",
@@ -1055,8 +1057,9 @@ export const locales = {
           desc: "评估器输出经规范化（见仓库中的 `pythia.canonical_export.v1`）并以 SHA-256 哈希。测试为接受态快照固定预期摘要并拒绝被篡改的 payload——这就是“相同输入 → 相同摘要”的具体含义。",
         },
       ],
+      repoNoteTitle: "审阅者快速上手",
       repoNote:
-        "审阅者快速上手：克隆仓库，运行 `mix test`，再执行 `mix run examples/agent_infra_action_showcase.exs`（以及 banking / Web3 showcase）。面向审阅的预期输出见 `docs/*_expected_output.md`。",
+        "克隆仓库，运行 `mix test`，再执行 `mix run examples/agent_infra_action_showcase.exs`（以及 banking / Web3 showcase）。面向审阅的预期输出见 `docs/*_expected_output.md`。",
     },
     ideBridge: {
       title: "在 Cursor 与兼容 IDE 中使用门控",
