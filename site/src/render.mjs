@@ -100,6 +100,25 @@ export function renderPage(currentId, year) {
     )
     .join("");
 
+  const mechanismSteps = t.solution.steps
+    .map(
+      (s, i) =>
+        `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${escape(s.desc)}</p></div></li>`,
+    )
+    .join("");
+
+  const founderVideoCards = siteConfig.founderVideos
+    .map((v) => {
+      const card = t.founderVideosBlock.cards[v.labelKey];
+      return `<article class="video-card">
+        <p class="video-card-eyebrow">${escape(card.name)}</p>
+        <h3>${escape(card.headline)}</h3>
+        <p class="video-card-desc">${escape(card.desc)}</p>
+        <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)} →</a></p>
+      </article>`;
+    })
+    .join("");
+
   return `<!doctype html>
 <html lang="${t.htmlLang}">
   <head>
@@ -150,9 +169,10 @@ export function renderPage(currentId, year) {
         </a>
         <nav class="site-nav" aria-label="Primary">
           <a href="#problem">${escape(t.nav.problem)}</a>
+          <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
-          <a href="#demo">${escape(t.nav.demo)}</a>
+          <a href="#videos">${escape(t.nav.videos)}</a>
           <a href="#faq">${escape(t.nav.faq)}</a>
           <a href="#contact">${escape(t.nav.contact)}</a>
         </nav>
@@ -166,10 +186,12 @@ export function renderPage(currentId, year) {
           <p class="eyebrow">${escape(t.hero.eyebrow)}</p>
           <h1 class="hero-headline">${escape(t.hero.headline)}</h1>
           <p class="hero-subtitle">${escape(t.hero.subtitle)}</p>
-          <p class="hero-audience">${escape(t.hero.audience)}</p>
+          <p class="hero-text">${escape(t.hero.body)}</p>
+          <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
             <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
+            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.tertiary)}</a>
           </div>
           <p class="hero-badges">
             <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
@@ -188,19 +210,53 @@ export function renderPage(currentId, year) {
         </div>
       </aside>
 
-      <section id="problem" class="section">
+      <section id="video" class="section section-alt">
         <div class="container">
-          <h2>${escape(t.problem.title)}</h2>
-          <p>${escape(t.problem.p1)}</p>
-          <p>${escape(t.problem.p2)}</p>
-          <blockquote>${escape(t.problem.quote)}</blockquote>
+          <p class="cta-eyebrow">${escape(t.videoBlock.eyebrow)}</p>
+          <h2>${escape(t.videoBlock.title)}</h2>
+          <p>${escape(t.videoBlock.body)}</p>
+          <div class="video-frame">
+            <iframe
+              src="${siteConfig.demoEmbedUrl}"
+              title="PythiaLabs demo"
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+          <blockquote class="core-message">
+            <p class="core-label">${escape(t.videoBlock.coreLabel)}</p>
+            <p>${escape(t.videoBlock.core)}</p>
+          </blockquote>
+          <p><a href="${utm(siteConfig.demoUrl, "video_block_fallback")}" rel="noopener noreferrer">${escape(t.videoBlock.fallback)} →</a></p>
         </div>
       </section>
 
-      <section id="solution" class="section section-alt">
+      <section id="problem" class="section">
+        <div class="container">
+          <h2>${escape(t.problem.title)}</h2>
+          <p>${escape(t.problem.intro)}</p>
+          <ul class="bullet-grid">${t.problem.items.map(li).join("")}</ul>
+          <blockquote>${escape(t.problem.punchline)}</blockquote>
+        </div>
+      </section>
+
+      <section id="idea" class="section section-alt">
+        <div class="container">
+          <p class="cta-eyebrow">${escape(t.bigIdea.eyebrow)}</p>
+          <h2>${escape(t.bigIdea.title)}</h2>
+          <p>${escape(t.bigIdea.lead)}</p>
+          <blockquote class="big-quote">${escape(t.bigIdea.quote)}</blockquote>
+          <ul class="not-list">${t.bigIdea.not.map((s) => `<li><span class="not-mark" aria-hidden="true">✕</span>${escape(s)}</li>`).join("")}</ul>
+          <p class="but-line"><strong>${escape(t.bigIdea.but)}</strong></p>
+        </div>
+      </section>
+
+      <section id="solution" class="section">
         <div class="container">
           <h2>${escape(t.solution.title)}</h2>
           <p>${escape(t.solution.intro)}</p>
+          <ol class="step-list">${mechanismSteps}</ol>
           <div class="two-col">
             <div class="card">
               <h3>${escape(t.solution.checksTitle)}</h3>
@@ -218,7 +274,7 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
-      <section id="artifact" class="section">
+      <section id="artifact" class="section section-alt">
         <div class="container">
           <h2>${escape(t.artifact.title)}</h2>
           <p>${escape(t.artifact.intro)}</p>
@@ -226,15 +282,48 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
-      <section id="value" class="section section-alt">
+      <section id="value" class="section">
         <div class="container">
           <h2>${escape(t.valueStack.title)}</h2>
+          <p>${escape(t.valueStack.intro)}</p>
           <ul class="value-stack">${t.valueStack.items.map((s) => `<li><span class="check" aria-hidden="true">✓</span><span>${escape(s)}</span></li>`).join("")}</ul>
           <p class="value-stack-footer"><span class="value-price">${escape(t.valueStack.footer)}</span></p>
         </div>
       </section>
 
-      <section id="comparison" class="section">
+      <section id="use-cases" class="section section-alt">
+        <div class="container">
+          <h2>${escape(t.useCases.title)}</h2>
+          <div class="card-grid">${useCaseCards}</div>
+        </div>
+      </section>
+
+      <section id="positioning" class="section">
+        <div class="container">
+          <p class="cta-eyebrow">${escape(t.positioning.eyebrow)}</p>
+          <h2>${escape(t.positioning.title)}</h2>
+          <ul class="not-list">${t.positioning.negatives.map((s) => `<li><span class="not-mark" aria-hidden="true">✕</span>${escape(s)}</li>`).join("")}</ul>
+          <p class="but-line"><strong>${escape(t.positioning.claim)}</strong></p>
+          <p class="positioning-tags-label">${escape(t.positioning.tagsLabel)}</p>
+          <ul class="positioning-tags">
+            ${t.positioning.tags
+              .map((tag) => {
+                const cls =
+                  tag === "ALLOW"
+                    ? "tag-allow"
+                    : tag === "BLOCK"
+                      ? "tag-block"
+                      : tag === "ESCALATE"
+                        ? "tag-escalate"
+                        : "tag-audit";
+                return `<li><span class="tag ${cls}">${escape(tag)}</span></li>`;
+              })
+              .join("")}
+          </ul>
+        </div>
+      </section>
+
+      <section id="comparison" class="section section-alt">
         <div class="container">
           <h2>${escape(t.comparison.title)}</h2>
           <div class="compare-grid">
@@ -250,27 +339,34 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
-      <section id="demo" class="section section-alt">
+      <section id="authority" class="section">
         <div class="container">
-          <h2>${escape(t.demo.title)}</h2>
-          <p>${escape(t.demo.caption)}</p>
-          <div class="video-frame">
-            <iframe
-              src="${siteConfig.demoEmbedUrl}"
-              title="PythiaLabs demo"
-              loading="lazy"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              referrerpolicy="strict-origin-when-cross-origin"></iframe>
-          </div>
-          <p><a href="${siteConfig.demoUrl}">${escape(t.demo.fallback)} →</a></p>
+          <p class="cta-eyebrow">${escape(t.authority.eyebrow)}</p>
+          <h2>${escape(t.authority.title)}</h2>
+          <p>${escape(t.authority.body)}</p>
+          <blockquote class="big-quote">${escape(t.authority.pullQuote)}</blockquote>
         </div>
       </section>
 
-      <section id="use-cases" class="section">
+      <section id="founder" class="section section-alt">
         <div class="container">
-          <h2>${escape(t.useCases.title)}</h2>
-          <div class="card-grid">${useCaseCards}</div>
+          <h2>${escape(t.founderLetter.title)}</h2>
+          <blockquote class="founder-letter">
+            <p>${escape(t.founderLetter.body)}</p>
+            <footer>
+              <p class="founder-name">${escape(siteConfig.founderName)}</p>
+              <p class="founder-role">${escape(t.founder.role)} · ${escape(t.founder.exp)}</p>
+              <p class="founder-signoff">${escape(t.founderLetter.signoff)}</p>
+            </footer>
+          </blockquote>
+        </div>
+      </section>
+
+      <section id="videos" class="section">
+        <div class="container">
+          <p class="cta-eyebrow">${escape(t.founderVideosBlock.eyebrow)}</p>
+          <h2>${escape(t.founderVideosBlock.title)}</h2>
+          <div class="card-grid video-cards">${founderVideoCards}</div>
         </div>
       </section>
 
@@ -291,12 +387,19 @@ export function renderPage(currentId, year) {
         <div class="container">
           <p class="cta-eyebrow">${escape(t.finalCta.eyebrow)}</p>
           <h2>${escape(t.finalCta.title)}</h2>
-          <p>${escape(t.finalCta.text)}</p>
+          <p>${escape(t.finalCta.body)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "pilot_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
+            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
+            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.tertiary)}</a>
           </div>
           <p class="cta-reassurance">${escape(t.finalCta.reassurance)}</p>
+        </div>
+      </section>
+
+      <section id="closer" class="section closer">
+        <div class="container">
+          <p class="closer-line">${escape(t.closer.title)}</p>
         </div>
       </section>
 
@@ -307,30 +410,7 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
-      <section id="founder" class="section section-alt">
-        <div class="container">
-          <h2>${escape(t.founderLetter.title)}</h2>
-          <blockquote class="founder-letter">
-            <p>${escape(t.founderLetter.body)}</p>
-            <footer>
-              <p class="founder-name">${escape(siteConfig.founderName)}</p>
-              <p class="founder-role">${escape(t.founder.role)} · ${escape(t.founder.exp)}</p>
-              <p class="founder-signoff">${escape(t.founderLetter.signoff)}</p>
-            </footer>
-          </blockquote>
-          <p class="founder-videos-title">${escape(t.founderLetter.videosTitle)}</p>
-          <div class="founder-videos">
-            ${siteConfig.founderVideos
-              .map(
-                (v) =>
-                  `<a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(t.founderLetter.videoLabels[v.labelKey])}</a>`,
-              )
-              .join("")}
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" class="section">
+      <section id="contact" class="section section-alt">
         <div class="container">
           <h2>${escape(t.contact.title)}</h2>
           <ul class="contact-list">

@@ -1006,6 +1006,216 @@ blockquote {
   }
 }
 
+/* Hero tagline (one-liner under body copy) */
+.hero-tagline {
+  display: inline-block;
+  margin: 0.5rem 0 1.75rem;
+  padding: 0.45rem 0.9rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+/* Big idea / authority pull-quote */
+.big-quote {
+  font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+  line-height: 1.4;
+  font-weight: 600;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1.25rem 1.5rem;
+  margin: 1.25rem 0;
+  max-width: 820px;
+  color: var(--text);
+}
+
+/* Not / negation list (Big Idea, Positioning) */
+.not-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 760px;
+}
+
+.not-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.not-mark {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  background: rgba(248, 81, 73, 0.18);
+  color: var(--block);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.but-line {
+  margin: 1rem 0 0;
+  font-size: 1.1rem;
+  max-width: 760px;
+}
+
+/* Mechanism / 4-step list */
+.step-list {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 1.5rem 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  gap: 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--accent-strong);
+  color: #0b0d10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.step-body h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.step-body p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Video block — core message pull */
+.core-message {
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  max-width: 760px;
+}
+
+.core-message p {
+  margin: 0;
+}
+
+.core-message .core-label {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+/* Positioning tags */
+.positioning-tags-label {
+  margin: 1.5rem 0 0.6rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
+.positioning-tags {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-audit {
+  color: var(--accent);
+  border-color: rgba(124, 196, 255, 0.4);
+}
+
+/* Video cards (3-up grid for founder videos) */
+.video-cards .video-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.video-card-eyebrow {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.video-card h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.video-card-desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  flex: 1;
+}
+
+/* Closer one-liner banner */
+.closer {
+  text-align: center;
+  background:
+    radial-gradient(800px 200px at 50% 50%, rgba(78, 166, 255, 0.12), transparent 70%),
+    var(--bg);
+}
+
+.closer-line {
+  font-size: clamp(1.3rem, 3vw, 1.9rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  max-width: none;
+  color: var(--text);
+}
+
 /* Sticky bottom CTA bar */
 .sticky-bar {
   position: sticky;
