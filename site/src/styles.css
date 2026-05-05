@@ -1405,6 +1405,17 @@ blockquote {
   line-height: 1.5;
 }
 
+.step-body .inline-code,
+.quickstart-list .inline-code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(126, 196, 255, 0.1);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.06em 0.35em;
+  color: var(--text);
+}
+
 /* Video block — core message pull */
 .core-message {
   margin: 1.25rem 0 0;

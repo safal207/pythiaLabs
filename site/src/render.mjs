@@ -8,6 +8,20 @@ const escape = (s) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+/** Interprets `…` spans as inline <code> (safe for HTML). */
+const inlineCodeToHtml = (s) => {
+  const parts = String(s).split(/`([^`]*)`/g);
+  let html = "";
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      html += escape(parts[i]);
+    } else {
+      html += `<code class="inline-code">${escape(parts[i])}</code>`;
+    }
+  }
+  return html;
+};
+
 const li = (s) => `<li>${escape(s)}</li>`;
 
 const ARTIFACT_JSON = `{
@@ -203,7 +217,7 @@ export function renderPage(currentId, year, buildDate) {
   const mechanismSteps = t.solution.steps
     .map(
       (s, i) =>
-        `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${escape(s.desc)}</p></div></li>`,
+        `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${inlineCodeToHtml(s.desc)}</p></div></li>`,
     )
     .join("");
 
@@ -481,7 +495,7 @@ export function renderPage(currentId, year, buildDate) {
           <ol class="step-list quickstart-list">${t.quickstart.steps
             .map(
               (s, i) =>
-                `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${escape(s.desc)}</p></div></li>`,
+                `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${inlineCodeToHtml(s.desc)}</p></div></li>`,
             )
             .join("")}</ol>
         </div>

@@ -492,7 +492,7 @@ export const locales = {
       steps: [
         {
           name: "Клон и зависимости",
-          desc: "`git clone` репозитория, затем `mix deps.get` (как в CI).",
+          desc: "Сделайте `git clone` репозитория, затем `mix deps.get` (как в CI).",
         },
         {
           name: "Прогон тестов",
