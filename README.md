@@ -79,7 +79,8 @@ echo '{"gate":"agent_infra_action","action":{...},"safety_context":{...}}' | mix
 ```
 
 For users who do not want to remember the `mix` invocation, a thin wrapper at
-[`bin/pythia`](bin/pythia) exposes the same gate as `pythia eval`:
+[`bin/pythia`](bin/pythia) exposes the same gate as `pythia eval` — and ships
+machine-readable input schemas under [`schemas/mcp/`](schemas/mcp/):
 
 ```bash
 # Stdin (auto-locates the repo from the script path)
@@ -88,12 +89,18 @@ echo '{"gate":"agent_infra_action", ...}' | ./bin/pythia eval
 # Or from a file
 ./bin/pythia eval --file proposal.json
 
-# Help and supported gates
+# List supported gates and inspect their JSON Schema
+./bin/pythia gates
+./bin/pythia describe banking_risk_action
+
+# Help
 ./bin/pythia --help
 ```
 
-Set `PYTHIA_REPO_ROOT` if you symlink the script into your `$PATH` from outside
-the repository.
+The JSON Schemas (draft-07) describe required fields and types per gate so
+editors can give you autocomplete and inline errors before you ever invoke the
+evaluator. Set `PYTHIA_REPO_ROOT` if you symlink the script into your `$PATH`
+from outside the repository.
 
 Setup steps and `mcp.json` snippet: [`integrations/mcp/README.md`](integrations/mcp/README.md).
 
