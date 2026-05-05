@@ -468,7 +468,7 @@ export function renderPage(currentId, year, buildDate) {
           <p>${escape(t.artifact.introPlain)}</p>
           <details class="artifact-technical">
             <summary>${escape(t.artifact.technicalSummary)}</summary>
-            <p>${escape(t.artifact.introTechnical)}</p>
+            <p>${inlineCodeToHtml(t.artifact.introTechnical)}</p>
           </details>
           <pre class="code-block" aria-label="Example evidence artifact JSON"><code>${escape(ARTIFACT_JSON)}</code></pre>
         </div>
@@ -481,10 +481,10 @@ export function renderPage(currentId, year, buildDate) {
           <div class="card-grid">${t.integration.items
             .map(
               (item) =>
-                `<article class="card"><h3>${escape(item.name)}</h3><p>${escape(item.desc)}</p></article>`,
+                `<article class="card"><h3>${escape(item.name)}</h3><p>${inlineCodeToHtml(item.desc)}</p></article>`,
             )
             .join("")}</div>
-          <p class="integration-repo-note">${escape(t.integration.repoNote)}</p>
+          <p class="integration-repo-note">${inlineCodeToHtml(t.integration.repoNote)}</p>
         </div>
       </section>
 
@@ -622,7 +622,7 @@ export function renderPage(currentId, year, buildDate) {
             ${t.faq.items
               .map(
                 (item) =>
-                  `<details class="faq-item"><summary>${escape(item.q)}</summary><p>${escape(item.a)}</p></details>`,
+                  `<details class="faq-item"><summary>${escape(item.q)}</summary><p>${inlineCodeToHtml(item.a)}</p></details>`,
               )
               .join("")}
           </div>
