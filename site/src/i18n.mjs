@@ -1,11 +1,16 @@
 export const locales = {
   en: {
     htmlLang: "en",
+    ogLocale: "en_US",
     langLabel: "EN",
     meta: {
       title: "Pre-execution safety gate for AI agents — PythiaLabs",
       description:
-        "PythiaLabs is the pre-execution safety gate for AI agents. Decides whether an agent's action should ALLOW, BLOCK, or ESCALATE — before it executes — with replayable evidence.",
+        "Open-source pre-execution gate for AI and agentic systems: ALLOW, BLOCK, or ESCALATE before tools run. Deterministic checks, replayable traces, audit-ready evidence — self-hosted Elixir library, Apache-2.0.",
+      keywords:
+        "AI agent safety, pre-execution gate, agentic AI, AI governance, ALLOW BLOCK ESCALATE, deterministic policy gate, audit trail, open source AI safety, Apache-2.0, Elixir agent guard, OPA RBAC complement, DevOps AI agents, fintech AI risk, Web3 treasury governance",
+      ogImageAlt:
+        "PythiaLabs — pre-execution safety gate for AI agents: verify actions before they execute",
     },
     nav: {
       problem: "Problem",
@@ -14,6 +19,7 @@ export const locales = {
       integration: "Integration",
       quickstart: "Quick start",
       fit: "Who it's for",
+      pilot: "Pilot",
       useCases: "Use cases",
       videos: "Videos",
       faq: "FAQ",
@@ -24,9 +30,9 @@ export const locales = {
       eyebrow: "Pre-execution safety layer · Open-source · Apache-2.0",
       headline: "Stop dangerous AI agent actions before they execute.",
       subtitle:
-        "AI agents are moving from answers to actions. PythiaLabs decides whether those actions should execute.",
-      body: "AI agents already modify code, run commands, touch infrastructure, and act in financial and governance workflows. PythiaLabs is a pre-execution safety layer that evaluates an action before the agent runs it.",
-      tagline: "Not trust. Verification before execution.",
+        "The gate returns ALLOW, BLOCK, or ESCALATE before your agent runs destructive tools — deterministic, replayable, on your infrastructure.",
+      body: "Code, infra, banking, governance: when agents act, PythiaLabs evaluates the proposal and evidence first, not the chat transcript.",
+      tagline: "Verify before execute. Evidence your reviewers can replay.",
       starsAlt: "GitHub stars",
     },
     trustStrip: [
@@ -89,7 +95,7 @@ export const locales = {
     videoBlock: {
       eyebrow: "Watch why this matters",
       title: "Should this AI agent action execute?",
-      body: "When an AI agent gets the ability to act, a mistake is no longer a bad answer — it becomes a real action in the real world. PythiaLabs places a verifiable gate before execution: does the agent have the right to act, is there enough context, is the temporal/causal state valid, can the trace be replayed, and should this be allowed, blocked, or escalated to a human?",
+      body: "When agents can act, a bad answer becomes a real incident. PythiaLabs checks permission, evidence freshness, risk, and replayability — then allows, blocks, or escalates to a human before anything irreversible runs.",
       coreLabel: "Core message",
       core: "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
       fallback: "Watch on YouTube",
@@ -155,8 +161,24 @@ export const locales = {
     },
     artifact: {
       title: "Inspectable decision artifacts",
+      technicalSummary: "For engineers: canonical encoding and digests",
+      introPlain:
+        "Every decision ships as structured evidence: outcome, why it stopped, per-check results, and a trace reviewers can replay. Auditors read the same artifact your CI can snapshot — not screenshots of a chat.",
+      introTechnical:
+        "Exports use canonical encoding (`pythia.canonical_export.v1`) and SHA-256 so the same evaluated snapshot always yields the same hex digest; re-run exports in CI to catch drift.",
+    },
+    pilotOutcome: {
+      title: "What a pilot week actually delivers",
       intro:
-        "Every decision produces a JSON artifact: stable stop reasons, per-check results, a replayable trace ID, and a tamper-checkable digest. Digests in the reference implementations use canonical export encoding (`pythia.canonical_export.v1`) and SHA-256 over a stable key order — the same evaluated snapshot yields the same hex digest; re-run exports in CI to detect drift. This is what reviewers and auditors actually read.",
+        "This is an open-source MVP — not magic. A focused pilot still gives your team concrete, reviewable outputs:",
+      items: [
+        "One or two high-risk agent flows mapped to structured proposals and decision-time evidence.",
+        "ALLOW / BLOCK / ESCALATE outcomes with stable stop reasons before tools execute.",
+        "Replayable traces and optional SHA-256 digests your reviewers can diff in CI.",
+        "Shared vocabulary with security and compliance: fewer arguments, clearer escalations.",
+      ],
+      footnote:
+        "Scope and pace depend on your stack. Email with your scenario — we prioritize serious design partners.",
     },
     integration: {
       title: "How you integrate it (today)",
@@ -272,6 +294,12 @@ export const locales = {
       body: "The AI industry is moving fast toward autonomous agents. PythiaLabs is built around a simple idea:",
       pullQuote:
         "A powerful AI agent should not only reason. It should be constrained by verifiable action permissions.",
+      oracleEyebrow: "Why this name fits",
+      oracleQuote:
+        "You didn't come here to make the choice. You're here to try to understand why you made it.",
+      oracleSource: "The Oracle, The Matrix",
+      oracleBridge:
+        'When an agent acts, the risk is that the "why" only appears after the damage. PythiaLabs makes the why legible first: stable stop reasons and a replayable trace before the tool runs — so humans can understand the choice while it can still be stopped.',
     },
     founderVideosBlock: {
       eyebrow: "From the founder",
@@ -392,11 +420,16 @@ export const locales = {
 
   ru: {
     htmlLang: "ru",
+    ogLocale: "ru_RU",
     langLabel: "RU",
     meta: {
       title: "Pre-execution safety gate для AI-агентов — PythiaLabs",
       description:
-        "PythiaLabs — pre-execution safety gate для AI-агентов. Решает, должно ли действие агента быть ALLOW, BLOCK или ESCALATE до выполнения, с воспроизводимыми доказательствами.",
+        "Open-source шлюз до выполнения для AI и agentic-систем: ALLOW, BLOCK или ESCALATE до запуска tools. Детерминированные проверки, воспроизводимые трассы, артефакты для аудита — self-hosted Elixir-библиотека, Apache-2.0.",
+      keywords:
+        "безопасность AI-агентов, pre-execution gate, agentic AI, governance AI, ALLOW BLOCK ESCALATE, детерминированный policy gate, audit trail, open source AI safety, Apache-2.0, Elixir guard, OPA RBAC, DevOps агенты, финтех риск AI, Web3 treasury",
+      ogImageAlt:
+        "PythiaLabs — pre-execution safety gate для AI-агентов: проверка действий до выполнения",
     },
     nav: {
       problem: "Проблема",
@@ -405,6 +438,7 @@ export const locales = {
       integration: "Интеграция",
       quickstart: "Быстрый старт",
       fit: "Кому подходит",
+      pilot: "Пилот",
       useCases: "Применение",
       videos: "Видео",
       faq: "FAQ",
@@ -415,9 +449,9 @@ export const locales = {
       eyebrow: "Pre-execution safety layer · Open-source · Apache-2.0",
       headline: "Останавливайте опасные действия AI-агентов до их выполнения.",
       subtitle:
-        "AI-агенты переходят от ответов к действиям. PythiaLabs решает, должны ли эти действия выполняться.",
-      body: "AI-агенты уже меняют код, запускают команды, трогают инфраструктуру и участвуют в финансовых и governance-сценариях. PythiaLabs — pre-execution safety layer, проверяющий действие до того, как агент его выполнит.",
-      tagline: "Не доверие. Верификация до выполнения.",
+        "Шлюз возвращает ALLOW, BLOCK или ESCALATE до того, как агент запустит разрушительные tools — детерминированно, воспроизводимо, на вашей инфре.",
+      body: "Код, инфра, банки, governance: когда агент действует, PythiaLabs сначала оценивает предложение и доказательства, а не расшифровку чата.",
+      tagline: "Проверка до исполнения. Доказательства, которые ревьюер может перепроиграть.",
       starsAlt: "Звёзды на GitHub",
     },
     trustStrip: [
@@ -480,7 +514,7 @@ export const locales = {
     videoBlock: {
       eyebrow: "Почему это важно",
       title: "Должно ли это действие AI-агента выполниться?",
-      body: "Когда AI-агент получает возможность действовать, ошибка перестаёт быть просто плохим ответом — она становится реальным действием в реальном мире. PythiaLabs ставит проверяемые ворота перед исполнением: есть ли право на действие, достаточно ли контекста, валиден ли temporal/causal state, можно ли воспроизвести trace, и нужно ли разрешить, заблокировать или эскалировать на человека.",
+      body: "Когда агент может действовать, плохой ответ превращается в инцидент. PythiaLabs проверяет право, свежесть доказательств, риск и воспроизводимость — затем разрешает, блокирует или эскалирует на человека до необратимых действий.",
       coreLabel: "Главный тезис",
       core: "Будущее agent safety — не пост-фактум дебаг. Это контроль до выполнения.",
       fallback: "Смотреть на YouTube",
@@ -546,8 +580,24 @@ export const locales = {
     },
     artifact: {
       title: "Проверяемые артефакты решений",
+      technicalSummary: "Для инженеров: канонизация и дайджесты",
+      introPlain:
+        "Каждое решение — это структурированное доказательство: исход, причина остановки, результаты проверок и trace, который ревьюер может перепроиграть. Аудитор читает тот же артефакт, что и ваш CI может зафиксировать снимком — не скриншот чата.",
+      introTechnical:
+        "Экспорт использует каноническое кодирование (`pythia.canonical_export.v1`) и SHA-256: одна и та же оценённая снапшот-сборка всегда даёт тот же hex-дайджест; повторный экспорт в CI ловит дрейф.",
+    },
+    pilotOutcome: {
+      title: "Что даёт пилот за короткий срок",
       intro:
-        "Каждое решение порождает JSON-артефакт: стабильные stop-причины, результаты по каждой проверке, воспроизводимый trace ID и дайджест с проверкой целостности. В референсных реализациях дайджесты считаются через canonical export (`pythia.canonical_export.v1`) и SHA-256 по стабильному порядку ключей: одна и та же зафиксированная оценка даёт тот же hex-дайджест; повторные экспорты в CI ловят дрейф артефакта. Это то, что реально читают ревьюеры и аудиторы.",
+        "Это open-source MVP — не волшебство. Сфокусированный пилот всё равно даёт команде конкретные, проверяемые результаты:",
+      items: [
+        "Один–два высокорисковых агент-сценария в виде структурированных предложений и decision-time evidence.",
+        "Исходы ALLOW / BLOCK / ESCALATE со стабильными stop-причинами до выполнения tools.",
+        "Воспроизводимые trace и при необходимости SHA-256 дайджесты, которые ревью могут сравнивать в CI.",
+        "Общий язык с security и комплаенсом — меньше споров, яснее эскалации.",
+      ],
+      footnote:
+        "Объём и темп зависят от вашего стека. Напишите с описанием сценария — приоритет у серьёзных design partners.",
     },
     integration: {
       title: "Как это подключать (сегодня)",
@@ -663,6 +713,12 @@ export const locales = {
       body: "AI-индустрия быстро движется к автономным агентам. PythiaLabs построен вокруг простой идеи:",
       pullQuote:
         "Сильный AI-агент должен не только рассуждать. Он должен быть ограничен проверяемыми правами на действие.",
+      oracleEyebrow: "Почему это созвучно названию",
+      oracleQuote:
+        "Ты пришёл не затем, чтобы сделать выбор. Ты пришёл, чтобы понять, почему ты его сделал.",
+      oracleSource: "Оракул, «Матрица»",
+      oracleBridge:
+        "Когда действует агент, опасность в том, что «почему» всплывает уже после последствий. PythiaLabs делает «почему» читаемым заранее: стабильные stop-причины и воспроизводимый trace до вызова tool — чтобы человек понимал выбор, пока его ещё можно остановить.",
     },
     founderVideosBlock: {
       eyebrow: "От основателя",
@@ -783,11 +839,15 @@ export const locales = {
 
   zh: {
     htmlLang: "zh-Hans",
+    ogLocale: "zh_CN",
     langLabel: "中文",
     meta: {
       title: "面向 AI Agent 的执行前安全门控 — PythiaLabs",
       description:
-        "PythiaLabs 是面向 AI Agent 的执行前安全门控。在执行前判定行动应 ALLOW、BLOCK 或 ESCALATE，并产出可重放的证据。",
+        "面向 AI 与 agentic 系统的开源执行前门控：在工具运行前给出 ALLOW、BLOCK 或 ESCALATE。确定性检查、可重放轨迹、审计友好证据——自托管 Elixir 库，Apache-2.0。",
+      keywords:
+        "AI Agent 安全, 执行前门控, agentic AI, AI 治理, ALLOW BLOCK ESCALATE, 确定性策略门控, 审计轨迹, 开源 AI 安全, Apache-2.0, Elixir, OPA RBAC, DevOps Agent, 金融科技 AI 风险, Web3 金库治理",
+      ogImageAlt: "PythiaLabs — AI Agent 执行前安全门控：先验证再执行",
     },
     nav: {
       problem: "问题",
@@ -796,6 +856,7 @@ export const locales = {
       integration: "集成",
       quickstart: "快速上手",
       fit: "适合谁",
+      pilot: "试点",
       useCases: "应用场景",
       videos: "视频",
       faq: "常见问题",
@@ -805,9 +866,10 @@ export const locales = {
     hero: {
       eyebrow: "执行前安全层 · 开源 · Apache-2.0",
       headline: "在 AI Agent 执行前阻止危险行动。",
-      subtitle: "AI Agent 正从“回答”走向“行动”。PythiaLabs 决定这些行动是否应当执行。",
-      body: "AI Agent 已经在修改代码、运行命令、操作基础设施，并参与金融与治理流程。PythiaLabs 是一个执行前安全层，在 Agent 执行前评估它的行动。",
-      tagline: "不是信任，而是执行前的验证。",
+      subtitle:
+        "在 Agent 运行破坏性工具之前，门控先返回 ALLOW、BLOCK 或 ESCALATE——确定性、可重放，跑在你自己的基础设施上。",
+      body: "代码、基础设施、银行、治理：当 Agent 要行动时，PythiaLabs 先评估提案与证据，而不是聊天记录本身。",
+      tagline: "先验证再执行。审阅者可重放的证据。",
       starsAlt: "GitHub 星标",
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
@@ -863,7 +925,7 @@ export const locales = {
     videoBlock: {
       eyebrow: "为什么这件事重要",
       title: "这个 AI Agent 行动应该被执行吗？",
-      body: "当 AI Agent 拥有了行动能力，错误就不再只是糟糕的回答，而是真实世界中的真实行动。PythiaLabs 在执行前设置一个可校验的门：Agent 是否有权执行、上下文是否充分、时间/因果状态是否有效、轨迹是否可重放、是允许、阻止还是升级到人。",
+      body: "Agent 能行动时，糟糕的回答就会变成事故。PythiaLabs 在不可逆动作之前检查权限、证据新鲜度、风险与可重放性——然后允许、阻止或升级到人。",
       coreLabel: "核心信息",
       core: "Agent 安全的未来不是事后调试，而是执行前的控制。",
       fallback: "在 YouTube 观看",
@@ -916,8 +978,22 @@ export const locales = {
     },
     artifact: {
       title: "可审查的决策产物",
-      intro:
-        "每个决策都会生成 JSON 产物：稳定的停止原因、各项检查结果、可重放的 trace ID，以及可校验的摘要。参考实现中的摘要通过规范化导出编码（`pythia.canonical_export.v1`）与稳定键序上的 SHA-256 计算：同一评估快照产生相同的十六进制摘要；在 CI 中重复导出可发现产物漂移。这才是审查者和审计者真正会读的内容。",
+      technicalSummary: "工程细节：规范化编码与摘要",
+      introPlain:
+        "每次决策都会生成结构化证据：结果、停止原因、各检查项与一个审阅者可重放的轨迹。审计者读到的与你在 CI 里快照的是同一类产物——不是聊天截图。",
+      introTechnical:
+        "导出采用规范化编码（`pythia.canonical_export.v1`）与 SHA-256：同一评估快照总是得到相同的十六进制摘要；在 CI 中重复导出可发现漂移。",
+    },
+    pilotOutcome: {
+      title: "一次试点周能交付什么",
+      intro: "这是开源 MVP，不是魔法。但聚焦的试点仍能给团队具体、可审查的产出：",
+      items: [
+        "将一到两个高风险 Agent 流程映射为结构化提案与决策时证据。",
+        "在工具执行前得到带稳定停止原因的 ALLOW / BLOCK / ESCALATE。",
+        "可重放的轨迹以及可选的 SHA-256 摘要，便于审阅在 CI 中对比。",
+        "与安全、合规共享同一套语言——争论更少，升级路径更清晰。",
+      ],
+      footnote: "范围与节奏取决于你的栈。请附场景邮件联系，我们会优先考虑认真的设计合作伙伴。",
     },
     integration: {
       title: "如何集成（当前形态）",
@@ -1027,6 +1103,11 @@ export const locales = {
       title: "没有可校验行动权限的自主性，不是智能，而是风险",
       body: "AI 行业正快速走向自主代理。PythiaLabs 构建在一个简单理念之上：",
       pullQuote: "强大的 AI Agent 不只是要会推理，更应受到可校验行动权限的约束。",
+      oracleEyebrow: "与名字的共鸣",
+      oracleQuote: "你不是来这里做选择的——你是来试图理解自己为何做出这个选择。",
+      oracleSource: "先知，《黑客帝国》",
+      oracleBridge:
+        "当 Agent 真正行动时，风险在于「为何」往往在后果之后才浮现。PythiaLabs 让「为何」在工具执行前就可读：稳定的停止原因与可重放轨迹——在人类仍能叫停时理解这次选择。",
     },
     founderVideosBlock: {
       eyebrow: "来自创始人",

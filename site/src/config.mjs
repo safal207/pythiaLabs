@@ -25,6 +25,7 @@ export const siteConfig = {
   pilotEmailSubject: "PythiaLabs pilot inquiry",
   xUrl: "https://x.com/lim746048",
   xHandle: "x.com/lim746048",
+  twitterSite: "@lim746048",
   telegramUrl: "https://t.me/Alexfox14",
   telegramHandle: "@Alexfox14",
   founderName: "Aleksei Safonov",
