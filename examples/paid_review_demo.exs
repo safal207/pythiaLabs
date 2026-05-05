@@ -79,7 +79,8 @@ counterfactual = Map.get(input, "counterfactual")
 
 # ──────────────────────────────────────────────────────────────────────
 # Run a single scenario through the real engine; build an evidence
-# envelope with a real sha256 digest and round-trip-verify it.
+# record with a real sha256 digest and round-trip-verify it via
+# Engine.verify_evidence/1 (not the signed-envelope path).
 # ──────────────────────────────────────────────────────────────────────
 run_scenario = fn scenario ->
   action = hydrate.(scenario["action"])
@@ -91,9 +92,11 @@ run_scenario = fn scenario ->
   evidence = Engine.export_evidence(result)
   verify = Engine.verify_evidence(evidence)
 
-  # Persisted envelope omits wall-clock timing so the bundle is byte-stable
-  # across runs; latency is reported to the terminal only.
-  envelope = %{
+  # Persisted record omits wall-clock timing so the bundle is byte-stable
+  # across runs; latency is reported to the terminal only. Note this is the
+  # plain evidence payload + its sha256 digest (Engine.verify_evidence/1),
+  # not the signed envelope (Engine.verify_evidence_envelope/1).
+  evidence_record = %{
     "scenario" => scenario["name"],
     "headline" => scenario["headline"],
     "expected_status" => scenario["expected_status"],
@@ -114,7 +117,7 @@ run_scenario = fn scenario ->
     payload: payload,
     elapsed_us: elapsed_us,
     evidence: evidence,
-    envelope: envelope,
+    record: evidence_record,
     verify: verify
   }
 end
@@ -156,7 +159,7 @@ print_scenario = fn idx, total, r ->
       {:error, %{reason: reason}} -> red.("rejected:#{reason}")
     end
 
-  IO.puts("  envelope    : #{verify_label}")
+  IO.puts("  evidence    : #{verify_label}")
 
   expected_match?
 end
@@ -187,7 +190,7 @@ results =
 # Counterfactual: flip one input field and show the decision flips too.
 # This is the headline claim of an evidence-driven gate.
 # ──────────────────────────────────────────────────────────────────────
-{cf_envelope, cf_status_str} =
+{cf_record, cf_status_str} =
   case counterfactual do
     nil ->
       {nil, nil}
@@ -280,15 +283,15 @@ File.mkdir_p!(Path.dirname(artifacts_path))
 bundle = %{
   "schema" => "pythia.demo.artifact_bundle.v1",
   "scenario_set_id" => input["scenario_set_id"],
-  "scenarios" => Enum.map(results, & &1.envelope),
-  "counterfactual" => cf_envelope
+  "scenarios" => Enum.map(results, & &1.record),
+  "counterfactual" => cf_record
 }
 
 File.write!(artifacts_path, Jason.encode!(bundle, pretty: true) <> "\n")
 
 rule.()
 IO.puts("Artifact bundle written to #{cyan.(artifacts_path)}")
-IO.puts(dim.("  #{length(results)} evidence envelope(s); each digest re-verified via Engine.verify_evidence/1"))
+IO.puts(dim.("  #{length(results)} evidence record(s); each digest re-verified via Engine.verify_evidence/1"))
 
 # ──────────────────────────────────────────────────────────────────────
 # Final pass/fail

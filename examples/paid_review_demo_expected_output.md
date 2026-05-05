@@ -34,7 +34,7 @@ scenario=accepted_transfer
     PASS  authorization_transaction_time_check
     PASS  transfer_expiration_check
   sha256[:16] : <16-hex-prefix>
-  envelope    : verified
+  evidence    : verified
 ────────────────────────────────────────────────────────────────
 [2/4] Quorum threshold not reached
 scenario=quorum_not_met
@@ -46,7 +46,7 @@ scenario=quorum_not_met
     PASS  permission_check
     FAIL  quorum_check
   sha256[:16] : <16-hex-prefix>
-  envelope    : verified
+  evidence    : verified
 ────────────────────────────────────────────────────────────────
 [3/4] Timelock has not yet expired
 scenario=timelock_not_satisfied
@@ -60,13 +60,13 @@ scenario=timelock_not_satisfied
     PASS  voting_window_check
     FAIL  timelock_check
   sha256[:16] : <16-hex-prefix>
-  envelope    : verified
+  evidence    : verified
 ────────────────────────────────────────────────────────────────
 [4/4] Authorization window has expired
 scenario=transfer_window_expired
   decision    : ● REJECTED  (<x.xx ms>)
-  stop_reason : transfer_window_expired
-  expected    : rejected / transfer_window_expired → MATCH
+  stop_reason : transfer_expired
+  expected    : rejected / transfer_expired → MATCH
   evidence trace:
     PASS  proposal_match_check
     PASS  permission_check
@@ -77,7 +77,7 @@ scenario=transfer_window_expired
     PASS  authorization_transaction_time_check
     FAIL  transfer_expiration_check
   sha256[:16] : <16-hex-prefix>
-  envelope    : verified
+  evidence    : verified
 ────────────────────────────────────────────────────────────────
 Counterfactual
 from=quorum_not_met  patch={"governance_record":{"quorum_met":true}}
@@ -88,10 +88,10 @@ Summary
   accepted_transfer        accepted    treasury_transfer_accepted           <x.xx>  <8hex>
   quorum_not_met           rejected    quorum_not_met                       <x.xx>  <8hex>
   timelock_not_satisfied   rejected    timelock_not_satisfied               <x.xx>  <8hex>
-  transfer_window_expired  rejected    transfer_window_expired              <x.xx>  <8hex>
+  transfer_window_expired  rejected    transfer_expired                     <x.xx>  <8hex>
 ────────────────────────────────────────────────────────────────
 Artifact bundle written to examples/output/paid_review_demo_artifact.json
-  4 evidence envelope(s); each digest re-verified via Engine.verify_evidence/1
+  4 evidence record(s); each digest re-verified via Engine.verify_evidence/1
 ────────────────────────────────────────────────────────────────
 Result: PASS — all scenarios matched expectations
 ```
@@ -101,10 +101,12 @@ Result: PASS — all scenarios matched expectations
 1. **Real engine, not mocks** — every decision comes from
    `Pythia.Showcase.Web3TreasuryAction.evaluate/2`; the demo only formats the
    input and output.
-2. **Deterministic evidence** — each evidence envelope is canonically encoded
-   and digested with SHA-256; the demo immediately calls
+2. **Deterministic evidence verification** — each evidence record is
+   canonically encoded and digested with SHA-256; the demo immediately calls
    `Pythia.Showcase.Web3TreasuryAction.verify_evidence/1` on every artifact and
-   reports `verified` only when the digest round-trips.
+   reports `verified` only when the digest round-trips. (This is plain
+   evidence verification, not the signed-envelope path —
+   `verify_evidence_envelope/1` is a separate, stricter mode.)
 3. **Multiple failure modes** — the four scenarios cover an accepted transfer
    plus three orthogonal rejection reasons (quorum, timelock, expiration), so a
    reviewer sees both `accept` and `reject` paths exercised.
@@ -112,7 +114,7 @@ Result: PASS — all scenarios matched expectations
    true`) is shown to flip the decision, demonstrating that the gate is driven
    by evidence rather than action shape.
 5. **Audit trail on disk** — `examples/output/paid_review_demo_artifact.json`
-   is a bundle of evidence envelopes that an external auditor can re-verify
+   is a bundle of evidence records that an external auditor can re-verify
    independently.
 
 The artifact bundle is gitignored — running `make demo` regenerates it. To

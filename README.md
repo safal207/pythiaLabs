@@ -86,12 +86,13 @@ flips one evidence field to show the decision flip.
 For each scenario the demo:
 
 - runs the engine and prints the per-check evidence trace,
-- builds an evidence envelope with a real SHA-256 digest, and
+- builds an evidence record with a real SHA-256 digest, and
 - calls `Pythia.Showcase.Web3TreasuryAction.verify_evidence/1` to confirm the
-  digest round-trips.
+  digest round-trips (plain evidence verification, not the signed
+  `verify_evidence_envelope/1` path).
 
 Inputs live in `examples/paid_review_demo_input.json`; the run writes a bundle
-of evidence envelopes to `examples/output/paid_review_demo_artifact.json`
+of evidence records to `examples/output/paid_review_demo_artifact.json`
 (gitignored — regenerated each run). For expected reviewer-facing output, see
 `examples/paid_review_demo_expected_output.md`.
 

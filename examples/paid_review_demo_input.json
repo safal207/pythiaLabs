@@ -96,7 +96,7 @@
       "name": "transfer_window_expired",
       "headline": "Authorization window has expired",
       "expected_status": "rejected",
-      "expected_stop_reason": "transfer_window_expired",
+      "expected_stop_reason": "transfer_expired",
       "action": {
         "action_id": "dao_act_004",
         "action_type": "treasury_transfer",
