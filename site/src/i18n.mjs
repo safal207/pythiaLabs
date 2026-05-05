@@ -278,8 +278,7 @@ export const locales = {
       headline: "在 AI Agent 执行风险操作之前阻止它们。",
       subtitle:
         "PythiaLabs 是一个开源策略引擎：在执行前返回 ALLOW / BLOCK / ESCALATE，并产出可被审查的证据产物。",
-      audience:
-        "面向运行 AI 编码代理、基础设施自动化、FinTech / RegTech 与 Web3 治理的团队。",
+      audience: "面向运行 AI 编码代理、基础设施自动化、FinTech / RegTech 与 Web3 治理的团队。",
       starsAlt: "GitHub 星标",
     },
     cta: {
@@ -298,15 +297,7 @@ export const locales = {
       title: "PythiaLabs 的工作原理",
       intro: "PythiaLabs 在执行前评估拟议行动，并返回一个决策与可审查的证据产物。",
       checksTitle: "检查项",
-      checks: [
-        "授权",
-        "证据新鲜度",
-        "决策时上下文",
-        "权限边界",
-        "凭据",
-        "恢复假设",
-        "行动风险",
-      ],
+      checks: ["授权", "证据新鲜度", "决策时上下文", "权限边界", "凭据", "恢复假设", "行动风险"],
       returnsTitle: "返回",
     },
     artifact: {

@@ -40,6 +40,12 @@ function pilotMailto(subject) {
   return `mailto:${siteConfig.email}?subject=${encodeURIComponent(subject)}`;
 }
 
+function utm(url, campaign) {
+  if (!url || url.startsWith("mailto:") || url.startsWith("#")) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}utm_source=landing&utm_medium=cta&utm_campaign=${encodeURIComponent(campaign)}`;
+}
+
 function jsonLd(currentId, canonical) {
   const t = locales[currentId];
   const data = {
@@ -105,6 +111,8 @@ export function renderPage(currentId, year) {
     <meta name="description" content="${escape(t.meta.description)}" />
     <meta name="color-scheme" content="dark light" />
     <meta name="robots" content="index, follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: https://img.shields.io; frame-src https://www.youtube-nocookie.com; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'" />
 
     <link rel="canonical" href="${canonical}" />
 
@@ -159,8 +167,8 @@ export function renderPage(currentId, year) {
           <p class="hero-subtitle">${escape(t.hero.subtitle)}</p>
           <p class="hero-audience">${escape(t.hero.audience)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${siteConfig.demoUrl}">${escape(t.cta.primary)}</a>
-            <a class="btn btn-secondary" href="${siteConfig.repoUrl}">${escape(t.cta.secondary)}</a>
+            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-badges">
             <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
@@ -240,8 +248,8 @@ export function renderPage(currentId, year) {
           <h2>${escape(t.finalCta.title)}</h2>
           <p>${escape(t.finalCta.text)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${pilotHref}">${escape(t.finalCta.primary)}</a>
-            <a class="btn btn-secondary" href="${siteConfig.repoUrl}">${escape(t.finalCta.secondary)}</a>
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "pilot_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
           </div>
         </div>
       </section>

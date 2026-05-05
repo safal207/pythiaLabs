@@ -14,9 +14,7 @@ export function renderSitemap(today = new Date().toISOString().slice(0, 10)) {
         (id) =>
           `      <xhtml:link rel="alternate" hreflang="${locales[id].htmlLang}" href="${urlFor(id)}"/>`,
       )
-      .concat(
-        `      <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor("en")}"/>`,
-      )
+      .concat(`      <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor("en")}"/>`)
       .join("\n");
 
   const urls = localeOrder

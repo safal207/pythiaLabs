@@ -9,8 +9,7 @@ import { renderPage } from "./src/render.mjs";
 import { renderRobots, renderSitemap } from "./src/sitemap.mjs";
 
 // lightningcss browser version encoding: major << 16 | minor << 8 | patch
-const browserVersion = (major, minor = 0, patch = 0) =>
-  (major << 16) | (minor << 8) | patch;
+const browserVersion = (major, minor = 0, patch = 0) => (major << 16) | (minor << 8) | patch;
 
 async function main() {
   validateLocales();
