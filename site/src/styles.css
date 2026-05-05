@@ -228,6 +228,18 @@ a:focus {
   margin: 0 0 0.75rem;
 }
 
+.hero-stakes {
+  font-size: 1.08rem;
+  max-width: 720px;
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem 0.85rem 1.1rem;
+  border-left: 3px solid var(--block);
+  background: #f851491a;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text);
+  line-height: 1.55;
+}
+
 .hero-outcome-line {
   font-size: 1.02rem;
   max-width: 720px;

@@ -318,6 +318,7 @@ export function renderPage(currentId, year, buildDate) {
           <p class="eyebrow">${escape(t.hero.eyebrow)}</p>
           <h1 class="hero-headline">${escape(t.hero.headline)}</h1>
           <p class="hero-subtitle">${escape(t.hero.subtitle)}</p>
+          <p class="hero-stakes">${escape(t.hero.stakesLine)}</p>
           <p class="hero-text">${escape(t.hero.body)}</p>
           <p class="hero-outcome-line">${inlineCodeToHtml(t.hero.outcomeLine)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>

@@ -39,6 +39,8 @@ export const locales = {
       startHereLabel: "New here? Start with Quick start",
       starsAlt: "GitHub stars",
       mcpBadgeAlt: "MCP-ready: Cursor & IDE bridge",
+      stakesLine:
+        "When an agent gets it wrong, it isn't a bad chat answer — it's a wiped database, a transfer you can't claw back, a deploy that breaks production at 3 a.m.",
     },
     trustStrip: [
       "100% open-source",
@@ -489,6 +491,8 @@ export const locales = {
       startHereLabel: "Новичок здесь? Начните с «Быстрого старта»",
       starsAlt: "Звёзды на GitHub",
       mcpBadgeAlt: "MCP-ready: мост в Cursor и IDE",
+      stakesLine:
+        "Когда агент ошибается, это не плохой ответ в чате — это снесённая база, перевод, который не вернуть, и упавший прод в три ночи.",
     },
     trustStrip: [
       "100% open-source",
@@ -938,6 +942,7 @@ export const locales = {
       startHereLabel: "第一次来？从「快速上手」开始",
       starsAlt: "GitHub 星标",
       mcpBadgeAlt: "支持 MCP：连接 Cursor 与 IDE",
+      stakesLine: "Agent 出错时，不只是聊天里答错一句——而是被清空的数据库、追不回的转账，以及凌晨三点崩掉的生产环境。",
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
     cta: {
