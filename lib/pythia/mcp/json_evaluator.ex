@@ -40,14 +40,20 @@ defmodule Pythia.Mcp.JsonEvaluator do
         end
 
       nil ->
-        {:error, %{error: "missing_gate", message: "required field \"gate\" (e.g. \"agent_infra_action\")"}}
+        {:error,
+         %{
+           error: "missing_gate",
+           message: "required field \"gate\" (e.g. \"agent_infra_action\")"
+         }}
 
       other ->
-        {:error, %{error: "unknown_gate", gate: other, message: "supported: [\"agent_infra_action\"]"}}
+        {:error,
+         %{error: "unknown_gate", gate: other, message: "supported: [\"agent_infra_action\"]"}}
     end
   end
 
-  defp evaluate_decoded(_), do: {:error, %{error: "invalid_body", message: "JSON root must be an object"}}
+  defp evaluate_decoded(_),
+    do: {:error, %{error: "invalid_body", message: "JSON root must be an object"}}
 
   defp build_response({:ok, payload}, evidence) do
     %{
@@ -100,6 +106,7 @@ defmodule Pythia.Mcp.JsonEvaluator do
 
   defp decode_safety_context(raw) when is_map(raw) do
     strings = [:credential_scope, :backup_isolation]
+
     bools = [
       :explicit_user_approval_present,
       :environment_scope_verified,
