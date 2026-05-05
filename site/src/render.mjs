@@ -336,6 +336,9 @@ export function renderPage(currentId, year, buildDate) {
             <a href="${siteConfig.repoUrl}/blob/main/LICENSE" class="badge-link">
               <img src="https://img.shields.io/github/license/${siteConfig.repoSlug}?style=flat-square&color=0b0d10" alt="License" loading="lazy" decoding="async" width="100" height="20" />
             </a>
+            <a href="#cursor-ide" class="badge-link">
+              <img src="https://img.shields.io/badge/MCP-ready-7cc4ff?style=flat-square&color=0b0d10" alt="${escape(t.hero.mcpBadgeAlt)}" loading="lazy" decoding="async" width="92" height="20" />
+            </a>
           </p>
           <div class="hero-stats" role="region" aria-label="${escape(t.heroStats.ariaLabel)}">
             <div class="stat"><span class="stat-value">${siteConfig.showcaseScriptCount}</span><span class="stat-label">${escape(t.heroStats.showcases)}</span></div>
