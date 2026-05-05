@@ -460,7 +460,7 @@ export function renderPage(currentId, year, buildDate) {
         <div class="container">
           <h2>${escape(t.solution.title)}</h2>
           <p>${escape(t.solution.intro)}</p>
-          <ol class="step-list">${mechanismSteps}</ol>
+          <ul class="step-list">${mechanismSteps}</ul>
           <div class="two-col">
             <div class="card">
               <h3>${escape(t.solution.checksTitle)}</h3>
@@ -527,12 +527,12 @@ export function renderPage(currentId, year, buildDate) {
         <div class="container">
           <h2>${escape(t.quickstart.title)}</h2>
           <p>${escape(t.quickstart.intro)}</p>
-          <ol class="step-list quickstart-list">${t.quickstart.steps
+          <ul class="step-list quickstart-list">${t.quickstart.steps
             .map(
               (s, i) =>
                 `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${inlineCodeToHtml(s.desc)}</p></div></li>`,
             )
-            .join("")}</ol>
+            .join("")}</ul>
         </div>
       </section>
 
