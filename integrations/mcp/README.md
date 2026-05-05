@@ -32,7 +32,15 @@ If the repo is not next to `integrations/mcp` relative to the script, set:
 }
 ```
 
-3. Restart Cursor (or reload MCP). Tools: **`pythia_evaluate`** (main), **`pythia_evaluate_agent_infra`** (alias), **`pythia_mcp_info`**.
+3. Restart Cursor (or reload MCP). Tools:
+
+   | Tool                            | Purpose                                                          |
+   | ------------------------------- | ---------------------------------------------------------------- |
+   | `pythia_evaluate`               | Run a gate (`input_json` → ALLOW/BLOCK + evidence).              |
+   | `pythia_evaluate_agent_infra`   | Backward-compat alias of `pythia_evaluate`.                      |
+   | `pythia_describe_gate`          | Return the JSON Schema for a gate so the agent can self-correct. |
+   | `pythia_list_gates`             | List supported gate ids.                                         |
+   | `pythia_mcp_info`               | Server version, repo root, supported gates, schemas dir.         |
 
 ## Tool: `pythia_evaluate`
 

@@ -7,6 +7,7 @@
  */
 
 import { spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import * as readline from "node:readline";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,9 +18,15 @@ const repoRoot = process.env.PYTHIA_REPO_ROOT
   ? path.resolve(process.env.PYTHIA_REPO_ROOT)
   : defaultRoot;
 
+const SUPPORTED_GATES = [
+  "agent_infra_action",
+  "banking_risk_action",
+  "web3_treasury_action",
+];
+
 const SERVER_INFO = {
   name: "pythialabs",
-  version: "0.2.0",
+  version: "0.3.0",
 };
 
 const TOOLS = [
@@ -56,11 +63,38 @@ const TOOLS = [
     },
   },
   {
+    name: "pythia_describe_gate",
+    description:
+      "Return the JSON Schema (draft-07) for one PythiaLabs gate so the agent can compose a valid input_json before calling pythia_evaluate. Schema files live in schemas/mcp/.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        gate: {
+          type: "string",
+          enum: SUPPORTED_GATES,
+          description: "Gate id to describe.",
+        },
+      },
+      required: ["gate"],
+    },
+  },
+  {
+    name: "pythia_list_gates",
+    description: "List supported gate ids served by this MCP server.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
     name: "pythia_mcp_info",
     description: "Return PythiaLabs repo root used by this MCP server and supported tools.",
     inputSchema: { type: "object", properties: {} },
   },
 ];
+
+async function loadGateSchema(gate) {
+  const file = path.join(repoRoot, "schemas", "mcp", `${gate}.schema.json`);
+  const raw = await readFile(file, "utf8");
+  return { file, schema: JSON.parse(raw) };
+}
 
 let messageId = 0;
 function nextId() {
@@ -130,6 +164,52 @@ for await (const line of rl) {
     const name = params?.name;
     const args = params?.arguments ?? {};
 
+    if (name === "pythia_list_gates") {
+      send({
+        jsonrpc: "2.0",
+        id,
+        result: {
+          content: [{ type: "text", text: JSON.stringify(SUPPORTED_GATES, null, 2) }],
+          structuredContent: { gates: SUPPORTED_GATES },
+        },
+      });
+      continue;
+    }
+
+    if (name === "pythia_describe_gate") {
+      const gate = args.gate;
+      if (!SUPPORTED_GATES.includes(gate)) {
+        send({
+          jsonrpc: "2.0",
+          id,
+          error: {
+            code: -32602,
+            message: `unknown gate: ${gate} (supported: ${SUPPORTED_GATES.join(", ")})`,
+          },
+        });
+        continue;
+      }
+
+      try {
+        const { file, schema } = await loadGateSchema(gate);
+        send({
+          jsonrpc: "2.0",
+          id,
+          result: {
+            content: [{ type: "text", text: JSON.stringify(schema, null, 2) }],
+            structuredContent: { gate, file: path.relative(repoRoot, file), schema },
+          },
+        });
+      } catch (e) {
+        send({
+          jsonrpc: "2.0",
+          id,
+          error: { code: -32603, message: `failed to load schema for ${gate}: ${e?.message ?? e}` },
+        });
+      }
+      continue;
+    }
+
     if (name === "pythia_mcp_info") {
       send({
         jsonrpc: "2.0",
@@ -144,6 +224,8 @@ for await (const line of rl) {
                   version: SERVER_INFO.version,
                   repoRoot,
                   mixTask: "mix pythia.eval_json",
+                  supportedGates: SUPPORTED_GATES,
+                  schemasDir: "schemas/mcp",
                   docs: "integrations/mcp/README.md",
                 },
                 null,
