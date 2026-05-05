@@ -4,7 +4,9 @@ import { fileURLToPath } from "node:url";
 import { transform } from "lightningcss";
 
 import { localeOrder, validateLocales } from "./src/i18n.mjs";
+import { renderOgSvg } from "./src/og.mjs";
 import { renderPage } from "./src/render.mjs";
+import { renderRobots, renderSitemap } from "./src/sitemap.mjs";
 
 // lightningcss browser version encoding: major << 16 | minor << 8 | patch
 const browserVersion = (major, minor = 0, patch = 0) =>
@@ -49,8 +51,12 @@ async function main() {
     process.stdout.write(`  ${rel.padEnd(20)} ${(size / 1024).toFixed(2)} KB\n`);
   }
 
+  await writeFile(path.join(distDir, "robots.txt"), renderRobots(), "utf8");
+  await writeFile(path.join(distDir, "sitemap.xml"), renderSitemap(), "utf8");
+  await writeFile(path.join(distDir, "og.svg"), renderOgSvg(), "utf8");
+
   process.stdout.write(
-    `\nbuilt ${localeOrder.length} pages (${(total / 1024).toFixed(2)} KB total)\n`,
+    `\nbuilt ${localeOrder.length} pages (${(total / 1024).toFixed(2)} KB total) + robots.txt, sitemap.xml, og.svg\n`,
   );
 }
 

@@ -1,11 +1,16 @@
 export const siteConfig = {
   canonicalOrigin: "https://safal207.github.io/pythiaLabs",
   repoUrl: "https://github.com/safal207/pythiaLabs",
+  repoSlug: "safal207/pythiaLabs",
   demoUrl: "https://youtu.be/IUk3iO0N4YU",
+  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/IUk3iO0N4YU",
   email: "safal0645@gmail.com",
+  pilotEmailSubject: "PythiaLabs pilot inquiry",
   xUrl: "https://x.com/lim746048",
   xHandle: "x.com/lim746048",
   telegramUrl: "https://t.me/Alexfox14",
   telegramHandle: "@Alexfox14",
   founderName: "Aleksei Safonov",
+  license: "Apache-2.0",
+  ogImagePath: "/og.svg",
 };

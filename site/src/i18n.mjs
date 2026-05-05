@@ -3,40 +3,44 @@ export const locales = {
     htmlLang: "en",
     langLabel: "EN",
     meta: {
-      title: "PythiaLabs — Evidence Gates for High-Risk AI-Agent Actions",
+      title: "Evidence Gates for AI-Agent Actions — PythiaLabs",
       description:
-        "Open-source deterministic evidence gates for deciding whether high-risk AI-agent actions should be allowed, blocked, or escalated before execution.",
+        "Open-source policy engine for AI agents. Returns ALLOW / BLOCK / ESCALATE for high-risk actions before execution, with replayable evidence artifacts.",
     },
     nav: {
       problem: "Problem",
-      solution: "Solution",
+      solution: "How it works",
       useCases: "Use cases",
-      stage: "Stage",
+      demo: "Demo",
       contact: "Contact",
     },
+    skipLink: "Skip to content",
     hero: {
       eyebrow: "Open-source · Deterministic · Pre-execution",
-      subtitle: "Evidence Gates for High-Risk AI-Agent Actions",
-      text: "PythiaLabs helps teams decide whether AI-agent actions should be allowed, blocked, or escalated before execution.",
-      support:
-        "Built for agentic AI workflows involving code, infrastructure, credentials, finance, governance, and other high-risk operations.",
+      headline: "Stop AI agents from running risky actions — before they happen.",
+      subtitle:
+        "PythiaLabs is an open-source policy engine that returns ALLOW / BLOCK / ESCALATE for high-risk agent actions, with replayable evidence artifacts your reviewers can audit.",
+      audience:
+        "For teams running AI coding agents, infrastructure automation, FinTech / RegTech, and Web3 governance.",
+      starsAlt: "GitHub stars",
     },
     cta: {
-      github: "View GitHub",
-      demo: "Watch Demo",
-      contact: "Contact Founder",
+      primary: "Watch 2-min demo",
+      secondary: "View on GitHub",
+      pilot: "Apply as pilot partner",
+      contact: "Contact",
     },
     problem: {
-      title: "AI Agents Are Moving From Text to Action",
-      p1: "AI agents can now modify code, call tools, touch infrastructure, handle credentials, prepare financial workflows, and support governance decisions.",
-      p2: "But most teams still lack a clear pre-execution checkpoint:",
+      title: "AI agents are moving from text to action",
+      p1: "Coding agents merge PRs. Infra agents call cloud APIs. Treasury agents prepare on-chain transactions. Compliance agents draft regulatory filings.",
+      p2: "Most teams still lack a clear pre-execution checkpoint that can answer one question:",
       quote: "“Should this action be allowed to happen?”",
     },
     solution: {
-      title: "Deterministic Evidence Gates Before Execution",
+      title: "How PythiaLabs works",
       intro:
-        "PythiaLabs evaluates proposed high-risk actions before execution.",
-      checksTitle: "It checks",
+        "PythiaLabs evaluates a proposed action before execution and returns a decision plus an inspectable evidence artifact.",
+      checksTitle: "Checks",
       checks: [
         "authorization",
         "evidence freshness",
@@ -46,35 +50,60 @@ export const locales = {
         "recovery assumptions",
         "action risk",
       ],
-      returnsTitle: "Then returns",
+      returnsTitle: "Returns",
     },
-    output: {
-      title: "Inspectable Decision Artifacts",
-      intro: "Every decision can produce reviewer-friendly artifacts:",
-      items: [
-        "Replayable traces",
-        "Stable stop reasons",
-        "JSON evidence artifacts",
-        "Tamper-checkable digests",
-        "Reviewer-facing reports",
-      ],
+    artifact: {
+      title: "Inspectable decision artifacts",
+      intro:
+        "Every decision produces a JSON artifact: stable stop reasons, per-check results, a replayable trace ID, and a tamper-checkable digest. This is what reviewers and auditors actually read.",
+    },
+    demo: {
+      title: "See it in action",
+      caption: "2-minute walkthrough of a deterministic local demo.",
+      fallback: "Watch the demo on YouTube",
     },
     useCases: {
-      title: "Where PythiaLabs Can Help",
+      title: "Where PythiaLabs fits",
       items: [
-        "AI coding agents",
-        "Infrastructure automation",
-        "FinTech / RegTech workflows",
-        "Web3 treasury governance",
-        "Public-sector AI workflows",
-        "Enterprise AI assurance",
+        {
+          name: "AI coding agents",
+          desc: "Block PRs that touch prod secrets or skip evidence-freshness checks.",
+        },
+        {
+          name: "Infrastructure automation",
+          desc: "Gate `terraform apply`, IAM changes, and production deploys.",
+        },
+        {
+          name: "FinTech / RegTech",
+          desc: "Pre-execution checks on payment, KYC, and compliance flows.",
+        },
+        {
+          name: "Web3 treasury governance",
+          desc: "Verify multi-sig proposals and decision-time context before broadcast.",
+        },
+        {
+          name: "Public-sector AI",
+          desc: "Auditable decisions with replay traces for transparency reviews.",
+        },
+        {
+          name: "Enterprise AI assurance",
+          desc: "Evidence artifacts your reviewers and auditors can read end-to-end.",
+        },
       ],
     },
+    finalCta: {
+      title: "Looking for design partners",
+      text: "We are talking to early teams running agentic AI workflows in code, infra, finance, and governance.",
+      primary: "Apply as pilot partner",
+      secondary: "Star on GitHub",
+    },
     stage: {
-      title: "Current Stage",
-      p1: "PythiaLabs is an open-source MVP with deterministic local demos.",
-      p2: "It is not currently a production enforcement system, regulatory compliance product, or certified safety framework.",
-      p3: "We are looking for pilot partners, ecosystem support, accelerators, technical collaborators, and early reviewers.",
+      title: "Project stage",
+      items: [
+        "Open-source MVP with deterministic local demos.",
+        "Not a production enforcement system, regulatory product, or certified safety framework.",
+        "Looking for pilot partners, accelerators, technical collaborators, and early reviewers.",
+      ],
     },
     founder: {
       title: "Founder",
@@ -93,49 +122,54 @@ export const locales = {
         telegram: "Telegram",
       },
     },
-    footer: "© {year} PythiaLabs · Open-source MVP",
+    footer: {
+      tagline: "Open-source MVP · Apache-2.0",
+      copyright: "© {year} PythiaLabs",
+    },
   },
 
   ru: {
     htmlLang: "ru",
     langLabel: "RU",
     meta: {
-      title:
-        "PythiaLabs — доказательные шлюзы для рискованных действий AI-агентов",
+      title: "Доказательные шлюзы для AI-агентов — PythiaLabs",
       description:
-        "Открытые детерминированные доказательные шлюзы: решают, должно ли рискованное действие AI-агента быть разрешено, заблокировано или эскалировано до выполнения.",
+        "Open-source policy engine для AI-агентов. Возвращает ALLOW / BLOCK / ESCALATE для рискованных действий до выполнения, с воспроизводимыми артефактами доказательств.",
     },
     nav: {
       problem: "Проблема",
-      solution: "Решение",
+      solution: "Как работает",
       useCases: "Применение",
-      stage: "Стадия",
+      demo: "Демо",
       contact: "Контакты",
     },
+    skipLink: "К содержимому",
     hero: {
       eyebrow: "Open-source · Детерминированно · До выполнения",
+      headline: "Останавливайте рискованные действия AI-агентов — до того, как они произойдут.",
       subtitle:
-        "Доказательные шлюзы для рискованных действий AI-агентов",
-      text: "PythiaLabs помогает командам решать, должно ли действие AI-агента быть разрешено, заблокировано или эскалировано до выполнения.",
-      support:
-        "Создано для агентных AI-сценариев с кодом, инфраструктурой, учётными данными, финансами, governance и другими высокорисковыми операциями.",
+        "PythiaLabs — open-source policy engine, возвращающий ALLOW / BLOCK / ESCALATE для рискованных действий агентов, с воспроизводимыми артефактами доказательств для аудита.",
+      audience:
+        "Для команд с AI-агентами в коде, инфраструктуре, FinTech / RegTech и Web3-governance.",
+      starsAlt: "Звёзды на GitHub",
     },
     cta: {
-      github: "Открыть GitHub",
-      demo: "Смотреть демо",
-      contact: "Связаться с автором",
+      primary: "Посмотреть демо (2 мин)",
+      secondary: "Открыть на GitHub",
+      pilot: "Стать пилотным партнёром",
+      contact: "Связаться",
     },
     problem: {
       title: "AI-агенты переходят от текста к действиям",
-      p1: "AI-агенты уже могут менять код, вызывать инструменты, влиять на инфраструктуру, работать с учётными данными, готовить финансовые операции и поддерживать governance-решения.",
-      p2: "Но у большинства команд до сих пор нет чёткой точки контроля перед выполнением:",
+      p1: "Coding-агенты мерджат PR. Infra-агенты вызывают cloud API. Treasury-агенты готовят on-chain транзакции. Compliance-агенты составляют отчёты для регуляторов.",
+      p2: "У большинства команд до сих пор нет чёткой точки контроля перед выполнением, которая отвечает на один вопрос:",
       quote: "«Должно ли это действие вообще произойти?»",
     },
     solution: {
-      title: "Детерминированные доказательные шлюзы перед выполнением",
+      title: "Как работает PythiaLabs",
       intro:
-        "PythiaLabs оценивает предлагаемые рискованные действия до их выполнения.",
-      checksTitle: "Что проверяется",
+        "PythiaLabs оценивает предлагаемое действие до выполнения и возвращает решение плюс проверяемый артефакт доказательств.",
+      checksTitle: "Проверки",
       checks: [
         "авторизация",
         "актуальность доказательств",
@@ -145,36 +179,60 @@ export const locales = {
         "предположения о восстановлении",
         "риск действия",
       ],
-      returnsTitle: "Что возвращается",
+      returnsTitle: "Возвращает",
     },
-    output: {
+    artifact: {
       title: "Проверяемые артефакты решений",
       intro:
-        "Каждое решение может выдавать удобные для аудита артефакты:",
-      items: [
-        "Воспроизводимые трассы",
-        "Стабильные stop-причины",
-        "JSON-артефакты доказательств",
-        "Дайджесты с проверкой целостности",
-        "Отчёты для ревьюеров",
-      ],
+        "Каждое решение порождает JSON-артефакт: стабильные stop-причины, результаты по каждой проверке, воспроизводимый trace ID и дайджест с проверкой целостности. Это то, что реально читают ревьюеры и аудиторы.",
+    },
+    demo: {
+      title: "Посмотреть в действии",
+      caption: "Двухминутный обзор детерминированного локального демо.",
+      fallback: "Смотреть демо на YouTube",
     },
     useCases: {
-      title: "Где PythiaLabs может помочь",
+      title: "Где применяется PythiaLabs",
       items: [
-        "AI-агенты для кода",
-        "Автоматизация инфраструктуры",
-        "FinTech / RegTech сценарии",
-        "Web3-казначейство и governance",
-        "AI в госсекторе",
-        "Корпоративная AI-надёжность",
+        {
+          name: "AI-агенты для кода",
+          desc: "Блокируйте PR, которые трогают prod-секреты или пропускают проверку свежести доказательств.",
+        },
+        {
+          name: "Автоматизация инфраструктуры",
+          desc: "Шлюзование `terraform apply`, изменений IAM и production-деплоев.",
+        },
+        {
+          name: "FinTech / RegTech",
+          desc: "Проверки до выполнения для платежей, KYC и комплаенс-сценариев.",
+        },
+        {
+          name: "Web3-казначейство",
+          desc: "Проверка multi-sig предложений и контекста на момент решения до broadcast.",
+        },
+        {
+          name: "AI в госсекторе",
+          desc: "Аудируемые решения с воспроизводимыми трассами для проверок прозрачности.",
+        },
+        {
+          name: "Корпоративная AI-надёжность",
+          desc: "Артефакты доказательств, которые ваши ревьюеры и аудиторы читают целиком.",
+        },
       ],
     },
+    finalCta: {
+      title: "Ищем design partners",
+      text: "Мы общаемся с командами, которые уже запускают agentic AI в коде, инфраструктуре, финансах и governance.",
+      primary: "Стать пилотным партнёром",
+      secondary: "Поставить звезду на GitHub",
+    },
     stage: {
-      title: "Текущая стадия",
-      p1: "PythiaLabs — open-source MVP с детерминированными локальными демо.",
-      p2: "Это не production-система контроля действий, не комплаенс-продукт и не сертифицированный safety-фреймворк.",
-      p3: "Ищем пилотных партнёров, поддержку экосистемы, акселераторы, технических сотрудников и ранних ревьюеров.",
+      title: "Стадия проекта",
+      items: [
+        "Open-source MVP с детерминированными локальными демо.",
+        "Не production-система контроля, не комплаенс-продукт, не сертифицированный safety-фреймворк.",
+        "Ищем пилотных партнёров, акселераторы, технических сотрудников и ранних ревьюеров.",
+      ],
     },
     founder: {
       title: "Основатель",
@@ -193,45 +251,52 @@ export const locales = {
         telegram: "Telegram",
       },
     },
-    footer: "© {year} PythiaLabs · Open-source MVP",
+    footer: {
+      tagline: "Open-source MVP · Apache-2.0",
+      copyright: "© {year} PythiaLabs",
+    },
   },
 
   zh: {
     htmlLang: "zh-Hans",
     langLabel: "中文",
     meta: {
-      title: "PythiaLabs — 高风险 AI Agent 行动的证据门控",
+      title: "面向 AI Agent 行动的证据门控 — PythiaLabs",
       description:
-        "开源、确定性的证据门控：在执行前判断高风险 AI Agent 行动应被允许、阻止或升级处理。",
+        "面向 AI Agent 的开源策略引擎。在执行前返回 ALLOW / BLOCK / ESCALATE，并产出可重放的证据产物。",
     },
     nav: {
       problem: "问题",
-      solution: "解决方案",
+      solution: "工作原理",
       useCases: "应用场景",
-      stage: "阶段",
+      demo: "演示",
       contact: "联系",
     },
+    skipLink: "跳到内容",
     hero: {
       eyebrow: "开源 · 确定性 · 执行前",
-      subtitle: "高风险 AI Agent 行动的证据门控",
-      text: "PythiaLabs 帮助团队在执行前决定 AI Agent 的行动应被允许、阻止还是升级处理。",
-      support:
-        "面向涉及代码、基础设施、凭据、金融、治理及其他高风险操作的 AI Agent 工作流。",
+      headline: "在 AI Agent 执行风险操作之前阻止它们。",
+      subtitle:
+        "PythiaLabs 是一个开源策略引擎：在执行前返回 ALLOW / BLOCK / ESCALATE，并产出可被审查的证据产物。",
+      audience:
+        "面向运行 AI 编码代理、基础设施自动化、FinTech / RegTech 与 Web3 治理的团队。",
+      starsAlt: "GitHub 星标",
     },
     cta: {
-      github: "访问 GitHub",
-      demo: "观看演示",
-      contact: "联系创始人",
+      primary: "观看 2 分钟演示",
+      secondary: "查看 GitHub",
+      pilot: "申请试点合作",
+      contact: "联系",
     },
     problem: {
       title: "AI Agent 正从文本走向行动",
-      p1: "AI Agent 现在能修改代码、调用工具、操作基础设施、处理凭据、准备金融流程并支持治理决策。",
-      p2: "但大多数团队仍缺少清晰的执行前检查点：",
+      p1: "编码代理合并 PR；基础设施代理调用云 API；金库代理准备链上交易；合规代理起草监管报告。",
+      p2: "但大多数团队仍缺少一个能回答以下问题的执行前检查点：",
       quote: "“这个行动应该被允许发生吗？”",
     },
     solution: {
-      title: "执行前的确定性证据门控",
-      intro: "PythiaLabs 在执行前评估拟议的高风险行动。",
+      title: "PythiaLabs 的工作原理",
+      intro: "PythiaLabs 在执行前评估拟议行动，并返回一个决策与可审查的证据产物。",
       checksTitle: "检查项",
       checks: [
         "授权",
@@ -242,35 +307,60 @@ export const locales = {
         "恢复假设",
         "行动风险",
       ],
-      returnsTitle: "返回结果",
+      returnsTitle: "返回",
     },
-    output: {
+    artifact: {
       title: "可审查的决策产物",
-      intro: "每次决策都可生成便于审查的产物：",
-      items: [
-        "可重放的轨迹",
-        "稳定的停止原因",
-        "JSON 证据产物",
-        "可校验的摘要",
-        "面向审查者的报告",
-      ],
+      intro:
+        "每个决策都会生成 JSON 产物：稳定的停止原因、各项检查结果、可重放的 trace ID，以及可校验的摘要。这才是审查者和审计者真正会读的内容。",
+    },
+    demo: {
+      title: "实际效果演示",
+      caption: "2 分钟的确定性本地演示。",
+      fallback: "在 YouTube 观看演示",
     },
     useCases: {
-      title: "PythiaLabs 的应用场景",
+      title: "PythiaLabs 的适用场景",
       items: [
-        "AI 编码代理",
-        "基础设施自动化",
-        "FinTech / RegTech 工作流",
-        "Web3 国库治理",
-        "公共部门 AI 工作流",
-        "企业 AI 保障",
+        {
+          name: "AI 编码代理",
+          desc: "阻止触及生产密钥或跳过证据新鲜度检查的 PR。",
+        },
+        {
+          name: "基础设施自动化",
+          desc: "对 `terraform apply`、IAM 变更与生产部署做门控。",
+        },
+        {
+          name: "FinTech / RegTech",
+          desc: "对支付、KYC 与合规流程做执行前检查。",
+        },
+        {
+          name: "Web3 国库治理",
+          desc: "在广播前验证多签提案与决策时上下文。",
+        },
+        {
+          name: "公共部门 AI",
+          desc: "用可重放轨迹支撑透明度审查的可审计决策。",
+        },
+        {
+          name: "企业 AI 保障",
+          desc: "可被审查者与审计者完整阅读的证据产物。",
+        },
       ],
     },
+    finalCta: {
+      title: "正在寻找设计伙伴",
+      text: "我们正在与在代码、基础设施、金融与治理中运行 agentic AI 的早期团队交流。",
+      primary: "申请试点合作",
+      secondary: "在 GitHub 加星",
+    },
     stage: {
-      title: "当前阶段",
-      p1: "PythiaLabs 是一个具有确定性本地演示的开源 MVP。",
-      p2: "目前并非生产级执行系统、合规产品或经认证的安全框架。",
-      p3: "我们正在寻找试点合作伙伴、生态支持、加速器、技术合作者与早期审查者。",
+      title: "项目阶段",
+      items: [
+        "具有确定性本地演示的开源 MVP。",
+        "并非生产级执行系统、合规产品或经认证的安全框架。",
+        "正在寻找试点合作伙伴、加速器、技术合作者与早期审查者。",
+      ],
     },
     founder: {
       title: "创始人",
@@ -288,7 +378,10 @@ export const locales = {
         telegram: "Telegram",
       },
     },
-    footer: "© {year} PythiaLabs · 开源 MVP",
+    footer: {
+      tagline: "开源 MVP · Apache-2.0",
+      copyright: "© {year} PythiaLabs",
+    },
   },
 };
 

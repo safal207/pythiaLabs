@@ -578,3 +578,147 @@ blockquote {
     transform: none;
   }
 }
+
+/* Hero additions */
+.hero-headline {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+  line-height: 1.15;
+  max-width: 18ch;
+}
+
+.hero-subtitle {
+  max-width: 700px;
+}
+
+.hero-audience {
+  color: var(--text-muted);
+  max-width: 700px;
+  margin: 0 0 2rem;
+  font-size: 0.95rem;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0 0;
+  align-items: center;
+}
+
+.badge-link {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.badge-link img {
+  height: 20px;
+  width: auto;
+  border-radius: 4px;
+}
+
+/* Code block */
+.code-block {
+  background: #0a0c10;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #c9d4e0;
+  max-width: 760px;
+  margin: 1.5rem 0 0;
+}
+
+.code-block code {
+  font-family: inherit;
+  white-space: pre;
+}
+
+/* Video embed (16:9) */
+.video-frame {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 16 / 9;
+  margin: 1.5rem 0 1rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--border);
+}
+
+.video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Use-case cards (with descriptions) */
+.use-case h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.4rem;
+}
+
+.use-case p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Repeat CTA section */
+.section-cta {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
+  text-align: center;
+}
+
+.section-cta .cta-row {
+  justify-content: center;
+}
+
+.section-cta p {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Footer row */
+.footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+@media (prefers-color-scheme: light) {
+  .code-block {
+    background: #f6f8fa;
+    color: #1f2328;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-row {
+    flex-direction: column;
+    text-align: center;
+  }
+  .hero-badges {
+    justify-content: flex-start;
+  }
+  .code-block {
+    font-size: 0.78rem;
+  }
+}

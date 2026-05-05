@@ -10,6 +10,20 @@ const escape = (s) =>
 
 const li = (s) => `<li>${escape(s)}</li>`;
 
+const ARTIFACT_JSON = `{
+  "outcome": "BLOCK",
+  "stop_reason": "evidence_stale",
+  "checks": {
+    "authorization":      "pass",
+    "evidence_freshness": "fail",
+    "permission_boundary": "pass",
+    "credentials":        "pass",
+    "action_risk":        "high"
+  },
+  "trace_id": "01HXR7Q9P3K4...",
+  "digest":   "sha256:9f86d081884c..."
+}`;
+
 function pathsFor(currentId) {
   const fromRoot = (id) => (id === "en" ? "./" : `./${id}/`);
   const fromSub = (id) => (id === "en" ? "../" : id === currentId ? "./" : `../${id}/`);
@@ -22,10 +36,38 @@ function canonicalFor(id) {
   return id === "en" ? `${base}/` : `${base}/${id}/`;
 }
 
+function pilotMailto(subject) {
+  return `mailto:${siteConfig.email}?subject=${encodeURIComponent(subject)}`;
+}
+
+function jsonLd(currentId, canonical) {
+  const t = locales[currentId];
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "PythiaLabs",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Cross-platform",
+    description: t.meta.description,
+    url: canonical,
+    inLanguage: t.htmlLang,
+    license: `https://opensource.org/licenses/${siteConfig.license}`,
+    codeRepository: siteConfig.repoUrl,
+    author: {
+      "@type": "Person",
+      name: siteConfig.founderName,
+    },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+}
+
 export function renderPage(currentId, year) {
   const t = locales[currentId];
   const hrefs = pathsFor(currentId);
   const canonical = canonicalFor(currentId);
+  const ogImage = `${siteConfig.canonicalOrigin.replace(/\/$/, "")}${siteConfig.ogImagePath}`;
+  const pilotHref = pilotMailto(siteConfig.pilotEmailSubject);
 
   const langSwitcher = localeOrder
     .map((id) => {
@@ -44,6 +86,13 @@ export function renderPage(currentId, year) {
     )
     .concat(`<link rel="alternate" hreflang="x-default" href="${canonicalFor("en")}" />`)
     .join("\n    ");
+
+  const useCaseCards = t.useCases.items
+    .map(
+      (uc) =>
+        `<article class="card use-case"><h3>${escape(uc.name)}</h3><p>${escape(uc.desc)}</p></article>`,
+    )
+    .join("");
 
   return `<!doctype html>
 <html lang="${t.htmlLang}">
@@ -64,20 +113,27 @@ export function renderPage(currentId, year) {
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${canonical}" />
     <meta property="og:locale" content="${t.htmlLang.replace("-", "_")}" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="${ogImage}" />
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='28'%3E%E2%97%87%3C/text%3E%3C/svg%3E" />
 
     <link rel="dns-prefetch" href="https://github.com" />
-    <link rel="dns-prefetch" href="https://youtu.be" />
+    <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
+    <link rel="dns-prefetch" href="https://img.shields.io" />
     <link rel="preconnect" href="https://github.com" crossorigin />
 
     ${hreflangLinks}
 
+    ${jsonLd(currentId, canonical)}
+
     <style>__INLINE_CSS__</style>
   </head>
   <body>
-    <a class="skip-link" href="#top">Skip to content</a>
+    <a class="skip-link" href="#main">${escape(t.skipLink)}</a>
     <header class="site-header">
       <div class="container header-row">
         <a class="brand" href="${hrefs[currentId]}" aria-label="PythiaLabs home">
@@ -88,26 +144,32 @@ export function renderPage(currentId, year) {
           <a href="#problem">${escape(t.nav.problem)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
-          <a href="#stage">${escape(t.nav.stage)}</a>
+          <a href="#demo">${escape(t.nav.demo)}</a>
           <a href="#contact">${escape(t.nav.contact)}</a>
         </nav>
         <div class="lang-switcher" role="group" aria-label="Language">${langSwitcher}</div>
       </div>
     </header>
 
-    <main id="top">
+    <main id="main">
       <section class="hero">
         <div class="container">
           <p class="eyebrow">${escape(t.hero.eyebrow)}</p>
-          <h1>PythiaLabs</h1>
+          <h1 class="hero-headline">${escape(t.hero.headline)}</h1>
           <p class="hero-subtitle">${escape(t.hero.subtitle)}</p>
-          <p class="hero-text">${escape(t.hero.text)}</p>
-          <p class="hero-support">${escape(t.hero.support)}</p>
+          <p class="hero-audience">${escape(t.hero.audience)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${siteConfig.repoUrl}">${escape(t.cta.github)}</a>
-            <a class="btn btn-secondary" href="${siteConfig.demoUrl}">${escape(t.cta.demo)}</a>
-            <a class="btn btn-ghost" href="mailto:${siteConfig.email}">${escape(t.cta.contact)}</a>
+            <a class="btn btn-primary" href="${siteConfig.demoUrl}">${escape(t.cta.primary)}</a>
+            <a class="btn btn-secondary" href="${siteConfig.repoUrl}">${escape(t.cta.secondary)}</a>
           </div>
+          <p class="hero-badges">
+            <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
+              <img src="https://img.shields.io/github/stars/${siteConfig.repoSlug}?style=flat-square&label=stars&color=0b0d10" alt="${escape(t.hero.starsAlt)}" loading="lazy" decoding="async" width="90" height="20" />
+            </a>
+            <a href="${siteConfig.repoUrl}/blob/main/LICENSE" class="badge-link">
+              <img src="https://img.shields.io/github/license/${siteConfig.repoSlug}?style=flat-square&color=0b0d10" alt="License" loading="lazy" decoding="async" width="100" height="20" />
+            </a>
+          </p>
         </div>
       </section>
 
@@ -141,19 +203,45 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
-      <section id="output" class="section">
+      <section id="artifact" class="section">
         <div class="container">
-          <h2>${escape(t.output.title)}</h2>
-          <p>${escape(t.output.intro)}</p>
-          <ul class="bullet-grid">${t.output.items.map(li).join("")}</ul>
+          <h2>${escape(t.artifact.title)}</h2>
+          <p>${escape(t.artifact.intro)}</p>
+          <pre class="code-block" aria-label="Example evidence artifact JSON"><code>${escape(ARTIFACT_JSON)}</code></pre>
         </div>
       </section>
 
-      <section id="use-cases" class="section section-alt">
+      <section id="demo" class="section section-alt">
+        <div class="container">
+          <h2>${escape(t.demo.title)}</h2>
+          <p>${escape(t.demo.caption)}</p>
+          <div class="video-frame">
+            <iframe
+              src="${siteConfig.demoEmbedUrl}"
+              title="PythiaLabs demo"
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+          <p><a href="${siteConfig.demoUrl}">${escape(t.demo.fallback)} →</a></p>
+        </div>
+      </section>
+
+      <section id="use-cases" class="section">
         <div class="container">
           <h2>${escape(t.useCases.title)}</h2>
-          <div class="card-grid">
-            ${t.useCases.items.map((s) => `<div class="card"><h3>${escape(s)}</h3></div>`).join("")}
+          <div class="card-grid">${useCaseCards}</div>
+        </div>
+      </section>
+
+      <section id="pilot" class="section section-cta">
+        <div class="container">
+          <h2>${escape(t.finalCta.title)}</h2>
+          <p>${escape(t.finalCta.text)}</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="${pilotHref}">${escape(t.finalCta.primary)}</a>
+            <a class="btn btn-secondary" href="${siteConfig.repoUrl}">${escape(t.finalCta.secondary)}</a>
           </div>
         </div>
       </section>
@@ -161,9 +249,7 @@ export function renderPage(currentId, year) {
       <section id="stage" class="section">
         <div class="container">
           <h2>${escape(t.stage.title)}</h2>
-          <p>${escape(t.stage.p1)}</p>
-          <p>${escape(t.stage.p2)}</p>
-          <p>${escape(t.stage.p3)}</p>
+          <ul class="bullet-grid">${t.stage.items.map(li).join("")}</ul>
         </div>
       </section>
 
@@ -194,8 +280,13 @@ export function renderPage(currentId, year) {
     </main>
 
     <footer class="site-footer">
-      <div class="container">
-        <p>${escape(t.footer.replace("{year}", String(year)))}</p>
+      <div class="container footer-row">
+        <p>${escape(t.footer.copyright.replace("{year}", String(year)))} · ${escape(t.footer.tagline)}</p>
+        <p class="footer-links">
+          <a href="${siteConfig.repoUrl}">GitHub</a>
+          <a href="${siteConfig.repoUrl}/blob/main/LICENSE">License</a>
+          <a href="${siteConfig.demoUrl}">Demo</a>
+        </p>
       </div>
     </footer>
   </body>
