@@ -216,6 +216,8 @@ export function renderPage(currentId, year) {
           <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
           <a href="#integration">${escape(t.nav.integration)}</a>
+          <a href="#quickstart">${escape(t.nav.quickstart)}</a>
+          <a href="#if-you">${escape(t.nav.fit)}</a>
           <a href="#use-cases">${escape(t.nav.useCases)}</a>
           <a href="#videos">${escape(t.nav.videos)}</a>
           <a href="#faq">${escape(t.nav.faq)}</a>
@@ -234,9 +236,9 @@ export function renderPage(currentId, year) {
           <p class="hero-text">${escape(t.hero.body)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
-            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.tertiary)}</a>
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-badges">
             <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
@@ -246,6 +248,22 @@ export function renderPage(currentId, year) {
               <img src="https://img.shields.io/github/license/${siteConfig.repoSlug}?style=flat-square&color=0b0d10" alt="License" loading="lazy" decoding="async" width="100" height="20" />
             </a>
           </p>
+          <div class="hero-stats" role="region" aria-label="${escape(t.heroStats.ariaLabel)}">
+            <div class="stat"><span class="stat-value">${siteConfig.showcaseScriptCount}</span><span class="stat-label">${escape(t.heroStats.showcases)}</span></div>
+            <div class="stat rule" aria-hidden="true"></div>
+            <div class="stat"><span class="stat-value">${siteConfig.testFileCount}</span><span class="stat-label">${escape(t.heroStats.tests)}</span></div>
+            <div class="stat rule" aria-hidden="true"></div>
+            <div class="stat"><span class="stat-value stat-value--license">${escape(t.heroStats.licenseValue)}</span><span class="stat-label">${escape(t.heroStats.licenseLine)}</span></div>
+            <div class="stat rule" aria-hidden="true"></div>
+            <div class="stat"><span class="stat-value">0</span><span class="stat-label">${escape(t.heroStats.llmLine)}</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="if-you" class="section section-if-you">
+        <div class="container">
+          <h2>${escape(t.ifYou.title)}</h2>
+          <ul class="if-you-list">${t.ifYou.items.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
         </div>
       </section>
 
@@ -368,6 +386,19 @@ export function renderPage(currentId, year) {
         </div>
       </section>
 
+      <section id="quickstart" class="section section-alt">
+        <div class="container">
+          <h2>${escape(t.quickstart.title)}</h2>
+          <p>${escape(t.quickstart.intro)}</p>
+          <ol class="step-list quickstart-list">${t.quickstart.steps
+            .map(
+              (s, i) =>
+                `<li class="step"><div class="step-num" aria-hidden="true">${i + 1}</div><div class="step-body"><h3>${escape(s.name)}</h3><p>${escape(s.desc)}</p></div></li>`,
+            )
+            .join("")}</ol>
+        </div>
+      </section>
+
       <section id="value" class="section">
         <div class="container">
           <h2>${escape(t.valueStack.title)}</h2>
@@ -381,6 +412,17 @@ export function renderPage(currentId, year) {
         <div class="container">
           <h2>${escape(t.useCases.title)}</h2>
           <div class="card-grid">${useCaseCards}</div>
+        </div>
+      </section>
+
+      <section class="section mid-cta" aria-label="Mid-page calls to action">
+        <div class="container mid-cta-inner">
+          <p class="mid-cta-line">${escape(t.midCta.line)}</p>
+          <div class="cta-row cta-row--center">
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "mid_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "mid_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
+          </div>
         </div>
       </section>
 
@@ -422,6 +464,13 @@ export function renderPage(currentId, year) {
               <ul>${t.comparison.withItems.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>
             </div>
           </div>
+          <h3 class="comparison-vs-title">${escape(t.comparison.vsTitle)}</h3>
+          <div class="card-grid comparison-vs-grid">${t.comparison.vsItems
+            .map(
+              (item) =>
+                `<article class="card"><h4>${escape(item.name)}</h4><p>${escape(item.desc)}</p></article>`,
+            )
+            .join("")}</div>
         </div>
       </section>
 
@@ -476,9 +525,9 @@ export function renderPage(currentId, year) {
           <h2>${escape(t.finalCta.title)}</h2>
           <p>${escape(t.finalCta.body)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
-            <a class="btn btn-ghost" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.tertiary)}</a>
+            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
           </div>
           <p class="cta-reassurance">${escape(t.finalCta.reassurance)}</p>
         </div>

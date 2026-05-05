@@ -12,6 +12,8 @@ export const locales = {
       idea: "Big idea",
       solution: "How it works",
       integration: "Integration",
+      quickstart: "Quick start",
+      fit: "Who it's for",
       useCases: "Use cases",
       videos: "Videos",
       faq: "FAQ",
@@ -35,11 +37,54 @@ export const locales = {
       "No telemetry",
     ],
     cta: {
-      primary: "Watch the demo",
+      primary: "Join early access",
+      demo: "Watch the demo",
       secondary: "View GitHub repo",
-      tertiary: "Join early access",
       pilot: "Apply as pilot partner",
       contact: "Contact",
+    },
+    heroStats: {
+      ariaLabel: "Repository at a glance",
+      showcases: "deterministic local showcases",
+      tests: "Elixir test files for gates and evidence",
+      licenseLine: "License",
+      licenseValue: "Apache-2.0",
+      llmLine: "LLM calls in the gate",
+    },
+    ifYou: {
+      title: "If this sounds like your team, PythiaLabs is built for you",
+      items: [
+        "You run (or are about to run) agents that can change production, money, or governance — not just chat.",
+        "Post-hoc logs are not enough: you need a decision record before the tool fires.",
+        "RBAC and coarse policy are necessary but do not answer “should this exact action run right now, with this evidence?”",
+        "Reviewers and security want the same replayable artifact every time — not screenshots of a thread.",
+      ],
+    },
+    quickstart: {
+      title: "Get to a working gate in one sitting",
+      intro:
+        "No credit card. No SaaS account. Clone, test, run a showcase, then wire your orchestrator the same way.",
+      steps: [
+        {
+          name: "Clone and install deps",
+          desc: "`git clone` the repository, then `mix deps.get` (same toolchain as CI).",
+        },
+        {
+          name: "Prove the test suite",
+          desc: "Run `mix test` — this is the contract the gate is held to.",
+        },
+        {
+          name: "Run a showcase script",
+          desc: "Try `mix run examples/agent_infra_action_showcase.exs` (or banking / Web3 showcases) and compare stdout to `docs/*_expected_output.md`.",
+        },
+        {
+          name: "Call the evaluator before tools",
+          desc: "From your agent runner, pass a structured proposal plus decision-time evidence; block execution unless the outcome is ALLOW (or route ESCALATE per your policy).",
+        },
+      ],
+    },
+    midCta: {
+      line: "Watch the walkthrough, run the repo locally, or start a pilot — your stack, your infrastructure.",
     },
     videoBlock: {
       eyebrow: "Watch why this matters",
@@ -168,6 +213,25 @@ export const locales = {
         "Every decision has a stop reason, a trace, and a verifiable digest",
         "Reviewers get the same artifact every time, replay included",
       ],
+      vsTitle: "How this differs from nearby approaches",
+      vsItems: [
+        {
+          name: "Prompt-only guardrails",
+          desc: "Instructions to the model are not a boundary for high-risk tools. The gate is deterministic code with stable stop reasons and tests — not prompt text.",
+        },
+        {
+          name: "RBAC / coarse IAM alone",
+          desc: "Static roles don't encode “right now, with this evidence snapshot, under this risk.” The gate consumes decision-time context and freshness.",
+        },
+        {
+          name: "Policy engines such as OPA",
+          desc: "OPA answers authorization rules you express. PythiaLabs targets agent-action proposals plus replayable traces and digest exports for reviewers — complement, not duplicate.",
+        },
+        {
+          name: "Post-hoc monitoring",
+          desc: "Metrics after execution cannot undo a transfer, deletion, or governance vote. Pre-execution is the control point.",
+        },
+      ],
     },
     useCases: {
       title: "Where this becomes critical",
@@ -283,9 +347,9 @@ export const locales = {
       eyebrow: "For builders of high-risk AI agents",
       title: "Build AI agents that can be audited before they act",
       body: "The next generation of AI systems will not be judged only by how well they answer. They will be judged by whether their actions are safe, authorized, and explainable. PythiaLabs gives agentic AI a gate before execution.",
-      primary: "Watch the demo",
+      primary: "Join early access",
+      demo: "Watch the demo",
       secondary: "View GitHub repo",
-      tertiary: "Join early access",
       reassurance: "Apache-2.0 · Self-hostable · No vendor lock-in · No credit card",
     },
     closer: {
@@ -339,6 +403,8 @@ export const locales = {
       idea: "Идея",
       solution: "Как работает",
       integration: "Интеграция",
+      quickstart: "Быстрый старт",
+      fit: "Кому подходит",
       useCases: "Применение",
       videos: "Видео",
       faq: "FAQ",
@@ -362,11 +428,54 @@ export const locales = {
       "Без телеметрии",
     ],
     cta: {
-      primary: "Смотреть демо",
+      primary: "Запросить ранний доступ",
+      demo: "Смотреть демо",
       secondary: "Открыть GitHub",
-      tertiary: "Запросить ранний доступ",
       pilot: "Стать пилотным партнёром",
       contact: "Связаться",
+    },
+    heroStats: {
+      ariaLabel: "Сигналы репозитория",
+      showcases: "детерминированных локальных showcase",
+      tests: "файлов тестов для шлюзов и доказательств",
+      licenseLine: "Лицензия",
+      licenseValue: "Apache-2.0",
+      llmLine: "вызовов LLM в шлюзе",
+    },
+    ifYou: {
+      title: "Если это про вашу команду — PythiaLabs для вас",
+      items: [
+        "Вы запускаете (или собираетесь) агентов, которые трогают прод, деньги или governance — не только чат.",
+        "Постфактум логов мало: нужна запись решения до вызова tool.",
+        "RBAC и грубая политика нужны, но не отвечают: «должно ли выполниться именно это действие прямо сейчас с этими доказательствами?»",
+        "Security и ревьюерам нужен один и тот же воспроизводимый артефакт — не скриншот треда.",
+      ],
+    },
+    quickstart: {
+      title: "Рабочий шлюз за одну сессию",
+      intro:
+        "Без карты. Без SaaS-аккаунта. Клонируйте, прогоните тесты и showcase, затем подключите оркестратор так же.",
+      steps: [
+        {
+          name: "Клон и зависимости",
+          desc: "`git clone` репозитория, затем `mix deps.get` (как в CI).",
+        },
+        {
+          name: "Прогон тестов",
+          desc: "Выполните `mix test` — это контракт, которому соответствует шлюз.",
+        },
+        {
+          name: "Showcase-скрипт",
+          desc: "Запустите `mix run examples/agent_infra_action_showcase.exs` (или banking / Web3) и сверьте stdout с `docs/*_expected_output.md`.",
+        },
+        {
+          name: "Вызов до tools",
+          desc: "Из agent runner передайте структурированное предложение и evidence на момент решения; блокируйте исполнение, если исход не ALLOW (или обрабатывайте ESCALATE по своей политике).",
+        },
+      ],
+    },
+    midCta: {
+      line: "Посмотрите walkthrough, прогоните репозиторий локально или начните пилот — ваш стек, ваша инфраструктура.",
     },
     videoBlock: {
       eyebrow: "Почему это важно",
@@ -495,6 +604,25 @@ export const locales = {
         "У каждого решения есть stop-причина, трасса и проверяемый дайджест",
         "Ревьюеры каждый раз получают один и тот же артефакт, replay включён",
       ],
+      vsTitle: "Чем это отличается от близких подходов",
+      vsItems: [
+        {
+          name: "Только промпты и guardrails",
+          desc: "Инструкции модели — не граница для высокорисковых tools. Шлюз — детерминированный код со стабильными stop-причинами и тестами, а не текст промпта.",
+        },
+        {
+          name: "Только RBAC / грубый IAM",
+          desc: "Статические роли не кодируют «прямо сейчас, с этим снапшотом доказательств, при этом риске». Шлюз потребляет контекст на момент решения и свежесть evidence.",
+        },
+        {
+          name: "Policy engine вроде OPA",
+          desc: "OPA отвечает на выраженные вами правила авторизации. PythiaLabs — про предложения действий агента, воспроизводимые trace и экспорт дайджестов для ревью; это дополнение, не дубль.",
+        },
+        {
+          name: "Пост-мониторинг",
+          desc: "Метрики после исполнения не отменят перевод, удаление или голосование. Контрольная точка — до выполнения.",
+        },
+      ],
     },
     useCases: {
       title: "Где это становится критично",
@@ -610,9 +738,9 @@ export const locales = {
       eyebrow: "Для тех, кто строит AI-агентов с высоким риском",
       title: "Стройте AI-агентов, которых можно аудировать до их действий",
       body: "Следующее поколение AI-систем будут оценивать не только по тому, насколько хорошо они отвечают. Их будут оценивать по тому, безопасны ли, авторизованы ли и объяснимы ли их действия. PythiaLabs даёт agentic AI шлюз перед выполнением.",
-      primary: "Смотреть демо",
+      primary: "Запросить ранний доступ",
+      demo: "Смотреть демо",
       secondary: "Открыть GitHub",
-      tertiary: "Запросить ранний доступ",
       reassurance: "Apache-2.0 · Self-hosted · Без vendor lock-in · Без карточки",
     },
     closer: {
@@ -666,6 +794,8 @@ export const locales = {
       idea: "核心理念",
       solution: "工作原理",
       integration: "集成",
+      quickstart: "快速上手",
+      fit: "适合谁",
       useCases: "应用场景",
       videos: "视频",
       faq: "常见问题",
@@ -682,11 +812,53 @@ export const locales = {
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
     cta: {
-      primary: "观看演示",
+      primary: "申请早期访问",
+      demo: "观看演示",
       secondary: "查看 GitHub",
-      tertiary: "申请早期访问",
       pilot: "申请试点合作",
       contact: "联系",
+    },
+    heroStats: {
+      ariaLabel: "仓库一览",
+      showcases: "个确定性本地 showcase 脚本",
+      tests: "个 Ex 测试文件覆盖门控与证据",
+      licenseLine: "许可证",
+      licenseValue: "Apache-2.0",
+      llmLine: "门控路径中的 LLM 调用",
+    },
+    ifYou: {
+      title: "如果这就是你的团队，PythiaLabs 为你而建",
+      items: [
+        "你运行（或计划运行）能改动生产、资金或治理的 Agent——不仅是聊天。",
+        "事后日志不够：你需要在工具执行前就留下决策记录。",
+        "仅有 RBAC 与粗粒度策略不够回答「在当前证据下，这一具体操作此刻是否应执行？」",
+        "安全与审查需要每次都可重放的同一类产物——而不是线程截图。",
+      ],
+    },
+    quickstart: {
+      title: "一次上手就能跑通门控",
+      intro: "无需信用卡与 SaaS。克隆、测试、运行 showcase，再按同样方式接入编排器。",
+      steps: [
+        {
+          name: "克隆并安装依赖",
+          desc: "`git clone` 仓库后执行 `mix deps.get`（与 CI 相同工具链）。",
+        },
+        {
+          name: "跑通测试",
+          desc: "运行 `mix test`——门控需遵守的契约。",
+        },
+        {
+          name: "运行 showcase",
+          desc: "执行 `mix run examples/agent_infra_action_showcase.exs`（或 banking / Web3 showcase），将标准输出与 `docs/*_expected_output.md` 对照。",
+        },
+        {
+          name: "在工具前调用评估器",
+          desc: "在 Agent runner 中传入结构化提案与决策时证据；若结果不是 ALLOW（或按策略处理 ESCALATE）则阻止执行。",
+        },
+      ],
+    },
+    midCta: {
+      line: "观看讲解视频、在本地运行仓库，或启动试点对话——你的栈，你的基础设施。",
     },
     videoBlock: {
       eyebrow: "为什么这件事重要",
@@ -801,6 +973,25 @@ export const locales = {
         "每个决策都有停止原因、轨迹与可校验摘要",
         "审查者每次拿到的是同样的产物，含重放",
       ],
+      vsTitle: "与常见方案的区别",
+      vsItems: [
+        {
+          name: "仅靠提示词与护栏",
+          desc: "对高风险工具而言，模型指令不是边界。门控是可测试的确定性代码与稳定停止原因——不是提示文本。",
+        },
+        {
+          name: "仅有 RBAC / 粗粒度 IAM",
+          desc: "静态角色无法表达「此刻、在此证据快照、在此风险下」。门控消费决策时上下文与证据新鲜度。",
+        },
+        {
+          name: "诸如 OPA 的策略引擎",
+          desc: "OPA 回答你编写的授权规则。PythiaLabs 聚焦 Agent 行动提案、可重放轨迹与审阅用摘要导出——互补而非重复。",
+        },
+        {
+          name: "事后监控",
+          desc: "执行后的指标无法撤销转账、删除或治理投票。控制点在执行之前。",
+        },
+      ],
     },
     useCases: {
       title: "关键场景",
@@ -911,9 +1102,9 @@ export const locales = {
       eyebrow: "为构建高风险 AI Agent 的团队",
       title: "构建可在行动前被审计的 AI Agent",
       body: "下一代 AI 系统不会只以回答得多好被评判，更会以行动是否安全、被授权、可解释来评判。PythiaLabs 为 agentic AI 提供执行前的门控。",
-      primary: "观看演示",
+      primary: "申请早期访问",
+      demo: "观看演示",
       secondary: "查看 GitHub",
-      tertiary: "申请早期访问",
       reassurance: "Apache-2.0 · 可自托管 · 无供应商锁定 · 无需信用卡",
     },
     closer: {

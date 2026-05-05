@@ -30,4 +30,6 @@ export const siteConfig = {
   founderName: "Aleksei Safonov",
   license: "Apache-2.0",
   ogImagePath: "/og.svg",
+  showcaseScriptCount: 6,
+  testFileCount: 17,
 };
