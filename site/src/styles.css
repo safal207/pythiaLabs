@@ -633,6 +633,134 @@ blockquote {
   border-radius: 4px;
 }
 
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.5rem 1.25rem;
+  margin: 1.75rem 0 0;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(22, 27, 34, 0.5);
+  max-width: 100%;
+}
+
+.hero-stats .stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 5.5rem;
+}
+
+.hero-stats .stat.rule {
+  width: 1px;
+  min-width: 0;
+  align-self: stretch;
+  background: var(--border);
+  margin: 0 0.25rem;
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: var(--accent-strong);
+}
+
+.stat-value--license {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+  max-width: 11rem;
+}
+
+.section-if-you {
+  padding: 2rem 0;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+}
+
+.section-if-you h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+}
+
+.if-you-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.if-you-list li {
+  margin: 0;
+  padding: 0 0 0 1.35rem;
+  position: relative;
+}
+
+.if-you-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--allow);
+  font-weight: 700;
+}
+
+.mid-cta {
+  padding: 2.25rem 0;
+  border-block: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(78, 166, 255, 0.06) 0%, transparent 100%);
+}
+
+.mid-cta-inner {
+  text-align: center;
+}
+
+.mid-cta-line {
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--text-muted);
+}
+
+.cta-row--center {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.comparison-vs-title {
+  margin: 2rem 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.comparison-vs-grid .card h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.comparison-vs-grid .card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.quickstart-list {
+  margin-top: 1.25rem;
+}
+
 /* Example decision */
 .example-decision {
   border-bottom: 1px solid var(--border);
