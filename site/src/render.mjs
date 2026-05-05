@@ -431,6 +431,14 @@ export function renderPage(currentId, year) {
           <h2>${escape(t.authority.title)}</h2>
           <p>${escape(t.authority.body)}</p>
           <blockquote class="big-quote">${escape(t.authority.pullQuote)}</blockquote>
+          <aside class="oracle-quote" aria-labelledby="oracle-quote-label">
+            <p class="oracle-quote-eyebrow" id="oracle-quote-label">${escape(t.authority.oracleEyebrow)}</p>
+            <blockquote class="oracle-quote-body">
+              <p>${escape(t.authority.oracleQuote)}</p>
+              <cite class="oracle-quote-source">${escape(t.authority.oracleSource)}</cite>
+            </blockquote>
+            <p class="oracle-quote-bridge">${escape(t.authority.oracleBridge)}</p>
+          </aside>
         </div>
       </section>
 
