@@ -985,6 +985,27 @@ blockquote {
   margin-top: 0.35rem !important;
 }
 
+.founder-videos-title {
+  margin: 1.75rem 0 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.founder-videos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+@media (max-width: 600px) {
+  .founder-videos .btn {
+    width: 100%;
+  }
+}
+
 /* Sticky bottom CTA bar */
 .sticky-bar {
   position: sticky;

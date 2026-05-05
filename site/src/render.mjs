@@ -318,6 +318,15 @@ export function renderPage(currentId, year) {
               <p class="founder-signoff">${escape(t.founderLetter.signoff)}</p>
             </footer>
           </blockquote>
+          <p class="founder-videos-title">${escape(t.founderLetter.videosTitle)}</p>
+          <div class="founder-videos">
+            ${siteConfig.founderVideos
+              .map(
+                (v) =>
+                  `<a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(t.founderLetter.videoLabels[v.labelKey])}</a>`,
+              )
+              .join("")}
+          </div>
         </div>
       </section>
 

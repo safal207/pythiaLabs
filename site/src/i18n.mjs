@@ -161,6 +161,12 @@ export const locales = {
       title: "Why I built this",
       body: "I spent 12 years in QA for fintech and infrastructure systems where the price of a wrong action is measured in audited regulatory filings. When I started watching AI agents do the same kind of work — modify code, call cloud APIs, prepare on-chain transactions — I kept asking the question that QA culture trained me to ask: where is the pre-execution checkpoint? PythiaLabs is my attempt to build it as deterministic, replayable, and reviewer-friendly as the systems I came from.",
       signoff: "— Aleksei Safonov, founder",
+      videosTitle: "Hear it from the founder",
+      videoLabels: {
+        longForm: "▶ Long-form walkthrough",
+        short1: "▶ Short — why this matters",
+        short2: "▶ Short — how it works",
+      },
     },
     finalCta: {
       eyebrow: "Limited pilot cohort",
@@ -367,6 +373,12 @@ export const locales = {
       title: "Почему я это сделал",
       body: "Я провёл 12 лет в QA финтеха и инфраструктуры — там, где цена неправильного действия измеряется в аудируемых отчётах для регулятора. Когда я начал смотреть, как AI-агенты делают ту же работу — меняют код, дёргают cloud API, готовят on-chain транзакции — я задавал тот же вопрос, которому меня научила QA-культура: где точка контроля перед выполнением? PythiaLabs — моя попытка сделать её такой же детерминированной, воспроизводимой и удобной для ревьюеров, как системы, из которых я пришёл.",
       signoff: "— Алексей Сафонов, основатель",
+      videosTitle: "Послушать основателя",
+      videoLabels: {
+        longForm: "▶ Полный обзор",
+        short1: "▶ Шортс — зачем это нужно",
+        short2: "▶ Шортс — как это работает",
+      },
     },
     finalCta: {
       eyebrow: "Ограниченная пилотная когорта",
@@ -572,6 +584,12 @@ export const locales = {
       title: "我为什么做这件事",
       body: "我在金融科技与基础设施 QA 行业工作了 12 年——在那里，一次错误行动的代价以受审计的监管报告来衡量。当我开始观察 AI Agent 做同类工作——修改代码、调用云 API、准备链上交易——我总在问 QA 文化教给我的同一个问题：执行前的检查点在哪里？PythiaLabs 就是我把它做得像我来自的系统一样确定、可重放、对审查者友好的尝试。",
       signoff: "— Aleksei Safonov，创始人",
+      videosTitle: "听创始人说",
+      videoLabels: {
+        longForm: "▶ 长视频讲解",
+        short1: "▶ 短视频 — 为什么重要",
+        short2: "▶ 短视频 — 工作原理",
+      },
     },
     finalCta: {
       eyebrow: "试点名额有限",
