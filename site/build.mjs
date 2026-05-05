@@ -179,6 +179,91 @@ const buildCssFixes = `
   color: var(--text-muted);
   font-size: 0.92rem;
 }
+
+.paid-review-section {
+  background: linear-gradient(180deg, rgba(124, 196, 255, 0.06) 0%, transparent 100%);
+}
+
+.paid-review-section .paid-review-intro {
+  max-width: 780px;
+  color: var(--text-muted);
+  font-size: 1.03rem;
+}
+
+.paid-review-pitch {
+  max-width: 780px;
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--accent-strong);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(124, 196, 255, 0.08);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.paid-review-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.paid-review-tier {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.paid-review-tier:first-child {
+  border-color: rgba(124, 196, 255, 0.48);
+  box-shadow: 0 0 0 1px rgba(124, 196, 255, 0.08), 0 12px 36px rgba(0, 0, 0, 0.18);
+}
+
+.paid-review-tier-price {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.paid-review-tier h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.paid-review-tier p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.paid-review-tier ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.paid-review-cta {
+  margin-top: 1.5rem;
+}
+
+.paid-review-note {
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
 `;
 
 const escapeHtml = (value) =>
@@ -337,6 +422,201 @@ const downloadCopy = {
     },
   },
 };
+
+const paidReviewCopy = {
+  en: {
+    eyebrow: "Paid pre-execution safety review",
+    title: "Send one risky agent workflow. Get a pre-execution safety review.",
+    intro:
+      "If your AI agent can touch code, infrastructure, money, or governance, the highest-leverage first step is not a donation. It is a paid review of one real workflow before it executes.",
+    pitch:
+      "Not consulting. Not a tool sale. One risky agent workflow → ALLOW / BLOCK / ESCALATE criteria, evidence requirements, stop reasons, and a sample evidence artifact.",
+    tiers: [
+      {
+        price: "From $500",
+        title: "Async Workflow Review",
+        desc: "Send one workflow. Get a written review back.",
+        items: [
+          "Risk map of the agent action",
+          "Evidence checklist (what must be true at decision time)",
+          "ALLOW / BLOCK / ESCALATE decision table",
+          "Sample evidence artifact (JSON)",
+          "Suggested next step",
+        ],
+      },
+      {
+        price: "$1,500",
+        title: "1-week Pilot Mapping",
+        desc: "Deeper scoping of one workflow with a kickoff call.",
+        items: [
+          "1 kickoff call",
+          "Action schema + gate criteria",
+          "Evidence model + stop reasons",
+          "Replayable artifact example",
+          "Final pilot report",
+        ],
+      },
+      {
+        price: "$5,000",
+        title: "Design Partner Sprint",
+        desc: "For teams actively building an agent with real tool calls.",
+        items: [
+          "2–3 calls",
+          "Workflow mapping + gate spec",
+          "Integration notes",
+          "Artifact format",
+          "Permission / escalation model",
+          "Implementation recommendations",
+        ],
+      },
+    ],
+    ctaLabel: "Request paid review",
+    ctaHref: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20review",
+    note: "Reply within 2 business days. Limited slots so each review stays focused.",
+  },
+  ru: {
+    eyebrow: "Платный pre-execution safety review",
+    title: "Пришлите один рискованный agent workflow. Получите pre-execution review.",
+    intro:
+      "Если AI-агент может трогать код, инфраструктуру, деньги или governance, самый сильный первый шаг — не донат. Это платный разбор одного реального workflow до его выполнения.",
+    pitch:
+      "Это не консалтинг и не продажа инструмента. Один опасный workflow → критерии ALLOW / BLOCK / ESCALATE, требования к evidence, stop reasons и пример evidence artifact.",
+    tiers: [
+      {
+        price: "От $500",
+        title: "Async Workflow Review",
+        desc: "Присылаете один workflow. Получаете письменный разбор.",
+        items: [
+          "Risk map для действия агента",
+          "Evidence checklist (что должно быть истинно на момент решения)",
+          "Таблица решений ALLOW / BLOCK / ESCALATE",
+          "Пример evidence artifact (JSON)",
+          "Рекомендация следующего шага",
+        ],
+      },
+      {
+        price: "$1,500",
+        title: "1-week Pilot Mapping",
+        desc: "Более глубокий разбор одного workflow с kickoff-созвоном.",
+        items: [
+          "1 kickoff call",
+          "Action schema + критерии gate",
+          "Evidence model + stop reasons",
+          "Пример replayable artifact",
+          "Финальный pilot report",
+        ],
+      },
+      {
+        price: "$5,000",
+        title: "Design Partner Sprint",
+        desc: "Для команды, которая реально строит агента с tool calls.",
+        items: [
+          "2–3 созвона",
+          "Workflow mapping + gate spec",
+          "Заметки по интеграции",
+          "Формат artifact",
+          "Permission / escalation model",
+          "Рекомендации по реализации",
+        ],
+      },
+    ],
+    ctaLabel: "Заказать платный разбор",
+    ctaHref: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20review",
+    note: "Ответ в течение 2 рабочих дней. Слотов мало — чтобы каждый разбор оставался сфокусированным.",
+  },
+  zh: {
+    eyebrow: "Paid pre-execution safety review",
+    title: "Send one risky agent workflow. Get a pre-execution safety review.",
+    intro:
+      "If your AI agent can touch code, infrastructure, money, or governance, the highest-leverage first step is not a donation. It is a paid review of one real workflow before it executes.",
+    pitch:
+      "Not consulting. Not a tool sale. One risky agent workflow → ALLOW / BLOCK / ESCALATE criteria, evidence requirements, stop reasons, and a sample evidence artifact.",
+    tiers: [
+      {
+        price: "From $500",
+        title: "Async Workflow Review",
+        desc: "Send one workflow. Get a written review back.",
+        items: [
+          "Risk map of the agent action",
+          "Evidence checklist (what must be true at decision time)",
+          "ALLOW / BLOCK / ESCALATE decision table",
+          "Sample evidence artifact (JSON)",
+          "Suggested next step",
+        ],
+      },
+      {
+        price: "$1,500",
+        title: "1-week Pilot Mapping",
+        desc: "Deeper scoping of one workflow with a kickoff call.",
+        items: [
+          "1 kickoff call",
+          "Action schema + gate criteria",
+          "Evidence model + stop reasons",
+          "Replayable artifact example",
+          "Final pilot report",
+        ],
+      },
+      {
+        price: "$5,000",
+        title: "Design Partner Sprint",
+        desc: "For teams actively building an agent with real tool calls.",
+        items: [
+          "2–3 calls",
+          "Workflow mapping + gate spec",
+          "Integration notes",
+          "Artifact format",
+          "Permission / escalation model",
+          "Implementation recommendations",
+        ],
+      },
+    ],
+    ctaLabel: "Request paid review",
+    ctaHref: "mailto:safal0645@gmail.com?subject=PythiaLabs%20paid%20review",
+    note: "Reply within 2 business days. Limited slots so each review stays focused.",
+  },
+};
+
+function renderPaidReviewSection(currentId) {
+  const copy = paidReviewCopy[currentId] ?? paidReviewCopy.en;
+  const tiers = copy.tiers
+    .map(
+      (tier) => `
+          <article class="paid-review-tier">
+            <p class="paid-review-tier-price">${escapeHtml(tier.price)}</p>
+            <h3>${escapeHtml(tier.title)}</h3>
+            <p>${escapeHtml(tier.desc)}</p>
+            <ul>${tier.items.map((it) => `<li>${escapeHtml(it)}</li>`).join("")}</ul>
+          </article>`,
+    )
+    .join("");
+
+  return `
+      <section id="paid-review" class="section section-alt paid-review-section" aria-labelledby="paid-review-title">
+        <div class="container">
+          <p class="cta-eyebrow">${escapeHtml(copy.eyebrow)}</p>
+          <h2 id="paid-review-title">${escapeHtml(copy.title)}</h2>
+          <p class="paid-review-intro">${escapeHtml(copy.intro)}</p>
+          <p class="paid-review-pitch">${escapeHtml(copy.pitch)}</p>
+          <div class="paid-review-tiers">${tiers}
+          </div>
+          <p class="paid-review-cta"><a class="btn btn-primary" href="${escapeHtml(copy.ctaHref)}" rel="noopener noreferrer">${escapeHtml(copy.ctaLabel)} →</a></p>
+          <p class="paid-review-note">${escapeHtml(copy.note)}</p>
+        </div>
+      </section>`;
+}
+
+function injectPaidReviewSection(html, currentId) {
+  const section = renderPaidReviewSection(currentId);
+  const supportMarker = "      <section id=\"support\"";
+  if (html.includes(supportMarker)) {
+    return html.replace(supportMarker, `${section}\n\n${supportMarker}`);
+  }
+  const contactMarker = "      <section id=\"contact\"";
+  if (html.includes(contactMarker)) {
+    return html.replace(contactMarker, `${section}\n\n${contactMarker}`);
+  }
+  return html.replace("\n    </main>", `\n${section}\n    </main>`);
+}
 
 const supportCopy = {
   en: {
@@ -562,8 +842,11 @@ async function main() {
 
   for (const id of localeOrder) {
     const html = injectSupportSection(
-      injectDownloadsSection(
-        renderPage(id, year, buildDate).replace("__INLINE_CSS__", minifiedCss),
+      injectPaidReviewSection(
+        injectDownloadsSection(
+          renderPage(id, year, buildDate).replace("__INLINE_CSS__", minifiedCss),
+          id,
+        ),
         id,
       ),
       id,
