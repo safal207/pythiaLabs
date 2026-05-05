@@ -633,6 +633,66 @@ blockquote {
   border-radius: 4px;
 }
 
+/* Example decision */
+.example-decision {
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #0e1116 0%, var(--bg-alt) 100%);
+  padding: 2.4rem 0;
+}
+
+.example-decision-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  gap: 1.6rem;
+  align-items: center;
+}
+
+.example-copy h2 {
+  max-width: 520px;
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.decision-card {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(22, 27, 34, 0.86);
+  overflow: hidden;
+}
+
+.decision-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.decision-row:last-child {
+  border-bottom: 0;
+}
+
+.decision-row dt {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.decision-row dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.96rem;
+}
+
+.decision-row-strong {
+  background: rgba(210, 153, 34, 0.08);
+}
+
 /* Code block */
 .code-block {
   background: #0a0c10;
@@ -735,6 +795,16 @@ blockquote {
   }
   .code-block {
     font-size: 0.78rem;
+  }
+  .example-decision {
+    padding: 2rem 0;
+  }
+  .example-decision-wrap {
+    grid-template-columns: 1fr;
+  }
+  .decision-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 }
 

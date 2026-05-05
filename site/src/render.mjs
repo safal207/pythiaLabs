@@ -74,6 +74,7 @@ export function renderPage(currentId, year) {
   const canonical = canonicalFor(currentId);
   const ogImage = `${siteConfig.canonicalOrigin.replace(/\/$/, "")}${siteConfig.ogImagePath}`;
   const pilotHref = pilotMailto(siteConfig.pilotEmailSubject);
+  const example = t.exampleDecision || locales.en.exampleDecision;
 
   const langSwitcher = localeOrder
     .map((id) => {
@@ -201,6 +202,33 @@ export function renderPage(currentId, year) {
               <img src="https://img.shields.io/github/license/${siteConfig.repoSlug}?style=flat-square&color=0b0d10" alt="License" loading="lazy" decoding="async" width="100" height="20" />
             </a>
           </p>
+        </div>
+      </section>
+
+      <section class="example-decision" aria-labelledby="example-decision-title">
+        <div class="container example-decision-wrap">
+          <div class="example-copy">
+            <p class="cta-eyebrow">${escape(example.eyebrow)}</p>
+            <h2 id="example-decision-title">${escape(example.title)}</h2>
+          </div>
+          <dl class="decision-card">
+            <div class="decision-row">
+              <dt>${escape(example.actionLabel)}</dt>
+              <dd>${escape(example.action)}</dd>
+            </div>
+            <div class="decision-row decision-row-strong">
+              <dt>${escape(example.decisionLabel)}</dt>
+              <dd><span class="tag tag-escalate">${escape(example.decision)}</span></dd>
+            </div>
+            <div class="decision-row">
+              <dt>${escape(example.reasonLabel)}</dt>
+              <dd>${escape(example.reason)}</dd>
+            </div>
+            <div class="decision-row">
+              <dt>${escape(example.evidenceLabel)}</dt>
+              <dd>${escape(example.evidence)}</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
