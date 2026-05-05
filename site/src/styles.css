@@ -1110,6 +1110,52 @@ blockquote {
   color: var(--text);
 }
 
+.oracle-quote {
+  margin: 2rem 0 0;
+  padding: 1.35rem 1.5rem;
+  max-width: 820px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(22, 27, 34, 0.55);
+}
+
+.oracle-quote-eyebrow {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.oracle-quote-body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.oracle-quote-body p {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  line-height: 1.45;
+  font-style: italic;
+  color: var(--text);
+}
+
+.oracle-quote-source {
+  display: block;
+  font-size: 0.88rem;
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+.oracle-quote-bridge {
+  margin: 1rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
 /* Not / negation list (Big Idea, Positioning) */
 .not-list {
   list-style: none;

@@ -208,6 +208,12 @@ export const locales = {
       body: "The AI industry is moving fast toward autonomous agents. PythiaLabs is built around a simple idea:",
       pullQuote:
         "A powerful AI agent should not only reason. It should be constrained by verifiable action permissions.",
+      oracleEyebrow: "Why this name fits",
+      oracleQuote:
+        "You didn't come here to make the choice. You're here to try to understand why you made it.",
+      oracleSource: "The Oracle, The Matrix",
+      oracleBridge:
+        'When an agent acts, the risk is that the "why" only appears after the damage. PythiaLabs makes the why legible first: stable stop reasons and a replayable trace before the tool runs — so humans can understand the choice while it can still be stopped.',
     },
     founderVideosBlock: {
       eyebrow: "From the founder",
@@ -535,6 +541,12 @@ export const locales = {
       body: "AI-индустрия быстро движется к автономным агентам. PythiaLabs построен вокруг простой идеи:",
       pullQuote:
         "Сильный AI-агент должен не только рассуждать. Он должен быть ограничен проверяемыми правами на действие.",
+      oracleEyebrow: "Почему это созвучно названию",
+      oracleQuote:
+        "Ты пришёл не затем, чтобы сделать выбор. Ты пришёл, чтобы понять, почему ты его сделал.",
+      oracleSource: "Оракул, «Матрица»",
+      oracleBridge:
+        "Когда действует агент, опасность в том, что «почему» всплывает уже после последствий. PythiaLabs делает «почему» читаемым заранее: стабильные stop-причины и воспроизводимый trace до вызова tool — чтобы человек понимал выбор, пока его ещё можно остановить.",
     },
     founderVideosBlock: {
       eyebrow: "От основателя",
@@ -836,6 +848,11 @@ export const locales = {
       title: "没有可校验行动权限的自主性，不是智能，而是风险",
       body: "AI 行业正快速走向自主代理。PythiaLabs 构建在一个简单理念之上：",
       pullQuote: "强大的 AI Agent 不只是要会推理，更应受到可校验行动权限的约束。",
+      oracleEyebrow: "与名字的共鸣",
+      oracleQuote: "你不是来这里做选择的——你是来试图理解自己为何做出这个选择。",
+      oracleSource: "先知，《黑客帝国》",
+      oracleBridge:
+        "当 Agent 真正行动时，风险在于「为何」往往在后果之后才浮现。PythiaLabs 让「为何」在工具执行前就可读：稳定的停止原因与可重放轨迹——在人类仍能叫停时理解这次选择。",
     },
     founderVideosBlock: {
       eyebrow: "来自创始人",
