@@ -20,12 +20,50 @@ const buildCssFixes = `
 }
 
 .downloads-section {
-  background: linear-gradient(180deg, rgba(124, 196, 255, 0.06) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(124, 196, 255, 0.08) 0%, transparent 100%);
 }
 
 .downloads-section .downloads-intro {
-  max-width: 760px;
+  max-width: 780px;
   color: var(--text-muted);
+  font-size: 1.03rem;
+}
+
+.downloads-risk-line {
+  max-width: 780px;
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--escalate);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(210, 153, 34, 0.1);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.download-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.6rem;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.download-paths li {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(22, 27, 34, 0.58);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.download-paths strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--text);
+  font-size: 0.88rem;
 }
 
 .downloads-grid {
@@ -45,6 +83,11 @@ const buildCssFixes = `
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.download-card:first-child {
+  border-color: rgba(124, 196, 255, 0.48);
+  box-shadow: 0 0 0 1px rgba(124, 196, 255, 0.08), 0 12px 36px rgba(0, 0, 0, 0.18);
 }
 
 .download-card-kicker {
@@ -74,6 +117,14 @@ const buildCssFixes = `
   align-self: flex-start;
 }
 
+.download-card-micro {
+  margin-top: 0.65rem !important;
+  color: var(--text-muted) !important;
+  font-family: var(--mono);
+  font-size: 0.76rem !important;
+  line-height: 1.45 !important;
+}
+
 .downloads-note {
   margin-top: 1.25rem;
   color: var(--text-muted);
@@ -90,92 +141,149 @@ const escapeHtml = (value) =>
 
 const downloadCopy = {
   en: {
-    eyebrow: "Downloadable assets",
-    title: "Give reviewers something concrete to inspect",
+    eyebrow: "10-minute safety review",
+    title: "Run a pre-execution safety review before your next risky agent tool call",
     intro:
-      "Use these lightweight assets to evaluate whether your agent workflows need a pre-execution gate before code, infrastructure, money, or governance actions run.",
-    note: "Markdown files are designed for quick review, copying into internal docs, or conversion to PDF.",
-    button: "Download",
+      "If your agent can touch code, infrastructure, money, or governance, the safety question is no longer “did it answer well?”. The question is: should this action execute?",
+    riskLine:
+      "Your safety boundary is no longer the prompt. It is the moment before execution.",
+    pathTitle: "Choose your path",
+    note:
+      "No email required. Use these files in your next internal review, security discussion, grant application, or pilot conversation.",
     cards: {
       "ai-agent-pre-execution-safety-checklist.md": {
-        kicker: "Checklist",
-        title: "AI Agent Pre-Execution Safety Checklist",
-        desc: "A practical checklist for proposed actions, authorization, evidence freshness, blast radius, decision outcome, and replayability.",
+        kicker: "Start here",
+        path: "I am evaluating risk",
+        title: "Find your first unsafe agent action in 10 minutes",
+        desc:
+          "Review one real agent workflow and identify missing authorization, stale evidence, blast radius, and escalation gaps before tools execute.",
+        button: "Get the 10-minute checklist",
+        micro: "Best first download · No email required",
       },
       "pythialabs-one-page-technical-brief.md": {
-        kicker: "Brief",
-        title: "PythiaLabs One-Page Technical Brief",
-        desc: "A compact technical overview for CTOs, security reviewers, grant reviewers, and potential design partners.",
+        kicker: "Internal buy-in",
+        path: "I need to explain this internally",
+        title: "Explain PythiaLabs to your CTO or security reviewer",
+        desc:
+          "A one-page brief you can forward internally: what the gate checks, why post-hoc logs are not enough, and how ALLOW / BLOCK / ESCALATE decisions work.",
+        button: "Download the technical brief",
+        micro: "Forwardable · Reviewer-friendly",
       },
       "pythialabs-pilot-partner-pack.md": {
-        kicker: "Pilot",
-        title: "Pilot Partner Pack",
-        desc: "A focused pilot outline: who it is for, what inputs are needed, and what reviewable outputs a pilot can deliver.",
+        kicker: "Pilot fit",
+        path: "I want to test a real workflow",
+        title: "See if your team is a fit for a pilot",
+        desc:
+          "Map one high-risk agent workflow into proposed actions, decision-time evidence, stop reasons, and reviewable outputs.",
+        button: "Check pilot fit",
+        micro: "For teams with real agent tools",
       },
       "sample-evidence-artifact.json": {
-        kicker: "Artifact",
-        title: "Sample Evidence Artifact JSON",
-        desc: "A concrete ALLOW / BLOCK / ESCALATE-style artifact showing checks, stop reasons, decision-time evidence, and digest metadata.",
+        kicker: "Inspect output",
+        path: "I want to inspect the output",
+        title: "Inspect what reviewers actually get",
+        desc:
+          "A sample evidence artifact with checks, stop reasons, decision-time evidence, outcome, and digest metadata. No vibes — inspectable output.",
+        button: "View sample artifact",
+        micro: "JSON artifact · CI/security ready",
       },
     },
   },
   ru: {
-    eyebrow: "Материалы для скачивания",
-    title: "Дайте ревьюерам конкретный артефакт для проверки",
+    eyebrow: "10-минутное safety review",
+    title: "Проведите pre-execution review до следующего рискованного tool call агента",
     intro:
-      "Эти материалы помогают оценить, нужен ли вашим AI-agent workflow pre-execution gate до действий с кодом, инфраструктурой, деньгами или governance.",
-    note: "Markdown-файлы удобно быстро читать, копировать во внутренние документы или конвертировать в PDF.",
-    button: "Скачать",
+      "Если агент может трогать код, инфраструктуру, деньги или governance, вопрос безопасности уже не “хорошо ли он ответил?”. Вопрос: должно ли это действие выполниться?",
+    riskLine:
+      "Граница безопасности уже не в промпте. Она в моменте перед выполнением.",
+    pathTitle: "Выберите свой путь",
+    note:
+      "Email не нужен. Используйте эти файлы для внутреннего review, security-обсуждения, грантовой заявки или разговора о пилоте.",
     cards: {
       "ai-agent-pre-execution-safety-checklist.md": {
-        kicker: "Checklist",
-        title: "AI Agent Pre-Execution Safety Checklist",
-        desc: "Практический чеклист: действие, авторизация, свежесть evidence, blast radius, решение и воспроизводимость.",
+        kicker: "Начните здесь",
+        path: "Я оцениваю риск",
+        title: "Найдите первое небезопасное действие агента за 10 минут",
+        desc:
+          "Возьмите один реальный agent workflow и проверьте authorization, свежесть evidence, blast radius и escalation gaps до запуска tools.",
+        button: "Получить 10-минутный checklist",
+        micro: "Лучший первый download · Без email",
       },
       "pythialabs-one-page-technical-brief.md": {
-        kicker: "Brief",
-        title: "PythiaLabs One-Page Technical Brief",
-        desc: "Короткий технический обзор для CTO, security-ревьюеров, грантовых комиссий и design partners.",
+        kicker: "Для внутреннего buy-in",
+        path: "Мне нужно объяснить это внутри команды",
+        title: "Объясните PythiaLabs CTO или security-ревьюеру",
+        desc:
+          "One-page brief для пересылки: что проверяет gate, почему post-hoc logs недостаточно и как работают ALLOW / BLOCK / ESCALATE решения.",
+        button: "Скачать technical brief",
+        micro: "Можно переслать · Удобно для ревьюеров",
       },
       "pythialabs-pilot-partner-pack.md": {
-        kicker: "Pilot",
-        title: "Pilot Partner Pack",
-        desc: "Описание пилота: кому подходит, какие входные данные нужны и какие проверяемые результаты можно получить.",
+        kicker: "Pilot fit",
+        path: "Я хочу протестировать реальный workflow",
+        title: "Проверьте, подходит ли команда для пилота",
+        desc:
+          "Соберите один high-risk agent workflow в proposed actions, decision-time evidence, stop reasons и reviewable outputs.",
+        button: "Проверить pilot fit",
+        micro: "Для команд с реальными agent tools",
       },
       "sample-evidence-artifact.json": {
-        kicker: "Artifact",
-        title: "Sample Evidence Artifact JSON",
-        desc: "Пример артефакта ALLOW / BLOCK / ESCALATE с checks, stop reasons, decision-time evidence и digest metadata.",
+        kicker: "Посмотреть output",
+        path: "Я хочу увидеть результат",
+        title: "Посмотрите, что реально получает ревьюер",
+        desc:
+          "Sample evidence artifact с checks, stop reasons, decision-time evidence, outcome и digest metadata. Не vibes — проверяемый output.",
+        button: "Открыть sample artifact",
+        micro: "JSON artifact · Для CI/security",
       },
     },
   },
   zh: {
-    eyebrow: "可下载资料",
-    title: "Give reviewers concrete artifacts to inspect",
+    eyebrow: "10-minute safety review",
+    title: "Run a pre-execution safety review before your next risky agent tool call",
     intro:
-      "These lightweight assets help teams evaluate whether agent workflows need a pre-execution gate before code, infrastructure, money, or governance actions run.",
-    note: "Markdown files are easy to review, copy into internal docs, or convert to PDF.",
-    button: "Download",
+      "If your agent can touch code, infrastructure, money, or governance, the safety question is no longer “did it answer well?”. The question is: should this action execute?",
+    riskLine:
+      "Your safety boundary is no longer the prompt. It is the moment before execution.",
+    pathTitle: "Choose your path",
+    note:
+      "No email required. Use these files in your next internal review, security discussion, grant application, or pilot conversation.",
     cards: {
       "ai-agent-pre-execution-safety-checklist.md": {
-        kicker: "Checklist",
-        title: "AI Agent Pre-Execution Safety Checklist",
-        desc: "A practical checklist for proposed action, authorization, evidence freshness, blast radius, decision outcome, and replayability.",
+        kicker: "Start here",
+        path: "I am evaluating risk",
+        title: "Find your first unsafe agent action in 10 minutes",
+        desc:
+          "Review one real agent workflow and identify missing authorization, stale evidence, blast radius, and escalation gaps before tools execute.",
+        button: "Get the 10-minute checklist",
+        micro: "Best first download · No email required",
       },
       "pythialabs-one-page-technical-brief.md": {
-        kicker: "Brief",
-        title: "PythiaLabs One-Page Technical Brief",
-        desc: "A compact technical overview for CTOs, security reviewers, grant reviewers, and design partners.",
+        kicker: "Internal buy-in",
+        path: "I need to explain this internally",
+        title: "Explain PythiaLabs to your CTO or security reviewer",
+        desc:
+          "A one-page brief you can forward internally: what the gate checks, why post-hoc logs are not enough, and how ALLOW / BLOCK / ESCALATE decisions work.",
+        button: "Download the technical brief",
+        micro: "Forwardable · Reviewer-friendly",
       },
       "pythialabs-pilot-partner-pack.md": {
-        kicker: "Pilot",
-        title: "Pilot Partner Pack",
-        desc: "A focused pilot outline: who it is for, required inputs, and reviewable outputs.",
+        kicker: "Pilot fit",
+        path: "I want to test a real workflow",
+        title: "See if your team is a fit for a pilot",
+        desc:
+          "Map one high-risk agent workflow into proposed actions, decision-time evidence, stop reasons, and reviewable outputs.",
+        button: "Check pilot fit",
+        micro: "For teams with real agent tools",
       },
       "sample-evidence-artifact.json": {
-        kicker: "Artifact",
-        title: "Sample Evidence Artifact JSON",
-        desc: "A concrete ALLOW / BLOCK / ESCALATE-style artifact with checks, stop reasons, evidence, and digest metadata.",
+        kicker: "Inspect output",
+        path: "I want to inspect the output",
+        title: "Inspect what reviewers actually get",
+        desc:
+          "A sample evidence artifact with checks, stop reasons, decision-time evidence, outcome, and digest metadata. No vibes — inspectable output.",
+        button: "View sample artifact",
+        micro: "JSON artifact · CI/security ready",
       },
     },
   },
@@ -188,6 +296,13 @@ function downloadHref(currentId, filename) {
 
 function renderDownloadsSection(currentId) {
   const copy = downloadCopy[currentId] ?? downloadCopy.en;
+  const pathItems = downloadAssets
+    .map((asset) => {
+      const card = copy.cards[asset.filename] ?? downloadCopy.en.cards[asset.filename];
+      return `<li><strong>${escapeHtml(card.path)}</strong>${escapeHtml(card.kicker)} → ${escapeHtml(card.title)}</li>`;
+    })
+    .join("");
+
   const cards = downloadAssets
     .map((asset) => {
       const card = copy.cards[asset.filename] ?? downloadCopy.en.cards[asset.filename];
@@ -198,8 +313,9 @@ function renderDownloadsSection(currentId) {
               <p class="download-card-kicker">${escapeHtml(card.kicker)}</p>
               <h3>${escapeHtml(card.title)}</h3>
               <p>${escapeHtml(card.desc)}</p>
+              <p class="download-card-micro">${escapeHtml(card.micro)}</p>
             </div>
-            <p><a class="btn btn-secondary" href="${escapeHtml(href)}" download>${escapeHtml(copy.button)} →</a></p>
+            <p><a class="btn btn-secondary" href="${escapeHtml(href)}" download>${escapeHtml(card.button)} →</a></p>
           </article>`;
     })
     .join("");
@@ -210,6 +326,8 @@ function renderDownloadsSection(currentId) {
           <p class="cta-eyebrow">${escapeHtml(copy.eyebrow)}</p>
           <h2 id="downloads-title">${escapeHtml(copy.title)}</h2>
           <p class="downloads-intro">${escapeHtml(copy.intro)}</p>
+          <p class="downloads-risk-line">${escapeHtml(copy.riskLine)}</p>
+          <ul class="download-paths" aria-label="${escapeHtml(copy.pathTitle)}">${pathItems}</ul>
           <div class="downloads-grid">${cards}
           </div>
           <p class="downloads-note">${escapeHtml(copy.note)}</p>
