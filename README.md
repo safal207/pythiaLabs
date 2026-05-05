@@ -69,6 +69,33 @@ mix run examples/banking_ai_risk_showcase.exs
 mix run examples/web3_treasury_full_showcase.exs
 ```
 
+## Paid review demo (recordable in ~30 seconds)
+
+Run:
+
+```bash
+make demo
+```
+
+A single-command, deterministic demo that drives the real
+`Pythia.Showcase.Web3TreasuryAction` engine through four Web3 treasury
+scenarios — one accepted transfer plus three orthogonal rejection reasons
+(quorum, timelock, transfer-window expiration) — and a counterfactual that
+flips one evidence field to show the decision flip.
+
+For each scenario the demo:
+
+- runs the engine and prints the per-check evidence trace,
+- builds an evidence record with a real SHA-256 digest, and
+- calls `Pythia.Showcase.Web3TreasuryAction.verify_evidence/1` to confirm the
+  digest round-trips (plain evidence verification, not the signed
+  `verify_evidence_envelope/1` path).
+
+Inputs live in `examples/paid_review_demo_input.json`; the run writes a bundle
+of evidence records to `examples/output/paid_review_demo_artifact.json`
+(gitignored — regenerated each run). For expected reviewer-facing output, see
+`examples/paid_review_demo_expected_output.md`.
+
 ## Cursor / IDE bridge (MCP)
 
 A minimal **stdio MCP server** in [`integrations/mcp/`](integrations/mcp/) calls `mix pythia.eval_json` locally so Cursor (or any MCP host) can run deterministic gates (`agent_infra_action`, `banking_risk_action`, `web3_treasury_action`) from JSON.

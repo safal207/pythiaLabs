@@ -1,0 +1,131 @@
+{
+  "schema": "pythia.demo.input.v2",
+  "scenario_set_id": "paid_review_demo_2026_05",
+  "scenarios": [
+    {
+      "name": "accepted_transfer",
+      "headline": "Clean 25,000 USDC treasury transfer",
+      "expected_status": "accepted",
+      "expected_stop_reason": "treasury_transfer_accepted",
+      "action": {
+        "action_id": "dao_act_001",
+        "action_type": "treasury_transfer",
+        "actor": "agent_treasury_alpha",
+        "dao_id": "dao_pythia",
+        "proposal_id": "prop_001",
+        "amount": 25000,
+        "asset": "USDC",
+        "recipient": "0xA11owListedRecipient",
+        "required_permission": "treasury.transfer",
+        "action_time": "2026-04-25T12:00:00Z",
+        "decision_time": "2026-04-25T12:01:00Z"
+      },
+      "governance_record": {
+        "proposal_id": "prop_001",
+        "permission": "treasury.transfer",
+        "quorum_met": true,
+        "voting_closed_at": "2026-04-25T11:00:00Z",
+        "timelock_until": "2026-04-25T11:30:00Z",
+        "authorization_valid_from": "2026-04-25T11:30:00Z",
+        "authorization_valid_to": "2026-04-25T13:00:00Z",
+        "authorization_recorded_at": "2026-04-25T11:45:00Z",
+        "transfer_expires_at": "2026-04-25T13:00:00Z"
+      }
+    },
+    {
+      "name": "quorum_not_met",
+      "headline": "Quorum threshold not reached",
+      "expected_status": "rejected",
+      "expected_stop_reason": "quorum_not_met",
+      "action": {
+        "action_id": "dao_act_002",
+        "action_type": "treasury_transfer",
+        "actor": "agent_treasury_alpha",
+        "dao_id": "dao_pythia",
+        "proposal_id": "prop_001",
+        "amount": 25000,
+        "asset": "USDC",
+        "recipient": "0xA11owListedRecipient",
+        "required_permission": "treasury.transfer",
+        "action_time": "2026-04-25T12:00:00Z",
+        "decision_time": "2026-04-25T12:01:00Z"
+      },
+      "governance_record": {
+        "proposal_id": "prop_001",
+        "permission": "treasury.transfer",
+        "quorum_met": false,
+        "voting_closed_at": "2026-04-25T11:00:00Z",
+        "timelock_until": "2026-04-25T11:30:00Z",
+        "authorization_valid_from": "2026-04-25T11:30:00Z",
+        "authorization_valid_to": "2026-04-25T13:00:00Z",
+        "authorization_recorded_at": "2026-04-25T11:45:00Z",
+        "transfer_expires_at": "2026-04-25T13:00:00Z"
+      }
+    },
+    {
+      "name": "timelock_not_satisfied",
+      "headline": "Timelock has not yet expired",
+      "expected_status": "rejected",
+      "expected_stop_reason": "timelock_not_satisfied",
+      "action": {
+        "action_id": "dao_act_003",
+        "action_type": "treasury_transfer",
+        "actor": "agent_treasury_alpha",
+        "dao_id": "dao_pythia",
+        "proposal_id": "prop_001",
+        "amount": 25000,
+        "asset": "USDC",
+        "recipient": "0xA11owListedRecipient",
+        "required_permission": "treasury.transfer",
+        "action_time": "2026-04-25T12:00:00Z",
+        "decision_time": "2026-04-25T12:01:00Z"
+      },
+      "governance_record": {
+        "proposal_id": "prop_001",
+        "permission": "treasury.transfer",
+        "quorum_met": true,
+        "voting_closed_at": "2026-04-25T11:00:00Z",
+        "timelock_until": "2026-04-25T12:30:00Z",
+        "authorization_valid_from": "2026-04-25T11:30:00Z",
+        "authorization_valid_to": "2026-04-25T13:00:00Z",
+        "authorization_recorded_at": "2026-04-25T11:45:00Z",
+        "transfer_expires_at": "2026-04-25T13:00:00Z"
+      }
+    },
+    {
+      "name": "transfer_window_expired",
+      "headline": "Authorization window has expired",
+      "expected_status": "rejected",
+      "expected_stop_reason": "transfer_expired",
+      "action": {
+        "action_id": "dao_act_004",
+        "action_type": "treasury_transfer",
+        "actor": "agent_treasury_alpha",
+        "dao_id": "dao_pythia",
+        "proposal_id": "prop_001",
+        "amount": 25000,
+        "asset": "USDC",
+        "recipient": "0xA11owListedRecipient",
+        "required_permission": "treasury.transfer",
+        "action_time": "2026-04-25T12:40:00Z",
+        "decision_time": "2026-04-25T12:41:00Z"
+      },
+      "governance_record": {
+        "proposal_id": "prop_001",
+        "permission": "treasury.transfer",
+        "quorum_met": true,
+        "voting_closed_at": "2026-04-25T11:00:00Z",
+        "timelock_until": "2026-04-25T11:30:00Z",
+        "authorization_valid_from": "2026-04-25T11:30:00Z",
+        "authorization_valid_to": "2026-04-25T13:30:00Z",
+        "authorization_recorded_at": "2026-04-25T11:45:00Z",
+        "transfer_expires_at": "2026-04-25T12:30:00Z"
+      }
+    }
+  ],
+  "counterfactual": {
+    "from_scenario": "quorum_not_met",
+    "patch": {"governance_record": {"quorum_met": true}},
+    "expected_status": "accepted"
+  }
+}
