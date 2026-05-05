@@ -496,7 +496,14 @@ export function renderPage(currentId, year, buildDate) {
                 `<article class="card"><h3>${escape(item.name)}</h3><p>${inlineCodeToHtml(item.desc)}</p></article>`,
             )
             .join("")}</div>
-          <p class="integration-repo-note">${inlineCodeToHtml(t.integration.repoNote)}</p>
+          <aside
+            class="integration-repo-callout"
+            aria-labelledby="integration-repo-note-heading">
+            <h3 id="integration-repo-note-heading" class="integration-repo-callout-title">
+              ${escape(t.integration.repoNoteTitle)}
+            </h3>
+            <p class="integration-repo-callout-body">${inlineCodeToHtml(t.integration.repoNote)}</p>
+          </aside>
         </div>
       </section>
 
