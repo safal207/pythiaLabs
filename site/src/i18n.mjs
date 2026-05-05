@@ -12,6 +12,7 @@ export const locales = {
       idea: "Big idea",
       solution: "How it works",
       integration: "Integration",
+      pilot: "Pilot",
       useCases: "Use cases",
       videos: "Videos",
       faq: "FAQ",
@@ -22,9 +23,9 @@ export const locales = {
       eyebrow: "Pre-execution safety layer · Open-source · Apache-2.0",
       headline: "Stop dangerous AI agent actions before they execute.",
       subtitle:
-        "AI agents are moving from answers to actions. PythiaLabs decides whether those actions should execute.",
-      body: "AI agents already modify code, run commands, touch infrastructure, and act in financial and governance workflows. PythiaLabs is a pre-execution safety layer that evaluates an action before the agent runs it.",
-      tagline: "Not trust. Verification before execution.",
+        "The gate returns ALLOW, BLOCK, or ESCALATE before your agent runs destructive tools — deterministic, replayable, on your infrastructure.",
+      body: "Code, infra, banking, governance: when agents act, PythiaLabs evaluates the proposal and evidence first, not the chat transcript.",
+      tagline: "Verify before execute. Evidence your reviewers can replay.",
       starsAlt: "GitHub stars",
     },
     trustStrip: [
@@ -35,16 +36,16 @@ export const locales = {
       "No telemetry",
     ],
     cta: {
-      primary: "Watch the demo",
+      primary: "Join early access",
+      demo: "Watch the demo",
       secondary: "View GitHub repo",
-      tertiary: "Join early access",
       pilot: "Apply as pilot partner",
       contact: "Contact",
     },
     videoBlock: {
       eyebrow: "Watch why this matters",
       title: "Should this AI agent action execute?",
-      body: "When an AI agent gets the ability to act, a mistake is no longer a bad answer — it becomes a real action in the real world. PythiaLabs places a verifiable gate before execution: does the agent have the right to act, is there enough context, is the temporal/causal state valid, can the trace be replayed, and should this be allowed, blocked, or escalated to a human?",
+      body: "When agents can act, a bad answer becomes a real incident. PythiaLabs checks permission, evidence freshness, risk, and replayability — then allows, blocks, or escalates to a human before anything irreversible runs.",
       coreLabel: "Core message",
       core: "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
       fallback: "Watch on YouTube",
@@ -110,8 +111,24 @@ export const locales = {
     },
     artifact: {
       title: "Inspectable decision artifacts",
+      technicalSummary: "For engineers: canonical encoding and digests",
+      introPlain:
+        "Every decision ships as structured evidence: outcome, why it stopped, per-check results, and a trace reviewers can replay. Auditors read the same artifact your CI can snapshot — not screenshots of a chat.",
+      introTechnical:
+        "Exports use canonical encoding (`pythia.canonical_export.v1`) and SHA-256 so the same evaluated snapshot always yields the same hex digest; re-run exports in CI to catch drift.",
+    },
+    pilotOutcome: {
+      title: "What a pilot week actually delivers",
       intro:
-        "Every decision produces a JSON artifact: stable stop reasons, per-check results, a replayable trace ID, and a tamper-checkable digest. Digests in the reference implementations use canonical export encoding (`pythia.canonical_export.v1`) and SHA-256 over a stable key order — the same evaluated snapshot yields the same hex digest; re-run exports in CI to detect drift. This is what reviewers and auditors actually read.",
+        "This is an open-source MVP — not magic. A focused pilot still gives your team concrete, reviewable outputs:",
+      items: [
+        "One or two high-risk agent flows mapped to structured proposals and decision-time evidence.",
+        "ALLOW / BLOCK / ESCALATE outcomes with stable stop reasons before tools execute.",
+        "Replayable traces and optional SHA-256 digests your reviewers can diff in CI.",
+        "Shared vocabulary with security and compliance: fewer arguments, clearer escalations.",
+      ],
+      footnote:
+        "Scope and pace depend on your stack. Email with your scenario — we prioritize serious design partners.",
     },
     integration: {
       title: "How you integrate it (today)",
@@ -283,9 +300,9 @@ export const locales = {
       eyebrow: "For builders of high-risk AI agents",
       title: "Build AI agents that can be audited before they act",
       body: "The next generation of AI systems will not be judged only by how well they answer. They will be judged by whether their actions are safe, authorized, and explainable. PythiaLabs gives agentic AI a gate before execution.",
-      primary: "Watch the demo",
+      primary: "Join early access",
+      demo: "Watch the demo",
       secondary: "View GitHub repo",
-      tertiary: "Join early access",
       reassurance: "Apache-2.0 · Self-hostable · No vendor lock-in · No credit card",
     },
     closer: {
@@ -339,6 +356,7 @@ export const locales = {
       idea: "Идея",
       solution: "Как работает",
       integration: "Интеграция",
+      pilot: "Пилот",
       useCases: "Применение",
       videos: "Видео",
       faq: "FAQ",
@@ -349,9 +367,9 @@ export const locales = {
       eyebrow: "Pre-execution safety layer · Open-source · Apache-2.0",
       headline: "Останавливайте опасные действия AI-агентов до их выполнения.",
       subtitle:
-        "AI-агенты переходят от ответов к действиям. PythiaLabs решает, должны ли эти действия выполняться.",
-      body: "AI-агенты уже меняют код, запускают команды, трогают инфраструктуру и участвуют в финансовых и governance-сценариях. PythiaLabs — pre-execution safety layer, проверяющий действие до того, как агент его выполнит.",
-      tagline: "Не доверие. Верификация до выполнения.",
+        "Шлюз возвращает ALLOW, BLOCK или ESCALATE до того, как агент запустит разрушительные tools — детерминированно, воспроизводимо, на вашей инфре.",
+      body: "Код, инфра, банки, governance: когда агент действует, PythiaLabs сначала оценивает предложение и доказательства, а не расшифровку чата.",
+      tagline: "Проверка до исполнения. Доказательства, которые ревьюер может перепроиграть.",
       starsAlt: "Звёзды на GitHub",
     },
     trustStrip: [
@@ -362,16 +380,16 @@ export const locales = {
       "Без телеметрии",
     ],
     cta: {
-      primary: "Смотреть демо",
+      primary: "Запросить ранний доступ",
+      demo: "Смотреть демо",
       secondary: "Открыть GitHub",
-      tertiary: "Запросить ранний доступ",
       pilot: "Стать пилотным партнёром",
       contact: "Связаться",
     },
     videoBlock: {
       eyebrow: "Почему это важно",
       title: "Должно ли это действие AI-агента выполниться?",
-      body: "Когда AI-агент получает возможность действовать, ошибка перестаёт быть просто плохим ответом — она становится реальным действием в реальном мире. PythiaLabs ставит проверяемые ворота перед исполнением: есть ли право на действие, достаточно ли контекста, валиден ли temporal/causal state, можно ли воспроизвести trace, и нужно ли разрешить, заблокировать или эскалировать на человека.",
+      body: "Когда агент может действовать, плохой ответ превращается в инцидент. PythiaLabs проверяет право, свежесть доказательств, риск и воспроизводимость — затем разрешает, блокирует или эскалирует на человека до необратимых действий.",
       coreLabel: "Главный тезис",
       core: "Будущее agent safety — не пост-фактум дебаг. Это контроль до выполнения.",
       fallback: "Смотреть на YouTube",
@@ -437,8 +455,24 @@ export const locales = {
     },
     artifact: {
       title: "Проверяемые артефакты решений",
+      technicalSummary: "Для инженеров: канонизация и дайджесты",
+      introPlain:
+        "Каждое решение — это структурированное доказательство: исход, причина остановки, результаты проверок и trace, который ревьюер может перепроиграть. Аудитор читает тот же артефакт, что и ваш CI может зафиксировать снимком — не скриншот чата.",
+      introTechnical:
+        "Экспорт использует каноническое кодирование (`pythia.canonical_export.v1`) и SHA-256: одна и та же оценённая снапшот-сборка всегда даёт тот же hex-дайджест; повторный экспорт в CI ловит дрейф.",
+    },
+    pilotOutcome: {
+      title: "Что даёт пилот за короткий срок",
       intro:
-        "Каждое решение порождает JSON-артефакт: стабильные stop-причины, результаты по каждой проверке, воспроизводимый trace ID и дайджест с проверкой целостности. В референсных реализациях дайджесты считаются через canonical export (`pythia.canonical_export.v1`) и SHA-256 по стабильному порядку ключей: одна и та же зафиксированная оценка даёт тот же hex-дайджест; повторные экспорты в CI ловят дрейф артефакта. Это то, что реально читают ревьюеры и аудиторы.",
+        "Это open-source MVP — не волшебство. Сфокусированный пилот всё равно даёт команде конкретные, проверяемые результаты:",
+      items: [
+        "Один–два высокорисковых агент-сценария в виде структурированных предложений и decision-time evidence.",
+        "Исходы ALLOW / BLOCK / ESCALATE со стабильными stop-причинами до выполнения tools.",
+        "Воспроизводимые trace и при необходимости SHA-256 дайджесты, которые ревью могут сравнивать в CI.",
+        "Общий язык с security и комплаенсом — меньше споров, яснее эскалации.",
+      ],
+      footnote:
+        "Объём и темп зависят от вашего стека. Напишите с описанием сценария — приоритет у серьёзных design partners.",
     },
     integration: {
       title: "Как это подключать (сегодня)",
@@ -610,9 +644,9 @@ export const locales = {
       eyebrow: "Для тех, кто строит AI-агентов с высоким риском",
       title: "Стройте AI-агентов, которых можно аудировать до их действий",
       body: "Следующее поколение AI-систем будут оценивать не только по тому, насколько хорошо они отвечают. Их будут оценивать по тому, безопасны ли, авторизованы ли и объяснимы ли их действия. PythiaLabs даёт agentic AI шлюз перед выполнением.",
-      primary: "Смотреть демо",
+      primary: "Запросить ранний доступ",
+      demo: "Смотреть демо",
       secondary: "Открыть GitHub",
-      tertiary: "Запросить ранний доступ",
       reassurance: "Apache-2.0 · Self-hosted · Без vendor lock-in · Без карточки",
     },
     closer: {
@@ -666,6 +700,7 @@ export const locales = {
       idea: "核心理念",
       solution: "工作原理",
       integration: "集成",
+      pilot: "试点",
       useCases: "应用场景",
       videos: "视频",
       faq: "常见问题",
@@ -675,23 +710,24 @@ export const locales = {
     hero: {
       eyebrow: "执行前安全层 · 开源 · Apache-2.0",
       headline: "在 AI Agent 执行前阻止危险行动。",
-      subtitle: "AI Agent 正从“回答”走向“行动”。PythiaLabs 决定这些行动是否应当执行。",
-      body: "AI Agent 已经在修改代码、运行命令、操作基础设施，并参与金融与治理流程。PythiaLabs 是一个执行前安全层，在 Agent 执行前评估它的行动。",
-      tagline: "不是信任，而是执行前的验证。",
+      subtitle:
+        "在 Agent 运行破坏性工具之前，门控先返回 ALLOW、BLOCK 或 ESCALATE——确定性、可重放，跑在你自己的基础设施上。",
+      body: "代码、基础设施、银行、治理：当 Agent 要行动时，PythiaLabs 先评估提案与证据，而不是聊天记录本身。",
+      tagline: "先验证再执行。审阅者可重放的证据。",
       starsAlt: "GitHub 星标",
     },
     trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
     cta: {
-      primary: "观看演示",
+      primary: "申请早期访问",
+      demo: "观看演示",
       secondary: "查看 GitHub",
-      tertiary: "申请早期访问",
       pilot: "申请试点合作",
       contact: "联系",
     },
     videoBlock: {
       eyebrow: "为什么这件事重要",
       title: "这个 AI Agent 行动应该被执行吗？",
-      body: "当 AI Agent 拥有了行动能力，错误就不再只是糟糕的回答，而是真实世界中的真实行动。PythiaLabs 在执行前设置一个可校验的门：Agent 是否有权执行、上下文是否充分、时间/因果状态是否有效、轨迹是否可重放、是允许、阻止还是升级到人。",
+      body: "Agent 能行动时，糟糕的回答就会变成事故。PythiaLabs 在不可逆动作之前检查权限、证据新鲜度、风险与可重放性——然后允许、阻止或升级到人。",
       coreLabel: "核心信息",
       core: "Agent 安全的未来不是事后调试，而是执行前的控制。",
       fallback: "在 YouTube 观看",
@@ -744,8 +780,22 @@ export const locales = {
     },
     artifact: {
       title: "可审查的决策产物",
-      intro:
-        "每个决策都会生成 JSON 产物：稳定的停止原因、各项检查结果、可重放的 trace ID，以及可校验的摘要。参考实现中的摘要通过规范化导出编码（`pythia.canonical_export.v1`）与稳定键序上的 SHA-256 计算：同一评估快照产生相同的十六进制摘要；在 CI 中重复导出可发现产物漂移。这才是审查者和审计者真正会读的内容。",
+      technicalSummary: "工程细节：规范化编码与摘要",
+      introPlain:
+        "每次决策都会生成结构化证据：结果、停止原因、各检查项与一个审阅者可重放的轨迹。审计者读到的与你在 CI 里快照的是同一类产物——不是聊天截图。",
+      introTechnical:
+        "导出采用规范化编码（`pythia.canonical_export.v1`）与 SHA-256：同一评估快照总是得到相同的十六进制摘要；在 CI 中重复导出可发现漂移。",
+    },
+    pilotOutcome: {
+      title: "一次试点周能交付什么",
+      intro: "这是开源 MVP，不是魔法。但聚焦的试点仍能给团队具体、可审查的产出：",
+      items: [
+        "将一到两个高风险 Agent 流程映射为结构化提案与决策时证据。",
+        "在工具执行前得到带稳定停止原因的 ALLOW / BLOCK / ESCALATE。",
+        "可重放的轨迹以及可选的 SHA-256 摘要，便于审阅在 CI 中对比。",
+        "与安全、合规共享同一套语言——争论更少，升级路径更清晰。",
+      ],
+      footnote: "范围与节奏取决于你的栈。请附场景邮件联系，我们会优先考虑认真的设计合作伙伴。",
     },
     integration: {
       title: "如何集成（当前形态）",
@@ -911,9 +961,9 @@ export const locales = {
       eyebrow: "为构建高风险 AI Agent 的团队",
       title: "构建可在行动前被审计的 AI Agent",
       body: "下一代 AI 系统不会只以回答得多好被评判，更会以行动是否安全、被授权、可解释来评判。PythiaLabs 为 agentic AI 提供执行前的门控。",
-      primary: "观看演示",
+      primary: "申请早期访问",
+      demo: "观看演示",
       secondary: "查看 GitHub",
-      tertiary: "申请早期访问",
       reassurance: "Apache-2.0 · 可自托管 · 无供应商锁定 · 无需信用卡",
     },
     closer: {

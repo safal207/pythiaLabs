@@ -894,7 +894,42 @@ blockquote {
   margin: 1.75rem 0 0;
   font-size: 0.95rem;
   line-height: 1.55;
-  color: var(--muted);
+  color: var(--text-muted);
+}
+
+.pilot-outcome-list {
+  margin-top: 1.25rem;
+}
+
+.pilot-outcome-footnote {
+  margin: 1.5rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.artifact-technical {
+  margin: 1.25rem 0 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.artifact-technical summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.artifact-technical summary:hover {
+  color: var(--accent-strong);
+}
+
+.artifact-technical p {
+  margin: 0.85rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 /* Comparison */
