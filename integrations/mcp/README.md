@@ -1,6 +1,6 @@
 # PythiaLabs MCP (Cursor & compatible hosts)
 
-stdio MCP server that exposes **`pythia_evaluate_agent_infra`** — it shells to `mix pythia.eval_json` in this repository so the deterministic infrastructure gate runs locally (no hosted service).
+stdio MCP server that forwards tool calls to `mix pythia.eval_json` in this repository so deterministic showcase gates run locally (no hosted service).
 
 ## Prerequisites
 
@@ -32,17 +32,23 @@ If the repo is not next to `integrations/mcp` relative to the script, set:
 }
 ```
 
-3. Restart Cursor (or reload MCP). You should see tools **`pythia_evaluate_agent_infra`** and **`pythia_mcp_info`**.
+3. Restart Cursor (or reload MCP). Tools: **`pythia_evaluate`** (main), **`pythia_evaluate_agent_infra`** (alias), **`pythia_mcp_info`**.
 
-## Tool: `pythia_evaluate_agent_infra`
+## Tool: `pythia_evaluate`
 
-Pass **`input_json`** — a single JSON string matching the schema consumed by `mix pythia.eval_json`:
+Pass **`input_json`** — one JSON object (string) for `mix pythia.eval_json`.
 
-- **`gate`**: `"agent_infra_action"`
-- **`action`**: infrastructure action map (string keys), including ISO-8601 `action_time` and `decision_time`
-- **`safety_context`**: safety context map (booleans + string fields as in `examples/agent_infra_action_showcase.exs`)
+### `gate` values
 
-### Example `input_json` (accept path from showcase)
+| `gate` | Second map | Matches showcase |
+|--------|------------|------------------|
+| `agent_infra_action` | `safety_context` | `examples/agent_infra_action_showcase.exs` |
+| `banking_risk_action` | `governance` (or `governance_record`) | `examples/banking_ai_risk_showcase.exs` |
+| `web3_treasury_action` | `governance` (or `governance_record`) | `examples/web3_treasury_action_showcase.exs` |
+
+Use **string keys** and **ISO-8601** datetimes. For Web3, `amount` must be an integer (whole-number floats accepted).
+
+### Example: agent infrastructure (accept path)
 
 ```json
 {
@@ -69,17 +75,74 @@ Pass **`input_json`** — a single JSON string matching the schema consumed by `
 }
 ```
 
-Response maps **`outcome`** to **`ALLOW`** when the gate accepts, **`BLOCK`** when it rejects (deterministic showcase semantics). See stdout JSON for `export`, `evidence`, and `stop_reason`.
+### Example: banking risk
+
+```json
+{
+  "gate": "banking_risk_action",
+  "action": {
+    "action_id": "bank_act_001",
+    "action_type": "fraud_response",
+    "operator_id": "risk_operator_7",
+    "account_id": "acct_demo_01",
+    "action_time": "2026-04-26T09:00:00Z",
+    "decision_time": "2026-04-26T09:01:00Z"
+  },
+  "governance": {
+    "authorization_valid_from": "2026-04-26T08:30:00Z",
+    "authorization_valid_to": "2026-04-26T10:30:00Z",
+    "authorization_recorded_at": "2026-04-26T08:45:00Z",
+    "evidence_observed_at": "2026-04-26T08:55:00Z",
+    "evidence_valid_until": "2026-04-26T09:10:00Z",
+    "decision_time_knowledge_present": true,
+    "operator_approval_present": true
+  }
+}
+```
+
+### Example: Web3 treasury
+
+```json
+{
+  "gate": "web3_treasury_action",
+  "action": {
+    "action_id": "dao_act_001",
+    "action_type": "treasury_transfer",
+    "actor": "agent_alpha",
+    "dao_id": "dao_pythia",
+    "proposal_id": "prop_001",
+    "amount": 10000,
+    "asset": "USDC",
+    "recipient": "0xRecipient",
+    "required_permission": "treasury.transfer",
+    "action_time": "2026-04-25T12:00:00Z",
+    "decision_time": "2026-04-25T12:01:00Z"
+  },
+  "governance": {
+    "proposal_id": "prop_001",
+    "permission": "treasury.transfer",
+    "quorum_met": true,
+    "voting_closed_at": "2026-04-25T11:00:00Z",
+    "timelock_until": "2026-04-25T11:30:00Z",
+    "authorization_valid_from": "2026-04-25T11:30:00Z",
+    "authorization_valid_to": "2026-04-25T13:00:00Z",
+    "authorization_recorded_at": "2026-04-25T11:45:00Z",
+    "transfer_expires_at": "2026-04-25T13:00:00Z"
+  }
+}
+```
+
+Response: **`outcome`** **`ALLOW`** or **`BLOCK`**, plus `export`, `evidence`, `stop_reason` (showcase semantics).
 
 ## CLI without MCP
 
 ```bash
 echo '{"gate":"agent_infra_action", ... }' | mix pythia.eval_json
-# or
+echo '{"gate":"banking_risk_action", ... }' | mix pythia.eval_json
 mix pythia.eval_json --file proposal.json
 ```
 
 ## Limitations (MVP)
 
-- One gate id: **`agent_infra_action`**. Banking / Web3 showcases can be wired the same way later.
-- Requires local Mix + compiled project; MCP is a bridge, not a remote API.
+- Deterministic local showcases only; MCP is a bridge, not a remote API.
+- Field decoding is strict JSON (no silent coercion beyond whole-number floats for `amount`).

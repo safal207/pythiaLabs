@@ -19,14 +19,30 @@ const repoRoot = process.env.PYTHIA_REPO_ROOT
 
 const SERVER_INFO = {
   name: "pythialabs",
-  version: "0.1.0",
+  version: "0.2.0",
 };
 
 const TOOLS = [
   {
+    name: "pythia_evaluate",
+    description:
+      "Run a deterministic PythiaLabs gate (ALLOW/BLOCK). input_json: {\"gate\":\"agent_infra_action\"|\"banking_risk_action\"|\"web3_treasury_action\", \"action\":{...}, plus safety_context or governance}. See integrations/mcp/README.md.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        input_json: {
+          type: "string",
+          description:
+            'JSON string for mix pythia.eval_json (gate + action + safety_context or governance)',
+        },
+      },
+      required: ["input_json"],
+    },
+  },
+  {
     name: "pythia_evaluate_agent_infra",
     description:
-      "Run the deterministic PythiaLabs agent infrastructure gate (ALLOW/BLOCK style outcome). Input: JSON with gate, action, safety_context per repo docs.",
+      "Alias: same as pythia_evaluate — supports all gates via input_json; name kept for backward compatibility.",
     inputSchema: {
       type: "object",
       properties: {
@@ -140,7 +156,7 @@ for await (const line of rl) {
       continue;
     }
 
-    if (name === "pythia_evaluate_agent_infra") {
+    if (name === "pythia_evaluate" || name === "pythia_evaluate_agent_infra") {
       const input = args.input_json;
       if (typeof input !== "string" || !input.trim()) {
         send({

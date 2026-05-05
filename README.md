@@ -71,10 +71,10 @@ mix run examples/web3_treasury_full_showcase.exs
 
 ## Cursor / IDE bridge (MCP)
 
-A minimal **stdio MCP server** lives in [`integrations/mcp/`](integrations/mcp/). It exposes tools that call `mix pythia.eval_json` locally so Cursor (or any MCP host) can run the **agent infrastructure** gate on a JSON proposal.
+A minimal **stdio MCP server** in [`integrations/mcp/`](integrations/mcp/) calls `mix pythia.eval_json` locally so Cursor (or any MCP host) can run deterministic gates (`agent_infra_action`, `banking_risk_action`, `web3_treasury_action`) from JSON.
 
 ```bash
-# Same schema as the MCP tool `pythia_evaluate_agent_infra` (see integrations/mcp/README.md)
+# Any supported gate — see integrations/mcp/README.md
 echo '{"gate":"agent_infra_action","action":{...},"safety_context":{...}}' | mix pythia.eval_json
 ```
 

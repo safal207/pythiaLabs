@@ -1,18 +1,20 @@
 defmodule Mix.Tasks.Pythia.EvalJson do
   use Mix.Task
 
-  @shortdoc "Run AgentInfraAction gate on JSON (stdin or --file path)"
+  @shortdoc "Run deterministic showcase gate on JSON (stdin or --file)"
 
   @moduledoc """
   Reads one JSON object and prints the evaluation result as JSON on stdout.
 
+  **`gate`** selects the showcase: `"agent_infra_action"`, `"banking_risk_action"`, or
+  `"web3_treasury_action"`. See `Pythia.Mcp.JsonEvaluator` for field layout per gate.
+
   ## Examples
 
       echo '{"gate":"agent_infra_action",...}' | mix pythia.eval_json
+      echo '{"gate":"banking_risk_action","action":{...},"governance":{...}}' | mix pythia.eval_json
 
       mix pythia.eval_json --file proposal.json
-
-  See `Pythia.Mcp.JsonEvaluator` for the input schema.
   """
 
   @impl Mix.Task
