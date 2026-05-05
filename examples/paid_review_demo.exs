@@ -291,7 +291,12 @@ File.write!(artifacts_path, Jason.encode!(bundle, pretty: true) <> "\n")
 
 rule.()
 IO.puts("Artifact bundle written to #{cyan.(artifacts_path)}")
-IO.puts(dim.("  #{length(results)} evidence record(s); each digest re-verified via Engine.verify_evidence/1"))
+
+IO.puts(
+  dim.(
+    "  #{length(results)} evidence record(s); each digest re-verified via Engine.verify_evidence/1"
+  )
+)
 
 # ──────────────────────────────────────────────────────────────────────
 # Final pass/fail
