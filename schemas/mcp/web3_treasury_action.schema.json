@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://safal207.github.io/pythiaLabs/schemas/mcp/web3_treasury_action.schema.json",
+  "title": "PythiaLabs gate input: web3_treasury_action",
+  "description": "Decision-time proposal + DAO governance record for the Web3 treasury-transfer gate. Mirrors examples/web3_treasury_action_showcase.exs. Either `governance` or `governance_record` is accepted.",
+  "type": "object",
+  "required": ["gate", "action"],
+  "oneOf": [
+    { "required": ["governance"] },
+    { "required": ["governance_record"] }
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "gate": { "const": "web3_treasury_action" },
+    "action": {
+      "type": "object",
+      "required": [
+        "action_id",
+        "action_type",
+        "actor",
+        "dao_id",
+        "proposal_id",
+        "amount",
+        "asset",
+        "recipient",
+        "required_permission",
+        "action_time",
+        "decision_time"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action_id":           { "$ref": "#/$defs/nonEmptyString" },
+        "action_type":         { "$ref": "#/$defs/nonEmptyString" },
+        "actor":               { "$ref": "#/$defs/nonEmptyString" },
+        "dao_id":              { "$ref": "#/$defs/nonEmptyString" },
+        "proposal_id":         { "$ref": "#/$defs/nonEmptyString" },
+        "amount":              {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Whole-number amount in the smallest unit. JSON numbers without a fractional part are accepted."
+        },
+        "asset":               { "$ref": "#/$defs/nonEmptyString" },
+        "recipient":           { "$ref": "#/$defs/nonEmptyString" },
+        "required_permission": { "$ref": "#/$defs/nonEmptyString" },
+        "action_time":         { "$ref": "#/$defs/iso8601" },
+        "decision_time":       { "$ref": "#/$defs/iso8601" }
+      }
+    },
+    "governance":        { "$ref": "#/$defs/governance" },
+    "governance_record": { "$ref": "#/$defs/governance" }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "iso8601": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 instant accepted by Elixir's DateTime.from_iso8601/1."
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "proposal_id",
+        "permission",
+        "quorum_met",
+        "voting_closed_at",
+        "timelock_until",
+        "authorization_valid_from",
+        "authorization_valid_to",
+        "authorization_recorded_at",
+        "transfer_expires_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id":               { "$ref": "#/$defs/nonEmptyString" },
+        "permission":                { "$ref": "#/$defs/nonEmptyString" },
+        "quorum_met":                { "type": "boolean" },
+        "voting_closed_at":          { "$ref": "#/$defs/iso8601" },
+        "timelock_until":            { "$ref": "#/$defs/iso8601" },
+        "authorization_valid_from":  { "$ref": "#/$defs/iso8601" },
+        "authorization_valid_to":    { "$ref": "#/$defs/iso8601" },
+        "authorization_recorded_at": { "$ref": "#/$defs/iso8601" },
+        "transfer_expires_at":       { "$ref": "#/$defs/iso8601" }
+      }
+    }
+  }
+}

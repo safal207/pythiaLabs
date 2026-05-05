@@ -13,6 +13,8 @@
 
 set -euo pipefail
 
+SUPPORTED_GATES=(agent_infra_action banking_risk_action web3_treasury_action)
+
 print_usage() {
   cat <<'USAGE'
 pythia — deterministic pre-execution gate (CLI wrapper)
@@ -21,6 +23,12 @@ Usage:
   pythia eval [--file PATH | -f PATH]
       Evaluate one JSON proposal. Reads from stdin if --file is omitted.
       Prints a single JSON line on stdout.
+
+  pythia gates
+      List supported gate ids, one per line.
+
+  pythia describe GATE
+      Print the JSON Schema for the given gate id (from schemas/mcp/).
 
   pythia --help | -h
       Show this help.
@@ -32,6 +40,7 @@ Environment:
 Examples:
   echo '{"gate":"agent_infra_action", ...}' | pythia eval
   pythia eval --file proposal.json
+  pythia describe banking_risk_action | jq .properties.action.required
 
 Gates: agent_infra_action, banking_risk_action, web3_treasury_action.
 See integrations/mcp/README.md for full request/response shapes.
@@ -83,6 +92,36 @@ cmd_eval() {
   fi
 }
 
+cmd_gates() {
+  printf '%s\n' "${SUPPORTED_GATES[@]}"
+}
+
+cmd_describe() {
+  if [[ $# -ne 1 ]]; then
+    echo "pythia: describe needs exactly one gate id" >&2
+    echo "Try: pythia gates" >&2
+    exit 64
+  fi
+  local gate=$1
+  local found=0
+  for g in "${SUPPORTED_GATES[@]}"; do
+    [[ "$g" == "$gate" ]] && found=1 && break
+  done
+  if [[ $found -eq 0 ]]; then
+    echo "pythia: unknown gate: $gate" >&2
+    echo "Supported: ${SUPPORTED_GATES[*]}" >&2
+    exit 64
+  fi
+  local root
+  root=$(resolve_repo_root)
+  local schema="$root/schemas/mcp/${gate}.schema.json"
+  if [[ ! -f "$schema" ]]; then
+    echo "pythia: schema file missing: $schema" >&2
+    exit 66
+  fi
+  cat "$schema"
+}
+
 main() {
   if [[ $# -eq 0 ]]; then
     print_usage
@@ -92,6 +131,14 @@ main() {
     eval)
       shift
       cmd_eval "$@"
+      ;;
+    gates)
+      shift
+      cmd_gates "$@"
+      ;;
+    describe)
+      shift
+      cmd_describe "$@"
       ;;
     -h|--help|help)
       print_usage

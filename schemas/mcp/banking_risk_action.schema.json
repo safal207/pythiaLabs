@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://safal207.github.io/pythiaLabs/schemas/mcp/banking_risk_action.schema.json",
+  "title": "PythiaLabs gate input: banking_risk_action",
+  "description": "Decision-time proposal + governance record for the banking risk-response gate. Mirrors examples/banking_ai_risk_showcase.exs. Either `governance` or `governance_record` is accepted.",
+  "type": "object",
+  "required": ["gate", "action"],
+  "oneOf": [
+    { "required": ["governance"] },
+    { "required": ["governance_record"] }
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "gate": { "const": "banking_risk_action" },
+    "action": {
+      "type": "object",
+      "required": [
+        "action_id",
+        "action_type",
+        "operator_id",
+        "account_id",
+        "action_time",
+        "decision_time"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action_id":     { "$ref": "#/$defs/nonEmptyString" },
+        "action_type":   { "$ref": "#/$defs/nonEmptyString" },
+        "operator_id":   { "$ref": "#/$defs/nonEmptyString" },
+        "account_id":    { "$ref": "#/$defs/nonEmptyString" },
+        "action_time":   { "$ref": "#/$defs/iso8601" },
+        "decision_time": { "$ref": "#/$defs/iso8601" }
+      }
+    },
+    "governance":        { "$ref": "#/$defs/governance" },
+    "governance_record": { "$ref": "#/$defs/governance" }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "iso8601": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 instant accepted by Elixir's DateTime.from_iso8601/1."
+    },
+    "governance": {
+      "type": "object",
+      "required": [
+        "authorization_valid_from",
+        "authorization_valid_to",
+        "authorization_recorded_at",
+        "evidence_observed_at",
+        "evidence_valid_until",
+        "decision_time_knowledge_present",
+        "operator_approval_present"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "authorization_valid_from":         { "$ref": "#/$defs/iso8601" },
+        "authorization_valid_to":           { "$ref": "#/$defs/iso8601" },
+        "authorization_recorded_at":        { "$ref": "#/$defs/iso8601" },
+        "evidence_observed_at":             { "$ref": "#/$defs/iso8601" },
+        "evidence_valid_until":             { "$ref": "#/$defs/iso8601" },
+        "decision_time_knowledge_present":  { "type": "boolean" },
+        "operator_approval_present":        { "type": "boolean" }
+      }
+    }
+  }
+}
