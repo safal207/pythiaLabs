@@ -10,6 +10,42 @@ For a concise reviewer-facing overview, see:
 
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
 - **Demo video:** https://youtu.be/IUk3iO0N4YU
+- **Landing page:** [`site/`](site/) (deployable via GitHub Pages)
+
+## Landing Page
+
+A landing page for PythiaLabs lives in [`site/`](site/). It is a
+zero-runtime-JS static site optimized for fast loading: a small Node build
+script renders three localized pages (English, Russian, Chinese) with all
+CSS inlined, so each page is a single HTTP request.
+
+Output structure:
+
+- `dist/index.html`   — English (default)
+- `dist/ru/index.html` — Русский
+- `dist/zh/index.html` — 中文 (Simplified)
+
+`<link rel="alternate" hreflang>` tags and a header language switcher
+connect the three locales.
+
+### Local preview
+
+```bash
+cd site
+npm install
+npm run build     # writes dist/
+npm run preview   # serves dist/ at http://localhost:5173
+npm run dev       # build + serve in one step
+```
+
+### Deploy to GitHub Pages
+
+A workflow at `.github/workflows/pages.yml` deploys the contents of `site/`
+to GitHub Pages on pushes to `main`. To enable it:
+
+1. In the repository settings, go to **Pages** and set **Source** to
+   **GitHub Actions**.
+2. Push to `main` (or trigger the workflow manually from the Actions tab).
 
 PythiaLabs is currently an open-source MVP with deterministic local demos. It is not presented as a production enforcement system, regulatory compliance product, or certified safety framework.
 

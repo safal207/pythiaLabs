@@ -1,0 +1,33 @@
+export const siteConfig = {
+  canonicalOrigin: "https://safal207.github.io/pythiaLabs",
+  repoUrl: "https://github.com/safal207/pythiaLabs",
+  repoSlug: "safal207/pythiaLabs",
+  demoUrl: "https://youtu.be/IUk3iO0N4YU",
+  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/IUk3iO0N4YU",
+  founderVideos: [
+    {
+      url: "https://youtu.be/IUk3iO0N4YU",
+      labelKey: "longForm",
+      campaign: "founder_video_longform",
+    },
+    {
+      url: "https://youtube.com/shorts/Ot5tMRDN0l4",
+      labelKey: "short1",
+      campaign: "founder_video_short_1",
+    },
+    {
+      url: "https://youtube.com/shorts/dRxCiXmUk0o",
+      labelKey: "short2",
+      campaign: "founder_video_short_2",
+    },
+  ],
+  email: "safal0645@gmail.com",
+  pilotEmailSubject: "PythiaLabs pilot inquiry",
+  xUrl: "https://x.com/lim746048",
+  xHandle: "x.com/lim746048",
+  telegramUrl: "https://t.me/Alexfox14",
+  telegramHandle: "@Alexfox14",
+  founderName: "Aleksei Safonov",
+  license: "Apache-2.0",
+  ogImagePath: "/og.svg",
+};
