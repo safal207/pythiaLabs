@@ -11,6 +11,7 @@ export const locales = {
       problem: "Problem",
       idea: "Big idea",
       solution: "How it works",
+      integration: "Integration",
       useCases: "Use cases",
       videos: "Videos",
       faq: "FAQ",
@@ -45,8 +46,7 @@ export const locales = {
       title: "Should this AI agent action execute?",
       body: "When an AI agent gets the ability to act, a mistake is no longer a bad answer — it becomes a real action in the real world. PythiaLabs places a verifiable gate before execution: does the agent have the right to act, is there enough context, is the temporal/causal state valid, can the trace be replayed, and should this be allowed, blocked, or escalated to a human?",
       coreLabel: "Core message",
-      core:
-        "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
+      core: "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
       fallback: "Watch on YouTube",
     },
     problem: {
@@ -111,7 +111,32 @@ export const locales = {
     artifact: {
       title: "Inspectable decision artifacts",
       intro:
-        "Every decision produces a JSON artifact: stable stop reasons, per-check results, a replayable trace ID, and a tamper-checkable digest. This is what reviewers and auditors actually read.",
+        "Every decision produces a JSON artifact: stable stop reasons, per-check results, a replayable trace ID, and a tamper-checkable digest. Digests in the reference implementations use canonical export encoding (`pythia.canonical_export.v1`) and SHA-256 over a stable key order — the same evaluated snapshot yields the same hex digest; re-run exports in CI to detect drift. This is what reviewers and auditors actually read.",
+    },
+    integration: {
+      title: "How you integrate it (today)",
+      intro:
+        "PythiaLabs ships as an Apache-2.0 Elixir library — not a hosted control plane. You keep your agents and tools; the gate is a library boundary your orchestrator calls before anything irreversible happens.",
+      items: [
+        {
+          name: "Call site in your stack",
+          desc: "Link the library from your agent runner or a thin sidecar service. There is no required SaaS, telemetry, or phone-home — everything runs on your infra.",
+        },
+        {
+          name: "Structured proposal → deterministic evaluation",
+          desc: "Pass a typed proposed action plus decision-time evidence (approvals, policy state, freshness markers, environment context). The engine returns ALLOW / BLOCK / ESCALATE with a replayable trace; showcases also emit exportable digests for audit handoff.",
+        },
+        {
+          name: "Complements RBAC and policy engines",
+          desc: "OPA and RBAC answer “is this principal allowed in general?”. The gate answers “should this exact action run right now?” using decision-time evidence, freshness, risk, and temporal/causal checks — often in front of or behind your existing policy layer.",
+        },
+        {
+          name: "Reproducible digest, not vibes",
+          desc: "Evaluator outputs are canonicalized (see `pythia.canonical_export.v1` in the repository) and hashed with SHA-256. Tests pin expected digests for accepted snapshots and reject tampered payloads — that is the concrete meaning of “same inputs, same digest.”",
+        },
+      ],
+      repoNote:
+        "Reviewer quickstart: clone the repo, run `mix test`, then `mix run examples/agent_infra_action_showcase.exs` (and the banking / Web3 showcases). Expected reviewer-facing output lives under `docs/*_expected_output.md`.",
     },
     valueStack: {
       title: "Stop dangerous agent actions before they happen",
@@ -229,7 +254,11 @@ export const locales = {
         },
         {
           q: "How is this different from RBAC or OPA?",
-          a: "RBAC asks “is this principal allowed?”. PythiaLabs asks “should this specific action happen, given current evidence, freshness, and risk?”. It complements policy engines like OPA — you can keep them in front of or behind the gate.",
+          a: "RBAC asks “is this principal allowed?”. PythiaLabs asks “should this specific action happen, given current evidence, freshness, and risk?”. It complements policy engines like OPA — use them for static rules and the gate for decision-time, evidence-bound checks.",
+        },
+        {
+          q: "How do I integrate PythiaLabs with my agents?",
+          a: "Start from the Elixir library in this repository: wire your orchestrator to call the evaluator before tool execution, pass structured proposals plus decision-time snapshots, and store or forward the trace plus optional SHA-256 digest exports for reviewers. Follow README “Reviewer quickstart” (`mix test` and the `examples/*_showcase.exs` scripts) and compare stdout to the `docs/*_expected_output.md` files.",
         },
         {
           q: "Does the gate call an LLM?",
@@ -309,6 +338,7 @@ export const locales = {
       problem: "Проблема",
       idea: "Идея",
       solution: "Как работает",
+      integration: "Интеграция",
       useCases: "Применение",
       videos: "Видео",
       faq: "FAQ",
@@ -408,7 +438,32 @@ export const locales = {
     artifact: {
       title: "Проверяемые артефакты решений",
       intro:
-        "Каждое решение порождает JSON-артефакт: стабильные stop-причины, результаты по каждой проверке, воспроизводимый trace ID и дайджест с проверкой целостности. Это то, что реально читают ревьюеры и аудиторы.",
+        "Каждое решение порождает JSON-артефакт: стабильные stop-причины, результаты по каждой проверке, воспроизводимый trace ID и дайджест с проверкой целостности. В референсных реализациях дайджесты считаются через canonical export (`pythia.canonical_export.v1`) и SHA-256 по стабильному порядку ключей: одна и та же зафиксированная оценка даёт тот же hex-дайджест; повторные экспорты в CI ловят дрейф артефакта. Это то, что реально читают ревьюеры и аудиторы.",
+    },
+    integration: {
+      title: "Как это подключать (сегодня)",
+      intro:
+        "PythiaLabs поставляется как open-source Elixir-библиотека под Apache-2.0 — не как hosted control plane. Агенты и tools остаются у вас; шлюз — это граница библиотеки, которую оркестратор вызывает до необратимых действий.",
+      items: [
+        {
+          name: "Место вызова в вашем стеке",
+          desc: "Подключите библиотеку из agent runner'а или тонкого sidecar-сервиса. Ни SaaS по умолчанию, ни телеметрии, ни phone-home — всё на вашей инфре.",
+        },
+        {
+          name: "Структурированное предложение → детерминированная оценка",
+          desc: "Передайте типизированное предложение действия плюс decision-time evidence (апрувы, состояние политики, метки свежести, контекст среды). Движок возвращает ALLOW / BLOCK / ESCALATE с воспроизводимым trace; в showcase также экспортируются дайджесты для аудиторской передачи.",
+        },
+        {
+          name: "Дополняет RBAC и policy engine",
+          desc: "OPA и RBAC отвечают «разрешён ли principal в принципе?». Шлюз отвечает «должно ли выполниться именно это действие прямо сейчас?» с учётом evidence, freshness, риска и temporal/causal проверок — часто перед или после вашего слоя политик.",
+        },
+        {
+          name: "Воспроизводимый дайджест, не «ощущения»",
+          desc: "Выходы evaluators канонизируются (см. `pythia.canonical_export.v1` в репозитории) и хешируются SHA-256. Тесты закрепляют ожидаемые дайджесты для принятых снапшотов и отклоняют подменённые payload'ы — это конкретный смысл формулировки «те же входы → тот же дайджест».",
+        },
+      ],
+      repoNote:
+        "Быстрый старт для ревьюеров: клонировать репозиторий, выполнить `mix test`, затем `mix run examples/agent_infra_action_showcase.exs` (и banking / Web3 showcase). Ожидаемый вывод для ревью — в `docs/*_expected_output.md`.",
     },
     valueStack: {
       title: "Останавливайте опасные действия агентов до того, как они произойдут",
@@ -476,8 +531,7 @@ export const locales = {
     },
     authority: {
       eyebrow: "Создано для следующего поколения agentic-систем",
-      title:
-        "Автономность без проверяемых прав на действие — это не интеллект, это риск",
+      title: "Автономность без проверяемых прав на действие — это не интеллект, это риск",
       body: "AI-индустрия быстро движется к автономным агентам. PythiaLabs построен вокруг простой идеи:",
       pullQuote:
         "Сильный AI-агент должен не только рассуждать. Он должен быть ограничен проверяемыми правами на действие.",
@@ -527,7 +581,11 @@ export const locales = {
         },
         {
           q: "Чем это отличается от RBAC или OPA?",
-          a: "RBAC отвечает на «можно ли этому principal'у?». PythiaLabs отвечает на «должно ли это конкретное действие произойти с учётом текущих доказательств, их свежести и риска?». Это дополняет policy engine'ы вроде OPA.",
+          a: "RBAC отвечает на «можно ли этому principal'у?». PythiaLabs отвечает на «должно ли это конкретное действие произойти с учётом текущих доказательств, их свежести и риска?». Это дополняет policy engine'ы вроде OPA: статические правила — там, decision-time проверки с evidence — в шлюзе.",
+        },
+        {
+          q: "Как интегрировать PythiaLabs с моими агентами?",
+          a: "Начните с Elixir-библиотеки в этом репозитории: подключите оркестратор к evaluator'у до выполнения инструментов, передавайте структурированные предложения и снимки контекста на момент решения, сохраняйте или передайте trace и при необходимости экспорт SHA-256 для ревьюеров. Следуйте README «Reviewer quickstart» (`mix test` и скрипты `examples/*_showcase.exs`) и сверяйте stdout с файлами `docs/*_expected_output.md`.",
         },
         {
           q: "Шлюз вызывает LLM?",
@@ -607,6 +665,7 @@ export const locales = {
       problem: "问题",
       idea: "核心理念",
       solution: "工作原理",
+      integration: "集成",
       useCases: "应用场景",
       videos: "视频",
       faq: "常见问题",
@@ -616,19 +675,12 @@ export const locales = {
     hero: {
       eyebrow: "执行前安全层 · 开源 · Apache-2.0",
       headline: "在 AI Agent 执行前阻止危险行动。",
-      subtitle:
-        "AI Agent 正从“回答”走向“行动”。PythiaLabs 决定这些行动是否应当执行。",
+      subtitle: "AI Agent 正从“回答”走向“行动”。PythiaLabs 决定这些行动是否应当执行。",
       body: "AI Agent 已经在修改代码、运行命令、操作基础设施，并参与金融与治理流程。PythiaLabs 是一个执行前安全层，在 Agent 执行前评估它的行动。",
       tagline: "不是信任，而是执行前的验证。",
       starsAlt: "GitHub 星标",
     },
-    trustStrip: [
-      "100% 开源",
-      "Apache-2.0",
-      "确定性 — 门控路径中无 LLM 调用",
-      "可自托管",
-      "无遥测",
-    ],
+    trustStrip: ["100% 开源", "Apache-2.0", "确定性 — 门控路径中无 LLM 调用", "可自托管", "无遥测"],
     cta: {
       primary: "观看演示",
       secondary: "查看 GitHub",
@@ -655,19 +707,14 @@ export const locales = {
         "在 Web3 国库与治理中行动",
         "通过 tools 与 API 执行",
       ],
-      punchline:
-        "但大多数系统仍在执行后才校验结果。这就像在大楼烧毁后才安装火警警报。",
+      punchline: "但大多数系统仍在执行后才校验结果。这就像在大楼烧毁后才安装火警警报。",
     },
     bigIdea: {
       eyebrow: "核心理念",
       title: "在 Agent 行动之前，必须证明该行动是被允许的",
       lead: "PythiaLabs 提出一个关键问题：",
       quote: "“这个 AI Agent 行动应该被执行吗？”",
-      not: [
-        "不是“答案听起来聪明吗？”",
-        "不是“模型有信心吗？”",
-        "不是“推理听起来对吗？”",
-      ],
+      not: ["不是“答案听起来聪明吗？”", "不是“模型有信心吗？”", "不是“推理听起来对吗？”"],
       but: "这个行动现在是否有权被执行？",
     },
     solution: {
@@ -692,26 +739,42 @@ export const locales = {
         },
       ],
       checksTitle: "检查项",
-      checks: [
-        "授权",
-        "证据新鲜度",
-        "决策时上下文",
-        "权限边界",
-        "凭据",
-        "恢复假设",
-        "行动风险",
-      ],
+      checks: ["授权", "证据新鲜度", "决策时上下文", "权限边界", "凭据", "恢复假设", "行动风险"],
       returnsTitle: "返回",
     },
     artifact: {
       title: "可审查的决策产物",
       intro:
-        "每个决策都会生成 JSON 产物：稳定的停止原因、各项检查结果、可重放的 trace ID，以及可校验的摘要。这才是审查者和审计者真正会读的内容。",
+        "每个决策都会生成 JSON 产物：稳定的停止原因、各项检查结果、可重放的 trace ID，以及可校验的摘要。参考实现中的摘要通过规范化导出编码（`pythia.canonical_export.v1`）与稳定键序上的 SHA-256 计算：同一评估快照产生相同的十六进制摘要；在 CI 中重复导出可发现产物漂移。这才是审查者和审计者真正会读的内容。",
+    },
+    integration: {
+      title: "如何集成（当前形态）",
+      intro:
+        "PythiaLabs 以 Apache-2.0 授权的 Elixir 库交付——不是托管控制平面。Agent 与工具仍归你所有；门控是编排器在不可逆动作之前调用的库边界。",
+      items: [
+        {
+          name: "在你系统中的挂载点",
+          desc: "从 Agent runner 或轻量 sidecar 服务链接该库。不强制 SaaS、不强制遥测、无回连——一切跑在你的基础设施上。",
+        },
+        {
+          name: "结构化提案 → 确定性评估",
+          desc: "传入类型化的拟议行动以及决策时证据（审批、策略状态、新鲜度标记、环境上下文）。引擎返回 ALLOW / BLOCK / ESCALATE 与可重放轨迹；showcase 还可导出 SHA-256 证据供审计交接。",
+        },
+        {
+          name: "与 RBAC 与策略引擎互补",
+          desc: "OPA 与 RBAC 回答“主体在一般情况下是否被允许？”。门控回答“在当前证据、新鲜度与风险下，这一具体行动是否应当现在执行？”——通常可置于现有策略层之前或之后。",
+        },
+        {
+          name: "可复现的摘要，而非主观感觉",
+          desc: "评估器输出经规范化（见仓库中的 `pythia.canonical_export.v1`）并以 SHA-256 哈希。测试为接受态快照固定预期摘要并拒绝被篡改的 payload——这就是“相同输入 → 相同摘要”的具体含义。",
+        },
+      ],
+      repoNote:
+        "审阅者快速上手：克隆仓库，运行 `mix test`，再执行 `mix run examples/agent_infra_action_showcase.exs`（以及 banking / Web3 showcase）。面向审阅的预期输出见 `docs/*_expected_output.md`。",
     },
     valueStack: {
       title: "在危险的 Agent 行动发生之前阻止它",
-      intro:
-        "PythiaLabs 帮助团队构建不能仅凭“信任”交付的 AI Agent。你将获得：",
+      intro: "PythiaLabs 帮助团队构建不能仅凭“信任”交付的 AI Agent。你将获得：",
       items: [
         "确定性安全门控 — 同样输入永远得到同样决策",
         "带稳定停止原因的可重放轨迹",
@@ -819,7 +882,11 @@ export const locales = {
         },
         {
           q: "与 RBAC 或 OPA 有何不同？",
-          a: "RBAC 问“这个 principal 是否被允许？”。PythiaLabs 问“在当前证据、新鲜度与风险下，这个具体行动应该发生吗？”，与 OPA 等策略引擎互补。",
+          a: "RBAC 问“这个 principal 是否被允许？”。PythiaLabs 问“在当前证据、新鲜度与风险下，这一具体行动是否应当现在执行？”。它与 OPA 等策略引擎互补：静态规则留在策略引擎，带证据的决策时检查放在门控。",
+        },
+        {
+          q: "如何把 PythiaLabs 接入我的 Agent？",
+          a: "从本仓库的 Elixir 库开始：在工具执行前让编排器调用评估器，传入结构化提案与决策时快照，并保存或转发轨迹与可选的 SHA-256 导出供审阅。按 README 的“Reviewer quickstart”运行 `mix test` 与 `examples/*_showcase.exs` 脚本，将标准输出与 `docs/*_expected_output.md` 对照。",
         },
         {
           q: "门控会调用 LLM 吗？",

@@ -890,6 +890,13 @@ blockquote {
   letter-spacing: 0.05em;
 }
 
+.integration-repo-note {
+  margin: 1.75rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
 /* Comparison */
 .compare-grid {
   display: grid;
@@ -1273,8 +1280,7 @@ blockquote {
 .closer {
   text-align: center;
   background:
-    radial-gradient(800px 200px at 50% 50%, rgba(78, 166, 255, 0.12), transparent 70%),
-    var(--bg);
+    radial-gradient(800px 200px at 50% 50%, rgba(78, 166, 255, 0.12), transparent 70%), var(--bg);
 }
 
 .closer-line {
