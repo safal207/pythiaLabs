@@ -69,6 +69,17 @@ mix run examples/banking_ai_risk_showcase.exs
 mix run examples/web3_treasury_full_showcase.exs
 ```
 
+## Cursor / IDE bridge (MCP)
+
+A minimal **stdio MCP server** lives in [`integrations/mcp/`](integrations/mcp/). It exposes tools that call `mix pythia.eval_json` locally so Cursor (or any MCP host) can run the **agent infrastructure** gate on a JSON proposal.
+
+```bash
+# Same schema as the MCP tool `pythia_evaluate_agent_infra` (see integrations/mcp/README.md)
+echo '{"gate":"agent_infra_action","action":{...},"safety_context":{...}}' | mix pythia.eval_json
+```
+
+Setup steps and `mcp.json` snippet: [`integrations/mcp/README.md`](integrations/mcp/README.md).
+
 ## What PythiaLabs is not yet
 
 PythiaLabs currently does not claim:
