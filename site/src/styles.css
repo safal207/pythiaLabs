@@ -1372,10 +1372,16 @@ blockquote {
 .step {
   display: flex;
   gap: 0.9rem;
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
+}
+
+.step-body {
+  min-width: 0;
+  flex: 1;
 }
 
 .step-num {
@@ -1403,6 +1409,7 @@ blockquote {
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .step-body .inline-code,
