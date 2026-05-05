@@ -338,7 +338,15 @@ blockquote {
   margin-top: 1.5rem;
 }
 
+/* Let grid tracks shrink so long copy wraps instead of widening the row */
+.card-grid > *,
+.two-col > *,
+.step-list > * {
+  min-width: 0;
+}
+
 .card {
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -349,6 +357,12 @@ blockquote {
   margin: 0 0 0.75rem;
   font-size: 1.05rem;
   color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.card p,
+.card li {
+  overflow-wrap: anywhere;
 }
 
 .card ul {
@@ -1043,6 +1057,29 @@ blockquote {
   color: var(--text-muted);
 }
 
+.section-ide-bridge .ide-bridge-list {
+  margin: 1.25rem 0 0;
+  padding-left: 1.25rem;
+  max-width: 760px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.section-ide-bridge .ide-bridge-list li {
+  margin: 0.45rem 0;
+}
+
+.ide-bridge-cta {
+  margin: 1.5rem 0 0;
+}
+
+.ide-bridge-note {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 .pilot-outcome-list {
   margin-top: 1.25rem;
 }
@@ -1390,10 +1427,16 @@ blockquote {
 .step {
   display: flex;
   gap: 0.9rem;
+  min-width: 0;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.1rem 1.25rem;
+}
+
+.step-body {
+  min-width: 0;
+  flex: 1;
 }
 
 .step-num {
@@ -1414,6 +1457,7 @@ blockquote {
 .step-body h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
+  overflow-wrap: anywhere;
 }
 
 .step-body p {
@@ -1421,6 +1465,7 @@ blockquote {
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .step-body .inline-code,
@@ -1436,6 +1481,9 @@ blockquote {
   border-radius: 4px;
   padding: 0.06em 0.35em;
   color: var(--text);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Video block — core message pull */
