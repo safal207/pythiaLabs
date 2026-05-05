@@ -229,6 +229,7 @@ export const locales = {
       items: [
         "Add the stdio MCP server from `integrations/mcp/` (Node + local Mix).",
         "Tool `pythia_evaluate`: pass JSON with `gate`, `action`, and `safety_context` or `governance`.",
+        "Tool `pythia_describe_gate`: the agent fetches the gate's JSON Schema mid-chat and fixes its own payload — no copy-paste from README.",
         "Same JSON works from the CLI — copy examples from the README.",
       ],
       docsCta: "MCP setup & JSON examples →",
@@ -681,6 +682,7 @@ export const locales = {
       items: [
         "stdio MCP из `integrations/mcp/` (Node + локальный Mix).",
         "Инструмент `pythia_evaluate`: JSON с `gate`, `action` и `safety_context` или `governance`.",
+        "Инструмент `pythia_describe_gate`: агент сам получает JSON Schema нужного gate и поправляет свой payload — без копипаста из README.",
         "Тот же JSON из CLI — примеры в README репозитория.",
       ],
       docsCta: "Установка MCP и примеры JSON →",
@@ -1109,6 +1111,7 @@ export const locales = {
       items: [
         "从 `integrations/mcp/` 启动 stdio MCP（Node + 本地 Mix）。",
         "工具 `pythia_evaluate`：传入含 `gate`、`action` 以及 `safety_context` 或 `governance` 的 JSON。",
+        "工具 `pythia_describe_gate`：Agent 在对话中直接获取 gate 的 JSON Schema 并自行修正 payload，无需从 README 复制粘贴。",
         "同一 JSON 也可通过 CLI 运行 — 示例见 README。",
       ],
       docsCta: "MCP 配置与 JSON 示例 →",

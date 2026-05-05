@@ -514,8 +514,8 @@ export function renderPage(currentId, year, buildDate) {
       <section id="cursor-ide" class="section section-alt section-ide-bridge" aria-labelledby="cursor-ide-title">
         <div class="container">
           <h2 id="cursor-ide-title">${escape(t.ideBridge.title)}</h2>
-          <p>${escape(t.ideBridge.intro)}</p>
-          <ul class="ide-bridge-list">${t.ideBridge.items.map((line) => `<li>${escape(line)}</li>`).join("")}</ul>
+          <p>${inlineCodeToHtml(t.ideBridge.intro)}</p>
+          <ul class="ide-bridge-list">${t.ideBridge.items.map((line) => `<li>${inlineCodeToHtml(line)}</li>`).join("")}</ul>
           <p class="ide-bridge-cta">
             <a class="btn btn-secondary" href="${utm(`${siteConfig.repoUrl}/blob/main/${siteConfig.mcpReadmePath}`, "ide_mcp_docs")}" rel="noopener noreferrer">${escape(t.ideBridge.docsCta)}</a>
           </p>
