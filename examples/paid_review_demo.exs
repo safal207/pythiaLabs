@@ -32,14 +32,23 @@ decision =
 
 stop_reason =
   cond do
-    decision == "BLOCK" -> "authorization_or_wallet_allowlist_failed"
+    decision == "BLOCK" ->
+      "authorization_or_wallet_allowlist_failed"
+
     not quorum_approval_ok? and not policy_freshness_ok? ->
       "missing_quorum_approval_and_stale_policy_state"
 
-    not quorum_approval_ok? -> "missing_quorum_approval"
-    not policy_freshness_ok? -> "stale_policy_state"
-    decision == "ESCALATE" -> "high_value_low_reversibility_action"
-    true -> "approved_under_current_evidence"
+    not quorum_approval_ok? ->
+      "missing_quorum_approval"
+
+    not policy_freshness_ok? ->
+      "stale_policy_state"
+
+    decision == "ESCALATE" ->
+      "high_value_low_reversibility_action"
+
+    true ->
+      "approved_under_current_evidence"
   end
 
 execution_allowed = decision == "ALLOW"
@@ -49,7 +58,10 @@ checks = [
   %{name: "wallet_allowlist", status: if(wallet_allowlist_ok?, do: "PASS", else: "FAIL")},
   %{name: "quorum_approval", status: if(quorum_approval_ok?, do: "PASS", else: "FAIL")},
   %{name: "policy_freshness", status: if(policy_freshness_ok?, do: "PASS", else: "FAIL")},
-  %{name: "action_risk", status: if(action_risk == "high_value_low_reversibility", do: "REVIEW", else: "PASS")}
+  %{
+    name: "action_risk",
+    status: if(action_risk == "high_value_low_reversibility", do: "REVIEW", else: "PASS")
+  }
 ]
 
 artifact = %{
