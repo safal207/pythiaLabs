@@ -1025,6 +1025,29 @@ blockquote {
   color: var(--text-muted);
 }
 
+.section-ide-bridge .ide-bridge-list {
+  margin: 1.25rem 0 0;
+  padding-left: 1.25rem;
+  max-width: 760px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.section-ide-bridge .ide-bridge-list li {
+  margin: 0.45rem 0;
+}
+
+.ide-bridge-cta {
+  margin: 1.5rem 0 0;
+}
+
+.ide-bridge-note {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 .pilot-outcome-list {
   margin-top: 1.25rem;
 }
