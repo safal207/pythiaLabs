@@ -52,4 +52,15 @@ defmodule Pythia.Mcp.JsonEvaluatorTest do
     assert err.ok == false
     assert err.error == "missing_gate"
   end
+
+  test "explicit false booleans are read correctly (not treated as missing)" do
+    ctx =
+      @accept_body["safety_context"]
+      |> Map.put("explicit_user_approval_present", false)
+
+    body = Map.put(@accept_body, "safety_context", ctx)
+    json = Jason.encode!(body)
+    assert {:ok, resp} = JsonEvaluator.run(json)
+    assert resp.outcome == "BLOCK"
+  end
 end

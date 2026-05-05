@@ -144,7 +144,17 @@ defmodule Pythia.Mcp.JsonEvaluator do
   end
 
   defp get_str(raw, key, field) do
-    case Map.get(raw, key) || Map.get(raw, field) do
+    val =
+      cond do
+        Map.has_key?(raw, key) -> Map.fetch!(raw, key)
+        Map.has_key?(raw, field) -> Map.fetch!(raw, field)
+        true -> nil
+      end
+
+    case val do
+      nil ->
+        {:error, %{error: "missing_field", field: key}}
+
       v when is_binary(v) ->
         if String.trim(v) != "" do
           {:ok, v}
@@ -152,16 +162,20 @@ defmodule Pythia.Mcp.JsonEvaluator do
           {:error, %{error: "invalid_field", field: key, expected: "non-empty string"}}
         end
 
-      nil ->
-        {:error, %{error: "missing_field", field: key}}
-
       _ ->
         {:error, %{error: "invalid_field", field: key, expected: "non-empty string"}}
     end
   end
 
   defp get_bool(raw, key, field) do
-    case Map.get(raw, key) || Map.get(raw, field) do
+    val =
+      cond do
+        Map.has_key?(raw, key) -> Map.fetch!(raw, key)
+        Map.has_key?(raw, field) -> Map.fetch!(raw, field)
+        true -> nil
+      end
+
+    case val do
       true -> {:ok, true}
       false -> {:ok, false}
       nil -> {:error, %{error: "missing_field", field: key}}
@@ -170,13 +184,18 @@ defmodule Pythia.Mcp.JsonEvaluator do
   end
 
   defp fetch_iso_datetime(raw, key, field) do
-    v = Map.get(raw, key) || Map.get(raw, field)
+    val =
+      cond do
+        Map.has_key?(raw, key) -> Map.fetch!(raw, key)
+        Map.has_key?(raw, field) -> Map.fetch!(raw, field)
+        true -> nil
+      end
 
     cond do
-      is_binary(v) ->
-        case DateTime.from_iso8601(v) do
+      is_binary(val) ->
+        case DateTime.from_iso8601(val) do
           {:ok, dt, _} -> {:ok, dt}
-          {:error, _} -> {:error, %{error: "invalid_datetime", field: key, value: v}}
+          {:error, _} -> {:error, %{error: "invalid_datetime", field: key, value: val}}
         end
 
       true ->
