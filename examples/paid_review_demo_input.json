@@ -1,0 +1,21 @@
+{
+  "schema": "pythia.demo.input.v1",
+  "trace_id": "trace_paid_review_demo_001",
+  "proposed_action": {
+    "action_id": "transfer_25000_usdc",
+    "action_type": "web3_treasury_transfer",
+    "amount": 25000,
+    "asset": "USDC",
+    "recipient": "0xA11owListedRecipient",
+    "requested_by": "agent_treasury_alpha"
+  },
+  "evidence_context": {
+    "authorization": true,
+    "wallet_allowlist": true,
+    "quorum_approval": false,
+    "policy_freshness_seconds": 5400,
+    "policy_freshness_ttl_seconds": 1800,
+    "action_risk": "high_value_low_reversibility"
+  },
+  "expected_decision": "ESCALATE"
+}
