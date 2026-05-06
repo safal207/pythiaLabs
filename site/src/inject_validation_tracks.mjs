@@ -7,6 +7,8 @@ const distDir = path.resolve(__dirname, "../dist");
 
 const manifundUrl =
   "https://manifund.org/projects/deterministic-oversight-for-agent-traces--ltp--cml";
+const threatModelUrl =
+  "https://github.com/safal207/pythiaLabs/blob/main/docs/THREAT_MODEL.md";
 
 const css = `
 .validation-tracks-section {
@@ -95,6 +97,12 @@ const tracks = [
       ru: "Заявка отправлена: воспроизводимые evidence gates для high-risk digital workflows.",
       zh: "Submitted for reproducible evidence gates for high-risk digital workflows.",
     },
+    href: threatModelUrl,
+    linkLabel: {
+      en: "View threat model →",
+      ru: "Посмотреть threat model →",
+      zh: "View threat model →",
+    },
   },
   {
     status: "Submitted",
@@ -112,6 +120,12 @@ const tracks = [
       en: "Application submitted to OpenAI Cybersecurity Grant Program (external review).",
       ru: "Заявка подана в OpenAI Cybersecurity Grant Program (на внешнем review).",
       zh: "Application submitted to OpenAI Cybersecurity Grant Program (external review).",
+    },
+    href: threatModelUrl,
+    linkLabel: {
+      en: "View threat model →",
+      ru: "Посмотреть threat model →",
+      zh: "View threat model →",
     },
   },
   {

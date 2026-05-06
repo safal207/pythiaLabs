@@ -660,6 +660,11 @@ export function renderPage(currentId, year, buildDate) {
               <p class="founder-name">${escape(siteConfig.founderName)}</p>
               <p class="founder-role">${escape(t.founder.role)} · ${escape(t.founder.exp)}</p>
               <p class="founder-signoff">${escape(t.founderLetter.signoff)}</p>
+              <p class="founder-verify">
+                <a href="${siteConfig.founderGithub}" target="_blank" rel="noopener noreferrer">GitHub profile</a>
+                · <a href="${siteConfig.repoUrl}/commits/main?author=safal207" target="_blank" rel="noopener noreferrer">Commits</a>
+                · <a href="${siteConfig.demoUrl}" target="_blank" rel="noopener noreferrer">Runnable demo</a>
+              </p>
             </footer>
           </blockquote>
         </div>
@@ -747,9 +752,14 @@ export function renderPage(currentId, year, buildDate) {
     <footer class="site-footer">
       <div class="container footer-row">
         <p>${escape(t.footer.copyright.replace("{year}", String(year)))} · ${escape(t.footer.tagline)}</p>
+        <p class="footer-meta">${escape(siteConfig.license)}-licensed · Open governance · Public roadmap</p>
         <p class="footer-links">
           <a href="${siteConfig.repoUrl}" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="${siteConfig.repoUrl}/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License</a>
+          <a href="${siteConfig.repoUrl}/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License (${escape(siteConfig.license)})</a>
+          <a href="${siteConfig.repoUrl}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contributing</a>
+          <a href="${siteConfig.repoUrl}/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noopener noreferrer">Code of Conduct</a>
+          <a href="${siteConfig.repoUrl}/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a>
+          <a href="#milestones">Roadmap</a>
           <a href="${siteConfig.demoUrl}" target="_blank" rel="noopener noreferrer">Demo</a>
         </p>
       </div>

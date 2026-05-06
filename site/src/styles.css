@@ -1055,6 +1055,14 @@ blockquote {
   flex-wrap: wrap;
 }
 
+.footer-meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
 @media (prefers-color-scheme: light) {
   .code-block {
     background: #f6f8fa;
@@ -1413,6 +1421,17 @@ blockquote {
   color: var(--text-muted);
   font-size: 0.92rem;
   margin-top: 0.35rem !important;
+}
+
+.founder-verify {
+  margin-top: 0.55rem !important;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+}
+
+.founder-verify a {
+  color: var(--accent);
 }
 
 .founder-videos-title {

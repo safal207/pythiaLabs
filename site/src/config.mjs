@@ -54,6 +54,7 @@ export const siteConfig = {
   telegramUrl: "https://t.me/Alexfox14",
   telegramHandle: "@Alexfox14",
   founderName: "Aleksei Safonov",
+  founderGithub: "https://github.com/safal207",
   license: "Apache-2.0",
   ogImagePath: "/og.svg",
   showcaseScriptCount: 6,
