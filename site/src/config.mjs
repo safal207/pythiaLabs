@@ -3,17 +3,17 @@ export const siteConfig = {
   repoUrl: "https://github.com/safal207/pythiaLabs",
   repoSlug: "safal207/pythiaLabs",
   demoUrl: "https://youtu.be/JDe3qS67A-I",
-  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I",
+  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I?controls=0&disablekb=1&rel=0&modestbranding=1",
   demoSeries: [
     {
       url: "https://youtu.be/JDe3qS67A-I",
-      embedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I",
+      embedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I?controls=0&disablekb=1&rel=0&modestbranding=1",
       labelKey: "part1",
       campaign: "demo_series_part_1",
     },
     {
       url: "https://youtu.be/pIJodVRD2Ro",
-      embedUrl: "https://www.youtube-nocookie.com/embed/pIJodVRD2Ro",
+      embedUrl: "https://www.youtube-nocookie.com/embed/pIJodVRD2Ro?controls=0&disablekb=1&rel=0&modestbranding=1",
       labelKey: "part2",
       campaign: "demo_series_part_2",
     },

@@ -474,12 +474,21 @@ export function renderPage(currentId, year, buildDate) {
               <h3>${escape(t.solution.checksTitle)}</h3>
               <ul>${t.solution.checks.map(li).join("")}</ul>
             </div>
-            <div class="card">
+            <div class="card return-card">
               <h3>${escape(t.solution.returnsTitle)}</h3>
               <ul class="decisions">
-                <li><span class="tag tag-allow">ALLOW</span></li>
-                <li><span class="tag tag-block">BLOCK</span></li>
-                <li><span class="tag tag-escalate">ESCALATE</span></li>
+                ${t.solution.returns
+                  .map(
+                    (item) =>
+                      `<li class="decision-outcome decision-${escape(item.label.toLowerCase())}">
+                        <span class="tag tag-${escape(item.label.toLowerCase())}">${escape(item.label)}</span>
+                        <div>
+                          <strong>${escape(item.title)}</strong>
+                          <p>${escape(item.desc)}</p>
+                        </div>
+                      </li>`,
+                  )
+                  .join("")}
               </ul>
             </div>
           </div>
@@ -702,13 +711,22 @@ export function renderPage(currentId, year, buildDate) {
       <section id="contact" class="section section-alt">
         <div class="container">
           <h2>${escape(t.contact.title)}</h2>
-          <ul class="contact-list">
-            <li><span>${escape(t.contact.labels.github)}</span><a href="${siteConfig.repoUrl}">${escape(siteConfig.repoUrl.replace(/^https?:\/\//, ""))}</a></li>
-            <li><span>${escape(t.contact.labels.demo)}</span><a href="${siteConfig.demoUrl}">${escape(siteConfig.demoUrl.replace(/^https?:\/\//, ""))}</a></li>
-            <li><span>${escape(t.contact.labels.email)}</span><a href="mailto:${siteConfig.email}">${escape(siteConfig.email)}</a></li>
-            <li><span>${escape(t.contact.labels.x)}</span><a href="${siteConfig.xUrl}">${escape(siteConfig.xHandle)}</a></li>
-            <li><span>${escape(t.contact.labels.telegram)}</span><a href="${siteConfig.telegramUrl}">${escape(siteConfig.telegramHandle)}</a></li>
-          </ul>
+          <div class="contact-panel">
+            <div>
+              <p class="cta-eyebrow">Start here</p>
+              <h3>Send one risky agent workflow</h3>
+              <p>Share the action your agent wants to take. I will help map it into proposal, evidence, and an ALLOW / BLOCK / ESCALATE trace.</p>
+              <p class="contact-actions">
+                <a class="btn btn-primary" href="mailto:${siteConfig.email}?subject=${encodeURIComponent(siteConfig.pilotEmailSubject)}" rel="noopener noreferrer">Email PythiaLabs →</a>
+                <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "contact_demo")}" rel="noopener noreferrer">Watch the demo →</a>
+              </p>
+            </div>
+            <ul class="contact-list">
+              <li><span>${escape(t.contact.labels.github)}</span><a href="${siteConfig.repoUrl}">${escape(siteConfig.repoUrl.replace(/^https?:\/\//, ""))}</a></li>
+              <li><span>${escape(t.contact.labels.x)}</span><a href="${siteConfig.xUrl}">${escape(siteConfig.xHandle)}</a></li>
+              <li><span>${escape(t.contact.labels.telegram)}</span><a href="${siteConfig.telegramUrl}">${escape(siteConfig.telegramHandle)}</a></li>
+            </ul>
+          </div>
         </div>
       </section>
     </main>

@@ -188,6 +188,23 @@ export const locales = {
         "action risk",
       ],
       returnsTitle: "Returns",
+      returns: [
+        {
+          label: "ALLOW",
+          title: "Execute with confidence",
+          desc: "Evidence is fresh, permissions match, and the action is safe to run now.",
+        },
+        {
+          label: "BLOCK",
+          title: "Stop before damage",
+          desc: "The gate catches missing approval, stale evidence, expired windows, or boundary violations.",
+        },
+        {
+          label: "ESCALATE",
+          title: "Bring in a human",
+          desc: "Ambiguous or high-impact actions get a reviewable trace instead of silent execution.",
+        },
+      ],
     },
     artifact: {
       title: "Inspectable decision artifacts",
@@ -667,6 +684,23 @@ export const locales = {
         "риск действия",
       ],
       returnsTitle: "Возвращает",
+      returns: [
+        {
+          label: "ALLOW",
+          title: "Execute with confidence",
+          desc: "Evidence is fresh, permissions match, and the action is safe to run now.",
+        },
+        {
+          label: "BLOCK",
+          title: "Stop before damage",
+          desc: "The gate catches missing approval, stale evidence, expired windows, or boundary violations.",
+        },
+        {
+          label: "ESCALATE",
+          title: "Bring in a human",
+          desc: "Ambiguous or high-impact actions get a reviewable trace instead of silent execution.",
+        },
+      ],
     },
     artifact: {
       title: "Проверяемые артефакты решений",
@@ -1124,6 +1158,23 @@ export const locales = {
       checksTitle: "检查项",
       checks: ["授权", "证据新鲜度", "决策时上下文", "权限边界", "凭据", "恢复假设", "行动风险"],
       returnsTitle: "返回",
+      returns: [
+        {
+          label: "ALLOW",
+          title: "Execute with confidence",
+          desc: "Evidence is fresh, permissions match, and the action is safe to run now.",
+        },
+        {
+          label: "BLOCK",
+          title: "Stop before damage",
+          desc: "The gate catches missing approval, stale evidence, expired windows, or boundary violations.",
+        },
+        {
+          label: "ESCALATE",
+          title: "Bring in a human",
+          desc: "Ambiguous or high-impact actions get a reviewable trace instead of silent execution.",
+        },
+      ],
     },
     artifact: {
       title: "可审查的决策产物",
