@@ -333,7 +333,7 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "From the founder",
-      title: "Runnable demo videos",
+      title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
           name: "Demo part 1",
@@ -798,7 +798,7 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "От основателя",
-      title: "Runnable demo videos",
+      title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
           name: "Demo part 1",
@@ -1232,7 +1232,7 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "来自创始人",
-      title: "Runnable demo videos",
+      title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
           name: "Demo part 1",

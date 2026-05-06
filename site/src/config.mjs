@@ -11,14 +11,14 @@ export const siteConfig = {
       campaign: "runnable_demo_part_1",
     },
     {
-      url: "https://youtu.be/pIJodVRD2Ro",
-      labelKey: "runnableDemoPart2",
-      campaign: "runnable_demo_part_2",
-    },
-    {
       url: "https://youtu.be/IUk3iO0N4YU",
       labelKey: "longForm",
       campaign: "founder_video_longform",
+    },
+    {
+      url: "https://youtu.be/pIJodVRD2Ro",
+      labelKey: "runnableDemoPart2",
+      campaign: "runnable_demo_part_2",
     },
     {
       url: "https://youtube.com/shorts/Ot5tMRDN0l4",
