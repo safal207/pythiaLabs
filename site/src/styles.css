@@ -1011,6 +1011,22 @@ blockquote {
   color: var(--text-muted);
 }
 
+.demo-series-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-series-actions {
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .demo-series-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* Use-case cards (with descriptions) */
 .use-case h3 {
   font-size: 1.05rem;
@@ -1814,5 +1830,18 @@ blockquote {
   }
   .founder-letter {
     padding: 1.1rem 1.2rem;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .demo-series-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-series-actions .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 }
