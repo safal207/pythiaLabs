@@ -1430,6 +1430,18 @@ blockquote {
   font-size: 0.82rem;
 }
 
+.funding-transparency {
+  margin: 0.85rem 0 0;
+  padding: 0.65rem 0.9rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(124, 196, 255, 0.06);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
 .founder-verify a {
   color: var(--accent);
 }

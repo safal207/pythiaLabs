@@ -742,6 +742,7 @@ function renderSupportSection(currentId) {
           <p class="cta-eyebrow">${escapeHtml(copy.eyebrow)}</p>
           <h2 id="support-title">${escapeHtml(copy.title)}</h2>
           <p class="support-intro">${escapeHtml(copy.intro)}</p>
+          <p class="funding-transparency">Self-funded · Active grant applications · Open to fiscal sponsorship</p>
           <div class="support-grid">${cards}
           </div>
           <p class="support-note">${escapeHtml(copy.note)}</p>

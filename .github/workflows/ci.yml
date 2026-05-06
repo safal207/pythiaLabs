@@ -47,6 +47,10 @@ jobs:
         run: |
           mix run examples/lev_demo.exs
 
+      - name: Run paid review demo (make demo)
+        run: |
+          make demo
+
       - name: Run bench
         run: |
           mix run benches/bench.exs

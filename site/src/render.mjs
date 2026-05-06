@@ -362,6 +362,9 @@ export function renderPage(currentId, year, buildDate) {
             <a href="#cursor-ide" class="badge-link">
               <img src="https://img.shields.io/badge/MCP-ready-7cc4ff?style=flat-square&color=0b0d10" alt="${escape(t.hero.mcpBadgeAlt)}" loading="lazy" decoding="async" width="92" height="20" />
             </a>
+            <a href="${siteConfig.repoUrl}/actions/workflows/ci.yml" class="badge-link" target="_blank" rel="noopener noreferrer">
+              <img src="https://img.shields.io/github/actions/workflow/status/${siteConfig.repoSlug}/ci.yml?branch=main&style=flat-square&label=runnable%20demo&color=0b0d10" alt="Runnable demo CI status" loading="lazy" decoding="async" width="140" height="20" />
+            </a>
           </p>
           <div class="hero-stats" role="region" aria-label="${escape(t.heroStats.ariaLabel)}">
             <div class="stat"><span class="stat-value">${siteConfig.showcaseScriptCount}</span><span class="stat-label">${escape(t.heroStats.showcases)}</span></div>

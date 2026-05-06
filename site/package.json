@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_validation_tracks.mjs",
-    "dev": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_validation_tracks.mjs && node serve.mjs",
+    "build": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_validation_tracks.mjs",
+    "dev": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_validation_tracks.mjs && node serve.mjs",
     "preview": "node serve.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
