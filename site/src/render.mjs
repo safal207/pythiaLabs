@@ -103,6 +103,12 @@ function utm(url, campaign) {
   return `${url}${sep}utm_source=landing&utm_medium=cta&utm_campaign=${encodeURIComponent(campaign)}`;
 }
 
+function linkAttrs(url, extra = "") {
+  const target = /^https?:\/\//.test(url) ? ` target="_blank"` : "";
+  const rel = /^https?:\/\//.test(url) || url.startsWith("mailto:") ? ` target="_blank" rel="noopener noreferrer"` : "";
+  return `${target}${rel}${extra}`;
+}
+
 function jsonLdGraph(currentId, canonical, buildDate) {
   const t = locales[currentId];
   const base = siteConfig.canonicalOrigin.replace(/\/$/, "");
@@ -228,7 +234,7 @@ export function renderPage(currentId, year, buildDate) {
         <p class="video-card-eyebrow">${escape(card.name)}</p>
         <h3>${escape(card.headline)}</h3>
         <p class="video-card-desc">${escape(card.desc)}</p>
-        <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)}</a></p>
+        <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" target="_blank" rel="noopener noreferrer">${escape(card.cta)}</a></p>
       </article>`;
     })
     .join("");
@@ -249,7 +255,7 @@ export function renderPage(currentId, year, buildDate) {
             <p class="video-card-eyebrow">${escape(card.label)}</p>
             <h3>${escape(card.title)}</h3>
             <p>${escape(card.desc)}</p>
-            <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)}</a></p>
+            <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" target="_blank" rel="noopener noreferrer">${escape(card.cta)}</a></p>
           </article>`;
     })
     .join("");
@@ -339,18 +345,18 @@ export function renderPage(currentId, year, buildDate) {
           <p class="hero-outcome-line">${inlineCodeToHtml(t.hero.outcomeLine)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
             <a class="btn btn-secondary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
-            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-start-here">
             <a href="#quickstart">${escape(t.hero.startHereLabel)} →</a>
           </p>
           <p class="hero-badges">
-            <a href="${siteConfig.repoUrl}/stargazers" class="badge-link">
+            <a href="${siteConfig.repoUrl}/stargazers" class="badge-link" target="_blank" rel="noopener noreferrer">
               <img src="https://img.shields.io/github/stars/${siteConfig.repoSlug}?style=flat-square&label=stars&color=0b0d10" alt="${escape(t.hero.starsAlt)}" loading="lazy" decoding="async" width="90" height="20" />
             </a>
-            <a href="${siteConfig.repoUrl}/blob/main/LICENSE" class="badge-link">
+            <a href="${siteConfig.repoUrl}/blob/main/LICENSE" class="badge-link" target="_blank" rel="noopener noreferrer">
               <img src="https://img.shields.io/github/license/${siteConfig.repoSlug}?style=flat-square&color=0b0d10" alt="License" loading="lazy" decoding="async" width="100" height="20" />
             </a>
             <a href="#cursor-ide" class="badge-link">
@@ -440,7 +446,7 @@ export function renderPage(currentId, year, buildDate) {
             <p class="core-label">${escape(t.videoBlock.coreLabel)}</p>
             <p>${escape(t.videoBlock.core)}</p>
           </blockquote>
-          <p><a href="${utm(siteConfig.demoUrl, "video_block_fallback")}" rel="noopener noreferrer">${escape(t.videoBlock.fallback)} →</a></p>
+          <p><a href="${utm(siteConfig.demoUrl, "video_block_fallback")}" target="_blank" rel="noopener noreferrer">${escape(t.videoBlock.fallback)} →</a></p>
         </div>
       </section>
 
@@ -534,7 +540,7 @@ export function renderPage(currentId, year, buildDate) {
           <p>${inlineCodeToHtml(t.ideBridge.intro)}</p>
           <ul class="ide-bridge-list">${t.ideBridge.items.map((line) => `<li>${inlineCodeToHtml(line)}</li>`).join("")}</ul>
           <p class="ide-bridge-cta">
-            <a class="btn btn-secondary" href="${utm(`${siteConfig.repoUrl}/blob/main/${siteConfig.mcpReadmePath}`, "ide_mcp_docs")}" rel="noopener noreferrer">${escape(t.ideBridge.docsCta)}</a>
+            <a class="btn btn-secondary" href="${utm(`${siteConfig.repoUrl}/blob/main/${siteConfig.mcpReadmePath}`, "ide_mcp_docs")}" target="_blank" rel="noopener noreferrer">${escape(t.ideBridge.docsCta)}</a>
           </p>
           <p class="ide-bridge-note">${escape(t.ideBridge.note)}</p>
         </div>
@@ -574,8 +580,8 @@ export function renderPage(currentId, year, buildDate) {
           <p class="mid-cta-line">${escape(t.midCta.line)}</p>
           <div class="cta-row cta-row--center">
             <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "mid_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
-            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "mid_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "mid_demo")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "mid_github")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
         </div>
       </section>
@@ -688,8 +694,8 @@ export function renderPage(currentId, year, buildDate) {
           <p>${escape(t.finalCta.body)}</p>
           <div class="cta-row">
             <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.finalCta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "final_demo")}" rel="noopener noreferrer">${escape(t.finalCta.demo)}</a>
-            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "final_github")}" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "final_demo")}" target="_blank" rel="noopener noreferrer">${escape(t.finalCta.demo)}</a>
+            <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "final_github")}" target="_blank" rel="noopener noreferrer">${escape(t.finalCta.secondary)}</a>
           </div>
           <p class="cta-reassurance">${escape(t.finalCta.reassurance)}</p>
         </div>
@@ -718,13 +724,13 @@ export function renderPage(currentId, year, buildDate) {
               <p>Share the action your agent wants to take. I will help map it into proposal, evidence, and an ALLOW / BLOCK / ESCALATE trace.</p>
               <p class="contact-actions">
                 <a class="btn btn-primary" href="mailto:${siteConfig.email}?subject=${encodeURIComponent(siteConfig.pilotEmailSubject)}" rel="noopener noreferrer">Email PythiaLabs →</a>
-                <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "contact_demo")}" rel="noopener noreferrer">Watch the demo →</a>
+                <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "contact_demo")}" target="_blank" rel="noopener noreferrer">Watch the demo →</a>
               </p>
             </div>
             <ul class="contact-list">
-              <li><span>${escape(t.contact.labels.github)}</span><a href="${siteConfig.repoUrl}">${escape(siteConfig.repoUrl.replace(/^https?:\/\//, ""))}</a></li>
-              <li><span>${escape(t.contact.labels.x)}</span><a href="${siteConfig.xUrl}">${escape(siteConfig.xHandle)}</a></li>
-              <li><span>${escape(t.contact.labels.telegram)}</span><a href="${siteConfig.telegramUrl}">${escape(siteConfig.telegramHandle)}</a></li>
+              <li><span>${escape(t.contact.labels.github)}</span><a href="${siteConfig.repoUrl}" target="_blank" rel="noopener noreferrer">${escape(siteConfig.repoUrl.replace(/^https?:\/\//, ""))}</a></li>
+              <li><span>${escape(t.contact.labels.x)}</span><a href="${siteConfig.xUrl}" target="_blank" rel="noopener noreferrer">${escape(siteConfig.xHandle)}</a></li>
+              <li><span>${escape(t.contact.labels.telegram)}</span><a href="${siteConfig.telegramUrl}" target="_blank" rel="noopener noreferrer">${escape(siteConfig.telegramHandle)}</a></li>
             </ul>
           </div>
         </div>
@@ -742,9 +748,9 @@ export function renderPage(currentId, year, buildDate) {
       <div class="container footer-row">
         <p>${escape(t.footer.copyright.replace("{year}", String(year)))} · ${escape(t.footer.tagline)}</p>
         <p class="footer-links">
-          <a href="${siteConfig.repoUrl}">GitHub</a>
-          <a href="${siteConfig.repoUrl}/blob/main/LICENSE">License</a>
-          <a href="${siteConfig.demoUrl}">Demo</a>
+          <a href="${siteConfig.repoUrl}" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="${siteConfig.repoUrl}/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">License</a>
+          <a href="${siteConfig.demoUrl}" target="_blank" rel="noopener noreferrer">Demo</a>
         </p>
       </div>
     </footer>

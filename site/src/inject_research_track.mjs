@@ -165,8 +165,8 @@ function renderSection(locale) {
           <p class="research-track-cta">
             <a class="btn btn-primary" href="#demo-proof">${escapeHtml(t.demo)} →</a>
             <a class="btn btn-secondary" href="#paid-review">${escapeHtml(t.paidReview)} →</a>
-            <a class="btn btn-ghost" href="${roadmapUrl}" rel="noopener noreferrer">${escapeHtml(t.roadmap)} →</a>
-            <a class="btn btn-ghost" href="${manifundUrl}" rel="noopener noreferrer">${escapeHtml(t.manifund)} →</a>
+            <a class="btn btn-ghost" href="${roadmapUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.roadmap)} →</a>
+            <a class="btn btn-ghost" href="${manifundUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.manifund)} →</a>
           </p>
           <p class="research-track-note">${escapeHtml(t.note)}</p>
         </div>

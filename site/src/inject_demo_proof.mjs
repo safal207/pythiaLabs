@@ -204,7 +204,7 @@ function renderSection(locale) {
             </div>
           </div>
           <p class="demo-proof-cta">
-            <a class="btn btn-primary" href="${repoDemoUrl}" rel="noopener noreferrer">${escapeHtml(t.runDemo)} →</a>
+            <a class="btn btn-primary" href="${repoDemoUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.runDemo)} →</a>
             <a class="btn btn-secondary" href="#paid-review">${escapeHtml(t.paidReview)} →</a>
           </p>
           <p class="demo-proof-note">${escapeHtml(t.note)}</p>

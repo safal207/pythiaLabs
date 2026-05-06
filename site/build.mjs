@@ -723,16 +723,17 @@ const supportCopy = {
 function renderSupportSection(currentId) {
   const copy = supportCopy[currentId] ?? supportCopy.en;
   const cards = copy.cards
-    .map(
-      (card) => `
+    .map((card) => {
+      const target = /^https?:\/\//.test(card.href) ? ` target="_blank"` : "";
+      return `
           <article class="support-card">
             <div>
               <h3>${escapeHtml(card.title)}</h3>
               <p>${escapeHtml(card.desc)}</p>
             </div>
-            <p><a class="btn btn-secondary" href="${escapeHtml(card.href)}" rel="noopener noreferrer">${escapeHtml(card.button)} →</a></p>
-          </article>`,
-    )
+            <p><a class="btn btn-secondary" href="${escapeHtml(card.href)}"${target} rel="noopener noreferrer">${escapeHtml(card.button)} -></a></p>
+          </article>`;
+    })
     .join("");
 
   return `
