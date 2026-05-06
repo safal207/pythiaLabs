@@ -416,6 +416,12 @@ Additional roadmap items:
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 - Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
+## Further Reading
+
+- [Database Architecture](docs/database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
+- [Agent Memory vs. Action Gates](docs/agent_memory_vs_action_gate.md) — why PythiaLabs is not an organizational memory product.
+- [Sponsorship and Paid Pilots](docs/SPONSORSHIP.md) — support paths, paid review scope, and sponsorship options.
+
 ## Research / Positioning / Docs
 
 - Open agentic models need evidence gates: `docs/open_agentic_models_need_evidence_gates.md`
