@@ -233,6 +233,27 @@ export function renderPage(currentId, year, buildDate) {
     })
     .join("");
 
+  const demoSeriesCards = siteConfig.demoSeries
+    .map((v) => {
+      const card = t.videoBlock.series[v.labelKey];
+      return `<article class="demo-series-card">
+            <div class="video-frame">
+              <iframe
+                src="${v.embedUrl}"
+                title="${escape(`${card.label}: ${card.title}`)}"
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <p class="video-card-eyebrow">${escape(card.label)}</p>
+            <h3>${escape(card.title)}</h3>
+            <p>${escape(card.desc)}</p>
+            <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)} â†’</a></p>
+          </article>`;
+    })
+    .join("");
+
   return `<!doctype html>
 <html lang="${t.htmlLang}" translate="no">
   <head>
@@ -414,15 +435,7 @@ export function renderPage(currentId, year, buildDate) {
           <p class="cta-eyebrow">${escape(t.videoBlock.eyebrow)}</p>
           <h2>${escape(t.videoBlock.title)}</h2>
           <p>${escape(t.videoBlock.body)}</p>
-          <div class="video-frame">
-            <iframe
-              src="${siteConfig.demoEmbedUrl}"
-              title="${escape(t.videoBlock.iframeTitle)}"
-              loading="lazy"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              referrerpolicy="strict-origin-when-cross-origin"></iframe>
-          </div>
+          <div class="demo-series-grid">${demoSeriesCards}</div>
           <blockquote class="core-message">
             <p class="core-label">${escape(t.videoBlock.coreLabel)}</p>
             <p>${escape(t.videoBlock.core)}</p>

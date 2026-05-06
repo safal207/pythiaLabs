@@ -562,6 +562,9 @@ blockquote {
   blockquote {
     font-size: 1.05rem;
   }
+  .demo-series-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Mobile */
@@ -919,6 +922,32 @@ blockquote {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.demo-series-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+  margin: 1.5rem 0 1.25rem;
+}
+
+.demo-series-card {
+  min-width: 0;
+}
+
+.demo-series-card .video-frame {
+  max-width: none;
+  margin: 0 0 1rem;
+}
+
+.demo-series-card h3 {
+  margin: 0.2rem 0 0.45rem;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.demo-series-card p {
+  color: var(--text-muted);
 }
 
 /* Use-case cards (with descriptions) */

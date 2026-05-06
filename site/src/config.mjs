@@ -4,6 +4,20 @@ export const siteConfig = {
   repoSlug: "safal207/pythiaLabs",
   demoUrl: "https://youtu.be/JDe3qS67A-I",
   demoEmbedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I",
+  demoSeries: [
+    {
+      url: "https://youtu.be/JDe3qS67A-I",
+      embedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I",
+      labelKey: "part1",
+      campaign: "demo_series_part_1",
+    },
+    {
+      url: "https://youtu.be/pIJodVRD2Ro",
+      embedUrl: "https://www.youtube-nocookie.com/embed/pIJodVRD2Ro",
+      labelKey: "part2",
+      campaign: "demo_series_part_2",
+    },
+  ],
   founderVideos: [
     {
       url: "https://youtu.be/JDe3qS67A-I",

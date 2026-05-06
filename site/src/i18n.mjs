@@ -108,13 +108,27 @@ export const locales = {
       line: "Watch the walkthrough, run the repo locally, or start a pilot — your stack, your infrastructure.",
     },
     videoBlock: {
-      eyebrow: "Watch why this matters",
-      title: "Should this AI agent action execute?",
-      body: "When agents can act, a bad answer becomes a real incident. PythiaLabs checks permission, evidence freshness, risk, and replayability — then allows, blocks, or escalates to a human before anything irreversible runs.",
+      eyebrow: "Runnable demo series",
+      title: "Watch PythiaLabs run as a real pre-execution gate",
+      body: "Two short recordings show the local demo end to end: accepted and rejected Web3 treasury actions, SHA-256 evidence verification, and the counterfactual rejected → accepted flip.",
       coreLabel: "Core message",
       core: "The future of agent safety is not after-the-fact debugging. It is pre-execution control.",
       fallback: "Watch on YouTube",
       iframeTitle: "PythiaLabs demo video",
+      series: {
+        part1: {
+          label: "Part 1",
+          title: "Run the gate",
+          desc: "The demo starts, evaluates proposed agent actions, and shows accepted and rejected scenarios.",
+          cta: "Watch part 1",
+        },
+        part2: {
+          label: "Part 2",
+          title: "Verify evidence and flip the decision",
+          desc: "Evidence records are verified, then one changed evidence field flips rejected → accepted.",
+          cta: "Watch part 2",
+        },
+      },
     },
     problem: {
       title: "The dangerous gap in agentic AI",
@@ -573,13 +587,27 @@ export const locales = {
       line: "Посмотрите walkthrough, прогоните репозиторий локально или начните пилот — ваш стек, ваша инфраструктура.",
     },
     videoBlock: {
-      eyebrow: "Почему это важно",
-      title: "Должно ли это действие AI-агента выполниться?",
-      body: "Когда агент может действовать, плохой ответ превращается в инцидент. PythiaLabs проверяет право, свежесть доказательств, риск и воспроизводимость — затем разрешает, блокирует или эскалирует на человека до необратимых действий.",
+      eyebrow: "Runnable demo series",
+      title: "Watch PythiaLabs run as a real pre-execution gate",
+      body: "Two short recordings show the local demo end to end: accepted and rejected Web3 treasury actions, SHA-256 evidence verification, and the counterfactual rejected → accepted flip.",
       coreLabel: "Главный тезис",
       core: "Будущее agent safety — не пост-фактум дебаг. Это контроль до выполнения.",
       fallback: "Смотреть на YouTube",
       iframeTitle: "Видео-демо PythiaLabs",
+      series: {
+        part1: {
+          label: "Part 1",
+          title: "Run the gate",
+          desc: "The demo starts, evaluates proposed agent actions, and shows accepted and rejected scenarios.",
+          cta: "Watch part 1",
+        },
+        part2: {
+          label: "Part 2",
+          title: "Verify evidence and flip the decision",
+          desc: "Evidence records are verified, then one changed evidence field flips rejected → accepted.",
+          cta: "Watch part 2",
+        },
+      },
     },
     problem: {
       title: "Опасный разрыв в agentic AI",
@@ -1029,13 +1057,27 @@ export const locales = {
       line: "观看讲解视频、在本地运行仓库，或启动试点对话——你的栈，你的基础设施。",
     },
     videoBlock: {
-      eyebrow: "为什么这件事重要",
-      title: "这个 AI Agent 行动应该被执行吗？",
-      body: "Agent 能行动时，糟糕的回答就会变成事故。PythiaLabs 在不可逆动作之前检查权限、证据新鲜度、风险与可重放性——然后允许、阻止或升级到人。",
+      eyebrow: "Runnable demo series",
+      title: "Watch PythiaLabs run as a real pre-execution gate",
+      body: "Two short recordings show the local demo end to end: accepted and rejected Web3 treasury actions, SHA-256 evidence verification, and the counterfactual rejected → accepted flip.",
       coreLabel: "核心信息",
       core: "Agent 安全的未来不是事后调试，而是执行前的控制。",
       fallback: "在 YouTube 观看",
       iframeTitle: "PythiaLabs 演示视频",
+      series: {
+        part1: {
+          label: "Part 1",
+          title: "Run the gate",
+          desc: "The demo starts, evaluates proposed agent actions, and shows accepted and rejected scenarios.",
+          cta: "Watch part 1",
+        },
+        part2: {
+          label: "Part 2",
+          title: "Verify evidence and flip the decision",
+          desc: "Evidence records are verified, then one changed evidence field flips rejected → accepted.",
+          cta: "Watch part 2",
+        },
+      },
     },
     problem: {
       title: "Agentic AI 中的危险缺口",
