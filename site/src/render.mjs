@@ -295,16 +295,11 @@ export function renderPage(currentId, year, buildDate) {
           <span class="brand-name">PythiaLabs</span>
         </a>
         <nav class="site-nav" aria-label="Primary">
-          <a href="#problem">${escape(t.nav.problem)}</a>
-          <a href="#idea">${escape(t.nav.idea)}</a>
           <a href="#solution">${escape(t.nav.solution)}</a>
-          <a href="#integration">${escape(t.nav.integration)}</a>
-          <a href="#cursor-ide">${escape(t.nav.cursorIde)}</a>
-          <a href="#quickstart">${escape(t.nav.quickstart)}</a>
-          <a href="#if-you">${escape(t.nav.fit)}</a>
-          <a href="#pilot-outcome">${escape(t.nav.pilot)}</a>
-          <a href="#use-cases">${escape(t.nav.useCases)}</a>
           <a href="#videos">${escape(t.nav.videos)}</a>
+          <a href="#demo-proof">Demo</a>
+          <a href="#use-cases">${escape(t.nav.useCases)}</a>
+          <a href="#pilot-outcome">${escape(t.nav.pilot)}</a>
           <a href="#faq">${escape(t.nav.faq)}</a>
           <a href="#contact">${escape(t.nav.contact)}</a>
         </nav>
@@ -323,8 +318,8 @@ export function renderPage(currentId, year, buildDate) {
           <p class="hero-outcome-line">${inlineCodeToHtml(t.hero.outcomeLine)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
-            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
+            <a class="btn btn-secondary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
             <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-start-here">

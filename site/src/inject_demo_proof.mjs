@@ -97,7 +97,7 @@ const copy = {
     title: "See PythiaLabs evaluate risky AI-agent actions before execution",
     intro:
       "Run one command. Watch the real Web3 treasury engine evaluate four scenarios, verify SHA-256 evidence, and show a counterfactual decision flip.",
-    terminal: `$ make demo\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
     cards: [
       {
         title: "Real engine",
@@ -114,14 +114,14 @@ const copy = {
     ],
     runDemo: "Run the demo",
     paidReview: "Request paid review",
-    note: "The demo is local, deterministic, and does not require external APIs.",
+    note: "The demo is local, deterministic, and does not require external APIs. On Windows, run the Mix command directly if make is not installed.",
   },
   ru: {
     eyebrow: "Запускаемое доказательство",
     title: "Посмотрите, как PythiaLabs проверяет рискованные действия AI-агента до выполнения",
     intro:
       "Одна команда запускает реальный Web3 treasury engine: четыре сценария, SHA-256 evidence verification и counterfactual, где изменение одного evidence-поля меняет решение.",
-    terminal: `$ make demo\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
     cards: [
       {
         title: "Реальный engine",
@@ -138,14 +138,14 @@ const copy = {
     ],
     runDemo: "Запустить демо",
     paidReview: "Заказать платный разбор",
-    note: "Демо локальное, детерминированное и не требует внешних API.",
+    note: "Демо локальное, детерминированное и не требует внешних API. На Windows запускайте Mix-команду напрямую, если make не установлен.",
   },
   zh: {
     eyebrow: "Runnable proof",
     title: "See PythiaLabs evaluate risky AI-agent actions before execution",
     intro:
       "Run one command. Watch the real Web3 treasury engine evaluate four scenarios, verify SHA-256 evidence, and show a counterfactual decision flip.",
-    terminal: `$ make demo\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
     cards: [
       {
         title: "Real engine",
@@ -162,7 +162,7 @@ const copy = {
     ],
     runDemo: "Run the demo",
     paidReview: "Request paid review",
-    note: "The demo is local, deterministic, and does not require external APIs.",
+    note: "The demo is local, deterministic, and does not require external APIs. On Windows, run the Mix command directly if make is not installed.",
   },
 };
 

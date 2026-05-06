@@ -332,7 +332,7 @@ export const locales = {
         'When an agent acts, the risk is that the "why" only appears after the damage. PythiaLabs makes the why legible first: stable stop reasons and a replayable trace before the tool runs — so humans can understand the choice while it can still be stopped.',
     },
     founderVideosBlock: {
-      eyebrow: "From the founder",
+      eyebrow: "Watch the demo",
       title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
@@ -797,7 +797,7 @@ export const locales = {
         "Когда действует агент, опасность в том, что «почему» всплывает уже после последствий. PythiaLabs делает «почему» читаемым заранее: стабильные stop-причины и воспроизводимый trace до вызова tool — чтобы человек понимал выбор, пока его ещё можно остановить.",
     },
     founderVideosBlock: {
-      eyebrow: "От основателя",
+      eyebrow: "Watch the demo",
       title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
@@ -1231,7 +1231,7 @@ export const locales = {
         "当 Agent 真正行动时，风险在于「为何」往往在后果之后才浮现。PythiaLabs 让「为何」在工具执行前就可读：稳定的停止原因与可重放轨迹——在人类仍能叫停时理解这次选择。",
     },
     founderVideosBlock: {
-      eyebrow: "来自创始人",
+      eyebrow: "Watch the demo",
       title: "Demo and thesis videos",
       cards: {
         runnableDemoPart1: {
