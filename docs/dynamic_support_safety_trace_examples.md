@@ -10,6 +10,8 @@ These examples make the [Dynamic Support-Safety Evaluation Harness](dynamic_supp
 
 Machine-readable fixture: [`../examples/dynamic_support_safety/sanitized_trace_fixture.json`](../examples/dynamic_support_safety/sanitized_trace_fixture.json)
 
+Prototype evaluator: [`../examples/dynamic_support_safety/evaluate_sanitized_fixture.exs`](../examples/dynamic_support_safety/evaluate_sanitized_fixture.exs)
+
 The goal is to show how a multi-turn support-safety trace could evolve and where a PythiaLabs-style decision would apply:
 
 ```text
@@ -19,6 +21,16 @@ conversation trace → risk-state changes → evidence snapshots → ALLOW / BLO
 For broader positioning, see the [Research Roadmap](research_roadmap.md).
 
 When available, `docs/evidence_artifact_schema.md` should become the canonical reference for shared evidence-artifact fields. Until then, these examples use the trace and evidence shape proposed in the harness spec.
+
+---
+
+## Running the prototype evaluator
+
+```bash
+mix run examples/dynamic_support_safety/evaluate_sanitized_fixture.exs
+```
+
+The evaluator is deterministic and reads only the sanitized JSON fixture. It does not call external APIs, does not generate new conversation content, and does not evaluate real users.
 
 ---
 
