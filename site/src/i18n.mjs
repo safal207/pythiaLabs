@@ -84,7 +84,7 @@ export const locales = {
     quickstart: {
       title: "Get to a working gate in one sitting",
       intro:
-        "No credit card. No SaaS account. Clone, test, run a showcase, then wire your orchestrator the same way.",
+        "No credit card or SaaS account for the code and demo. Clone, test, run a showcase, then wire your orchestrator the same way.",
       steps: [
         {
           name: "Clone and install deps",
@@ -278,7 +278,7 @@ export const locales = {
         "Apache-2.0 — fork it, run it on your infra, audit every line",
         "Zero vendor lock-in: no SaaS dependency, no telemetry, no phone-home",
       ],
-      footer: "All of this · $0 · Open source",
+      footer: "Code and demo · $0 · Open source",
     },
     comparison: {
       title: "Before vs. with PythiaLabs",
@@ -455,7 +455,7 @@ export const locales = {
       primary: "Join early access",
       demo: "Watch the demo",
       secondary: "View GitHub repo",
-      reassurance: "Apache-2.0 · Self-hostable · No vendor lock-in · No credit card",
+      reassurance: "Apache-2.0 · Self-hostable · No vendor lock-in · Free local demo",
     },
     closer: {
       title: "PythiaLabs is the pre-execution safety gate for AI agents.",

@@ -624,7 +624,7 @@ const supportCopy = {
     title: "Fund open-source pre-execution safety for AI agents",
     intro:
       "PythiaLabs is open source. Support helps fund deterministic ALLOW / BLOCK / ESCALATE decisions, structured decision-time evidence, replayable traces, and reviewer-facing artifacts for high-risk agent workflows.",
-    note: "All paths use email until payment accounts are configured.",
+    note: "Support and paid-review paths use email until payment accounts are configured.",
     cards: [
       {
         title: "Support open-source development",
@@ -690,7 +690,7 @@ const supportCopy = {
     title: "Fund open-source pre-execution safety for AI agents",
     intro:
       "PythiaLabs is open source. Support helps fund deterministic ALLOW / BLOCK / ESCALATE decisions, structured decision-time evidence, replayable traces, and reviewer-facing artifacts for high-risk agent workflows.",
-    note: "All paths use email until payment accounts are configured.",
+    note: "Support and paid-review paths use email until payment accounts are configured.",
     cards: [
       {
         title: "Support open-source development",
