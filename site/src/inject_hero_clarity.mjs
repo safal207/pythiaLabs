@@ -8,6 +8,9 @@ const pages = [
     subtitle:
       "PythiaLabs is an open-source pre-execution safety gate that evaluates proposed agent actions and returns ALLOW / BLOCK / ESCALATE with reviewer-facing evidence.",
     proofTitle: "Current proof",
+    runDemo: "Run demo",
+    requestReview: "Request paid review",
+    viewGithub: "View GitHub",
     cards: [
       "Open-source MVP",
       "Real-engine demo",
@@ -22,12 +25,16 @@ const pages = [
     subtitle:
       "PythiaLabs — open-source pre-execution safety gate: оценивает предлагаемые действия агента и возвращает ALLOW / BLOCK / ESCALATE с evidence для ревьюеров.",
     proofTitle: "Текущие proof-сигналы",
-    cards: [
+    runDemo: "Запустить демо",
+    requestReview: "Запросить платный разбор",
+    viewGithub: "Открыть GitHub",
+    cards:
+ [
       "Open-source MVP",
       "Демо на реальном движке",
-      "Проверка SHA-256 evidence",
+      "Проверка evidence по SHA-256",
       "Детерминированные решения ALLOW / BLOCK / ESCALATE",
-      "Research roadmap: LTP + CML",
+      "Исследовательский roadmap: LTP + CML",
     ],
   },
   {
@@ -36,6 +43,9 @@ const pages = [
     subtitle:
       "PythiaLabs is an open-source pre-execution safety gate that evaluates proposed agent actions and returns ALLOW / BLOCK / ESCALATE with reviewer-facing evidence.",
     proofTitle: "Current proof",
+    runDemo: "Run demo",
+    requestReview: "Request paid review",
+    viewGithub: "View GitHub",
     cards: [
       "Open-source MVP",
       "Real-engine demo",
@@ -52,7 +62,7 @@ const removeBlocks = [
   /\n\s*<p class="hero-tagline">[\s\S]*?<\/p>/,
   /\n\s*<p class="hero-start-here">[\s\S]*?<\/p>/,
   /\n\s*<p class="hero-badges">[\s\S]*?<\/p>/,
-  /\n\s*<div class="hero-stats"[\s\S]*?<\/div>\n\s*<\/div>/,
+  /\n\s*<div class="hero-stats"[\s\S]*?<\/div>/,
 ];
 
 for (const page of pages) {
@@ -77,7 +87,7 @@ for (const page of pages) {
 
   html = html.replace(
     /<div class="cta-row">[\s\S]*?<\/div>/,
-    `<div class="cta-row">\n            <a class="btn btn-primary" href="#demo-proof">Run demo</a>\n            <a class="btn btn-secondary" href="#paid-review">Request paid review</a>\n            <a class="btn btn-ghost" href="https://github.com/safal207/pythiaLabs" target="_blank" rel="noopener noreferrer">View GitHub</a>\n          </div>`,
+    `<div class="cta-row">\n            <a class="btn btn-primary" href="#demo-proof">${page.runDemo}</a>\n            <a class="btn btn-secondary" href="#paid-review">${page.requestReview}</a>\n            <a class="btn btn-ghost" href="https://github.com/safal207/pythiaLabs" target="_blank" rel="noopener noreferrer">${page.viewGithub}</a>\n          </div>`,
   );
 
   const section = `\n      <section id="current-proof" class="section section-alt" aria-labelledby="current-proof-title">\n        <div class="container">\n          <h2 id="current-proof-title">${page.proofTitle}</h2>\n          <div class="proof-grid">\n            ${page.cards.map((c) => `<article class="card"><p>${c}</p></article>`).join("\n            ")}\n          </div>\n        </div>\n      </section>\n`;
