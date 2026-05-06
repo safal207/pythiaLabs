@@ -1011,6 +1011,22 @@ blockquote {
   color: var(--text-muted);
 }
 
+.demo-series-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-series-actions {
+  margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .demo-series-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* Use-case cards (with descriptions) */
 .use-case h3 {
   font-size: 1.05rem;
