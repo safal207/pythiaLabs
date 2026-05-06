@@ -8,6 +8,8 @@
 
 These examples make the [Dynamic Support-Safety Evaluation Harness](dynamic_support_safety_eval_harness.md) concrete without introducing real user data or unsafe procedural content.
 
+Machine-readable fixture: [`../examples/dynamic_support_safety/sanitized_trace_fixture.json`](../examples/dynamic_support_safety/sanitized_trace_fixture.json)
+
 The goal is to show how a multi-turn support-safety trace could evolve and where a PythiaLabs-style decision would apply:
 
 ```text
