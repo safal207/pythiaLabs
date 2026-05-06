@@ -10,6 +10,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "lightningcss": "^1.27.0",
     "prettier": "^3.3.0"
   }

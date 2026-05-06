@@ -56,7 +56,7 @@ export const siteConfig = {
   founderName: "Aleksei Safonov",
   founderGithub: "https://github.com/safal207",
   license: "Apache-2.0",
-  ogImagePath: "/og.svg",
+  ogImagePath: "/og.png",
   showcaseScriptCount: 6,
   testFileCount: 17,
   mcpReadmePath: "integrations/mcp/README.md",

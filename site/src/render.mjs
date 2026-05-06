@@ -131,10 +131,11 @@ function jsonLdGraph(currentId, canonical, buildDate) {
     codeRepository: siteConfig.repoUrl,
     isAccessibleForFree: true,
     dateModified: buildDate,
-    keywords: t.meta.keywords,
     author: {
       "@type": "Person",
       name: siteConfig.founderName,
+      url: siteConfig.founderGithub,
+      sameAs: [siteConfig.founderGithub, siteConfig.xUrl],
     },
     publisher,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -269,7 +270,6 @@ export function renderPage(currentId, year, buildDate) {
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <title>${escape(t.meta.title)}</title>
     <meta name="description" content="${escape(t.meta.description)}" />
-    <meta name="keywords" content="${escape(t.meta.keywords)}" />
     <meta name="author" content="${escape(siteConfig.founderName)}" />
     <meta name="application-name" content="PythiaLabs" />
     <meta
@@ -291,7 +291,9 @@ export function renderPage(currentId, year, buildDate) {
     ${ogAlternateLocales}
     <meta property="og:image" content="${ogImage}" />
     <meta property="og:image:alt" content="${escape(t.meta.ogImageAlt)}" />
-    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="article:modified_time" content="${escape(buildDate)}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="${escape(siteConfig.twitterSite)}" />
