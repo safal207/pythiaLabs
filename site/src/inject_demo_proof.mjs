@@ -41,7 +41,8 @@ const css = `
 }
 
 .demo-terminal code {
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .demo-proof-cards {
@@ -68,6 +69,7 @@ const css = `
   color: var(--text-muted);
   font-size: 0.93rem;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .demo-proof-cta {
@@ -89,6 +91,18 @@ const css = `
     font-size: 0.78rem;
   }
 }
+
+@media (max-width: 600px) {
+  .demo-terminal {
+    padding: 0.9rem;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .demo-proof-card {
+    padding: 0.9rem 1rem;
+  }
+}
 `;
 
 const copy = {
@@ -97,7 +111,7 @@ const copy = {
     title: "See PythiaLabs evaluate risky AI-agent actions before execution",
     intro:
       "Run one command. Watch the real Web3 treasury engine evaluate four scenarios, verify SHA-256 evidence, and show a counterfactual decision flip.",
-    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS`,
     cards: [
       {
         title: "Real engine",
@@ -121,11 +135,11 @@ const copy = {
     title: "Посмотрите, как PythiaLabs проверяет рискованные действия AI-агента до выполнения",
     intro:
       "Одна команда запускает реальный Web3 treasury engine: четыре сценария, SHA-256 evidence verification и counterfactual, где изменение одного evidence-поля меняет решение.",
-    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS`,
     cards: [
       {
         title: "Реальный engine",
-        desc: "Используется Pythia.Showcase.Web3TreasuryAction.evaluate/2 — не mock.",
+        desc: "Демо использует настоящий Web3 treasury evaluator — не mock.",
       },
       {
         title: "Evidence verification",
@@ -145,7 +159,7 @@ const copy = {
     title: "See PythiaLabs evaluate risky AI-agent actions before execution",
     intro:
       "Run one command. Watch the real Web3 treasury engine evaluate four scenarios, verify SHA-256 evidence, and show a counterfactual decision flip.",
-    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS — all scenarios matched expectations`,
+    terminal: `$ make demo\n# Windows: mix run examples/paid_review_demo.exs\n\nPythiaLabs — Paid Review Demo\n\n[1/4] Clean 25,000 USDC treasury transfer\n  decision    : ● ACCEPTED\n  evidence    : verified\n\n[2/4] Quorum threshold not reached\n  decision    : ● REJECTED\n  stop_reason : quorum_not_met\n  evidence    : verified\n\nCounterfactual\n  rejected → accepted\n\nResult: PASS`,
     cards: [
       {
         title: "Real engine",
