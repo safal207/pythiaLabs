@@ -333,8 +333,20 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "From the founder",
-      title: "Three short videos",
+      title: "Runnable demo videos",
       cards: {
+        runnableDemoPart1: {
+          name: "Demo part 1",
+          headline: "Run the PythiaLabs pre-execution gate",
+          desc: "A terminal recording of the runnable demo: a real Web3 treasury engine evaluates proposed agent actions before execution.",
+          cta: "Watch part 1",
+        },
+        runnableDemoPart2: {
+          name: "Demo part 2",
+          headline: "Evidence verification and counterfactual flip",
+          desc: "Shows SHA-256 evidence verification, rejected scenarios, and the counterfactual where one evidence field flips the decision from rejected to accepted.",
+          cta: "Watch part 2",
+        },
         longForm: {
           name: "Video 1 — The main thesis",
           headline: "Should this AI agent action execute?",
@@ -786,8 +798,20 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "От основателя",
-      title: "Три коротких видео",
+      title: "Runnable demo videos",
       cards: {
+        runnableDemoPart1: {
+          name: "Demo part 1",
+          headline: "Run the PythiaLabs pre-execution gate",
+          desc: "A terminal recording of the runnable demo: a real Web3 treasury engine evaluates proposed agent actions before execution.",
+          cta: "Watch part 1",
+        },
+        runnableDemoPart2: {
+          name: "Demo part 2",
+          headline: "Evidence verification and counterfactual flip",
+          desc: "Shows SHA-256 evidence verification, rejected scenarios, and the counterfactual where one evidence field flips the decision from rejected to accepted.",
+          cta: "Watch part 2",
+        },
         longForm: {
           name: "Видео 1 — главный тезис",
           headline: "Должно ли это действие AI-агента выполниться?",
@@ -1208,8 +1232,20 @@ export const locales = {
     },
     founderVideosBlock: {
       eyebrow: "来自创始人",
-      title: "三个短视频",
+      title: "Runnable demo videos",
       cards: {
+        runnableDemoPart1: {
+          name: "Demo part 1",
+          headline: "Run the PythiaLabs pre-execution gate",
+          desc: "A terminal recording of the runnable demo: a real Web3 treasury engine evaluates proposed agent actions before execution.",
+          cta: "Watch part 1",
+        },
+        runnableDemoPart2: {
+          name: "Demo part 2",
+          headline: "Evidence verification and counterfactual flip",
+          desc: "Shows SHA-256 evidence verification, rejected scenarios, and the counterfactual where one evidence field flips the decision from rejected to accepted.",
+          cta: "Watch part 2",
+        },
         longForm: {
           name: "视频 1 — 主张",
           headline: "这个 AI Agent 行动应该被执行吗？",

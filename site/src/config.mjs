@@ -2,9 +2,19 @@ export const siteConfig = {
   canonicalOrigin: "https://safal207.github.io/pythiaLabs",
   repoUrl: "https://github.com/safal207/pythiaLabs",
   repoSlug: "safal207/pythiaLabs",
-  demoUrl: "https://youtu.be/IUk3iO0N4YU",
-  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/IUk3iO0N4YU",
+  demoUrl: "https://youtu.be/JDe3qS67A-I",
+  demoEmbedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I",
   founderVideos: [
+    {
+      url: "https://youtu.be/JDe3qS67A-I",
+      labelKey: "runnableDemoPart1",
+      campaign: "runnable_demo_part_1",
+    },
+    {
+      url: "https://youtu.be/pIJodVRD2Ro",
+      labelKey: "runnableDemoPart2",
+      campaign: "runnable_demo_part_2",
+    },
     {
       url: "https://youtu.be/IUk3iO0N4YU",
       labelKey: "longForm",
