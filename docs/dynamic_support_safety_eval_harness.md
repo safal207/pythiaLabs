@@ -54,7 +54,7 @@ ALLOW / BLOCK / ESCALATE vocabulary.
 
 Conservatively:
 
-- **LTP (Long-Term Provenance / trace layer)** records the conversation trace —
+- **LTP (Liminal Thread Protocol / trace layer)** records the conversation trace —
   turns, signals, decisions — so any later evaluation is replayable.
 - **CML (Causal Memory Layer)** is used to explain *where* in the causal chain
   risk first entered (which turn, which signal).
@@ -62,7 +62,7 @@ Conservatively:
   the evidence assembled from LTP + CML.
 
 For the broader research framing see
-[`docs/research_roadmap.md`](research_roadmap.md).
+[Research Roadmap](research_roadmap.md).
 
 This is a research direction, not a claim that LTP + CML + PythiaLabs as
 deployed today provide clinical safety guarantees.
