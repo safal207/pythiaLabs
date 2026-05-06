@@ -228,7 +228,7 @@ export function renderPage(currentId, year, buildDate) {
         <p class="video-card-eyebrow">${escape(card.name)}</p>
         <h3>${escape(card.headline)}</h3>
         <p class="video-card-desc">${escape(card.desc)}</p>
-        <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)} →</a></p>
+        <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)}</a></p>
       </article>`;
     })
     .join("");
@@ -249,7 +249,7 @@ export function renderPage(currentId, year, buildDate) {
             <p class="video-card-eyebrow">${escape(card.label)}</p>
             <h3>${escape(card.title)}</h3>
             <p>${escape(card.desc)}</p>
-            <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)} â†’</a></p>
+            <p><a class="btn btn-secondary" href="${utm(v.url, v.campaign)}" rel="noopener noreferrer">${escape(card.cta)}</a></p>
           </article>`;
     })
     .join("");
