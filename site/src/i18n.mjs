@@ -52,6 +52,8 @@ export const locales = {
     cta: {
       primary: "Join early access",
       demo: "Watch the demo",
+      hook: "Watch 30-sec hook",
+      runDemo: "Run the demo",
       secondary: "View GitHub repo",
       pilot: "Apply as pilot partner",
       contact: "Contact",
@@ -548,6 +550,8 @@ export const locales = {
     cta: {
       primary: "Запросить ранний доступ",
       demo: "Смотреть демо",
+      hook: "Watch 30-sec hook",
+      runDemo: "Run the demo",
       secondary: "Открыть GitHub",
       pilot: "Стать пилотным партнёром",
       contact: "Связаться",
@@ -1036,6 +1040,8 @@ export const locales = {
     cta: {
       primary: "申请早期访问",
       demo: "观看演示",
+      hook: "Watch 30-sec hook",
+      runDemo: "Run the demo",
       secondary: "查看 GitHub",
       pilot: "申请试点合作",
       contact: "联系",

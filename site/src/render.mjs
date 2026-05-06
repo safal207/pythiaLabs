@@ -345,8 +345,8 @@ export function renderPage(currentId, year, buildDate) {
           <p class="hero-outcome-line">${inlineCodeToHtml(t.hero.outcomeLine)}</p>
           <p class="hero-tagline">${escape(t.hero.tagline)}</p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="${utm(siteConfig.demoUrl, "hero_demo")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.demo)}</a>
-            <a class="btn btn-secondary" href="${pilotHref}" rel="noopener noreferrer">${escape(t.cta.primary)}</a>
+            <a class="btn btn-primary" href="${utm(siteConfig.hookUrl, "hero_hook")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.hook)}</a>
+            <a class="btn btn-secondary" href="${utm(siteConfig.demoUrl, "hero_demo")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.runDemo)}</a>
             <a class="btn btn-ghost" href="${utm(siteConfig.repoUrl, "hero_github")}" target="_blank" rel="noopener noreferrer">${escape(t.cta.secondary)}</a>
           </div>
           <p class="hero-start-here">

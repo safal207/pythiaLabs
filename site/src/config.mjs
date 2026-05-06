@@ -2,6 +2,7 @@ export const siteConfig = {
   canonicalOrigin: "https://safal207.github.io/pythiaLabs",
   repoUrl: "https://github.com/safal207/pythiaLabs",
   repoSlug: "safal207/pythiaLabs",
+  hookUrl: "https://www.youtube.com/shorts/Ot5tMRDN0l4",
   demoUrl: "https://youtu.be/JDe3qS67A-I",
   demoEmbedUrl: "https://www.youtube-nocookie.com/embed/JDe3qS67A-I?controls=0&disablekb=1&rel=0&modestbranding=1",
   demoSeries: [
