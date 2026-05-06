@@ -1832,3 +1832,16 @@ blockquote {
     padding: 1.1rem 1.2rem;
   }
 }
+
+
+@media (max-width: 700px) {
+  .demo-series-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-series-actions .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}
