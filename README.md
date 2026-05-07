@@ -66,8 +66,14 @@ AI agents are moving from text generation into real actions: infrastructure chan
 ## Current showcases
 
 - **Agent Infrastructure Action Safety** — destructive infrastructure actions such as production volume deletion.
+  
+  Expected output: [`docs/agent_infra_action_showcase_expected_output.md`](docs/agent_infra_action_showcase_expected_output.md)
 - **Banking AI Risk** — high-risk financial/agentic actions with operator approval, freshness, and decision-time knowledge checks.
+  
+  Expected output: [`docs/banking_ai_risk_showcase_expected_output.md`](docs/banking_ai_risk_showcase_expected_output.md)
 - **Web3 Treasury Governance** — DAO treasury action review with quorum, timelock, temporal authorization, evidence export, and tamper rejection.
+  
+  Expected output: [`docs/web3_treasury_full_showcase_expected_output.md`](docs/web3_treasury_full_showcase_expected_output.md)
 - **AI Coding Agents / CI Autofix** — pre-execution review for autonomous coding-agent actions such as CI fixes, PR updates, dependency changes, and deploy-adjacent workflows.
 
 ## Reviewer quickstart
