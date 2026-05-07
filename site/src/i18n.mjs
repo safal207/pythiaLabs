@@ -437,6 +437,8 @@ export const locales = {
       terminalCaption: "Reviewer-facing terminal output",
       terminalAriaLabel:
         "Reviewer-facing terminal output — deterministic, sanitized, replayable",
+      videoCaption: "Watch the support-safety gate demo",
+      videoIframeTitle: "PythiaLabs support-safety gate demo",
     },
     faq: {
       title: "Frequently asked questions",
@@ -973,6 +975,8 @@ export const locales = {
       terminalCaption: "Reviewer-facing terminal output",
       terminalAriaLabel:
         "Reviewer-facing terminal output — детерминированный, санитизированный, replayable",
+      videoCaption: "Смотреть демо support-safety gate",
+      videoIframeTitle: "PythiaLabs support-safety gate demo",
     },
     faq: {
       title: "Частые вопросы",
@@ -1478,6 +1482,8 @@ export const locales = {
       terminalCaption: "Reviewer-facing terminal output",
       terminalAriaLabel:
         "Reviewer-facing terminal output — deterministic, sanitized, replayable",
+      videoCaption: "Watch the support-safety gate demo",
+      videoIframeTitle: "PythiaLabs support-safety gate demo",
     },
     faq: {
       title: "常见问题",

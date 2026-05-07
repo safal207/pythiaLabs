@@ -705,6 +705,18 @@ export function renderPage(currentId, year, buildDate) {
           <h2 id="support-safety-proof-title">${escape(t.supportSafetyProof.title)}</h2>
           <p class="support-safety-proof-intro">${escape(t.supportSafetyProof.intro)}</p>
           <p class="support-safety-proof-positioning">${escape(t.supportSafetyProof.positioning)}</p>
+          <figure class="support-safety-video-figure">
+            <div class="support-safety-video-frame">
+              <iframe
+                src="${siteConfig.supportSafety.videoEmbedUrl}"
+                title="${escape(t.supportSafetyProof.videoIframeTitle)}"
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <figcaption class="support-safety-video-caption">${escape(t.supportSafetyProof.videoCaption)}</figcaption>
+          </figure>
           <figure class="support-safety-terminal-figure">
             <div class="support-safety-terminal" role="img" aria-label="${escape(t.supportSafetyProof.terminalAriaLabel)}">${SUPPORT_SAFETY_TERMINAL_HTML}</div>
             <figcaption class="support-safety-terminal-caption">${escape(t.supportSafetyProof.terminalCaption)}</figcaption>
