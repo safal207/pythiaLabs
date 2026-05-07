@@ -683,6 +683,39 @@ export function renderPage(currentId, year, buildDate) {
         </div>
       </section>
 
+      <section id="support-safety-proof" class="section section-alt support-safety-proof-section" aria-labelledby="support-safety-proof-title">
+        <div class="container">
+          <p class="cta-eyebrow">${escape(t.supportSafetyProof.eyebrow)}</p>
+          <h2 id="support-safety-proof-title">${escape(t.supportSafetyProof.title)}</h2>
+          <p class="support-safety-proof-intro">${escape(t.supportSafetyProof.intro)}</p>
+          <p class="support-safety-proof-positioning">${escape(t.supportSafetyProof.positioning)}</p>
+          <p class="support-safety-proof-funnel">
+            <span class="support-safety-proof-funnel-label">${escape(t.supportSafetyProof.funnelLabel)}:</span>
+            <span class="support-safety-proof-funnel-value">${escape(t.supportSafetyProof.funnel)}</span>
+          </p>
+          <div class="support-safety-proof-grid">
+            <article class="support-safety-proof-card">
+              <h3>${escape(t.supportSafetyProof.evidenceTitle)}</h3>
+              <ul class="support-safety-proof-evidence">${t.supportSafetyProof.evidenceItems
+                .map((item) => `<li><span class="check" aria-hidden="true">✓</span><span>${escape(item)}</span></li>`)
+                .join("")}</ul>
+            </article>
+            <article class="support-safety-proof-card support-safety-proof-card-scope">
+              <h3>${escape(t.supportSafetyProof.scopeTitle)}</h3>
+              <ul class="support-safety-proof-scope">${t.supportSafetyProof.scopeItems
+                .map((item) => `<li><span class="not-mark" aria-hidden="true">✕</span><span>${escape(item)}</span></li>`)
+                .join("")}</ul>
+            </article>
+          </div>
+          <p class="support-safety-proof-actions">
+            <a class="btn btn-primary" href="${utm(siteConfig.supportSafety.videoUrl, siteConfig.supportSafety.campaign)}" target="_blank" rel="noopener noreferrer">${escape(t.supportSafetyProof.links.video)} →</a>
+            <a class="btn btn-secondary" href="${siteConfig.repoUrl}/blob/main/${siteConfig.supportSafety.evaluatorPath}" target="_blank" rel="noopener noreferrer">${escape(t.supportSafetyProof.links.evaluator)} →</a>
+            <a class="btn btn-ghost" href="${siteConfig.repoUrl}/blob/main/${siteConfig.supportSafety.specPath}" target="_blank" rel="noopener noreferrer">${escape(t.supportSafetyProof.links.spec)} →</a>
+            <a class="btn btn-ghost" href="${siteConfig.repoUrl}/blob/main/${siteConfig.supportSafety.tracesPath}" target="_blank" rel="noopener noreferrer">${escape(t.supportSafetyProof.links.traces)} →</a>
+          </p>
+        </div>
+      </section>
+
       <section id="faq" class="section section-alt">
         <div class="container">
           <h2>${escape(t.faq.title)}</h2>

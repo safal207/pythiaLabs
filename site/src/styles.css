@@ -1845,3 +1845,100 @@ blockquote {
     text-align: center;
   }
 }
+
+/* Support-safety proof section */
+.support-safety-proof-section .support-safety-proof-intro,
+.support-safety-proof-section .support-safety-proof-positioning {
+  max-width: 820px;
+  color: var(--text-muted);
+  font-size: 1.03rem;
+}
+
+.support-safety-proof-funnel {
+  max-width: 820px;
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: rgba(124, 196, 255, 0.08);
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.support-safety-proof-funnel-label {
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.support-safety-proof-funnel-value {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.support-safety-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.support-safety-proof-card {
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.support-safety-proof-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.support-safety-proof-evidence,
+.support-safety-proof-scope {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.support-safety-proof-evidence li,
+.support-safety-proof-scope li {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  gap: 0.45rem;
+  align-items: start;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.support-safety-proof-card-scope {
+  border-color: rgba(210, 153, 34, 0.32);
+  background: rgba(210, 153, 34, 0.06);
+}
+
+.support-safety-proof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .support-safety-proof-actions .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}

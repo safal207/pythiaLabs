@@ -404,6 +404,37 @@ export const locales = {
         },
       },
     },
+    supportSafetyProof: {
+      eyebrow: "Trajectory-level research prototype",
+      title: "Support-safety gate demo",
+      intro:
+        "A deterministic support-safety gate demo using a sanitized trace fixture. The evaluator checks safety boundary, escalation timing, missed escalation, evidence completeness, and deterministic replayability.",
+      positioning:
+        "Web3 treasury demo is the action-level pre-execution gate. The dynamic support-safety evaluator is a trajectory-level research prototype over sanitized traces — a second proof path beyond Web3 treasury.",
+      funnelLabel: "Funnel",
+      funnel: "Trace → Safety boundary → Scenario checks → Evidence → PASS",
+      evidenceTitle: "Evidence",
+      evidenceItems: [
+        "Safety boundary: PASS",
+        "Scenarios: 3 deterministic checks",
+        "Evidence: complete + replayable",
+        "Result: PASS",
+      ],
+      scopeTitle: "Scope and safety boundaries",
+      scopeItems: [
+        "Sanitized fixture only — no real user data",
+        "No external APIs",
+        "Not medical advice",
+        "Not a clinical evaluator",
+        "Not a deployable safety framework",
+      ],
+      links: {
+        video: "Watch the demo",
+        evaluator: "Evaluator script",
+        spec: "Research spec",
+        traces: "Trace examples",
+      },
+    },
     faq: {
       title: "Frequently asked questions",
       items: [
@@ -906,6 +937,37 @@ export const locales = {
         },
       },
     },
+    supportSafetyProof: {
+      eyebrow: "Trajectory-level research prototype",
+      title: "Support-safety gate demo",
+      intro:
+        "Детерминированное демо support-safety gate на санитизированном trace fixture. Evaluator проверяет safety boundary, escalation timing, пропущенную эскалацию, полноту evidence и детерминированную replayability.",
+      positioning:
+        "Web3 treasury demo — это action-level pre-execution gate. Dynamic support-safety evaluator — это trajectory-level research prototype поверх санитизированных traces, второй proof path за пределами Web3 treasury.",
+      funnelLabel: "Воронка",
+      funnel: "Trace → Safety boundary → Scenario checks → Evidence → PASS",
+      evidenceTitle: "Evidence",
+      evidenceItems: [
+        "Safety boundary: PASS",
+        "Scenarios: 3 детерминированные проверки",
+        "Evidence: полное и replayable",
+        "Result: PASS",
+      ],
+      scopeTitle: "Scope и safety boundaries",
+      scopeItems: [
+        "Только санитизированный fixture — никаких данных реальных пользователей",
+        "Никаких внешних API",
+        "Не медицинский совет",
+        "Не клинический evaluator",
+        "Не готовый к деплою safety framework",
+      ],
+      links: {
+        video: "Смотреть демо",
+        evaluator: "Скрипт evaluator",
+        spec: "Research spec",
+        traces: "Примеры traces",
+      },
+    },
     faq: {
       title: "Частые вопросы",
       items: [
@@ -1375,6 +1437,37 @@ export const locales = {
           desc: "A deterministic demo using a sanitized trace fixture to evaluate safety boundary, escalation timing, missed escalation, evidence completeness, and replayability.",
           cta: "Watch support-safety demo",
         },
+      },
+    },
+    supportSafetyProof: {
+      eyebrow: "Trajectory-level research prototype",
+      title: "Support-safety gate demo",
+      intro:
+        "A deterministic support-safety gate demo using a sanitized trace fixture. The evaluator checks safety boundary, escalation timing, missed escalation, evidence completeness, and deterministic replayability.",
+      positioning:
+        "Web3 treasury demo is the action-level pre-execution gate. The dynamic support-safety evaluator is a trajectory-level research prototype over sanitized traces — a second proof path beyond Web3 treasury.",
+      funnelLabel: "Funnel",
+      funnel: "Trace → Safety boundary → Scenario checks → Evidence → PASS",
+      evidenceTitle: "Evidence",
+      evidenceItems: [
+        "Safety boundary: PASS",
+        "Scenarios: 3 deterministic checks",
+        "Evidence: complete + replayable",
+        "Result: PASS",
+      ],
+      scopeTitle: "Scope and safety boundaries",
+      scopeItems: [
+        "Sanitized fixture only — no real user data",
+        "No external APIs",
+        "Not medical advice",
+        "Not a clinical evaluator",
+        "Not a deployable safety framework",
+      ],
+      links: {
+        video: "Watch the demo",
+        evaluator: "Evaluator script",
+        spec: "Research spec",
+        traces: "Trace examples",
       },
     },
     faq: {

@@ -65,4 +65,11 @@ export const siteConfig = {
   showcaseScriptCount: 6,
   testFileCount: 17,
   mcpReadmePath: "integrations/mcp/README.md",
+  supportSafety: {
+    videoUrl: "https://youtu.be/A6UAR3e2r3k",
+    evaluatorPath: "examples/dynamic_support_safety/evaluate_sanitized_fixture.exs",
+    specPath: "docs/dynamic_support_safety_eval_harness.md",
+    tracesPath: "docs/dynamic_support_safety_trace_examples.md",
+    campaign: "support_safety_proof",
+  },
 };
