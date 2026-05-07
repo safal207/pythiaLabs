@@ -1948,7 +1948,6 @@ blockquote {
 }
 
 .support-safety-terminal {
-  overflow-x: auto;
   margin: 0;
   padding: 1.1rem 1.25rem;
   border: 1px solid rgba(124, 196, 255, 0.24);
@@ -1956,15 +1955,18 @@ blockquote {
   background: rgba(2, 6, 12, 0.92);
   color: var(--text);
   font-family: var(--mono);
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: 0.9rem;
+  line-height: 1.6;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
 }
 
-.support-safety-terminal code {
-  display: block;
-  white-space: pre;
-  color: var(--text);
+.support-safety-terminal .ts-line {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.support-safety-terminal .ts-spacer {
+  height: 0.7rem;
 }
 
 .support-safety-terminal .ts-title {
@@ -1991,6 +1993,36 @@ blockquote {
   color: var(--accent);
 }
 
+.support-safety-terminal .ts-table {
+  margin: 0.85rem 0;
+  padding: 0.7rem 0;
+  border-top: 1px dashed rgba(124, 196, 255, 0.18);
+  border-bottom: 1px dashed rgba(124, 196, 255, 0.18);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.support-safety-terminal .ts-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.support-safety-terminal .ts-row dt,
+.support-safety-terminal .ts-row dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.support-safety-terminal .ts-row dt {
+  color: var(--text-muted);
+}
+
+.support-safety-terminal .ts-result {
+  margin-top: 0.15rem;
+}
+
 .support-safety-terminal-caption {
   margin-top: 0.55rem;
   color: var(--text-muted);
@@ -2002,14 +2034,31 @@ blockquote {
 
 @media (max-width: 720px) {
   .support-safety-terminal {
-    font-size: 0.74rem;
-    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    padding: 1rem 1rem;
+    line-height: 1.55;
+  }
+
+  .support-safety-terminal .ts-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.5rem;
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .support-safety-terminal {
-    font-size: 0.66rem;
-    line-height: 1.5;
+    font-size: 0.78rem;
+  }
+
+  .support-safety-terminal .ts-row {
+    grid-template-columns: 1fr;
+    gap: 0.05rem;
+    padding: 0.15rem 0;
+  }
+
+  .support-safety-terminal .ts-row dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 }

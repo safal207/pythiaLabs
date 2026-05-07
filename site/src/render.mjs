@@ -42,23 +42,21 @@ const ARTIFACT_JSON = `{
   }
 }`;
 
-const SUPPORT_SAFETY_TERMINAL_HTML = `<span class="ts-title">PythiaLabs — Dynamic Support-Safety Gate</span>
-<span class="ts-dim">deterministic evaluator | sanitized fixture | zero external calls</span>
-
-<span class="ts-key">Fixture:</span> <span class="ts-trace">dynamic_support_safety_sanitized_v1</span>
-<span class="ts-key">Safety boundary:</span> <span class="ts-pass">PASS</span>
-<span class="ts-key">Scenarios:</span> 3 deterministic checks
-<span class="ts-key">Evidence:</span> complete + replayable
-
-┌──────────────────────────┬──────────────────────────────┐
-│ <span class="ts-amber">Safety boundary</span>          │ <span class="ts-pass">PASS</span>                         │
-│ Scenarios checked        │ <span class="ts-pass">3 / 3 PASS</span>                   │
-│ Evidence completeness    │ <span class="ts-pass">1.00 each scenario</span>           │
-│ Replayability            │ <span class="ts-trace">deterministic</span>                │
-│ Final verdict            │ <span class="ts-pass">PASS</span>                         │
-└──────────────────────────┴──────────────────────────────┘
-
-<span class="ts-key">Result:</span> <span class="ts-pass">PASS</span>`;
+const SUPPORT_SAFETY_TERMINAL_HTML = `<div class="ts-line ts-title">PythiaLabs — Dynamic Support-Safety Gate</div>
+<div class="ts-line ts-dim">deterministic evaluator | sanitized fixture | zero external calls</div>
+<div class="ts-spacer" aria-hidden="true"></div>
+<div class="ts-line"><span class="ts-key">Fixture:</span> <span class="ts-trace">dynamic_support_safety_sanitized_v1</span></div>
+<div class="ts-line"><span class="ts-key">Safety boundary:</span> <span class="ts-pass">PASS</span></div>
+<div class="ts-line"><span class="ts-key">Scenarios:</span> 3 deterministic checks</div>
+<div class="ts-line"><span class="ts-key">Evidence:</span> complete + replayable</div>
+<dl class="ts-table">
+  <div class="ts-row"><dt><span class="ts-amber">Safety boundary</span></dt><dd><span class="ts-pass">PASS</span></dd></div>
+  <div class="ts-row"><dt>Scenarios checked</dt><dd><span class="ts-pass">3 / 3 PASS</span></dd></div>
+  <div class="ts-row"><dt>Evidence completeness</dt><dd><span class="ts-pass">1.00 each scenario</span></dd></div>
+  <div class="ts-row"><dt>Replayability</dt><dd><span class="ts-trace">deterministic</span></dd></div>
+  <div class="ts-row"><dt>Final verdict</dt><dd><span class="ts-pass">PASS</span></dd></div>
+</dl>
+<div class="ts-line ts-result"><span class="ts-key">Result:</span> <span class="ts-pass">PASS</span></div>`;
 
 const exampleDecisions = {
   en: {
@@ -708,7 +706,7 @@ export function renderPage(currentId, year, buildDate) {
           <p class="support-safety-proof-intro">${escape(t.supportSafetyProof.intro)}</p>
           <p class="support-safety-proof-positioning">${escape(t.supportSafetyProof.positioning)}</p>
           <figure class="support-safety-terminal-figure">
-            <pre class="support-safety-terminal" role="img" aria-label="${escape(t.supportSafetyProof.terminalAriaLabel)}"><code>${SUPPORT_SAFETY_TERMINAL_HTML}</code></pre>
+            <div class="support-safety-terminal" role="img" aria-label="${escape(t.supportSafetyProof.terminalAriaLabel)}">${SUPPORT_SAFETY_TERMINAL_HTML}</div>
             <figcaption class="support-safety-terminal-caption">${escape(t.supportSafetyProof.terminalCaption)}</figcaption>
           </figure>
           <p class="support-safety-proof-funnel">
