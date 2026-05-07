@@ -17,11 +17,13 @@ end
 
 green = fn t -> paint.(:green, t) end
 red = fn t -> paint.(:red, t) end
+yellow = fn t -> paint.(:yellow, t) end
 cyan = fn t -> paint.(:cyan, t) end
 bold = fn t -> paint.(:bright, t) end
 dim = fn t -> paint.(:faint, t) end
 
 rule = fn -> IO.puts(dim.(String.duplicate("─", 72))) end
+arrow = dim.("  ->  ")
 
 status_text = fn pass? ->
   if pass?, do: green.(bold.("PASS")), else: red.(bold.("FAIL"))
@@ -29,6 +31,10 @@ end
 
 line = fn label, value ->
   IO.puts("  #{String.pad_trailing(label, 25)} #{value}")
+end
+
+funnel_stage = fn index, label, value, color ->
+  IO.puts("  #{dim.("[#{index}]")} #{color.(String.pad_trailing(label, 20))} #{value}")
 end
 
 format_optional = fn
@@ -140,11 +146,27 @@ IO.puts(bold.(cyan.("PythiaLabs — Dynamic Support-Safety Gate")))
 IO.puts(dim.("deterministic evaluator | sanitized fixture | zero external calls"))
 rule.()
 IO.puts("")
+IO.puts(bold.("Marketing-friendly funnel"))
+
+IO.puts(
+  "  " <>
+    cyan.("Sanitized trace") <>
+    arrow <>
+    yellow.("Safety boundary") <>
+    arrow <>
+    cyan.("Scenario checks") <>
+    arrow <>
+    green.("PASS verdict")
+)
+
+IO.puts("")
 IO.puts(bold.("Run summary"))
 line.("Fixture", cyan.(Map.fetch!(fixture, "fixture_id")))
 line.("Schema", Map.fetch!(fixture, "schema"))
-IO.puts("  Safety boundary: #{status_text.(safety_boundary_pass?)}")
-IO.puts("  Scenarios: #{length(scenario_results)}")
+funnel_stage.("1", "Input", cyan.("sanitized fixture"), cyan)
+funnel_stage.("2", "Safety boundary:", status_text.(safety_boundary_pass?), yellow)
+funnel_stage.("3", "Scenarios:", "#{length(scenario_results)} deterministic checks", cyan)
+funnel_stage.("4", "Evidence:", green.("complete + replayable"), green)
 
 if not safety_boundary_pass? do
   IO.puts("")
@@ -160,35 +182,50 @@ end
 Enum.with_index(scenario_results, 1)
 |> Enum.each(fn {result, index} ->
   rule.()
-  status = if scenario_pass?.(result), do: green.("PASS"), else: red.("FAIL")
+  status = if scenario_pass?.(result), do: green.(bold.("PASS")), else: red.(bold.("FAIL"))
 
   IO.puts(
     bold.("[#{index}/#{length(scenario_results)}] ") <>
       bold.(result.scenario_id) <>
-      "  " <>
+      arrow <>
       status
   )
 
   line.("risk_type", dim.(result.risk_type))
-  line.("expected_final_decision", result.expected_final_decision)
-  line.("first_escalate_turn", format_optional.(result.first_escalate_turn))
+
+  line.(
+    "decision path",
+    yellow.("trace") <>
+      arrow <> cyan.("boundary") <> arrow <> green.(result.expected_final_decision)
+  )
+
+  line.("first_escalate_turn", green.(format_optional.(result.first_escalate_turn)))
   line.("first_block_turn", format_optional.(result.first_block_turn))
   line.("expected_escalate_turn", format_optional.(result.expected_escalation_turn))
   line.("escalation_latency", format_optional.(result.escalation_latency))
-  line.("missed_escalation", result.missed_escalation?)
+
+  line.(
+    "missed_escalation",
+    if(result.missed_escalation?, do: red.("true"), else: green.("false"))
+  )
 
   line.(
     "evidence_completeness",
-    format_float.(result.evidence_completeness.score) <>
+    green.(format_float.(result.evidence_completeness.score)) <>
       " (#{result.evidence_completeness.matched}/#{result.evidence_completeness.total})"
   )
 
-  line.("replayability", result.replayability)
+  line.("replayability", cyan.(result.replayability))
 end)
 
 rule.()
 
 if safety_boundary_pass? and all_scenarios_pass? do
+  IO.puts(
+    bold.("Final funnel: ") <>
+      cyan.("Trace") <> arrow <> yellow.("Gate") <> arrow <> green.(bold.("PASS"))
+  )
+
   IO.puts(
     green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks")
   )
