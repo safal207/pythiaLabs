@@ -332,8 +332,8 @@ export const locales = {
           desc: "Before a treasury action or governance operation, the agent must pass a safety gate.",
         },
         {
-          name: "AI coding agents",
-          desc: "Before merge, patch, or production change, the agent leaves a verifiable trace and passes pre-execution validation.",
+          name: "AI Coding Agents / CI Autofix",
+          desc: "Before an autonomous coding agent fixes CI, opens a PR, updates dependencies, or touches deploy-adjacent workflows, PythiaLabs evaluates the proposed action and evidence first.",
         },
       ],
     },
@@ -828,8 +828,8 @@ export const locales = {
           desc: "Перед treasury-действием или governance-операцией агент должен пройти safety gate.",
         },
         {
-          name: "AI-агенты для кода",
-          desc: "Перед merge, patch или production-change агент оставляет проверяемый trace и проходит pre-execution validation.",
+          name: "AI Coding Agents / CI Autofix",
+          desc: "Перед тем как автономный coding agent чинит CI, открывает PR, обновляет зависимости или трогает deploy-adjacent workflow, PythiaLabs сначала оценивает proposed action и evidence.",
         },
       ],
     },
