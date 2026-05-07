@@ -9,6 +9,7 @@ PythiaLabs evaluates whether an AI/agent action should be allowed, blocked, or e
 For a concise reviewer-facing overview, see:
 
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
+- **Documentation index:** [`docs/README.md`](docs/README.md)
 - **Demo video:** https://youtu.be/IUk3iO0N4YU
 - **Landing page:** [`site/`](site/) (deployable via GitHub Pages)
 
