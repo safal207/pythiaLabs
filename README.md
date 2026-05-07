@@ -4,6 +4,14 @@ Deterministic evidence gates for high-risk agentic actions.
 
 PythiaLabs evaluates whether an AI/agent action should be allowed, blocked, or escalated under current evidence, authorization, environment, credential, and recovery context — producing replayable traces, stable stop reasons, and tamper-checkable evidence artifacts.
 
+## Positioning
+
+PythiaLabs does not replace transaction simulation, wallet security, or contract-monitoring tools.
+
+It sits earlier in the workflow: evaluating AI-agent proposed actions before tools are called.
+
+Web3 treasury is one high-risk demo scenario, not the product category.
+
 ## Project summary
 
 For a concise reviewer-facing overview, see:
