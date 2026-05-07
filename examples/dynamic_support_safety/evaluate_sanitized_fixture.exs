@@ -11,6 +11,21 @@ fixture_path = "examples/dynamic_support_safety/sanitized_trace_fixture.json"
 
 ansi? = IO.ANSI.enabled?()
 
+delay_ms =
+  cond do
+    System.get_env("CI") == "true" ->
+      0
+
+    System.get_env("PYTHIA_DEMO_DELAY_MS") in [nil, ""] ->
+      90
+
+    true ->
+      case Integer.parse(System.get_env("PYTHIA_DEMO_DELAY_MS")) do
+        {value, _} when value >= 0 -> value
+        _ -> 90
+      end
+  end
+
 paint = fn code, text ->
   if ansi?, do: IO.iodata_to_binary(IO.ANSI.format([code, text, :reset])), else: text
 end
@@ -22,7 +37,15 @@ cyan = fn t -> paint.(:cyan, t) end
 bold = fn t -> paint.(:bright, t) end
 dim = fn t -> paint.(:faint, t) end
 
-rule = fn -> IO.puts(dim.(String.duplicate("─", 72))) end
+say = fn text ->
+  IO.puts(text)
+
+  if delay_ms > 0 do
+    Process.sleep(delay_ms)
+  end
+end
+
+rule = fn -> say.(dim.(String.duplicate("─", 72))) end
 arrow = dim.("  ->  ")
 
 status_text = fn pass? ->
@@ -30,11 +53,11 @@ status_text = fn pass? ->
 end
 
 line = fn label, value ->
-  IO.puts("  #{String.pad_trailing(label, 25)} #{value}")
+  say.("  #{String.pad_trailing(label, 25)} #{value}")
 end
 
 funnel_stage = fn index, label, value, color ->
-  IO.puts("  #{dim.("[#{index}]")} #{color.(String.pad_trailing(label, 20))} #{value}")
+  say.("  #{dim.("[#{index}]")} #{color.(String.pad_trailing(label, 20))} #{value}")
 end
 
 format_optional = fn
@@ -140,15 +163,25 @@ end
 
 all_scenarios_pass? = Enum.all?(scenario_results, scenario_pass?)
 
-IO.puts("")
+say.("")
 rule.()
-IO.puts(bold.(cyan.("PythiaLabs — Dynamic Support-Safety Gate")))
-IO.puts(dim.("deterministic evaluator | sanitized fixture | zero external calls"))
+say.(bold.(cyan.("PythiaLabs — Dynamic Support-Safety Gate")))
+say.(dim.("deterministic evaluator | sanitized fixture | zero external calls"))
 rule.()
-IO.puts("")
-IO.puts(bold.("Marketing-friendly funnel"))
+say.("")
+say.(bold.("Mini gate hero"))
 
-IO.puts(
+say.(
+  "     " <>
+    yellow.("C<") <>
+    cyan.("◇") <>
+    dim.("  chomps uncertainty, not user trust")
+)
+
+say.("")
+say.(bold.("Marketing-friendly funnel"))
+
+say.(
   "  " <>
     cyan.("Sanitized trace") <>
     arrow <>
@@ -159,8 +192,8 @@ IO.puts(
     green.("PASS verdict")
 )
 
-IO.puts("")
-IO.puts(bold.("Run summary"))
+say.("")
+say.(bold.("Run summary"))
 line.("Fixture", cyan.(Map.fetch!(fixture, "fixture_id")))
 line.("Schema", Map.fetch!(fixture, "schema"))
 funnel_stage.("1", "Input", cyan.("sanitized fixture"), cyan)
@@ -169,12 +202,12 @@ funnel_stage.("3", "Scenarios:", "#{length(scenario_results)} deterministic chec
 funnel_stage.("4", "Evidence:", green.("complete + replayable"), green)
 
 if not safety_boundary_pass? do
-  IO.puts("")
-  IO.puts(red.("Safety boundary mismatches:"))
+  say.("")
+  say.(red.("Safety boundary mismatches:"))
 
   Enum.each(boundary_checks, fn {key, expected, actual, pass?} ->
     if not pass? do
-      IO.puts("  #{key}: expected=#{inspect(expected)} actual=#{inspect(actual)}")
+      say.("  #{key}: expected=#{inspect(expected)} actual=#{inspect(actual)}")
     end
   end)
 end
@@ -184,7 +217,7 @@ Enum.with_index(scenario_results, 1)
   rule.()
   status = if scenario_pass?.(result), do: green.(bold.("PASS")), else: red.(bold.("FAIL"))
 
-  IO.puts(
+  say.(
     bold.("[#{index}/#{length(scenario_results)}] ") <>
       bold.(result.scenario_id) <>
       arrow <>
@@ -221,17 +254,15 @@ end)
 rule.()
 
 if safety_boundary_pass? and all_scenarios_pass? do
-  IO.puts(
+  say.(
     bold.("Final funnel: ") <>
       cyan.("Trace") <> arrow <> yellow.("Gate") <> arrow <> green.(bold.("PASS"))
   )
 
-  IO.puts(
-    green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks")
-  )
+  say.(green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks"))
 
-  IO.puts(dim.("Gate verdict: fixture behavior is inspectable, replayable, and deterministic."))
+  say.(dim.("Gate verdict: fixture behavior is inspectable, replayable, and deterministic."))
 else
-  IO.puts(red.(bold.("Result: FAIL")) <> dim.(" — fixture diverged from deterministic checks"))
+  say.(red.(bold.("Result: FAIL")) <> dim.(" — fixture diverged from deterministic checks"))
   System.halt(1)
 end
