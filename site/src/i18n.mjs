@@ -434,6 +434,9 @@ export const locales = {
         spec: "Research spec",
         traces: "Trace examples",
       },
+      terminalCaption: "Reviewer-facing terminal output",
+      terminalAriaLabel:
+        "Reviewer-facing terminal output — deterministic, sanitized, replayable",
     },
     faq: {
       title: "Frequently asked questions",
@@ -967,6 +970,9 @@ export const locales = {
         spec: "Research spec",
         traces: "Примеры traces",
       },
+      terminalCaption: "Reviewer-facing terminal output",
+      terminalAriaLabel:
+        "Reviewer-facing terminal output — детерминированный, санитизированный, replayable",
     },
     faq: {
       title: "Частые вопросы",
@@ -1469,6 +1475,9 @@ export const locales = {
         spec: "Research spec",
         traces: "Trace examples",
       },
+      terminalCaption: "Reviewer-facing terminal output",
+      terminalAriaLabel:
+        "Reviewer-facing terminal output — deterministic, sanitized, replayable",
     },
     faq: {
       title: "常见问题",

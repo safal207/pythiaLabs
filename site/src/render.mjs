@@ -42,6 +42,24 @@ const ARTIFACT_JSON = `{
   }
 }`;
 
+const SUPPORT_SAFETY_TERMINAL_HTML = `<span class="ts-title">PythiaLabs — Dynamic Support-Safety Gate</span>
+<span class="ts-dim">deterministic evaluator | sanitized fixture | zero external calls</span>
+
+<span class="ts-key">Fixture:</span> <span class="ts-trace">dynamic_support_safety_sanitized_v1</span>
+<span class="ts-key">Safety boundary:</span> <span class="ts-pass">PASS</span>
+<span class="ts-key">Scenarios:</span> 3 deterministic checks
+<span class="ts-key">Evidence:</span> complete + replayable
+
+┌──────────────────────────┬──────────────────────────────┐
+│ <span class="ts-amber">Safety boundary</span>          │ <span class="ts-pass">PASS</span>                         │
+│ Scenarios checked        │ <span class="ts-pass">3 / 3 PASS</span>                   │
+│ Evidence completeness    │ <span class="ts-pass">1.00 each scenario</span>           │
+│ Replayability            │ <span class="ts-trace">deterministic</span>                │
+│ Final verdict            │ <span class="ts-pass">PASS</span>                         │
+└──────────────────────────┴──────────────────────────────┘
+
+<span class="ts-key">Result:</span> <span class="ts-pass">PASS</span>`;
+
 const exampleDecisions = {
   en: {
     eyebrow: "Example decision",
@@ -689,6 +707,10 @@ export function renderPage(currentId, year, buildDate) {
           <h2 id="support-safety-proof-title">${escape(t.supportSafetyProof.title)}</h2>
           <p class="support-safety-proof-intro">${escape(t.supportSafetyProof.intro)}</p>
           <p class="support-safety-proof-positioning">${escape(t.supportSafetyProof.positioning)}</p>
+          <figure class="support-safety-terminal-figure">
+            <pre class="support-safety-terminal" role="img" aria-label="${escape(t.supportSafetyProof.terminalAriaLabel)}"><code>${SUPPORT_SAFETY_TERMINAL_HTML}</code></pre>
+            <figcaption class="support-safety-terminal-caption">${escape(t.supportSafetyProof.terminalCaption)}</figcaption>
+          </figure>
           <p class="support-safety-proof-funnel">
             <span class="support-safety-proof-funnel-label">${escape(t.supportSafetyProof.funnelLabel)}:</span>
             <span class="support-safety-proof-funnel-value">${escape(t.supportSafetyProof.funnel)}</span>
