@@ -21,6 +21,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 - [Research Roadmap](research_roadmap.md)
 - [Open Agentic Models Need Evidence Gates](open_agentic_models_need_evidence_gates.md)
 - [Positioning vs. Transaction Simulation Tools](positioning_vs_transaction_simulation.md) — clarifies that PythiaLabs is not a Web3 transaction simulator; it is a pre-execution evidence gate for AI-agent proposed actions before tools are called.
+- [AI Coding Agents and CI Autofix Use Case](ai_coding_agents_ci_autofix_use_case.md) — documents how PythiaLabs can gate autonomous coding-agent and CI autofix actions before tools are called.
 
 ---
 
