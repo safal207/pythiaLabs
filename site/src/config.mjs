@@ -45,6 +45,11 @@ export const siteConfig = {
       labelKey: "short2",
       campaign: "founder_video_short_2",
     },
+    {
+      url: "https://youtu.be/A6UAR3e2r3k",
+      labelKey: "supportSafetyGate",
+      campaign: "support_safety_gate_demo",
+    },
   ],
   email: "safal0645@gmail.com",
   pilotEmailSubject: "PythiaLabs pilot inquiry",
