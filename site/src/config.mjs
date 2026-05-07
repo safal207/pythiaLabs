@@ -67,8 +67,7 @@ export const siteConfig = {
   mcpReadmePath: "integrations/mcp/README.md",
   supportSafety: {
     videoUrl: "https://youtu.be/A6UAR3e2r3k",
-    videoEmbedUrl:
-      "https://www.youtube-nocookie.com/embed/A6UAR3e2r3k?controls=1&rel=0&modestbranding=1",
+    videoEmbedUrl: "https://www.youtube-nocookie.com/embed/A6UAR3e2r3k?rel=0&modestbranding=1",
     evaluatorPath: "examples/dynamic_support_safety/evaluate_sanitized_fixture.exs",
     specPath: "docs/dynamic_support_safety_eval_harness.md",
     tracesPath: "docs/dynamic_support_safety_trace_examples.md",
