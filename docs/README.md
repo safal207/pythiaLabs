@@ -37,6 +37,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ## Funding and Support
 
+- [Grant Evidence Package](GRANT_EVIDENCE.md) — reviewer-facing evidence matrix, reproducible commands, architecture sketch, current limitations, and grant roadmap.
 - [Grant Readiness](grant_readiness.md)
 - [Grant One-Pager — Web3 Treasury Reason Layer](grant_one_pager_web3_treasury_reason_layer.md)
 - [Grant Application Summary](grant_application_summary.md)
