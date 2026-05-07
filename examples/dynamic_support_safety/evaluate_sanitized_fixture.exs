@@ -17,12 +17,19 @@ end
 
 green = fn t -> paint.(:green, t) end
 red = fn t -> paint.(:red, t) end
-yellow = fn t -> paint.(:yellow, t) end
 cyan = fn t -> paint.(:cyan, t) end
 bold = fn t -> paint.(:bright, t) end
 dim = fn t -> paint.(:faint, t) end
 
 rule = fn -> IO.puts(dim.(String.duplicate("─", 72))) end
+
+status_text = fn pass? ->
+  if pass?, do: green.(bold.("PASS")), else: red.(bold.("FAIL"))
+end
+
+line = fn label, value ->
+  IO.puts("  #{String.pad_trailing(label, 25)} #{value}")
+end
 
 format_optional = fn
   nil -> "none"
@@ -52,7 +59,8 @@ boundary_checks =
     {key, expected, actual, actual == expected}
   end)
 
-safety_boundary_pass? = Enum.all?(boundary_checks, fn {_key, _expected, _actual, pass?} -> pass? end)
+safety_boundary_pass? =
+  Enum.all?(boundary_checks, fn {_key, _expected, _actual, pass?} -> pass? end)
 
 all_risk_signals = fn turns ->
   turns
@@ -127,13 +135,16 @@ end
 all_scenarios_pass? = Enum.all?(scenario_results, scenario_pass?)
 
 IO.puts("")
-IO.puts(bold.("Dynamic Support-Safety Fixture Evaluation"))
-IO.puts(dim.("local deterministic prototype; sanitized fixture only"))
+rule.()
+IO.puts(bold.(cyan.("PythiaLabs — Dynamic Support-Safety Gate")))
+IO.puts(dim.("deterministic evaluator | sanitized fixture | zero external calls"))
+rule.()
 IO.puts("")
-IO.puts("Fixture: #{cyan.(Map.fetch!(fixture, "fixture_id"))}")
-IO.puts("Schema : #{Map.fetch!(fixture, "schema")}")
-IO.puts("Safety boundary: #{if safety_boundary_pass?, do: green.("PASS"), else: red.("FAIL")}")
-IO.puts("Scenarios: #{length(scenario_results)}")
+IO.puts(bold.("Run summary"))
+line.("Fixture", cyan.(Map.fetch!(fixture, "fixture_id")))
+line.("Schema", Map.fetch!(fixture, "schema"))
+IO.puts("  Safety boundary: #{status_text.(safety_boundary_pass?)}")
+IO.puts("  Scenarios: #{length(scenario_results)}")
 
 if not safety_boundary_pass? do
   IO.puts("")
@@ -152,33 +163,37 @@ Enum.with_index(scenario_results, 1)
   status = if scenario_pass?.(result), do: green.("PASS"), else: red.("FAIL")
 
   IO.puts(
-    bold.("[#{index}] ") <>
+    bold.("[#{index}/#{length(scenario_results)}] ") <>
       bold.(result.scenario_id) <>
-      dim.(" — #{result.risk_type}") <>
       "  " <>
       status
   )
 
-  IO.puts("  expected_final_decision : #{result.expected_final_decision}")
-  IO.puts("  first_escalate_turn     : #{format_optional.(result.first_escalate_turn)}")
-  IO.puts("  first_block_turn        : #{format_optional.(result.first_block_turn)}")
-  IO.puts("  expected_escalate_turn  : #{format_optional.(result.expected_escalation_turn)}")
-  IO.puts("  escalation_latency      : #{format_optional.(result.escalation_latency)}")
-  IO.puts("  missed_escalation       : #{result.missed_escalation?}")
+  line.("risk_type", dim.(result.risk_type))
+  line.("expected_final_decision", result.expected_final_decision)
+  line.("first_escalate_turn", format_optional.(result.first_escalate_turn))
+  line.("first_block_turn", format_optional.(result.first_block_turn))
+  line.("expected_escalate_turn", format_optional.(result.expected_escalation_turn))
+  line.("escalation_latency", format_optional.(result.escalation_latency))
+  line.("missed_escalation", result.missed_escalation?)
 
-  IO.puts(
-    "  evidence_completeness   : " <>
-      format_float.(result.evidence_completeness.score) <>
+  line.(
+    "evidence_completeness",
+    format_float.(result.evidence_completeness.score) <>
       " (#{result.evidence_completeness.matched}/#{result.evidence_completeness.total})"
   )
 
-  IO.puts("  replayability           : #{result.replayability}")
+  line.("replayability", result.replayability)
 end)
 
 rule.()
 
 if safety_boundary_pass? and all_scenarios_pass? do
-  IO.puts(green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks"))
+  IO.puts(
+    green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks")
+  )
+
+  IO.puts(dim.("Gate verdict: fixture behavior is inspectable, replayable, and deterministic."))
 else
   IO.puts(red.(bold.("Result: FAIL")) <> dim.(" — fixture diverged from deterministic checks"))
   System.halt(1)

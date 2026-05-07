@@ -17,11 +17,11 @@ defmodule Mix.Tasks.Compile.RustlerFallback do
         # Attempt to compile Rustler NIFs
         case Mix.Task.run("compile.rustler", []) do
           {:ok, _} ->
-            Mix.shell().info("Rustler NIFs compiled successfully")
+            fallback_info("Rustler NIFs compiled successfully")
             {:ok, []}
 
           {:error, _} ->
-            Mix.shell().info("Rustler compilation failed, using fallback implementation")
+            fallback_info("Rustler compilation failed, using fallback implementation")
             {:ok, []}
 
           _ ->
@@ -29,11 +29,11 @@ defmodule Mix.Tasks.Compile.RustlerFallback do
         end
       rescue
         e ->
-          Mix.shell().info("Rustler compilation error: #{inspect(e)}, using fallback")
+          fallback_info("Rustler compilation error: #{inspect(e)}, using fallback")
           {:ok, []}
       end
     else
-      Mix.shell().info("Rustler not available, using fallback implementation")
+      fallback_info("Rustler not available, using fallback implementation")
       {:ok, []}
     end
   end
@@ -55,5 +55,11 @@ defmodule Mix.Tasks.Compile.RustlerFallback do
   defp rustler_available? do
     # Check if Rustler is available as a dependency
     Code.ensure_loaded?(Rustler) and function_exported?(Mix.Task, :run, 2)
+  end
+
+  defp fallback_info(message) do
+    if System.get_env("PYTHIA_VERBOSE_FALLBACK") in ["1", "true"] do
+      Mix.shell().info(message)
+    end
   end
 end
