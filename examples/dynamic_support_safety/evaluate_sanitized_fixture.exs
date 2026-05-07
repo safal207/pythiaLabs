@@ -45,6 +45,12 @@ say = fn text ->
   end
 end
 
+pause = fn multiplier ->
+  if delay_ms > 0 do
+    Process.sleep(delay_ms * multiplier)
+  end
+end
+
 rule = fn -> say.(dim.(String.duplicate("─", 72))) end
 arrow = dim.("  ->  ")
 
@@ -58,6 +64,24 @@ end
 
 funnel_stage = fn index, label, value, color ->
   say.("  #{dim.("[#{index}]")} #{color.(String.pad_trailing(label, 20))} #{value}")
+end
+
+hero = fn ->
+  yellow.("C<") <> cyan.("◇")
+end
+
+hero_step = fn offset, label, color ->
+  say.(String.duplicate(" ", offset) <> hero.() <> "  " <> color.(label))
+end
+
+report_row = fn left, right, color ->
+  say.(
+    "│ " <>
+      String.pad_trailing(left, 24) <>
+      " │ " <>
+      color.(String.pad_trailing(right, 28)) <>
+      " │"
+  )
 end
 
 format_optional = fn
@@ -171,12 +195,11 @@ rule.()
 say.("")
 say.(bold.("Mini gate hero"))
 
-say.(
-  "     " <>
-    yellow.("C<") <>
-    cyan.("◇") <>
-    dim.("  chomps uncertainty, not user trust")
-)
+hero_step.(2, "wakes up", dim)
+hero_step.(5, "spots a sanitized trace", cyan)
+hero_step.(8, "checks the boundary", yellow)
+hero_step.(11, "follows evidence to a verdict", green)
+pause.(2)
 
 say.("")
 say.(bold.("Marketing-friendly funnel"))
@@ -258,6 +281,25 @@ if safety_boundary_pass? and all_scenarios_pass? do
     bold.("Final funnel: ") <>
       cyan.("Trace") <> arrow <> yellow.("Gate") <> arrow <> green.(bold.("PASS"))
   )
+
+  say.("")
+  say.(bold.("Landing report"))
+  hero_step.(22, "jump", cyan)
+  hero_step.(16, "jump", yellow)
+  hero_step.(10, "lands on the report", green)
+  say.("┌──────────────────────────┬──────────────────────────────┐")
+  report_row.("Safety boundary", "PASS", green)
+
+  report_row.(
+    "Scenarios checked",
+    "#{length(scenario_results)} / #{length(scenario_results)} PASS",
+    green
+  )
+
+  report_row.("Evidence completeness", "1.00 each scenario", green)
+  report_row.("Replayability", "deterministic", cyan)
+  report_row.("Final verdict", "PASS", green)
+  say.("└──────────────────────────┴──────────────────────────────┘")
 
   say.(green.(bold.("Result: PASS")) <> dim.(" — sanitized fixture matched deterministic checks"))
 
