@@ -27,6 +27,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ## Demos and Expected Outputs
 
+- [Support-safety gate demo](https://youtu.be/A6UAR3e2r3k) — deterministic support-safety gate: sanitized trace → safety boundary → scenario checks → evidence → PASS
 - [Paid Review Demo Expected Output](../examples/paid_review_demo_expected_output.md)
 - [Agent Infrastructure Showcase Expected Output](agent_infra_action_showcase_expected_output.md)
 - [Banking AI Risk Showcase Expected Output](banking_ai_risk_showcase_expected_output.md)

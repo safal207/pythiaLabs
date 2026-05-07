@@ -19,6 +19,7 @@ For a concise reviewer-facing overview, see:
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
 - **Documentation index:** [`docs/README.md`](docs/README.md)
 - **Demo video:** https://youtu.be/IUk3iO0N4YU
+- **Support-safety gate demo:** https://youtu.be/A6UAR3e2r3k
 - **Landing page:** [`site/`](site/) (deployable via GitHub Pages)
 
 ## Landing Page

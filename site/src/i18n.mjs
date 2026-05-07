@@ -396,6 +396,12 @@ export const locales = {
           desc: "The next frontier of AI safety is pre-execution control. PythiaLabs is building a deterministic gate for agentic actions — before code changes, infrastructure commands, financial decisions, or governance operations are executed.",
           cta: "Watch the short",
         },
+        supportSafetyGate: {
+          name: "Support-safety gate demo",
+          headline: "Support-safety gate demo",
+          desc: "A deterministic demo using a sanitized trace fixture to evaluate safety boundary, escalation timing, missed escalation, evidence completeness, and replayability.",
+          cta: "Watch support-safety demo",
+        },
       },
     },
     faq: {
@@ -892,6 +898,12 @@ export const locales = {
           desc: "Следующая граница AI safety — это контроль до выполнения. PythiaLabs строит детерминированный шлюз для agentic-действий: перед изменением кода, infra-командой, финансовым решением или governance-операцией.",
           cta: "Смотреть шортс",
         },
+        supportSafetyGate: {
+          name: "Support-safety gate demo",
+          headline: "Support-safety gate demo",
+          desc: "A deterministic demo using a sanitized trace fixture to evaluate safety boundary, escalation timing, missed escalation, evidence completeness, and replayability.",
+          cta: "Watch support-safety demo",
+        },
       },
     },
     faq: {
@@ -1356,6 +1368,12 @@ export const locales = {
           headline: "执行前控制",
           desc: "AI 安全的下一个前沿是执行前控制。PythiaLabs 正在为 agentic 行动构建确定性门控 — 在代码变更、基础设施命令、金融决策或治理操作执行之前。",
           cta: "观看短视频",
+        },
+        supportSafetyGate: {
+          name: "Support-safety gate demo",
+          headline: "Support-safety gate demo",
+          desc: "A deterministic demo using a sanitized trace fixture to evaluate safety boundary, escalation timing, missed escalation, evidence completeness, and replayability.",
+          cta: "Watch support-safety demo",
         },
       },
     },
