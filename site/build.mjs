@@ -635,7 +635,7 @@ const supportCopy = {
       },
       {
         title: "Sponsor a deterministic safety showcase",
-        desc: "Fund a concrete scenario: AI coding agents before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
+        desc: "Fund a concrete scenario: AI Coding Agents / CI Autofix before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
         href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
         button: "Sponsor a showcase",
       },
@@ -668,7 +668,7 @@ const supportCopy = {
       },
       {
         title: "Спонсировать showcase",
-        desc: "Профинансировать конкретный сценарий: AI coding agents, DevOps, fintech-риски, DAO governance.",
+        desc: "Профинансировать конкретный сценарий: AI Coding Agents / CI Autofix, DevOps, fintech-риски, DAO governance.",
         href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
         button: "Спонсировать showcase",
       },
@@ -701,7 +701,7 @@ const supportCopy = {
       },
       {
         title: "Sponsor a deterministic safety showcase",
-        desc: "Fund a concrete scenario: AI coding agents before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
+        desc: "Fund a concrete scenario: AI Coding Agents / CI Autofix before merge, DevOps agents before infra changes, fintech risk, or DAO governance.",
         href: "mailto:safal0645@gmail.com?subject=PythiaLabs%20showcase%20sponsor",
         button: "Sponsor a showcase",
       },
