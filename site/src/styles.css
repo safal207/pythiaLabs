@@ -1943,6 +1943,39 @@ blockquote {
   }
 }
 
+.support-safety-video-figure {
+  margin: 1.5rem 0 0;
+  max-width: 820px;
+}
+
+.support-safety-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(124, 196, 255, 0.32);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.32);
+}
+
+.support-safety-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.support-safety-video-caption {
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .support-safety-terminal-figure {
   margin: 1.25rem 0 0;
 }
