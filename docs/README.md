@@ -20,6 +20,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 ## Research and Positioning
 
 - [Agent Action Audit Kit](AGENT_ACTION_AUDIT_KIT.md) — sales-facing pilot wedge for auditing one AI-agent workflow and turning opaque behavior into a structured evidence chain.
+- [Agent Action Audit Snapshot](AGENT_ACTION_AUDIT_SNAPSHOT.md) — small paid OTO / entry offer for one workflow before a full audit pilot.
 - [Agent Action Audit Outreach Pack](AGENT_ACTION_AUDIT_OUTREACH.md) — outbound messages, discovery-call structure, qualification questions, and objection handling for first pilots.
 - [Agent Action Audit Report Template](AGENT_ACTION_AUDIT_REPORT_TEMPLATE.md) — customer-facing pilot deliverable template for one workflow, action class, or trace/log sample.
 - [Agent Action Audit Sample Report](AGENT_ACTION_AUDIT_SAMPLE_REPORT.md) — filled synthetic report for a coding-agent CI autofix workflow showing the expected customer-facing output.
