@@ -23,6 +23,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 - [Agent Action Audit Snapshot](AGENT_ACTION_AUDIT_SNAPSHOT.md) — small paid OTO / entry offer for one workflow before a full audit pilot.
 - [Agent Action Audit Snapshot Plus](AGENT_ACTION_AUDIT_SNAPSHOT_PLUS.md) — $497 upsell with live walkthrough and prioritized hardening roadmap after the Snapshot.
 - [Agent Action Audit Outreach Pack](AGENT_ACTION_AUDIT_OUTREACH.md) — outbound messages, discovery-call structure, qualification questions, and objection handling for first pilots.
+- [Agent Action Audit Snapshot Outreach Sequence](AGENT_ACTION_AUDIT_SNAPSHOT_OUTREACH.md) — short DM, cold email, follow-up, and objection scripts for the $197/$497 offer ladder.
 - [Agent Action Audit Report Template](AGENT_ACTION_AUDIT_REPORT_TEMPLATE.md) — customer-facing pilot deliverable template for one workflow, action class, or trace/log sample.
 - [Agent Action Audit Sample Report](AGENT_ACTION_AUDIT_SAMPLE_REPORT.md) — filled synthetic report for a coding-agent CI autofix workflow showing the expected customer-facing output.
 - [Research Roadmap](research_roadmap.md)
