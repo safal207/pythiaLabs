@@ -7,6 +7,14 @@ function urlFor(id) {
   return id === "en" ? `${origin()}/` : `${origin()}/${id}/`;
 }
 
+const standaloneUrls = [
+  {
+    loc: `${origin()}/agent-action-audit-kit-one-pager/`,
+    changefreq: "monthly",
+    priority: "0.9",
+  },
+];
+
 export function renderSitemap(today = new Date().toISOString().slice(0, 10)) {
   const alternates = (currentId) =>
     localeOrder
@@ -17,7 +25,7 @@ export function renderSitemap(today = new Date().toISOString().slice(0, 10)) {
       .concat(`      <xhtml:link rel="alternate" hreflang="x-default" href="${urlFor("en")}"/>`)
       .join("\n");
 
-  const urls = localeOrder
+  const localizedUrls = localeOrder
     .map(
       (id) => `  <url>
     <loc>${urlFor(id)}</loc>
@@ -29,10 +37,22 @@ ${alternates(id)}
     )
     .join("\n");
 
+  const standalone = standaloneUrls
+    .map(
+      (entry) => `  <url>
+    <loc>${entry.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${entry.changefreq}</changefreq>
+    <priority>${entry.priority}</priority>
+  </url>`,
+    )
+    .join("\n");
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls}
+${localizedUrls}
+${standalone}
 </urlset>
 `;
 }
