@@ -18,6 +18,33 @@ Good first contribution areas include:
 
 Please avoid large architectural rewrites unless discussed first.
 
+## Quickstart for New Contributors
+
+1. **Fork the repository** on GitHub
+2. **Clone your fork**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/pythiaLabs.git
+   cd pythiaLabs
+   ```
+3. **Add upstream remote** to stay in sync:
+   ```bash
+   git remote add upstream https://github.com/safal207/pythiaLabs.git
+   ```
+4. **Create a branch** for your contribution:
+   ```bash
+   git checkout -b docs/your-feature-name
+   ```
+5. **Make your changes** and run tests:
+   ```bash
+   mix test
+   ```
+6. **Commit and push**:
+   ```bash
+   git commit -m "docs: describe your change"
+   git push origin your-branch-name
+   ```
+7. **Open a PR** from your fork to `safal207/pythiaLabs:main`
+
 ## Development setup
 
 Build outputs such as `_build/`, `deps/`, Rust `target/` directories, and compiled NIF artifacts under `priv/` are listed in `.gitignore` so they are not committed by mistake.
