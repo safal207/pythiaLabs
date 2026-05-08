@@ -433,7 +433,6 @@ Additional roadmap items:
 - multi-domain executors for QA, graph problems, puzzles, and agent actions
 - Web3 consensus reason layer for DAO governance, treasury safety, and agentic on-chain actions
 
-
 ## Further Reading
 
 - [Database Architecture](docs/database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
