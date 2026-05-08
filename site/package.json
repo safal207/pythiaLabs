@@ -1,1 +1,17 @@
-{"name":"pythialabs-site","private":true,"type":"module","scripts":{"build":"node build.mjs && node src/inject_demo_proof.mjs && node src/inject_hero_clarity.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_contributor_roadmap.mjs && node src/inject_agent_action_audit_kit.mjs && node src/inject_agent_action_audit_one_pager.mjs && node src/inject_pilot_capture.mjs && node src/inject_validation_tracks.mjs","dev":"node build.mjs && node src/inject_demo_proof.mjs && node src/inject_hero_clarity.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_contributor_roadmap.mjs && node src/inject_agent_action_audit_kit.mjs && node src/inject_agent_action_audit_one_pager.mjs && node src/inject_pilot_capture.mjs && node src/inject_validation_tracks.mjs && node serve.mjs","preview":"node serve.mjs","format":"prettier --write .","format:check":"prettier --check ."},"devDependencies":{"@resvg/resvg-js":"^2.6.2","lightningcss":"^1.27.0","prettier":"^3.3.0"}}
+{
+  "name": "pythialabs-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_hero_clarity.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_contributor_roadmap.mjs && node src/inject_agent_action_audit_kit.mjs && node src/inject_agent_action_audit_one_pager.mjs && node src/inject_pilot_capture.mjs && node src/inject_validation_tracks.mjs",
+    "dev": "node build.mjs && node src/inject_demo_proof.mjs && node src/inject_hero_clarity.mjs && node src/inject_research_track.mjs && node src/inject_milestones.mjs && node src/inject_threat_model.mjs && node src/inject_contributor_roadmap.mjs && node src/inject_agent_action_audit_kit.mjs && node src/inject_agent_action_audit_one_pager.mjs && node src/inject_pilot_capture.mjs && node src/inject_validation_tracks.mjs && node serve.mjs",
+    "preview": "node serve.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "lightningcss": "^1.27.0",
+    "prettier": "^3.3.0"
+  }
+}
