@@ -1,0 +1,14 @@
+[project]
+name = "liminal-audit-bridge"
+version = "0.1.0"
+description = "Petri-like audit transcript to T-Trace JSONL bridge with causal/risk checks."
+requires-python = ">=3.10"
+authors = [{ name = "PythiaLabs / Liminal Stack" }]
+license = { text = "MIT" }
+
+[project.scripts]
+liminal-audit-bridge = "liminal_audit_bridge.__main__:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

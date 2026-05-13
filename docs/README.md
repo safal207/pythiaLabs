@@ -8,6 +8,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 ## Architecture
 
 - [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — cross-stack overview connecting PythiaLabs, DRP, LTP, CML, and LiminalDB as one deterministic oversight program.
+- [Liminal Audit Bridge](LIMINAL_AUDIT_BRIDGE.md) — Petri-like behavioral audit transcript -> T-Trace JSONL -> causal/risk checks -> reviewer-facing report.
 - [Database Architecture](database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
 - [Persistent Reasoning Memory](persistent_reasoning_memory.md) — append-only reasoning memory roadmap.
 - [Agent Memory vs. Action Gates](agent_memory_vs_action_gate.md) — why PythiaLabs is not an organizational memory product.
