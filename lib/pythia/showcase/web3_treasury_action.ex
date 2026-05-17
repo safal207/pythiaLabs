@@ -259,12 +259,14 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
       when is_map(envelope) and is_binary(signer_id) do
     with :ok <- validate_demo_signer_id(signer_id),
          {:ok, _verified_unsigned_envelope} <- verify_evidence_envelope(envelope) do
+      canonical_signer_id = String.trim(signer_id)
+
       {:ok,
        Map.put(envelope, "signature", %{
          "status" => "signed_demo",
          "algorithm" => "sha256-demo",
-         "signer_id" => signer_id,
-         "signature" => demo_signature(envelope, signer_id)
+         "signer_id" => canonical_signer_id,
+         "signature" => demo_signature(envelope, canonical_signer_id)
        })}
     end
   end
@@ -284,7 +286,11 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
          :ok <- verify_signed_signature_algorithm(signature),
          :ok <- verify_signed_signer_id(signature),
          :ok <- verify_signed_signature_digest(signature),
-         true <- signature["signature"] == demo_signature(envelope, signature["signer_id"]) do
+         true <-
+           secure_equal?(
+             signature["signature"],
+             demo_signature(envelope, signature["signer_id"])
+           ) do
       {:ok,
        %{
          status: :verified,
@@ -500,19 +506,44 @@ defmodule Pythia.Showcase.Web3TreasuryAction do
     "\"" <> escape_string(value) <> "\""
   end
 
-  defp canonical_encode(value) when is_number(value), do: to_string(value)
+  defp canonical_encode(value) when is_integer(value), do: Integer.to_string(value)
+  defp canonical_encode(value) when is_float(value), do: :erlang.float_to_binary(value, [:short])
   defp canonical_encode(true), do: "true"
   defp canonical_encode(false), do: "false"
   defp canonical_encode(nil), do: "null"
 
   defp escape_string(value) do
     value
-    |> String.replace("\\", "\\\\")
-    |> String.replace("\"", "\\\"")
-    |> String.replace("\n", "\\n")
-    |> String.replace("\r", "\\r")
-    |> String.replace("\t", "\\t")
+    |> String.to_charlist()
+    |> Enum.map_join(&escape_codepoint/1)
   end
+
+  defp escape_codepoint(?\\), do: "\\\\"
+  defp escape_codepoint(?"), do: "\\\""
+  defp escape_codepoint(?\n), do: "\\n"
+  defp escape_codepoint(?\r), do: "\\r"
+  defp escape_codepoint(?\t), do: "\\t"
+  defp escape_codepoint(?\b), do: "\\b"
+  defp escape_codepoint(?\f), do: "\\f"
+
+  defp escape_codepoint(codepoint) when codepoint in 0..31 do
+    "\\u" <> (codepoint |> Integer.to_string(16) |> String.pad_leading(4, "0"))
+  end
+
+  defp escape_codepoint(codepoint), do: <<codepoint::utf8>>
+
+  defp secure_equal?(a, b)
+       when is_binary(a) and is_binary(b) and byte_size(a) == byte_size(b) do
+    import Bitwise
+
+    a
+    |> :binary.bin_to_list()
+    |> Enum.zip(:binary.bin_to_list(b))
+    |> Enum.reduce(0, fn {x, y}, acc -> bor(acc, bxor(x, y)) end)
+    |> Kernel.==(0)
+  end
+
+  defp secure_equal?(_, _), do: false
 
   defp run_checks(action, governance_record, trace) do
     Enum.reduce_while(@check_order, {:ok, trace}, fn check, {:ok, acc_trace} ->

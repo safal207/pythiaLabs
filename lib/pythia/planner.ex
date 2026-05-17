@@ -1,7 +1,7 @@
 defmodule Pythia.Planner do
   @moduledoc "HRM-like outer loop: propose → run → measure → refine (string demo)."
   require Logger
-  alias Pythia.Executor
+  alias Pythia.{Critic, Executor, Kernels}
 
   defstruct problem: nil,
             objective: nil,
@@ -87,7 +87,7 @@ defmodule Pythia.Planner do
         finalize(p, :threshold)
 
       no_improve >= p.no_improve_limit ->
-        _ = critic
+        _ = Critic.advise(p.state, p.trace)
         finalize(p, :no_improve_limit)
 
       true ->
@@ -96,15 +96,23 @@ defmodule Pythia.Planner do
   end
 
   defp finalize(p, stop_reason) do
+    best = ensure_numeric_best(p.best, p.objective)
+
     :telemetry.execute(
       [:pythia, :planner, :stop],
       %{steps: p.step},
-      %{trace_id: p.trace_id, stop_reason: stop_reason, best_score: p.best.score}
+      %{trace_id: p.trace_id, stop_reason: stop_reason, best_score: best.score}
     )
 
     Logger.info("pythia_stop trace_id=#{p.trace_id} steps=#{p.step} reason=#{stop_reason}")
-    {:ok, %{best: p.best, steps: p.step, stop_reason: stop_reason, trace: Enum.reverse(p.trace)}}
+    {:ok, %{best: best, steps: p.step, stop_reason: stop_reason, trace: Enum.reverse(p.trace)}}
   end
+
+  defp ensure_numeric_best(%{score: :infinity, candidate: candidate}, objective) do
+    %{candidate: candidate, score: Kernels.levenshtein(candidate, objective)}
+  end
+
+  defp ensure_numeric_best(best, _objective), do: best
 
   defp propose(current, target) do
     {prefix, c_rest, t_rest} = longest_common_prefix(current, target)

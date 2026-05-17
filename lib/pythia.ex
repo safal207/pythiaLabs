@@ -47,6 +47,10 @@ defmodule Pythia do
            best: result.best,
            trace: result.trace
          }}
+      else
+        {:error, reason} when is_atom(reason) -> {:error, reason}
+        {:error, _} -> {:error, :refine_failed}
+        _ -> {:error, :refine_failed}
       end
     else
       {:error, :invalid_request}
