@@ -18,6 +18,7 @@ For a concise reviewer-facing overview, see:
 
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
 - **Documentation index:** [`docs/README.md`](docs/README.md)
+- **OTF reviewer path:** [`docs/OTF_REVIEWER_PATH.md`](docs/OTF_REVIEWER_PATH.md)
 - **Related LS grant path:** [`docs/RELATED_LS_GRANT_PATH.md`](docs/RELATED_LS_GRANT_PATH.md)
 - **ProofPath continuation for reviewers:** [`docs/PROOFPATH_CONTINUATION_FOR_REVIEWERS.md`](docs/PROOFPATH_CONTINUATION_FOR_REVIEWERS.md)
 - **Demo video:** https://youtu.be/IUk3iO0N4YU
