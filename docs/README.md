@@ -7,6 +7,8 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ## Architecture
 
+- [Action Gate Architecture Diagram](architecture_diagram.md) — compact visual flow from proposed action to evidence checks, ALLOW / BLOCK / ESCALATE, and reviewer-facing artifacts.
+- [Evidence Artifact Schema](evidence_artifact_schema.md) — high-level schema guide for current deterministic demo evidence artifacts, digests, decisions, and stop reasons.
 - [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — cross-stack overview connecting PythiaLabs, DRP, LTP, CML, and LiminalDB as one deterministic oversight program.
 - [Liminal Audit Bridge](LIMINAL_AUDIT_BRIDGE.md) — Petri-like behavioral audit transcript -> T-Trace JSONL -> causal/risk checks -> reviewer-facing report.
 - [Database Architecture](database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
@@ -37,6 +39,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ## Demos and Expected Outputs
 
+- [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md) — concise review steps for running `make demo`, checking expected decisions, verifying evidence, and inspecting the artifact bundle.
 - [Support-safety gate demo](https://youtu.be/A6UAR3e2r3k) — deterministic support-safety gate: sanitized trace → safety boundary → scenario checks → evidence → PASS
 - [Paid Review Demo Expected Output](../examples/paid_review_demo_expected_output.md)
 - [Agent Infrastructure Showcase Expected Output](agent_infra_action_showcase_expected_output.md)
