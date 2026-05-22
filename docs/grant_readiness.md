@@ -1,96 +1,221 @@
 # Grant Readiness Pack — PythiaLabs
 
 ## One-sentence pitch
-PythiaLabs is a temporal-causal reason layer for agentic governance actions, producing deterministic pre-execution decisions, audit traces, and verifiable evidence artifacts for Web3 treasury safety.
+
+PythiaLabs is an open-source prototype for deterministic pre-execution evidence gates for high-risk AI-agent actions. It evaluates whether proposed actions should be allowed, blocked, or escalated before tools are called, producing reviewer-facing evidence artifacts, stable stop reasons, and replayable traces.
 
 ## Problem statement
-Grant-funded ecosystems increasingly rely on autonomous tooling and AI-assisted operations, while governance and treasury decisions remain vulnerable to opaque logic, inconsistent policy checks, and weak auditability. Teams often cannot answer basic high-stakes questions with confidence: who authorized an action, whether that authorization was valid at the action time, whether it was known at the decision time, and which exact gate failed when a decision was rejected.
 
-Without explicit, replayable reasoning traces, governance incidents become difficult to diagnose, postmortems remain subjective, and safety controls are hard to verify across contributors, toolchains, and grant phases.
+AI agents are moving from text generation into real actions: code changes, infrastructure operations, financial workflows, governance actions, and tool calls. Prompt instructions, informal review, and after-the-fact logs are weak safety boundaries when an action may affect money, infrastructure, permissions, or public-sector workflows.
+
+Teams need a reproducible way to answer:
+
+```text
+Should this proposed AI-agent action be allowed to execute now,
+blocked before execution,
+or escalated to a human reviewer?
+```
+
+PythiaLabs explores this missing control layer between agent intent and execution.
 
 ## Why now
-- AI-assisted operational workflows are entering DAO and public-goods processes faster than safety conventions are maturing.
-- Grant programs are increasingly prioritizing transparency, risk controls, and measurable governance outcomes.
-- Ecosystems need reproducible demonstrations of policy enforcement that are understandable to both technical reviewers and non-technical governance participants.
-- A deterministic, local-first reasoning layer can be tested immediately without chain dependencies, enabling early validation before costly integrations.
+
+- AI-assisted operational workflows are moving into higher-impact settings.
+- Grant programs increasingly prioritize transparency, risk controls, and measurable governance outcomes.
+- Existing logs often explain what happened after the fact, not whether an action should have reached execution.
+- A deterministic, local-first evidence gate can be reviewed without private infrastructure or production credentials.
 
 ## Current implemented demos
-PythiaLabs currently ships deterministic, local demos and tests demonstrating:
 
-- agent safety gating (allow/deny with explicit stop reasons)
-- bitemporal authorization reasoning (action-time validity vs decision-time knowledge)
-- Web3 treasury governance checks (proposal match, quorum, voting window, timelock, authorization, expiration)
-- deterministic trace export for audit artifacts
-- evidence packaging and local verification flow
-- signed envelope demonstration via `signed_demo` as a **deterministic local demo only** (non-production cryptography demonstration; not a production signing system)
+PythiaLabs currently ships deterministic local demos and tests demonstrating:
 
-## Web3 treasury safety use case
-A DAO operator (or agent) proposes a treasury transfer. Before any execution, PythiaLabs evaluates governance and policy constraints in a deterministic pipeline and returns:
+- agent action gating with stable stop reasons,
+- decision-time evidence checks,
+- bitemporal authorization reasoning,
+- infrastructure-adjacent action safety checks,
+- banking / financial-risk action checks,
+- Web3 treasury governance checks,
+- deterministic trace export,
+- evidence packaging and SHA-256 verification,
+- tamper-detection examples,
+- reviewer-facing expected-output documentation,
+- a single-command paid review demo via `make demo`.
 
-1. allow/deny outcome
-2. stable stop reason
-3. chronological trace of checks and results
-4. evidence-ready artifact for audit and review
+Web3 treasury is one high-risk demo scenario, not the product category. The broader category is pre-execution evidence gates for AI-agent proposed actions.
 
-This supports pre-execution risk reduction, reviewer confidence, and clearer accountability during grant reporting.
+## Target users and reviewers
 
-## Target users
-- DAO and protocol treasury stewards
-- grant program operators and ecosystem review committees
-- public-goods teams that require transparent decision records
-- AI agent builders integrating policy-aware action controls
-- security, risk, and compliance contributors supporting governance operations
+- AI safety and AI governance researchers,
+- agent framework / tool-calling developers,
+- platform and DevOps teams adopting AI agents,
+- grant programs and public-goods review committees,
+- internet-freedom and civil-society tooling maintainers,
+- financial, infrastructure, governance, and compliance-oriented teams,
+- open-source maintainers experimenting with reviewer-facing action traces.
 
-## Public goods value
-- promotes open, inspectable safety patterns for governance tooling
-- reduces duplicated effort by providing a reusable reasoning template for treasury controls
-- improves grant accountability through deterministic traces and evidence artifacts
-- supports safer experimentation for smaller teams without requiring immediate smart-contract integration
+## Public-goods value
+
+- Provides an inspectable safety pattern for pre-execution action review.
+- Makes high-risk agent decisions easier to reproduce and audit.
+- Gives small teams a local-first artifact they can fork, inspect, and adapt.
+- Separates evidence-gate logic from downstream execution systems.
+- Creates a path toward benchmarkable evaluation of action governance.
 
 ## Current limitations
-- MVP scope only; no production deployment hardening
-- deterministic local demonstrations only
-- no blockchain, wallet, or RPC integration
-- no smart contract execution path
-- no claim of production-grade cryptography
-- no external persistence layer for long-lived governance history in current demo stack
+
+PythiaLabs is still an MVP. It currently does not claim:
+
+- production enforcement,
+- production cryptography,
+- wallet integration,
+- smart-contract execution,
+- RPC/indexer integration,
+- cloud-provider integration,
+- IAM enforcement,
+- regulatory compliance,
+- certified cybersecurity protection,
+- replacement of human review,
+- replacement of CI, transaction simulation, or runtime security tooling.
+
+The current value is a reproducible evidence-gate prototype, not a production control product.
 
 ## Proposed grant scopes
-### Scope A — Governance Safety Baseline
-- strengthen policy model coverage for treasury action categories
-- expand reject-path explanations and reviewer-facing diagnostics
-- add scenario packs aligned to common grant governance workflows
 
-### Scope B — Evidence Integrity and Reviewability
-- enrich evidence envelope schema checks and validation ergonomics
-- improve deterministic replay tooling for incident/postmortem workflows
-- provide export conventions suited for grant committee reviews
+### Scope A — Reviewer-Ready Evidence Gate Baseline
 
-### Scope C — Operator Tooling and Adoption
-- author step-by-step integration guides for ecosystem teams
-- provide reference evaluation dashboards/reports for milestones
-- build educational materials for non-technical governance participants
+Goal: turn the current MVP into a clean reviewer-ready baseline.
 
-## Milestone budget examples
-These are illustrative planning examples for grant design and can be adapted to ecosystem requirements.
+Deliverables:
 
-### Example plan — $25k
-- **Milestone 1 ($10k):** threat model expansion + acceptance criteria for core treasury policies
-- **Milestone 2 ($10k):** deterministic scenario pack and replayable audit trace templates
-- **Milestone 3 ($5k):** reviewer documentation and grant reporting artifacts
+- final reviewer path table,
+- updated documentation index,
+- cleaned roadmap board,
+- evidence artifact examples,
+- stop-reason glossary,
+- refreshed quickstart and demo notes,
+- short final technical memo.
 
-Potential outcome: robust baseline readiness pack for pilot governance reviews.
+### Scope B — Benchmarkable Demo and Evaluation Pack
 
-### Example plan — $50k
-- **Milestone 1 ($15k):** broaden safety policy coverage and negative-path testing
-- **Milestone 2 ($20k):** evidence envelope hardening + deterministic verification workflow improvements
-- **Milestone 3 ($15k):** operator playbooks, training examples, and ecosystem onboarding docs
+Goal: move from demos to a small benchmarkable evaluation pack.
 
-Potential outcome: production-readiness planning package (still pre-integration) with stronger review and adoption support.
+Deliverables:
 
-### Example plan — $100k
-- **Milestone 1 ($30k):** comprehensive policy/threat matrix and extended demo scenarios
-- **Milestone 2 ($35k):** audit artifact framework, replay/verification suite, and reporting templates
-- **Milestone 3 ($35k):** ecosystem-facing enablement toolkit, governance drills, and independent review facilitation
+- versioned evidence artifact conventions,
+- deterministic scenario fixtures,
+- expected ALLOW / BLOCK / ESCALATE outcomes,
+- negative-path examples,
+- verifier / reviewer-report prototype plan,
+- comparison plan against prompt-only guardrails and after-the-fact logging.
 
-Potential outcome: grant-grade safety and governance documentation framework suitable for multi-team ecosystem coordination.
+### Scope C — Open Evidence-Gate Toolkit
+
+Goal: build a reusable open-source toolkit around schemas, fixtures, replay checks, reviewer reports, and integration guidance.
+
+Deliverables:
+
+- evidence artifact and replay specification,
+- multi-domain scenario corpus,
+- local verifier / report prototype,
+- contributor and maintainer workflow hardening,
+- adapter notes for CI, MCP/tool-calling, coding-agent, and human review workflows,
+- final grant report and demo package.
+
+## Budget ladder
+
+These are illustrative scopes for grant design and can be adapted to a specific program.
+
+### Example plan — 20k USD
+
+Best fit: small foundation grant, ecosystem microgrant, rapid research support, public-goods grant.
+
+- Milestone 1 — reviewer path hardening: 5k USD
+- Milestone 2 — evidence schema refinement: 6k USD
+- Milestone 3 — small deterministic scenario pack: 6k USD
+- Milestone 4 — final report and demo refresh: 3k USD
+
+Expected outcome: a reviewer can clone the repository, run the demo, inspect artifacts, and understand the research direction in under 30 minutes.
+
+### Example plan — 35k USD
+
+Best fit: AI safety research grant, open-source infrastructure grant, internet-freedom tooling grant, governance tooling grant.
+
+- Milestone 1 — trace and artifact schema hardening: 8k USD
+- Milestone 2 — deterministic scenario benchmark: 10k USD
+- Milestone 3 — reviewer report prototype: 7k USD
+- Milestone 4 — adapter/readiness documentation: 5k USD
+- Milestone 5 — final evaluation memo: 5k USD
+
+Expected outcome: PythiaLabs becomes a reusable open-source evaluation artifact for deterministic pre-execution action gates.
+
+### Example plan — 50k USD
+
+Best fit: serious seed grant, AI governance / safety grant, civil-society tooling grant, public-goods infrastructure program.
+
+- Milestone 1 — evidence artifact and replay specification: 10k USD
+- Milestone 2 — multi-domain scenario corpus: 12k USD
+- Milestone 3 — local verifier / report prototype: 10k USD
+- Milestone 4 — contributor and maintainer workflow hardening: 5k USD
+- Milestone 5 — comparative evaluation plan: 7k USD
+- Milestone 6 — final grant report and demo package: 6k USD
+
+Expected outcome: the repository becomes credible as a follow-on candidate for larger funding because the research object is clear, reproducible, and measurable.
+
+### Larger follow-on path — 75k to 100k+ USD
+
+A larger follow-on grant can fund:
+
+- formal schema and conformance tests,
+- replay and regression suite,
+- multi-agent / multi-tool workflow cases,
+- adapter prototypes,
+- independent review package,
+- longer technical report and benchmark results.
+
+Expected outcome: PythiaLabs becomes a public, inspectable, extensible evidence-gate layer for high-risk AI-agent action governance.
+
+## Recommended ask positioning
+
+For a first serious external grant, the strongest ask is usually:
+
+```text
+35k–50k USD for 3–5 months
+```
+
+Why this range is credible:
+
+- large enough to produce real artifacts beyond documentation,
+- small enough to be plausible for an independent maintainer,
+- scoped around reproducible open-source deliverables,
+- expandable into a larger follow-on grant if benchmark and reviewer artifacts land.
+
+A conservative first ask:
+
+```text
+20k–25k USD for reviewer-ready baseline + small scenario pack
+```
+
+An ambitious but still defensible first ask:
+
+```text
+50k USD for an open evidence-gate toolkit with schemas, fixtures, verifier/report prototype, and evaluation plan
+```
+
+## Suggested grant reviewer checklist
+
+A reviewer can ask:
+
+- Can I run a demo locally without private infrastructure?
+- Does the system produce stable decisions and stop reasons?
+- Is there an explicit evidence path from input to decision?
+- Are current limitations stated clearly?
+- Is the category boundary clear: pre-execution evidence gate, not downstream execution simulation?
+- Is there a plausible path from prototype to benchmarkable research infrastructure?
+
+## Current strongest positioning
+
+Use this formulation in applications:
+
+```text
+PythiaLabs is an open-source prototype for deterministic pre-execution evidence gates for AI-agent actions. It evaluates whether proposed high-risk actions should be allowed, blocked, or escalated before tools are called, producing reviewer-facing evidence and replayable traces.
+```
