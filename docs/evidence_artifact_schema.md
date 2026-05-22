@@ -65,6 +65,56 @@ The demo reports:
 - a counterfactual decision flip,
 - and a final `PASS` result when all scenarios match expectations.
 
+### Minimal example shape
+
+The artifact bundle contains one record per scenario. A shortened
+reviewer-facing record for the accepted transfer scenario has this shape:
+
+```json
+{
+  "scenario": "accepted_transfer",
+  "headline": "Clean 25,000 USDC treasury transfer",
+  "expected_status": "accepted",
+  "expected_stop_reason": "treasury_transfer_accepted",
+  "evidence": {
+    "artifact_type": "pythia.web3_treasury_action.decision_trace.v1",
+    "algorithm": "sha256",
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "payload": {
+      "status": "accepted",
+      "stop_reason": "treasury_transfer_accepted",
+      "trace": [
+        {
+          "event": "proposed_action",
+          "result": "observed",
+          "action_id": "dao_act_001",
+          "action_type": "treasury_transfer",
+          "proposal_id": "prop_001",
+          "actor": "agent_treasury_alpha"
+        },
+        {
+          "event": "quorum_check",
+          "result": "pass",
+          "quorum_met": true
+        },
+        {
+          "event": "decision",
+          "result": "accept",
+          "stop_reason": "treasury_transfer_accepted"
+        }
+      ]
+    }
+  },
+  "self_verify": "verified"
+}
+```
+
+The all-zero digest value above is a placeholder. Running `make demo`
+generates runtime-specific SHA-256 digests and fuller traces for each
+scenario. In the written bundle, records like this appear under the
+`scenarios` list alongside the bundle-level `schema`, `scenario_set_id`,
+and `counterfactual` fields.
+
 ## Web3 treasury showcase artifact
 
 The Web3 treasury showcase runs with:
