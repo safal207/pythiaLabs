@@ -18,6 +18,7 @@ For a concise reviewer-facing overview, see:
 
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
 - **Documentation index:** [`docs/README.md`](docs/README.md)
+- **Portfolio relationship:** [`docs/PORTFOLIO_RELATIONSHIP.md`](docs/PORTFOLIO_RELATIONSHIP.md)
 - **Architecture diagram:** [`docs/architecture_diagram.md`](docs/architecture_diagram.md)
 - **Paid review demo reviewer checklist:** [`docs/paid_review_demo_reviewer_checklist.md`](docs/paid_review_demo_reviewer_checklist.md)
 - **Evidence artifact schema:** [`docs/evidence_artifact_schema.md`](docs/evidence_artifact_schema.md)
