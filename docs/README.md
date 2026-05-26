@@ -78,6 +78,13 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ---
 
+## Contributor Onboarding
+
+- [Contributor Task Map](contributor_task_map.md) — explains Level 1 / Level 2 / Level 3 task types and safe first-contribution boundaries.
+- [Docs PR Review Checklist](docs_pr_review_checklist.md) — maintainer checklist for reviewing docs-only PRs without inflating safety, compliance, or production claims.
+
+---
+
 ## Security and Governance
 
 - [Security Policy](../SECURITY.md)
