@@ -5,10 +5,27 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ---
 
+## Reviewer Paths
+
+| Reviewer intent | Start here |
+|---|---|
+| Understand the project quickly | [One-page summary](PYTHIALABS_ONE_PAGE_SUMMARY.md) |
+| Understand the portfolio role | [Portfolio relationship](PORTFOLIO_RELATIONSHIP.md) |
+| Understand the action-gate flow | [Action Gate Architecture Diagram](architecture_diagram.md) |
+| Verify demo evidence artifacts | [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md) and [Evidence Artifact Schema](evidence_artifact_schema.md) |
+| Check scope boundaries / non-claims | [Non-Claims](NON_CLAIMS.md) |
+| Avoid Web3 misclassification | [Positioning vs. Transaction Simulation Tools](positioning_vs_transaction_simulation.md) |
+| Review OTF / internet freedom framing | [OTF Reviewer Path](OTF_REVIEWER_PATH.md) |
+| Understand ProofPath continuation | [ProofPath Continuation for Reviewers](PROOFPATH_CONTINUATION_FOR_REVIEWERS.md) |
+| Evaluate commercial pilot path | [Agent Action Audit Sample Report](AGENT_ACTION_AUDIT_SAMPLE_REPORT.md) |
+
+---
+
 ## Architecture
 
 - [Action Gate Architecture Diagram](architecture_diagram.md) — compact visual flow from proposed action to evidence checks, ALLOW / BLOCK / ESCALATE, and reviewer-facing artifacts.
 - [Evidence Artifact Schema](evidence_artifact_schema.md) — high-level schema guide for current deterministic demo evidence artifacts, digests, decisions, and stop reasons.
+- [Glossary](glossary.md) — concise definitions for core decision terms such as ALLOW, BLOCK, ESCALATE, evidence artifact, stop reason, and replayable trace.
 - [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — cross-stack overview connecting PythiaLabs, DRP, LTP, CML, and LiminalDB as one deterministic oversight program.
 - [Liminal Audit Bridge](LIMINAL_AUDIT_BRIDGE.md) — Petri-like behavioral audit transcript -> T-Trace JSONL -> causal/risk checks -> reviewer-facing report.
 - [Database Architecture](database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
@@ -33,6 +50,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 - [Open Agentic Models Need Evidence Gates](open_agentic_models_need_evidence_gates.md)
 - [Related Prototype: ProofPath](related_proofpath.md) — explains how ProofPath serves as a separate runnable protocol/gateway lab for the PythiaLabs evidence-gate idea.
 - [Positioning vs. Transaction Simulation Tools](positioning_vs_transaction_simulation.md) — clarifies that PythiaLabs is not a Web3 transaction simulator; it is a pre-execution evidence gate for AI-agent proposed actions before tools are called.
+- [Non-Claims](NON_CLAIMS.md) — explicit scope boundaries: not production security certification, not compliance certification, not a transaction simulator, and not a replacement for human review.
 - [AI Coding Agents and CI Autofix Use Case](ai_coding_agents_ci_autofix_use_case.md) — documents how PythiaLabs can gate autonomous coding-agent and CI autofix actions before tools are called.
 
 ---
