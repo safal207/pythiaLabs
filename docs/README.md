@@ -12,7 +12,8 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 | Understand the project quickly | [One-page summary](PYTHIALABS_ONE_PAGE_SUMMARY.md) |
 | Understand the portfolio role | [Portfolio relationship](PORTFOLIO_RELATIONSHIP.md) |
 | Understand the action-gate flow | [Action Gate Architecture Diagram](architecture_diagram.md) |
-| Verify demo evidence artifacts | [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md) and [Evidence Artifact Schema](evidence_artifact_schema.md) |
+| Verify demo evidence artifacts | [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md), [Evidence Artifact Schema](evidence_artifact_schema.md), and [Artifact Inspection Checklist](artifact_inspection_checklist.md) |
+| Read a sample reviewer deliverable | [Paid Review Demo Sample Reviewer Report](paid_review_demo_sample_reviewer_report.md) |
 | Check scope boundaries / non-claims | [Non-Claims](NON_CLAIMS.md) |
 | Avoid Web3 misclassification | [Positioning vs. Transaction Simulation Tools](positioning_vs_transaction_simulation.md) |
 | Review OTF / internet freedom framing | [OTF Reviewer Path](OTF_REVIEWER_PATH.md) |
@@ -58,6 +59,8 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 ## Demos and Expected Outputs
 
 - [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md) — concise review steps for running `make demo`, checking expected decisions, verifying evidence, and inspecting the artifact bundle.
+- [Artifact Inspection Checklist](artifact_inspection_checklist.md) — checklist for inspecting generated evidence artifacts without trusting terminal output alone.
+- [Paid Review Demo Sample Reviewer Report](paid_review_demo_sample_reviewer_report.md) — example Markdown report a reviewer could produce after running the deterministic paid review demo.
 - [Support-safety gate demo](https://youtu.be/A6UAR3e2r3k) — deterministic support-safety gate: sanitized trace → safety boundary → scenario checks → evidence → PASS
 - [Paid Review Demo Expected Output](../examples/paid_review_demo_expected_output.md)
 - [Agent Infrastructure Showcase Expected Output](agent_infra_action_showcase_expected_output.md)
