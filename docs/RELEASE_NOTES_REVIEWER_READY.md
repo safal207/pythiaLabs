@@ -107,14 +107,33 @@ docs/positioning_vs_transaction_simulation.md
 
 This clearly states that PythiaLabs is not a Web3 transaction simulator and that Web3 treasury is one high-risk demo scenario, not the product category.
 
+### Advanced reviewer artifacts
+
+Added and linked:
+
+```text
+docs/paid_review_demo_sample_reviewer_report.md
+docs/artifact_inspection_checklist.md
+```
+
+These close the loop from deterministic demo output to human-readable reviewer deliverables:
+
+```text
+demo output -> evidence artifact -> inspection checklist -> sample reviewer report
+```
+
 ## Completed issue cleanup
 
 Resolved reviewer-navigation and positioning issues:
 
 - `#176` — glossary is linked from `docs/README.md`.
+- `#179` — contributor task map exists and is linked from `docs/README.md`.
 - `#180` — `docs/README.md` has a `Reviewer Paths` table.
+- `#182` — docs-only PR review checklist exists and is linked from `docs/README.md`.
 - `#125` — positioning vs transaction simulation is satisfied by `docs/positioning_vs_transaction_simulation.md`.
 - `#185` — duplicate positioning cleanup completed.
+- `#183` — sample paid-review demo reviewer report added.
+- `#184` — deterministic artifact inspection checklist added.
 
 ## Current evidence anchors
 
@@ -126,6 +145,8 @@ Resolved reviewer-navigation and positioning issues:
 | One-page summary | `docs/PYTHIALABS_ONE_PAGE_SUMMARY.md` |
 | Action gate architecture | `docs/architecture_diagram.md` |
 | Paid review demo checklist | `docs/paid_review_demo_reviewer_checklist.md` |
+| Artifact inspection checklist | `docs/artifact_inspection_checklist.md` |
+| Sample reviewer report | `docs/paid_review_demo_sample_reviewer_report.md` |
 | Evidence artifact schema | `docs/evidence_artifact_schema.md` |
 | Positioning vs transaction simulation | `docs/positioning_vs_transaction_simulation.md` |
 | Docs index | `docs/README.md` |
@@ -210,7 +231,6 @@ Before a formal reviewer-ready tag, complete:
 - clean-checkout validation;
 - confirm `mix deps.get`, `mix test`, and `make demo` pass;
 - optionally confirm `cd site && npm install && npm run build` passes;
-- decide whether to complete or defer `#179`, `#182`, `#183`, and `#184`;
 - update this snapshot with clean-checkout results;
 - add a reviewer-ready tag after validation.
 
@@ -219,7 +239,7 @@ Before a formal reviewer-ready tag, complete:
 PythiaLabs is now substantially clearer for external review:
 
 ```text
-clear action-gate framing + reviewer path + non-claims + portfolio relationship + docs index + positioning guardrail
+clear action-gate framing + reviewer path + non-claims + portfolio relationship + docs index + positioning guardrail + artifact checklist + sample reviewer report
 ```
 
 It is ready for the next step: clean-checkout validation and optional reviewer-ready tag.
