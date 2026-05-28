@@ -1,26 +1,46 @@
-# Liminal Evidence Stack
+# Liminal Evidence Stack — Portfolio Reviewer Map
 
-Status: reviewer-facing architecture overview.
+Status: portfolio-level reviewer map.
 
-Scope: this document explains how PythiaLabs, DRP, LTP, CML, and LiminalDB fit together as a coherent research and infrastructure program for deterministic oversight of agentic AI systems.
+Scope: this document explains how PythiaLabs, LTP, CML, DMP, and LRI fit together as a tagged, reproducible open-source portfolio for trustworthy agentic systems and human-boundary governance.
 
 ## One-sentence summary
 
-The Liminal Evidence Stack is a set of open-source artifacts for making high-risk AI-agent actions reviewable before execution, traceable during execution, auditable after execution, and reproducible from structured evidence.
+The Liminal Evidence Stack is a set of open-source artifacts for making high-risk AI-agent actions reviewable before execution, traceable during execution, auditable after execution, accountable as decisions, and bounded by human revisability constraints.
+
+## Five-minute reviewer path
+
+If you only have five minutes, read this document and answer:
+
+```text
+Does this portfolio separate action gating, trace replay, causal audit, decision memory, and human-boundary protection into narrow, testable artifacts?
+```
+
+Then inspect the tagged reviewer-ready snapshots:
+
+| Layer | Repository | Current snapshot |
+|---|---|---|
+| PythiaLabs | `safal207/pythiaLabs` | `v0.1-reviewer-ready` |
+| LTP | `safal207/L-THREAD-Liminal-Thread-Secure-Protocol-LTP-` | `v0.2-100k-evidence-upgrade` |
+| CML | `safal207/Causal-Memory-Layer` | `v0.1-reviewer-ready` |
+| DMP | `safal207/DMP-decision-memory-protocol` | `v0.1-reviewer-ready` |
+| LRI | `safal207/Living-Relational-Identity-LRI` | `v0.3-evidence-expansion` |
 
 ## Why this stack exists
 
-AI agents are moving from text generation into consequential actions: code changes, infrastructure operations, financial workflows, governance steps, and tool calls. A final answer or final outcome is not enough to evaluate safety.
+AI agents are moving from text generation into consequential actions: code changes, infrastructure operations, financial workflows, governance steps, tool calls, and long-term human interaction.
+
+A final answer or final outcome is not enough to evaluate safety.
 
 A reviewer needs to know:
 
-- what action was proposed,
-- what decision was made,
-- what evidence supported that decision,
-- what path the agent followed,
-- whether the path was admissible,
-- whether the action was causally authorized,
-- and where the evidence timeline is stored.
+- what action was proposed;
+- whether it should have been allowed before execution;
+- what path the agent followed;
+- whether the path was replayable and admissible;
+- whether the action had valid causal permission and responsibility lineage;
+- what decision was made, why, and whether later reality changed its reversibility;
+- whether human identity, revisability, consent drift, and relational boundaries were preserved.
 
 The Liminal Evidence Stack separates those concerns into small, testable layers.
 
@@ -29,52 +49,60 @@ The Liminal Evidence Stack separates those concerns into small, testable layers.
 ```text
 Agent proposes action
   -> PythiaLabs gates the action before tool call
-  -> DRP records the decision and rationale
-  -> LTP replays and inspects the execution trace
-  -> CML audits causal validity and responsibility lineage
-  -> LiminalDB stores replayable timelines, state, and evidence
+  -> LTP captures/replays the execution path
+  -> CML audits causal permission and responsibility lineage
+  -> DMP preserves decision memory and irreversibility assumptions
+  -> LRI protects human revisability and identity-boundary invariants
+  -> reviewer receives structured evidence instead of narrative-only logs
 ```
 
 ## Architecture at a glance
 
 ```mermaid
 flowchart LR
-  A[AI agent proposes high-risk action] --> B[PythiaLabs]
-  B -->|ALLOW / BLOCK / ESCALATE| C[DRP decision record]
-  B --> D[Evidence artifact]
-  A --> E[LTP trace]
-  E --> F[LTP replay / admissibility inspection]
-  C --> G[CML causal audit]
+  A[AI agent proposes high-risk action] --> B[PythiaLabs evidence gate]
+  B -->|ALLOW / BLOCK / ESCALATE| C[LTP trace / replay]
+  C --> D[CML causal audit]
+  B --> E[DMP decision memory]
+  D --> E
+  E --> F[LRI human-boundary review]
+  C --> G[Reviewer evidence packet]
   D --> G
+  E --> G
   F --> G
-  C --> H[LiminalDB timeline]
-  D --> H
-  F --> H
-  G --> H
-  H --> I[Reviewer / grant evaluator / operator]
 ```
 
 ## Layer responsibilities
 
 | Layer | Main question | Artifact role | Current repository |
-| --- | --- | --- | --- |
-| PythiaLabs | Should this proposed high-risk agent action proceed before tools are called? | Pre-execution evidence gate | `safal207/pythiaLabs` |
-| DRP | What decision was made, why, what was considered, and how does it link to prior/later decisions? | Immutable decision record protocol | `safal207/DRP` |
-| LTP | Was this agent execution path replayable, anchored, admissible, or rejected? | Deterministic trace replay and oversight protocol | `safal207/L-THREAD-Liminal-Thread-Secure-Protocol-LTP-` |
-| CML | Was this action causally valid under authorization, intent, approval, and responsibility lineage? | Causal validity audit layer | `safal207/Causal-Memory-Layer` |
-| LiminalDB | Where do adaptive state, timelines, snapshots, and replayable evidence live? | Storage / evidence substrate | `safal207/LiminalBD` |
+|---|---|---|---|
+| PythiaLabs | Should this proposed high-risk agent action proceed before tools are called? | Pre-execution evidence gate / action-admissibility MVP | `safal207/pythiaLabs` |
+| LTP | Was this agent execution path grounded, replayable, anchored, admissible, or rejected? | Deterministic trace replay and oversight protocol | `safal207/L-THREAD-Liminal-Thread-Secure-Protocol-LTP-` |
+| CML | Why was this action allowed, and is causal permission/responsibility lineage intact? | Causal audit layer | `safal207/Causal-Memory-Layer` |
+| DMP | What was decided, why, and did later reality make the decision irreversible? | Decision-memory and irreversibility-governance protocol | `safal207/DMP-decision-memory-protocol` |
+| LRI | Is the human still revisable, relational, and not compressed into a fixed profile? | Human-boundary protocol with identity-boundary tests | `safal207/Living-Relational-Identity-LRI` |
+
+## Current maturity by layer
+
+| Layer | Current maturity | Evidence posture | Best current use |
+|---|---|---|---|
+| PythiaLabs | `v0.1-reviewer-ready` | deterministic demos, reviewer checklist, artifact inspection, sample reviewer report | pre-execution evidence-gate review |
+| LTP | `v0.2-100k-evidence-upgrade` | 115 deterministic cases, clean-checkout validation, conformance tests | trace replay / admissibility evidence |
+| CML | `v0.1-reviewer-ready` | clean-checkout validation, API smoke tests, safety eval `6/6 matched` | causal-validity audit over structured traces |
+| DMP | `v0.1-reviewer-ready` | validation snapshot, schema, tests, trust files | decision memory and irreversibility review |
+| LRI | `v0.3-evidence-expansion` | 54 tests, 3 identity-boundary fixtures, automated anti-profiling/classification/diagnosis checks | human-boundary governance / revisability invariants |
 
 ## What each layer deliberately does not do
 
 The stack is designed around separation of concerns.
 
 | Layer | Not responsible for |
-| --- | --- |
-| PythiaLabs | Runtime orchestration, wallet security, transaction simulation, production enforcement |
-| DRP | Deciding whether a decision is morally/correctly right, enforcing governance, storing all data |
-| LTP | Executing agents, proving universal truth, replacing observability systems |
-| CML | Running actions, full AI alignment, production IAM, complete prevention of unsafe actions |
-| LiminalDB | Replacing all databases, guaranteeing production consensus/security/compliance in current form |
+|---|---|
+| PythiaLabs | wallet security, transaction simulation, production enforcement, certified compliance |
+| LTP | executing agents, proving universal truth, replacing observability systems |
+| CML | full AI alignment, production IAM, complete prevention of unsafe actions |
+| DMP | deciding what is morally/legalistically correct, replacing human governance, legal admissibility |
+| LRI | profiling, identity classification, therapy, diagnosis, social scoring, automated decisioning about humans |
 
 This is important for grant review: each artifact has a narrow, testable safety role rather than claiming to solve all AI safety problems.
 
@@ -86,29 +114,28 @@ A coding agent wants to modify CI configuration after a failed build.
    - Inputs: proposed action, risk class, evidence snapshot.
    - Output: `ALLOW`, `BLOCK`, or `ESCALATE`.
 
-2. **DRP** records the decision.
-   - What was decided?
-   - Why was it allowed, blocked, or escalated?
-   - What evidence was considered?
-   - Which prior decisions does it depend on?
-
-3. **LTP** inspects the agent execution path.
+2. **LTP** captures and replays the agent execution path.
    - Was the path replayable?
    - Were claims/actions anchored?
    - Did the path drift?
    - Was any output/action rejected under the oversight profile?
 
-4. **CML** audits causal validity.
+3. **CML** audits causal validity.
    - Was the action actually authorized by a valid parent decision?
    - Did responsibility remain intact through the chain?
    - Was there a missing parent, causal gap, or invalid handoff?
 
-5. **LiminalDB** stores replayable evidence.
-   - Decision records.
-   - Evidence snapshots.
-   - Trace events.
-   - Audit findings.
-   - Timeline entries and derived projections.
+4. **DMP** preserves decision memory.
+   - What was decided?
+   - Why was it allowed, blocked, or escalated?
+   - Was the decision believed to be reversible?
+   - Did later reality make it irreversible or require supersession?
+
+5. **LRI** protects human-boundary invariants when the action touches a person, memory, preference, identity, or relationship.
+   - Is the person still revisable?
+   - Is the system avoiding profiling/classification/diagnosis framing?
+   - Is consent drift or silent authorship visible?
+   - Is the human still the authority over their becoming?
 
 ## Evidence lifecycle
 
@@ -116,15 +143,25 @@ A coding agent wants to modify CI configuration after a failed build.
 proposed action
   -> evidence snapshot
   -> gate decision
-  -> decision record
   -> execution trace
   -> replay/admissibility result
   -> causal audit finding
-  -> timeline storage
+  -> decision memory / irreversibility record
+  -> human-boundary check when people are affected
   -> reviewer report
 ```
 
 The stack is strongest when every stage leaves a structured artifact that can be inspected later.
+
+## Reviewer entry points
+
+| Repository | Reviewer entry point | Main local validation idea |
+|---|---|---|
+| PythiaLabs | `docs/REVIEWER_PATH.md` and `docs/RELEASE_NOTES_REVIEWER_READY.md` | `mix test`, `make demo`, optional site build |
+| LTP | `docs/GRANT_EVIDENCE.md` / benchmark docs | `pnpm test`, `pnpm test:conformance`, benchmark runner |
+| CML | `docs/REVIEWER_PATH.md` and `docs/RELEASE_NOTES_REVIEWER_READY.md` | `pytest`, `python scripts/run_safety_eval.py` |
+| DMP | `docs/REVIEWER_PATH.md` and `docs/RELEASE_NOTES_REVIEWER_READY.md` | example validation + unittest + snapshot generation |
+| LRI | `docs/REVIEWER_PATH.md`, `docs/NON_CLAIMS.md`, and release notes | `make check`, `make all`, boundary tests |
 
 ## Grant relevance
 
@@ -136,79 +173,57 @@ Grant-funded work can evaluate questions such as:
 - Can deterministic replay expose execution-path failures that final output review misses?
 - Can causal lineage checks detect actions that succeed operationally but lack valid authorization?
 - Can structured decision records make governance and safety decisions auditable?
-- Can replayable storage make evidence timelines reconstructable without mutating ground truth?
-
-## Reviewer path across repositories
-
-Each repository now has its own grant evidence package or reviewer-facing entry point:
-
-| Repository | Reviewer entry point |
-| --- | --- |
-| PythiaLabs | `docs/GRANT_EVIDENCE.md` |
-| DRP | `docs/GRANT_EVIDENCE.md` |
-| LTP | `docs/GRANT_EVIDENCE.md` |
-| CML | `docs/GRANT_EVIDENCE.md` |
-| LiminalDB | `docs/GRANT_EVIDENCE.md` |
-
-This document is the cross-stack overview.
-
-## Current maturity
-
-| Layer | Current maturity | Best current use |
-| --- | --- | --- |
-| PythiaLabs | Prototype / demos / reviewer evidence | Pre-execution action gating research |
-| DRP | Draft protocol + reference validator | Decision provenance and auditability experiments |
-| LTP | Trace replay / inspector / conformance surface | Deterministic oversight of agent traces |
-| CML | Audit engine + benchmark fixtures | Causal-validity checking over structured traces |
-| LiminalDB | Active Rust runtime/storage substrate | Replayable timelines and adaptive state experiments |
+- Can human-boundary fixtures and tests prevent drift into profiling/classification/diagnosis framing?
+- Can a single reviewer report combine action gate, trace replay, causal audit, decision memory, and human-boundary evidence?
 
 ## Non-claims for the full stack
 
 The Liminal Evidence Stack currently does not claim:
 
-- complete AI alignment,
-- production-grade safety enforcement,
-- certified compliance,
-- replacement of human review,
-- replacement of existing observability/security systems,
-- universal correctness of agent decisions,
-- prevention of all unsafe actions,
-- production-readiness across all layers.
+- complete AI alignment;
+- production-grade safety enforcement;
+- certified compliance;
+- replacement of human review;
+- replacement of existing observability/security systems;
+- universal correctness of agent decisions;
+- prevention of all unsafe actions;
+- production-readiness across all layers;
+- identity classification, profiling, diagnosis, therapy, social scoring, or automated decisioning about humans.
 
 The current claim is narrower and stronger:
 
 ```text
-The stack provides implemented open-source artifacts for making selected classes of agentic decisions, traces, and causal lineages more structured, inspectable, replayable, and benchmarkable.
+The stack provides tagged, reproducible open-source artifacts for making selected classes of agentic decisions, traces, causal lineages, decision memories, and human-boundary risks more structured, inspectable, replayable, and testable.
 ```
 
 ## Research roadmap
 
 Near-term cross-stack work can focus on:
 
-1. **Shared trace/evidence schema** — align decision records, gate outputs, traces, audit findings, and timeline storage.
-2. **End-to-end benchmark scenarios** — coding agent, infra action, financial workflow, governance workflow, and web-browsing agent.
-3. **Replay fidelity metrics** — measure whether decisions and trace judgments reproduce from the same evidence.
-4. **Causal-validity metrics** — evaluate missing-parent, broken-handoff, unmarked-gap, and invalid lineage failures.
-5. **Reviewer reports** — generate one report that includes gate decision, DRP record, LTP replay result, CML finding, and LiminalDB timeline entry.
-6. **Adapters** — connect to agent frameworks, CI systems, MCP-style tools, and workflow engines.
-7. **Public artifacts** — publish sanitized fixtures, expected outputs, and reproducible benchmark reports.
+1. **Full-path demo** — one scenario that flows through PythiaLabs -> LTP -> CML -> DMP -> LRI.
+2. **Shared evidence packet** — one reviewer-facing report that includes gate decision, replay result, causal audit, decision memory, and boundary status.
+3. **Cross-stack fixtures** — coding agent, infra action, financial workflow, governance workflow, and long-term memory scenario.
+4. **Replay fidelity metrics** — measure whether decisions and trace judgments reproduce from the same evidence.
+5. **Causal-validity metrics** — evaluate missing-parent, broken-handoff, unmarked-gap, and invalid lineage failures.
+6. **Human-boundary drift metrics** — evaluate identity freezing, consent drift, silent authorship, and prohibited framing drift.
+7. **External review** — collect 2-3 independent reviewer comments or issues across the stack.
 
 ## Strongest positioning
 
 Use this formulation in applications:
 
 ```text
-The Liminal Evidence Stack is an open-source research stack for deterministic oversight of agentic AI systems. It combines pre-execution evidence gates, immutable decision records, deterministic trace replay, causal-lineage audit, and replayable evidence storage so that high-risk AI-agent actions can be reviewed, reproduced, and evaluated from structured artifacts rather than narrative-only logs.
+The Liminal Evidence Stack is an open-source research stack for deterministic oversight of agentic AI systems and human-boundary governance. It combines pre-execution evidence gates, deterministic trace replay, causal-lineage audit, decision-memory records, and automated identity-boundary checks so that high-risk AI-agent behavior can be reviewed, reproduced, and evaluated from structured artifacts rather than narrative-only logs.
 ```
 
 ## Short version
 
 ```text
 PythiaLabs gates actions.
-DRP records decisions.
 LTP replays traces.
 CML audits causal lineage.
-LiminalDB stores timelines and evidence.
+DMP preserves decision memory.
+LRI protects human revisability and identity-boundary invariants.
 ```
 
-Together, they form a deterministic oversight stack for agentic AI.
+Together, they form a tagged, reproducible evidence stack for trustworthy agentic systems.
