@@ -10,6 +10,8 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 | Reviewer intent | Start here |
 |---|---|
 | Understand the project quickly | [One-page summary](PYTHIALABS_ONE_PAGE_SUMMARY.md) |
+| Understand the full portfolio in 5 minutes | [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) |
+| Evaluate the portfolio for funding | [Portfolio One-Page Grant Packet](PORTFOLIO_ONE_PAGE_GRANT_PACKET.md) |
 | Understand the portfolio role | [Portfolio relationship](PORTFOLIO_RELATIONSHIP.md) |
 | Understand the action-gate flow | [Action Gate Architecture Diagram](architecture_diagram.md) |
 | Verify demo evidence artifacts | [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md), [Evidence Artifact Schema](evidence_artifact_schema.md), and [Artifact Inspection Checklist](artifact_inspection_checklist.md) |
@@ -27,7 +29,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 - [Action Gate Architecture Diagram](architecture_diagram.md) — compact visual flow from proposed action to evidence checks, ALLOW / BLOCK / ESCALATE, and reviewer-facing artifacts.
 - [Evidence Artifact Schema](evidence_artifact_schema.md) — high-level schema guide for current deterministic demo evidence artifacts, digests, decisions, and stop reasons.
 - [Glossary](glossary.md) — concise definitions for core decision terms such as ALLOW, BLOCK, ESCALATE, evidence artifact, stop reason, and replayable trace.
-- [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — cross-stack overview connecting PythiaLabs, DRP, LTP, CML, and LiminalDB as one deterministic oversight program.
+- [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — portfolio-level reviewer map connecting PythiaLabs, LTP, CML, DMP, and LRI as one tagged evidence stack.
 - [Liminal Audit Bridge](LIMINAL_AUDIT_BRIDGE.md) — Petri-like behavioral audit transcript -> T-Trace JSONL -> causal/risk checks -> reviewer-facing report.
 - [Database Architecture](database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
 - [Persistent Reasoning Memory](persistent_reasoning_memory.md) — append-only reasoning memory roadmap.
@@ -71,6 +73,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ## Funding and Support
 
+- [Portfolio One-Page Grant Packet](PORTFOLIO_ONE_PAGE_GRANT_PACKET.md) — short grant packet summarizing the full evidence stack, tagged snapshots, fundable question, and non-claims.
 - [Grant Evidence Package](GRANT_EVIDENCE.md) — reviewer-facing evidence matrix, reproducible commands, architecture sketch, current limitations, and grant roadmap.
 - [Grant Readiness](grant_readiness.md)
 - [Grant One-Pager — Web3 Treasury Reason Layer](grant_one_pager_web3_treasury_reason_layer.md)
