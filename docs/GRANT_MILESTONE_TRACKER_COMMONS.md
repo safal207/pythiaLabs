@@ -18,13 +18,11 @@ It helps reviewers quickly see the proposed work breakdown, expected deliverable
 
 ## Public milestone issues
 
-- Milestone 1: Evidence schema v0.1
-- Milestone 2: CLI and library path
-- Milestone 3: Demo case library
-- Milestone 4: GitHub Actions prototype
-- Milestone 5: Documentation and public reviewer report
-
-GitHub issue links will be added after the issues are created.
+- #190 — Milestone 1: Evidence schema v0.1
+- #191 — Milestone 2: CLI and library path
+- #192 — Milestone 3: Demo case library
+- #193 — Milestone 4: GitHub Actions prototype
+- #194 — Milestone 5: Documentation and public reviewer report
 
 ## Reviewer path
 
