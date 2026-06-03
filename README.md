@@ -16,6 +16,9 @@ Web3 treasury is one high-risk demo scenario, not the product category.
 
 For a concise reviewer-facing overview, see:
 
+- **NGI Commons reviewer path:** [`docs/NGI_COMMONS_REVIEWER_PATH.md`](docs/NGI_COMMONS_REVIEWER_PATH.md)
+- **NGI Commons budget and milestones:** [`docs/BUDGET_AND_MILESTONES_COMMONS.md`](docs/BUDGET_AND_MILESTONES_COMMONS.md)
+- **NGI Commons milestone tracker:** [`docs/GRANT_MILESTONE_TRACKER_COMMONS.md`](docs/GRANT_MILESTONE_TRACKER_COMMONS.md)
 - **Reviewer path:** [`docs/REVIEWER_PATH.md`](docs/REVIEWER_PATH.md)
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
 - **Documentation index:** [`docs/README.md`](docs/README.md)
@@ -30,6 +33,15 @@ For a concise reviewer-facing overview, see:
 - **Demo video:** https://youtu.be/IUk3iO0N4YU
 - **Support-safety gate demo:** https://youtu.be/A6UAR3e2r3k
 - **Landing page:** [`site/`](site/) (deployable via GitHub Pages)
+
+## NGI Commons grant metadata
+
+```text
+Application: 2026-06-133
+Fund: NGI Zero Commons / Commons Fund
+Requested amount: EUR 30,000
+Repository: https://github.com/safal207/pythiaLabs
+```
 
 ## Landing Page
 
