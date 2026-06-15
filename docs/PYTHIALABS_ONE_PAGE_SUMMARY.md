@@ -3,7 +3,7 @@
 ## Deterministic Evidence Gates for High-Risk AI-Agent Actions
 
 **Project:** PythiaLabs  
-**Maintainer:** Aleksei Safonov  
+**Maintainer:** Aleksey Safonov  
 **Repository:** https://github.com/safal207/pythiaLabs  
 **Demo:** https://youtu.be/IUk3iO0N4YU
 
@@ -117,28 +117,3 @@ The next stage of PythiaLabs is focused on questions such as:
 - How can deterministic control layers complement probabilistic AI evaluations?
 - How should AI-agent action gates integrate with enterprise, financial, infrastructure, and public-sector workflows?
 - What benchmark tasks best represent high-risk agentic actions?
-
----
-
-## 7. What We Are Looking For
-
-PythiaLabs is currently seeking:
-
-- research feedback;
-- technical collaborators;
-- AI safety / AI governance input;
-- startup, accelerator, or grant pathways;
-- pilot use cases in AI assurance, RegTech, GovTech, cybersecurity, and trusted infrastructure;
-- guidance on benchmark design and evaluation methodology.
-
----
-
-## 8. Contact
-
-**Aleksei Safonov**  
-Independent open-source maintainer and QA engineer  
-Email: safal0645@gmail.com  
-Telegram: @Alexfox14  
-X: https://x.com/lim746048  
-GitHub: https://github.com/safal207  
-Project: https://github.com/safal207/pythiaLabs
