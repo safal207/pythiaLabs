@@ -21,6 +21,7 @@ For a concise reviewer-facing overview, see:
 - **NGI Commons milestone tracker:** [`docs/GRANT_MILESTONE_TRACKER_COMMONS.md`](docs/GRANT_MILESTONE_TRACKER_COMMONS.md)
 - **Reviewer path:** [`docs/REVIEWER_PATH.md`](docs/REVIEWER_PATH.md)
 - **One-page summary:** [`docs/PYTHIALABS_ONE_PAGE_SUMMARY.md`](docs/PYTHIALABS_ONE_PAGE_SUMMARY.md)
+- **Agent Action Audit Snapshot example:** [`docs/examples/agent-action-audit-snapshot-example.md`](docs/examples/agent-action-audit-snapshot-example.md)
 - **Documentation index:** [`docs/README.md`](docs/README.md)
 - **Portfolio relationship:** [`docs/PORTFOLIO_RELATIONSHIP.md`](docs/PORTFOLIO_RELATIONSHIP.md)
 - **Limitations:** [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md)
@@ -96,6 +97,8 @@ AI agents are moving from text generation into real actions: infrastructure chan
   
   Expected output: [`docs/web3_treasury_full_showcase_expected_output.md`](docs/web3_treasury_full_showcase_expected_output.md)
 - **AI Coding Agents / CI Autofix** — pre-execution review for autonomous coding-agent actions such as CI fixes, PR updates, dependency changes, and deploy-adjacent workflows.
+
+  Snapshot example: [`docs/examples/agent-action-audit-snapshot-example.md`](docs/examples/agent-action-audit-snapshot-example.md)
 
 ## Reviewer quickstart
 
