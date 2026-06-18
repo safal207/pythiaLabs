@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Gate Decision Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_type",
+    "event_id",
+    "timestamp",
+    "source",
+    "action_event_id",
+    "tool_call_id",
+    "tool_name",
+    "security_assessment",
+    "gate_decision",
+    "matched_rules",
+    "evidence_refs",
+    "policy_context",
+    "replay"
+  ],
+  "properties": {
+    "schema_version": {"const": "pythia.openhands.evidence_gate_decision.v0.1"},
+    "event_type": {"const": "evidence_gate_decision"},
+    "event_id": {"type": "string", "minLength": 1},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "source": {"const": "security"},
+    "action_event_id": {"type": "string", "minLength": 1},
+    "tool_call_id": {"type": "string", "minLength": 1},
+    "tool_name": {"type": "string", "minLength": 1},
+    "action_summary": {"type": ["string", "null"]},
+    "security_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk", "basis"],
+      "properties": {
+        "risk": {"enum": ["UNKNOWN", "LOW", "MEDIUM", "HIGH"]},
+        "basis": {"enum": ["openhands_analyzer", "policy_rail", "ensemble", "external"]},
+        "analyzer_id": {"type": ["string", "null"]}
+      }
+    },
+    "gate_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "runtime_interaction", "decision_basis", "stop_reasons"],
+      "properties": {
+        "decision": {"enum": ["ALLOW", "BLOCK", "ESCALATE"]},
+        "runtime_interaction": {"enum": ["NONE", "CONFIRM", "DENY"]},
+        "decision_basis": {"enum": ["deterministic", "model_assisted", "hybrid"]},
+        "stop_reasons": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "rationale": {"type": ["string", "null"]}
+      }
+    },
+    "matched_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_id", "layer", "outcome", "reason"],
+        "properties": {
+          "rule_id": {"type": "string", "minLength": 1},
+          "layer": {"enum": ["openhands_policy_rail", "external_policy", "evidence_gate"]},
+          "outcome": {"enum": ["PASS", "FAIL", "REQUIRE_APPROVAL"]},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_id", "evidence_type", "status"],
+        "properties": {
+          "evidence_id": {"type": "string", "minLength": 1},
+          "evidence_type": {"type": "string", "minLength": 1},
+          "status": {"enum": ["PRESENT", "MISSING", "STALE", "REDACTED"]},
+          "digest": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+        }
+      }
+    },
+    "policy_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version", "policy_hash"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"type": "string", "minLength": 1},
+        "policy_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "evaluator_version": {"type": ["string", "null"]}
+      }
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["replayable", "canonical_input_digest", "decision_digest"],
+      "properties": {
+        "replayable": {"type": "boolean"},
+        "canonical_input_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "decision_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "sensitive_data_redacted": {"type": "boolean", "default": true}
+  }
+}
