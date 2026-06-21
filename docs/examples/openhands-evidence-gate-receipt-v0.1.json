@@ -1,0 +1,70 @@
+{
+  "schema_version": "pythia.openhands.evidence_gate_receipt.v0.1",
+  "event_type": "evidence_gate_receipt",
+  "receipt_id": "receipt_01",
+  "generated_at": "2026-06-21T14:05:01Z",
+  "action": {
+    "action_event_id": "action_evt_01",
+    "tool_call_id": "tool_call_01",
+    "observation_event_id": "observation_evt_01",
+    "tool_name": "terminal",
+    "action_summary": "modify production deployment workflow",
+    "final_artifact_refs": [
+      {
+        "ref_id": "deployment_diff_01",
+        "ref_type": "diff",
+        "digest": "3333333333333333333333333333333333333333333333333333333333333333"
+      }
+    ]
+  },
+  "decision": {
+    "gate_event_id": "gate_evt_01",
+    "decision": "ESCALATE",
+    "runtime_interaction": "CONFIRM",
+    "stop_reasons": [
+      "OWNER_APPROVAL_REQUIRED",
+      "PRODUCTION_SCOPE_REQUIRES_REVIEW"
+    ],
+    "policy_id": "repo-production-change-policy",
+    "policy_version": "1",
+    "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "event_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "verification": {
+    "verification_event_id": "verify_evt_01",
+    "status": "PASS",
+    "verifier_id": "pytest",
+    "verifier_version": "9.0",
+    "result_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "event_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "trace_chain": [
+    {
+      "stage": "DECISION",
+      "event_id": "gate_evt_01",
+      "event_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    {
+      "stage": "ACTION",
+      "event_id": "action_evt_01",
+      "event_digest": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    {
+      "stage": "OBSERVATION",
+      "event_id": "observation_evt_01",
+      "event_digest": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "stage": "VERIFICATION",
+      "event_id": "verify_evt_01",
+      "event_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "stage": "ARTIFACT",
+      "event_id": "deployment_diff_01",
+      "event_digest": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  ],
+  "complete": true,
+  "sensitive_data_redacted": true
+}
