@@ -38,10 +38,16 @@ This project is currently pre-release.
 - Deterministic Agent Infrastructure Action Safety Showcase for destructive AI-agent infrastructure actions
 - Reviewer-facing expected output guide for Agent Infrastructure Action Safety Showcase
 - Unit tests for destructive action decisioning and evidence verification paths
+- OpenHands-compatible `EvidenceGateDecisionEvent` v0.2 with shared `receipt_id` and `verification_required`
+- Append-only post-action `EvidenceGateVerificationEvent` schema
+- Reviewer-facing `EvidenceGateReceipt` projection schema
+- Linked decision, verification, and receipt JSON examples
+- Evidence Gate Receipt Protocol v0.2 release note
 
 ### Changed
 
 - Switched project license from Pythia Labs Custom License v1.0 to Apache License 2.0
+- Preserved the OpenHands decision-event v0.1 schema as a compatibility snapshot while moving the latest schema to v0.2
 
 ### Notes
 
