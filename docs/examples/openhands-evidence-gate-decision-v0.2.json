@@ -1,0 +1,56 @@
+{
+  "schema_version": "pythia.openhands.evidence_gate_decision.v0.2",
+  "event_type": "evidence_gate_decision",
+  "event_id": "gate_evt_01",
+  "receipt_id": "receipt_01",
+  "timestamp": "2026-06-21T14:00:00Z",
+  "source": "security",
+  "action_event_id": "action_evt_01",
+  "tool_call_id": "tool_call_01",
+  "tool_name": "terminal",
+  "action_summary": "modify production deployment workflow",
+  "security_assessment": {
+    "risk": "HIGH",
+    "basis": "ensemble",
+    "analyzer_id": "openhands-ensemble-v1"
+  },
+  "gate_decision": {
+    "decision": "ESCALATE",
+    "runtime_interaction": "CONFIRM",
+    "decision_basis": "hybrid",
+    "stop_reasons": [
+      "OWNER_APPROVAL_REQUIRED",
+      "PRODUCTION_SCOPE_REQUIRES_REVIEW"
+    ],
+    "rationale": "Production workflow changes require an authorized reviewer."
+  },
+  "matched_rules": [
+    {
+      "rule_id": "production-workflow-owner-approval",
+      "layer": "external_policy",
+      "outcome": "REQUIRE_APPROVAL",
+      "reason": "Production deployment workflow requires owner approval."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "evidence_id": "task_scope_01",
+      "evidence_type": "authorized_task_scope",
+      "status": "PRESENT",
+      "digest": "4444444444444444444444444444444444444444444444444444444444444444"
+    }
+  ],
+  "policy_context": {
+    "policy_id": "repo-production-change-policy",
+    "policy_version": "1",
+    "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evaluator_version": "pythia-labs-experimental-v0.2"
+  },
+  "replay": {
+    "replayable": true,
+    "canonical_input_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "decision_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "verification_required": true,
+  "sensitive_data_redacted": true
+}

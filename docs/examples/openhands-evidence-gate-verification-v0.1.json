@@ -1,0 +1,48 @@
+{
+  "schema_version": "pythia.openhands.evidence_gate_verification.v0.1",
+  "event_type": "evidence_gate_verification",
+  "event_id": "verify_evt_01",
+  "receipt_id": "receipt_01",
+  "timestamp": "2026-06-21T14:05:00Z",
+  "gate_event_id": "gate_evt_01",
+  "action_event_id": "action_evt_01",
+  "tool_call_id": "tool_call_01",
+  "observation_event_id": "observation_evt_01",
+  "verifier": {
+    "type": "command",
+    "id": "pytest",
+    "version": "9.0",
+    "identity_ref": null
+  },
+  "verification_command": {
+    "display": "pytest tests/deployment/",
+    "normalized_digest": "22cf890526e6af5b417b5a0081fee385325d3909b2a342967ef634ec101f932a",
+    "environment_ref": "sandbox:openhands-session-01"
+  },
+  "result": {
+    "status": "PASS",
+    "exit_code": 0,
+    "summary": "Deployment workflow tests passed.",
+    "output_refs": [
+      {
+        "ref_id": "observation_evt_01",
+        "ref_type": "observation",
+        "digest": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      {
+        "ref_id": "test_report_01",
+        "ref_type": "report",
+        "digest": "3333333333333333333333333333333333333333333333333333333333333333"
+      }
+    ],
+    "result_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "evidence_refs": [
+    {
+      "evidence_id": "task_scope_01",
+      "status": "PRESENT",
+      "digest": "4444444444444444444444444444444444444444444444444444444444444444"
+    }
+  ],
+  "sensitive_data_redacted": true
+}

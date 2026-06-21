@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Gate Decision Event v0.2",
+  "title": "Evidence Gate Decision Event",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -9,7 +9,6 @@
     "event_id",
     "timestamp",
     "source",
-    "receipt_id",
     "action_event_id",
     "tool_call_id",
     "tool_name",
@@ -18,21 +17,16 @@
     "matched_rules",
     "evidence_refs",
     "policy_context",
-    "replay",
-    "verification_required"
+    "replay"
   ],
   "properties": {
     "schema_version": {
-      "const": "pythia.openhands.evidence_gate_decision.v0.2"
+      "const": "pythia.openhands.evidence_gate_decision.v0.1"
     },
     "event_type": {
       "const": "evidence_gate_decision"
     },
     "event_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "receipt_id": {
       "type": "string",
       "minLength": 1
     },
@@ -267,9 +261,6 @@
     "sensitive_data_redacted": {
       "type": "boolean",
       "default": true
-    },
-    "verification_required": {
-      "type": "boolean"
     }
   }
 }

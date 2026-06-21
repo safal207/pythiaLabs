@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Gate Verification Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_type",
+    "event_id",
+    "receipt_id",
+    "timestamp",
+    "gate_event_id",
+    "action_event_id",
+    "tool_call_id",
+    "observation_event_id",
+    "verifier",
+    "verification_command",
+    "result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pythia.openhands.evidence_gate_verification.v0.1"
+    },
+    "event_type": {
+      "const": "evidence_gate_verification"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_call_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "command",
+            "tool",
+            "human",
+            "external_service"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "identity_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "verification_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display",
+        "normalized_digest"
+      ],
+      "properties": {
+        "display": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalized_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "environment_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "result_digest"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "ERROR",
+            "SKIPPED"
+          ]
+        },
+        "exit_code": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "summary": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ref_id",
+              "ref_type"
+            ],
+            "properties": {
+              "ref_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ref_type": {
+                "enum": [
+                  "observation",
+                  "artifact",
+                  "log",
+                  "diff",
+                  "report"
+                ]
+              },
+              "digest": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "result_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "status"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "PRESENT",
+              "MISSING",
+              "STALE",
+              "REDACTED"
+            ]
+          },
+          "digest": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "sensitive_data_redacted": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
