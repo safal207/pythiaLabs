@@ -1,0 +1,133 @@
+name: External Silicon Gate Consumer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/silicon-gate-consumer.yml"
+      - "scripts/build_silicon_gate_consumer_demo.py"
+      - "docs/SILICON_GATE_EXTERNAL_CONSUMER.md"
+  pull_request:
+    paths:
+      - ".github/workflows/silicon-gate-consumer.yml"
+      - "scripts/build_silicon_gate_consumer_demo.py"
+      - "docs/SILICON_GATE_EXTERNAL_CONSUMER.md"
+
+permissions:
+  contents: read
+
+jobs:
+  consume-v0-7-0:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out PythiaLabs
+        uses: actions/checkout@v4
+
+      - name: Build consumer evidence inputs
+        run: |
+          python3 scripts/build_silicon_gate_consumer_demo.py \
+            --output artifacts/silicon-gate-consumer \
+            --candidate-commit "$GITHUB_SHA"
+
+      - name: External ALLOW decision
+        id: allow
+        uses: safal207/ibex-agent-verification@v0.7.0
+        with:
+          request: artifacts/silicon-gate-consumer/allow/gate-request.json
+          report: artifacts/silicon-gate-consumer/allow/gate-decision.json
+
+      - name: External BLOCK in observe-only mode
+        id: block_observe
+        uses: safal207/ibex-agent-verification@v0.7.0
+        with:
+          request: artifacts/silicon-gate-consumer/block/gate-request.json
+          report: artifacts/silicon-gate-consumer/block/gate-observe-decision.json
+          fail_on_block: "false"
+
+      - name: External BLOCK under enforcement
+        id: block_enforce
+        continue-on-error: true
+        uses: safal207/ibex-agent-verification@v0.7.0
+        with:
+          request: artifacts/silicon-gate-consumer/block/gate-request.json
+          report: artifacts/silicon-gate-consumer/block/gate-enforce-decision.json
+
+      - name: Verify external action contract
+        env:
+          ALLOW_DECISION: ${{ steps.allow.outputs.decision }}
+          ALLOW_REASONS: ${{ steps.allow.outputs.reason_codes }}
+          ALLOW_REPORT_SHA: ${{ steps.allow.outputs.report_sha256 }}
+          BLOCK_DECISION: ${{ steps.block_observe.outputs.decision }}
+          BLOCK_REASONS: ${{ steps.block_observe.outputs.reason_codes }}
+          BLOCK_REPORT_SHA: ${{ steps.block_observe.outputs.report_sha256 }}
+          ENFORCED_BLOCK_OUTCOME: ${{ steps.block_enforce.outcome }}
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("artifacts/silicon-gate-consumer")
+          allow_path = root / "allow/gate-decision.json"
+          block_observe_path = root / "block/gate-observe-decision.json"
+          block_enforce_path = root / "block/gate-enforce-decision.json"
+
+          def load(path):
+              return json.loads(path.read_text(encoding="utf-8"))
+
+          def sha256(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+
+          allow = load(allow_path)
+          block_observe = load(block_observe_path)
+          block_enforce = load(block_enforce_path)
+
+          assert os.environ["ALLOW_DECISION"] == "ALLOW"
+          assert "NO_EVIDENCE_REGRESSION" in os.environ["ALLOW_REASONS"]
+          assert allow["decision"] == "ALLOW"
+          assert sha256(allow_path) == os.environ["ALLOW_REPORT_SHA"]
+
+          assert os.environ["BLOCK_DECISION"] == "BLOCK"
+          assert "NEW_UNEXPLAINED_TIMING_ANOMALY" in os.environ["BLOCK_REASONS"]
+          assert block_observe["decision"] == "BLOCK"
+          assert block_enforce["decision"] == "BLOCK"
+          assert sha256(block_observe_path) == os.environ["BLOCK_REPORT_SHA"]
+          assert os.environ["ENFORCED_BLOCK_OUTCOME"] == "failure"
+
+          summary = {
+              "schema_version": 1,
+              "status": "EXTERNAL_CONSUMER_PASSED",
+              "consumer_repository": os.environ["GITHUB_REPOSITORY"],
+              "consumer_commit": os.environ["GITHUB_SHA"],
+              "action": "safal207/ibex-agent-verification@v0.7.0",
+              "allow": {
+                  "decision": allow["decision"],
+                  "reason_codes": [item["code"] for item in allow["reasons"]],
+                  "report_sha256": sha256(allow_path),
+              },
+              "block_observe": {
+                  "decision": block_observe["decision"],
+                  "reason_codes": [item["code"] for item in block_observe["reasons"]],
+                  "report_sha256": sha256(block_observe_path),
+              },
+              "block_enforcement_outcome": os.environ["ENFORCED_BLOCK_OUTCOME"],
+          }
+          (root / "external-consumer-summary.json").write_text(
+              json.dumps(summary, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload external consumer evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pythialabs-external-silicon-gate-${{ github.sha }}
+          path: artifacts/silicon-gate-consumer/
+          if-no-files-found: error
+          retention-days: 14
