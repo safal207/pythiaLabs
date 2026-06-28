@@ -25,11 +25,15 @@ is uncompromised, or that a model later described the result honestly.
 - Schema: [`schemas/interop/pythialabs-authorization-record-v0.1.schema.json`](../../schemas/interop/pythialabs-authorization-record-v0.1.schema.json)
 - Fixtures: [`conformance/pythialabs-authorization-export-v0.1.json`](../../conformance/pythialabs-authorization-export-v0.1.json)
 - Exporter/verifier: [`scripts/check_pythialabs_authorization_export.py`](../../scripts/check_pythialabs_authorization_export.py)
+- Adversarial tests: [`scripts/test_pythialabs_authorization_export.py`](../../scripts/test_pythialabs_authorization_export.py)
+- Pinned dependencies: [`scripts/requirements-pythialabs-authorization-export.txt`](../../scripts/requirements-pythialabs-authorization-export.txt)
 
 Run:
 
 ```bash
+python3 -m pip install -r scripts/requirements-pythialabs-authorization-export.txt
 python3 scripts/check_pythialabs_authorization_export.py
+python3 scripts/test_pythialabs_authorization_export.py
 ```
 
 Emit one derived record and its optional handoff:
@@ -80,8 +84,17 @@ The record is wrapped with canonical bytes and a SHA-256 reference:
 record_ref = "sha256:" + SHA256(RFC8785-JCS(record))
 ```
 
-The published vector contains no floating-point values, so standard-library
-sorted minimal JSON is equivalent to RFC 8785 JCS for this fixture domain.
+The checker uses the `rfc8785` implementation directly, so hashes follow JCS
+number, string, and object-key serialization rules rather than Python-specific
+`json.dumps` behavior. The adversarial suite includes a number-serialization
+case that differs from ordinary Python JSON output.
+
+## Schema enforcement
+
+Every derived authorization record is validated against the published Draft
+2020-12 JSON Schema with format checking enabled. This validation runs before
+pinned record-reference comparison, so malformed values cannot be hidden by
+updating the expected hash.
 
 ## Showcase adapters
 
@@ -96,7 +109,8 @@ PythiaLabs domains:
 
 `source_showcase` and `gate_profile` preserve provenance, but Elixir module
 names, atoms, structs, or function names are not normative interoperability
-fields.
+fields. The checker also verifies that each showcase maps to its declared gate
+profile.
 
 ## Decision-time bindings
 
@@ -133,7 +147,7 @@ artifact_digest
 This separation makes evidence refresh, environment drift, and target-state
 drift visible instead of hiding all context behind one generic hash.
 
-## Decisions
+## Decisions and derived authority
 
 The portable decision values are:
 
@@ -143,19 +157,28 @@ BLOCK
 ESCALATE
 ```
 
+The verifier derives the effective authority state from the actual gate fields.
+It does not trust `expected.authority_state` as input. Derivation considers:
+
+- `evaluation_clock` relative to `valid_from` and `expires_at`;
+- `revalidation_requirements`;
+- `continuation_requirement`;
+- decision, approval, credential, and verification status.
+
 Only an `ALLOW` record whose derived authority state is `ACTIVE` permits the
 fixture's one expected side effect. `BLOCK`, `ESCALATE`, expired, or
 revalidation-required cases expect zero additional side effects.
 
 ## Temporal and drift semantics
 
-A decision may become unusable after it was created because:
+A decision may be unusable because:
 
 - its temporal authorization expired;
-- the target-state digest changed;
-- the evidence snapshot changed;
-- credentials or approval changed;
-- an explicit revalidation requirement became active.
+- the evaluation clock precedes its validity window;
+- target-state revalidation is required;
+- evidence-snapshot revalidation is required;
+- credentials or approval are not valid;
+- the decision artifact is not verified.
 
 The record retains the original decision-time evidence for audit, but stale
 evidence does not remain live authority.
@@ -179,6 +202,13 @@ authorization and observation records. Imported records keep their own issuer,
 verifier, and claim boundary. PythiaLabs does not adopt their semantic verdicts
 as its own.
 
+The checker derives the join result instead of merely carrying fixture text:
+
+- `MATCH` when authorization and observation bind correctly and no supplied
+  integrity record reports failure;
+- `MATCH_WITH_INTEGRITY_FAILURE` when the joins are intact but the independently
+  attributed response-integrity verdict is not `VERIFIED`.
+
 ## Fixture coverage
 
 The conformance vector covers:
@@ -191,11 +221,14 @@ The conformance vector covers:
 6. accepted Web3 action with matching observation;
 7. accepted Web3 action with a contradicted external response claim.
 
+The adversarial suite additionally proves rejection of a forged authority
+expectation, a forged join expectation, and a schema-invalid showcase value.
+
 ## Claim boundary
 
-This profile proves deterministic export, canonicalization, digest stability,
-decision-time context binding, and record-join consistency for the fixture
-domain.
+This profile proves deterministic export, RFC 8785 canonicalization, schema
+validation, authority-state derivation, digest stability, decision-time context
+binding, and record-join consistency for the fixture domain.
 
 It does not by itself prove:
 
