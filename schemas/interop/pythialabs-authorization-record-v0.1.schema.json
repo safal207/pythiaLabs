@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pythialabs.example/schemas/interop/pythialabs-authorization-record-v0.1.schema.json",
+  "title": "PythiaLabs Provider-Neutral Authorization Record v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "profile",
+    "transition_id",
+    "subject_id",
+    "source_showcase",
+    "gate_profile",
+    "gate_version",
+    "action_identity_profile",
+    "action_identity_digest",
+    "arguments_profile",
+    "arguments_digest",
+    "decision",
+    "reason_codes",
+    "decision_time",
+    "evaluation_clock",
+    "valid_from",
+    "expires_at",
+    "approval_state",
+    "credential_state",
+    "evidence_snapshot_digest",
+    "evidence_refs",
+    "environment_digest",
+    "target_state_digest",
+    "continuation_requirement",
+    "revalidation_requirements",
+    "artifact_digest",
+    "verification",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "org.pythialabs.authorization-record.v0.1"
+    },
+    "profile": {
+      "const": "org.pythialabs.authorization-export.v0.1"
+    },
+    "transition_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_showcase": {
+      "enum": [
+        "infrastructure",
+        "banking-risk",
+        "web3-treasury"
+      ]
+    },
+    "gate_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gate_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_identity_profile": {
+      "const": "org.liminal.trustworthy-transition.action-identity.v0.1"
+    },
+    "action_identity_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "arguments_profile": {
+      "const": "org.pythialabs.authorization-arguments.v0.1"
+    },
+    "arguments_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "decision": {
+      "enum": [
+        "ALLOW",
+        "BLOCK",
+        "ESCALATE"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "decision_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evaluation_clock": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "approval_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credential_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_snapshot_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "environment_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "target_state_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "continuation_requirement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revalidation_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "artifact_digest": {
+      "$ref": "#/$defs/sha256Ref"
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "status",
+        "verifier"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verifier": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "sha256Ref": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
