@@ -1,2 +1,0 @@
-rfc8785==0.1.4
-jsonschema[format]==4.26.0
