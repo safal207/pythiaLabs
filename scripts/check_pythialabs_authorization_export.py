@@ -50,7 +50,9 @@ def canonical(value: Any) -> bytes:
     try:
         return rfc8785.dumps(value)
     except rfc8785.CanonicalizationError as error:
-        raise FixtureError(f"value cannot be canonicalized with RFC 8785: {error}") from error
+        raise FixtureError(
+            f"value cannot be canonicalized with RFC 8785: {error}"
+        ) from error
 
 
 def digest(value: Any) -> str:
@@ -80,7 +82,7 @@ def strings(
         raise FixtureError(f"{label} must be a string array")
     if len(value) != len(set(value)):
         raise FixtureError(f"{label} must not contain duplicates")
-    return value
+    return list(value)
 
 
 def sha256_ref(value: Any, label: str) -> str:
@@ -279,7 +281,11 @@ def derive_authority_state(record: dict[str, Any]) -> str:
 
     requirements = record["revalidation_requirements"]
     continuation = record["continuation_requirement"]
-    if requirements or continuation.startswith("REVALIDATE") or continuation == "REAUTHORIZE":
+    if (
+        requirements
+        or continuation.startswith("REVALIDATE")
+        or continuation == "REAUTHORIZE"
+    ):
         return "REVALIDATION_REQUIRED"
     if record["decision"] != "ALLOW":
         return "BLOCKED"
@@ -301,7 +307,9 @@ def handoff(
     if source is None:
         return None
     case_id = case["case_id"]
-    if not isinstance(source, dict) or not isinstance(source.get("observation"), dict):
+    if not isinstance(source, dict) or not isinstance(
+        source.get("observation"), dict
+    ):
         raise FixtureError(f"{case_id} has invalid handoff")
     if not {"observation", "expected_join"}.issubset(source):
         raise FixtureError(f"{case_id} handoff is incomplete")
@@ -340,7 +348,10 @@ def handoff(
         "issuer": text(observation_input.get("issuer"), f"{case_id}.issuer"),
     }
     if observation["execution_status"] not in {
-        "EXECUTED", "BLOCKED", "ERRORED", "REFUSED"
+        "EXECUTED",
+        "BLOCKED",
+        "ERRORED",
+        "REFUSED",
     }:
         raise FixtureError(f"{case_id} has invalid execution_status")
     result: dict[str, Any] = {
@@ -371,7 +382,8 @@ def handoff(
                 f"{case_id}.overall_verdict",
             ),
             "verifier": text(
-                integrity_input.get("verifier"), f"{case_id}.integrity.verifier"
+                integrity_input.get("verifier"),
+                f"{case_id}.integrity.verifier",
             ),
             "claim_boundary": text(
                 integrity_input.get("claim_boundary"),
@@ -391,7 +403,11 @@ def derive_join(joined: dict[str, Any]) -> str:
     if integrity is None:
         return "MATCH"
     verdict = integrity["record"]["overall_verdict"]
-    return "MATCH" if verdict == "VERIFIED" else "MATCH_WITH_INTEGRITY_FAILURE"
+    return (
+        "MATCH"
+        if verdict == "VERIFIED"
+        else "MATCH_WITH_INTEGRITY_FAILURE"
+    )
 
 
 def verify(
@@ -437,7 +453,10 @@ def verify(
         observation_record = observation["record"]
         if observation_record["authorization_ref"] != authorization["record_ref"]:
             raise FixtureError(f"{case_id} authorization join mismatch")
-        if observation_record["action_identity_digest"] != record["action_identity_digest"]:
+        if (
+            observation_record["action_identity_digest"]
+            != record["action_identity_digest"]
+        ):
             raise FixtureError(f"{case_id} action identity join mismatch")
         if observation_record["binding_digest"] != record["arguments_digest"]:
             raise FixtureError(f"{case_id} arguments binding join mismatch")
@@ -450,12 +469,18 @@ def verify(
         integrity = joined.get("response_integrity_record")
         if integrity is not None:
             if integrity["record_ref"] != expected.get("response_integrity_ref"):
-                raise FixtureError(f"{case_id} response_integrity_ref regression")
+                raise FixtureError(
+                    f"{case_id} response_integrity_ref regression"
+                )
             integrity_record = integrity["record"]
             if integrity_record["authorization_ref"] != authorization["record_ref"]:
-                raise FixtureError(f"{case_id} integrity authorization join mismatch")
+                raise FixtureError(
+                    f"{case_id} integrity authorization join mismatch"
+                )
             if integrity_record["observation_refs"] != [observation["record_ref"]]:
-                raise FixtureError(f"{case_id} integrity observation join mismatch")
+                raise FixtureError(
+                    f"{case_id} integrity observation join mismatch"
+                )
 
         derived_join = derive_join(joined)
         if joined["expected_join"] != derived_join:
@@ -484,7 +509,9 @@ def main() -> int:
         "fixture",
         nargs="?",
         type=Path,
-        default=Path("conformance/pythialabs-authorization-export-v0.1.json"),
+        default=Path(
+            "conformance/pythialabs-authorization-export-v0.1.json"
+        ),
     )
     parser.add_argument("--emit-case")
     args = parser.parse_args()
@@ -529,7 +556,9 @@ def main() -> int:
             if selected is None:
                 raise FixtureError(f"unknown case_id: {args.emit_case}")
             print(json.dumps(selected, ensure_ascii=False, indent=2))
-        print(f"\nPythiaLabs authorization export fixtures passed: {len(seen)}")
+        print(
+            f"\nPythiaLabs authorization export fixtures passed: {len(seen)}"
+        )
         return 0
     except (OSError, json.JSONDecodeError, FixtureError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
