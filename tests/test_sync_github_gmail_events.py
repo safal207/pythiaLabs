@@ -71,6 +71,14 @@ class ClassificationTests(unittest.TestCase):
         decision = sync.classify(candidate, verification, set())
         self.assertEqual(decision.status, "needs-reply")
 
+    def test_unverified_direct_mention_stays_for_review(self) -> None:
+        candidate = self.make_candidate()
+        verification = sync.Verification(
+            "unverified", candidate.github_url, "author", None, "token missing"
+        )
+        decision = sync.classify(candidate, verification, set())
+        self.assertEqual(decision.status, "new-important")
+
     def test_review_feedback_needs_code_fix(self) -> None:
         candidate = self.make_candidate("Actionable comments posted: 2")
         verification = sync.Verification("verified", candidate.github_url, "bot", candidate.body)
