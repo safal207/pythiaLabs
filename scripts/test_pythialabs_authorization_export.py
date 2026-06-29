@@ -15,7 +15,9 @@ FIXTURE_PATH = Path("conformance/pythialabs-authorization-export-v0.1.json")
 
 def load_checker() -> Any:
     """Load the checker as a module without changing its CLI contract."""
-    spec = importlib.util.spec_from_file_location("pythia_export_checker", CHECKER_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "pythia_export_checker", CHECKER_PATH
+    )
     if spec is None or spec.loader is None:
         raise RuntimeError("cannot load authorization export checker")
     module = importlib.util.module_from_spec(spec)
@@ -51,7 +53,7 @@ def require_failure(
 
 
 def main() -> int:
-    """Run canonicalization, state, join, and schema negative checks."""
+    """Run canonicalization, state, join, schema, and isolation checks."""
     checker = load_checker()
     data = json.loads(FIXTURE_PATH.read_text(encoding="utf-8"))
     validator = checker.load_schema_validator()
@@ -70,7 +72,9 @@ def main() -> int:
         "authority_state mismatch",
     )
 
-    contradicted = find_case(data, "accepted_with_contradicted_external_response")
+    contradicted = find_case(
+        data, "accepted_with_contradicted_external_response"
+    )
     contradicted["handoff"]["expected_join"] = "MATCH"
     require_failure(
         checker,
@@ -90,7 +94,22 @@ def main() -> int:
         "schema violation",
     )
 
-    print("Adversarial PythiaLabs authorization export checks passed: 4")
+    source_case = find_case(data, "accepted_reversible_infrastructure")
+    authorization = checker.export(source_case)
+    original_ref = authorization["record_ref"]
+    original_bytes = authorization["canonical_bytes_utf8"]
+    source_case["input"]["gate"]["reason_codes"].append("LATE_CHANGE")
+    if "LATE_CHANGE" in authorization["record"]["reason_codes"]:
+        raise AssertionError("exported reason codes retained a source-list alias")
+    if checker.digest(authorization["record"]) != original_ref:
+        raise AssertionError("record reference changed after source-list edit")
+    if (
+        checker.canonical(authorization["record"]).decode("utf-8")
+        != original_bytes
+    ):
+        raise AssertionError("canonical bytes changed after source-list edit")
+
+    print("Adversarial PythiaLabs authorization export checks passed: 5")
     return 0
 
 
