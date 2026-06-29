@@ -1,0 +1,444 @@
+{
+  "fixture_version": "0.1",
+  "revision": "2026-06-29.1",
+  "title": "PythiaLabs canonical authorization export conformance fixtures",
+  "canonicalization": "RFC8785-JCS",
+  "hash_algorithm": "sha256",
+  "schema_path": "schemas/interop/pythialabs-authorization-record-v0.1.schema.json",
+  "profile": "org.pythialabs.authorization-export.v0.1",
+  "showcase_adapters": {
+    "infrastructure": "pythia.infrastructure.pre_execution.v1",
+    "banking-risk": "pythia.banking_risk.pre_execution.v1",
+    "web3-treasury": "pythia.web3_treasury.pre_execution.v1"
+  },
+  "cases": [
+    {
+      "case_id": "accepted_reversible_infrastructure",
+      "input": {
+        "transition_id": "transition-accepted_reversible_infrastructure",
+        "subject_id": "agent:infra",
+        "source_showcase": "infrastructure",
+        "action": {
+          "identity": {
+            "caller_id": "agent:infra",
+            "tool_id": "tool:kubernetes.apply",
+            "resource_scope": "cluster:staging/namespace:payments"
+          },
+          "arguments_schema": "pythia.infrastructure.action.v1",
+          "arguments": {
+            "change_id": "chg-001",
+            "operation": "apply",
+            "resource": "deployment/api",
+            "desired_replicas": 4
+          }
+        },
+        "gate": {
+          "profile": "pythia.infrastructure.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "ALLOW",
+          "reason_codes": [
+            "EVIDENCE_COMPLETE",
+            "REVERSIBLE_CHANGE"
+          ],
+          "decision_time": "2030-01-01T00:00:00Z",
+          "evaluation_clock": "2030-01-01T00:00:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "NOT_REQUIRED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "evidence_refs": [
+            "evidence:change/chg-001",
+            "evidence:cluster/staging-snapshot-001"
+          ],
+          "environment_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "target_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "continuation_requirement": "NONE",
+          "revalidation_requirements": [],
+          "artifact_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": true,
+        "authority_state": "ACTIVE",
+        "expected_additional_side_effects": 1,
+        "authorization_ref": "sha256:005a1da162e97f7eaa75187096d8fa77bd2876594f53d63f9c3bc948e4ab7f4c"
+      },
+      "handoff": null
+    },
+    {
+      "case_id": "blocked_destructive_without_approval",
+      "input": {
+        "transition_id": "transition-blocked_destructive_without_approval",
+        "subject_id": "agent:infra",
+        "source_showcase": "infrastructure",
+        "action": {
+          "identity": {
+            "caller_id": "agent:infra",
+            "tool_id": "tool:kubernetes.delete",
+            "resource_scope": "cluster:staging/namespace:payments"
+          },
+          "arguments_schema": "pythia.infrastructure.action.v1",
+          "arguments": {
+            "change_id": "chg-001",
+            "operation": "delete",
+            "resource": "namespace:payments",
+            "desired_replicas": 4
+          }
+        },
+        "gate": {
+          "profile": "pythia.infrastructure.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "BLOCK",
+          "reason_codes": [
+            "DESTRUCTIVE_ACTION_REQUIRES_APPROVAL"
+          ],
+          "decision_time": "2030-01-01T00:00:00Z",
+          "evaluation_clock": "2030-01-01T00:00:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "MISSING",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "evidence_refs": [
+            "evidence:change/chg-001",
+            "evidence:cluster/staging-snapshot-001"
+          ],
+          "environment_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "target_state_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+          "continuation_requirement": "AWAITING_APPROVAL",
+          "revalidation_requirements": [],
+          "artifact_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": false,
+        "authority_state": "BLOCKED",
+        "expected_additional_side_effects": 0,
+        "authorization_ref": "sha256:5c7edf39a3c3799edc3f20a0a1dae7e186227a0d9517367bb1928cf9839d7e60"
+      },
+      "handoff": null
+    },
+    {
+      "case_id": "expired_temporal_authorization",
+      "input": {
+        "transition_id": "transition-expired_temporal_authorization",
+        "subject_id": "agent:banking",
+        "source_showcase": "banking-risk",
+        "action": {
+          "identity": {
+            "caller_id": "agent:banking",
+            "tool_id": "tool:risk.limit_update",
+            "resource_scope": "bank:demo/portfolio:retail"
+          },
+          "arguments_schema": "pythia.banking_risk.action.v1",
+          "arguments": {
+            "customer_segment": "retail",
+            "limit_type": "daily_transfer",
+            "new_limit_minor": 500000
+          }
+        },
+        "gate": {
+          "profile": "pythia.banking_risk.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "BLOCK",
+          "reason_codes": [
+            "TEMPORAL_AUTHORIZATION_EXPIRED"
+          ],
+          "decision_time": "2030-01-01T00:11:00Z",
+          "evaluation_clock": "2030-01-01T00:11:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "VERIFIED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+          "evidence_refs": [
+            "evidence:risk-policy/v7",
+            "evidence:approval/apr-201"
+          ],
+          "environment_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+          "target_state_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+          "continuation_requirement": "REAUTHORIZE",
+          "revalidation_requirements": [
+            "TEMPORAL_AUTHORIZATION"
+          ],
+          "artifact_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": false,
+        "authority_state": "EXPIRED",
+        "expected_additional_side_effects": 0,
+        "authorization_ref": "sha256:d2ad59397c87fa49d32e1537a02296598d7c74d6ad60347f53e87cb18a4e349d"
+      },
+      "handoff": null
+    },
+    {
+      "case_id": "target_state_drift_after_decision",
+      "input": {
+        "transition_id": "transition-target_state_drift_after_decision",
+        "subject_id": "agent:infra",
+        "source_showcase": "infrastructure",
+        "action": {
+          "identity": {
+            "caller_id": "agent:infra",
+            "tool_id": "tool:kubernetes.apply",
+            "resource_scope": "cluster:staging/namespace:payments"
+          },
+          "arguments_schema": "pythia.infrastructure.action.v1",
+          "arguments": {
+            "change_id": "chg-001",
+            "operation": "apply",
+            "resource": "deployment/api",
+            "desired_replicas": 4
+          }
+        },
+        "gate": {
+          "profile": "pythia.infrastructure.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "BLOCK",
+          "reason_codes": [
+            "TARGET_STATE_DRIFT"
+          ],
+          "decision_time": "2030-01-01T00:00:00Z",
+          "evaluation_clock": "2030-01-01T00:00:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "NOT_REQUIRED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+          "evidence_refs": [
+            "evidence:change/chg-001",
+            "evidence:cluster/staging-snapshot-001"
+          ],
+          "environment_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+          "target_state_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "continuation_requirement": "REVALIDATE_TARGET_STATE",
+          "revalidation_requirements": [
+            "TARGET_STATE_DIGEST"
+          ],
+          "artifact_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": false,
+        "authority_state": "REVALIDATION_REQUIRED",
+        "expected_additional_side_effects": 0,
+        "authorization_ref": "sha256:88cfbd3a26662a35eedf17915a3aa2df45cf0c567490ea7aaac9b1325eaecbcb"
+      },
+      "handoff": null
+    },
+    {
+      "case_id": "evidence_updated_before_execution",
+      "input": {
+        "transition_id": "transition-evidence_updated_before_execution",
+        "subject_id": "agent:banking",
+        "source_showcase": "banking-risk",
+        "action": {
+          "identity": {
+            "caller_id": "agent:banking",
+            "tool_id": "tool:risk.limit_update",
+            "resource_scope": "bank:demo/portfolio:retail"
+          },
+          "arguments_schema": "pythia.banking_risk.action.v1",
+          "arguments": {
+            "customer_segment": "retail",
+            "limit_type": "daily_transfer",
+            "new_limit_minor": 500000
+          }
+        },
+        "gate": {
+          "profile": "pythia.banking_risk.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "BLOCK",
+          "reason_codes": [
+            "EVIDENCE_SNAPSHOT_STALE"
+          ],
+          "decision_time": "2030-01-01T00:05:00Z",
+          "evaluation_clock": "2030-01-01T00:05:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:20:00Z",
+          "approval_state": "VERIFIED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "evidence_refs": [
+            "evidence:risk-policy/v7",
+            "evidence:approval/apr-201"
+          ],
+          "environment_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+          "target_state_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+          "continuation_requirement": "REVALIDATE_EVIDENCE",
+          "revalidation_requirements": [
+            "EVIDENCE_SNAPSHOT_DIGEST"
+          ],
+          "artifact_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": false,
+        "authority_state": "REVALIDATION_REQUIRED",
+        "expected_additional_side_effects": 0,
+        "authorization_ref": "sha256:41bfa0b44e0f079d0ec68c6ff932c5debbaa1327b784cd5b4722d58d1426bfc0"
+      },
+      "handoff": null
+    },
+    {
+      "case_id": "accepted_with_matching_observation",
+      "input": {
+        "transition_id": "transition-accepted_with_matching_observation",
+        "subject_id": "agent:treasury",
+        "source_showcase": "web3-treasury",
+        "action": {
+          "identity": {
+            "caller_id": "agent:treasury",
+            "tool_id": "tool:treasury.transfer",
+            "resource_scope": "dao:demo/treasury:primary"
+          },
+          "arguments_schema": "pythia.web3_treasury.action.v1",
+          "arguments": {
+            "proposal_id": "prop-001",
+            "asset": "USDC",
+            "amount_minor": 25000000000,
+            "recipient": "wallet:vendor-001"
+          }
+        },
+        "gate": {
+          "profile": "pythia.web3_treasury.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "ALLOW",
+          "reason_codes": [
+            "QUORUM_MET",
+            "TIMELOCK_SATISFIED",
+            "TRANSFER_WINDOW_ACTIVE"
+          ],
+          "decision_time": "2030-01-01T00:02:00Z",
+          "evaluation_clock": "2030-01-01T00:02:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "VERIFIED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "evidence_refs": [
+            "evidence:proposal/prop-001",
+            "evidence:quorum/prop-001",
+            "evidence:timelock/prop-001"
+          ],
+          "environment_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "target_state_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "continuation_requirement": "NONE",
+          "revalidation_requirements": [],
+          "artifact_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": true,
+        "authority_state": "ACTIVE",
+        "expected_additional_side_effects": 1,
+        "authorization_ref": "sha256:49a639c20bf08eb2b82756cd6334c996c8c00acb62fe2ed2cc06319afbafbd96",
+        "observation_ref": "sha256:b6eba3b888f17bd55ff322aac40e16d679e4cd454536c78e3742674364778bc7"
+      },
+      "handoff": {
+        "observation": {
+          "execution_status": "EXECUTED",
+          "observed_at": "2030-01-01T00:03:00Z",
+          "result_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "issuer": "runtime:mock-treasury-rail"
+        },
+        "expected_join": "MATCH"
+      }
+    },
+    {
+      "case_id": "accepted_with_contradicted_external_response",
+      "input": {
+        "transition_id": "transition-accepted_with_contradicted_external_response",
+        "subject_id": "agent:treasury",
+        "source_showcase": "web3-treasury",
+        "action": {
+          "identity": {
+            "caller_id": "agent:treasury",
+            "tool_id": "tool:treasury.transfer",
+            "resource_scope": "dao:demo/treasury:primary"
+          },
+          "arguments_schema": "pythia.web3_treasury.action.v1",
+          "arguments": {
+            "proposal_id": "prop-001",
+            "asset": "USDC",
+            "amount_minor": 25000000000,
+            "recipient": "wallet:vendor-001"
+          }
+        },
+        "gate": {
+          "profile": "pythia.web3_treasury.pre_execution.v1",
+          "version": "1.0.0",
+          "decision": "ALLOW",
+          "reason_codes": [
+            "QUORUM_MET",
+            "TIMELOCK_SATISFIED",
+            "TRANSFER_WINDOW_ACTIVE"
+          ],
+          "decision_time": "2030-01-01T00:02:00Z",
+          "evaluation_clock": "2030-01-01T00:02:00Z",
+          "valid_from": "2030-01-01T00:00:00Z",
+          "expires_at": "2030-01-01T00:10:00Z",
+          "approval_state": "VERIFIED",
+          "credential_state": "VALID",
+          "evidence_snapshot_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "evidence_refs": [
+            "evidence:proposal/prop-001",
+            "evidence:quorum/prop-001",
+            "evidence:timelock/prop-001"
+          ],
+          "environment_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "target_state_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "continuation_requirement": "NONE",
+          "revalidation_requirements": [],
+          "artifact_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "verification_status": "VERIFIED",
+          "verifier": "pythia:local-demo"
+        }
+      },
+      "expected": {
+        "execution_allowed": true,
+        "authority_state": "ACTIVE",
+        "expected_additional_side_effects": 1,
+        "authorization_ref": "sha256:45c84a874da60ce4edeea28ef7e5f0a6dd477aa220bf28fe19a4a31824bf7fbc",
+        "observation_ref": "sha256:b9a1d5bd52a37e31e9c83a0b90e57465f0e96aa9b7a968f0b8834579c3a9c689",
+        "response_integrity_ref": "sha256:d6b53dcd1b22a1f5cc1e637d7b7a7704ba55fe3877eaa849338138719e31d2bc"
+      },
+      "handoff": {
+        "observation": {
+          "execution_status": "EXECUTED",
+          "observed_at": "2030-01-01T00:03:00Z",
+          "result_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "issuer": "runtime:mock-treasury-rail"
+        },
+        "expected_join": "MATCH_WITH_INTEGRITY_FAILURE",
+        "response_integrity": {
+          "overall_verdict": "FAILED",
+          "verifier": "ltp:external-demo",
+          "claim_boundary": "External verifier result; PythiaLabs did not author this semantic verdict."
+        }
+      }
+    }
+  ],
+  "invariants": [
+    "Only ALLOW records with ACTIVE authority permit execution.",
+    "BLOCK and ESCALATE records expect zero additional side effects.",
+    "Decision-time evidence, environment, and target-state digests remain explicit.",
+    "Observation and response-integrity records remain independently attributed.",
+    "A downstream integrity failure does not rewrite the original authorization decision.",
+    "Expired or drifted authority requires reauthorization or deterministic revalidation."
+  ]
+}
