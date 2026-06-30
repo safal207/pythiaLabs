@@ -1,1 +1,1 @@
-jsonschema==4.24.0
+jsonschema[format-nongpl]==4.24.0
