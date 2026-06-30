@@ -11,6 +11,8 @@ This RFC defines a bounded, structured continuation envelope for preserving an a
 
 The envelope is not a narrative memory summary and is not an authority token. It carries recent instructions, intended next actions, artifact references, rejected approaches, pending verification, and provenance so that a resumed agent can continue safely without inventing history.
 
+A separate `restore_results` document records what the resumed runtime actually read and verified. The envelope declares requirements; restore results prove whether those requirements were satisfied.
+
 ## 2. Problem statement
 
 After compaction or handoff, an agent may:
@@ -20,7 +22,7 @@ After compaction or handoff, an agent may:
 - choose an approach that was already rejected;
 - lose track of touched files and verification targets;
 - claim that an edit or command occurred without durable evidence;
-- restore remembered text as if it had system or developer authority.
+- restore quoted file or tool content as if it had instruction authority.
 
 This is not only a quality problem. It is an execution-integrity and trust problem.
 
@@ -33,7 +35,7 @@ An implementation conforming to this RFC should:
 3. retain provenance for each restored claim;
 4. point to durable sources of truth rather than replacing them;
 5. expose unresolved work and verification state;
-6. prevent silent continuation when required evidence is missing;
+6. prevent silent continuation when required restore work is incomplete;
 7. remain vendor- and transport-neutral.
 
 ## 4. Non-goals
@@ -67,7 +69,17 @@ The permitted influence of restored content:
 - `non_authoritative_memory`: recalled context that cannot override current instructions;
 - `quarantined`: content that must not influence execution until reviewed.
 
-### 5.4 Restore gate
+Only provenance sources explicitly listed in `authority_model.authoritative_sources` may carry `instruction` or `constraint`. RFC-001 permits `user_message` and `project_policy`. File content, tool output, git metadata, workflow output, runtime observations, agent text, and memory are non-authoritative by default.
+
+### 5.4 Restore requirements
+
+The declarative reads and evidence checks that must be satisfied before normal execution may resume.
+
+### 5.5 Restore results
+
+A separate runtime-produced document that records completed reads and evidence-check outcomes. Restore results are evaluated against the envelope and are not covered by the envelope digest.
+
+### 5.6 Restore gate
 
 A transition guard that prevents normal execution until required continuation material has been read and required evidence checks have completed.
 
@@ -90,11 +102,14 @@ A conforming envelope MUST include:
 - `restore_requirements`;
 - `envelope_digest`.
 
-The canonical machine-readable definition is in:
+The canonical machine-readable definitions are:
 
 ```text
 schema/continuation-envelope.schema.json
+schema/restore-results.schema.json
 ```
+
+A conforming implementation MUST validate both documents against their published JSON Schemas before semantic evaluation.
 
 ## 7. Operational-tail event model
 
@@ -128,15 +143,19 @@ Recommended event types:
 
 A current user constraint present before transition MUST remain present after restoration with its provenance and authority class intact.
 
-### VCE-002 — No execution claim from memory alone
+A constraint only counts as active when its provenance source is allowed by `authority_model.authoritative_sources`.
+
+### VCE-002 — No execution claim from envelope text alone
 
 The resumed agent MUST NOT claim that an edit, command, deployment, message, or other consequential action occurred solely because the envelope says it occurred.
 
-Such a claim requires a matching durable evidence reference or a fresh verification step.
+Each execution event MUST reference an artifact carrying a durable anchor (`digest` or `receipt_ref`), and the restore results MUST independently verify that anchor.
 
 ### VCE-003 — No silent authority restoration
 
-Content classified as `information`, `evidence_ref`, or `non_authoritative_memory` MUST NOT override system, developer, or newer user instructions.
+Only `user_message` and `project_policy` may carry `instruction` or `constraint` in RFC-001.
+
+Content sourced from `agent_message`, `tool`, `file`, `git`, `workflow`, `runtime`, or `memory` MUST remain non-authoritative, evidentiary, informational, or quarantined.
 
 ### VCE-004 — Rejected approaches remain rejected
 
@@ -148,7 +167,7 @@ A verification target that was incomplete at transition MUST NOT be represented 
 
 ### VCE-006 — Restore gate fails closed
 
-When a required restore file, digest, or evidence reference is missing or mismatched, normal consequential execution MUST remain blocked or require explicit user review.
+When restore results are missing, schema-invalid, tied to another envelope, incomplete, pending, failed, or inconsistent with the declared artifact digest or receipt, normal consequential execution MUST remain blocked or require explicit review.
 
 ### VCE-007 — Boundedness
 
@@ -156,7 +175,20 @@ The envelope MUST be bounded by an implementation-declared maximum size or maxim
 
 ### VCE-008 — Digest integrity
 
-The envelope MUST expose a digest computed over a canonical representation that excludes the digest field itself.
+The envelope digest MUST use `sha256` over `json-sort-keys-utf8-v1`, excluding the entire top-level `envelope_digest` member.
+
+`json-sort-keys-utf8-v1` is defined as:
+
+1. remove the top-level `envelope_digest` member;
+2. reject non-JSON numeric values such as NaN or Infinity;
+3. serialize JSON objects with member names sorted lexicographically by Unicode code point;
+4. preserve array order;
+5. emit no insignificant whitespace;
+6. emit non-ASCII characters directly, while applying normal JSON escaping to control characters, quotation marks, and reverse solidus;
+7. encode the resulting text as UTF-8;
+8. apply no Unicode normalization.
+
+For the reference implementation, this is equivalent to Python `json.dumps(..., ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")`.
 
 ## 9. Restore state machine
 
@@ -170,36 +202,35 @@ ENVELOPE_CREATED
   v
 RESTORE_REQUIRED
   |
-  +-- required material missing or invalid --> BLOCKED
+  +-- envelope or restore-results schema invalid --> BLOCKED
   |
-  +-- required material read and validated --> VERIFY_EVIDENCE
-                                                |
-                                                +-- required evidence unresolved --> REVIEW_REQUIRED
-                                                |
-                                                +-- evidence sufficient --> RESUMABLE
+  +-- required read/check missing or failed ------> BLOCKED
+  |
+  +-- required check still pending ---------------> REVIEW_REQUIRED
+  |
+  +-- restore requirements satisfied -------------> VERIFY_EVIDENCE
+                                                     |
+                                                     +-- task verification unresolved --> REVIEW_REQUIRED
+                                                     |
+                                                     +-- evidence sufficient ----------> RESUMABLE
 ```
 
 An implementation MAY use different state names, but it MUST preserve equivalent observable behavior.
 
 ## 10. Evidence resolution
 
-Artifact references SHOULD include:
+Artifact references MUST carry at least one durable anchor:
 
-- artifact type;
-- path or URI;
-- digest when available;
-- observed or modified status;
-- evidence source;
-- verification status.
+- `digest`, formatted as `sha256:<64 lowercase hex characters>`; or
+- `receipt_ref`, pointing to an independently retrievable execution or verification receipt.
 
-Examples:
+A self-declared status field is not proof.
 
-- a file path plus content digest;
-- a git commit SHA;
-- a test run ID and result;
-- a tool-call receipt;
-- a workflow artifact;
-- a log segment with a stable reference.
+For a `digest` check, restore results MUST report the independently observed digest and it MUST match the envelope.
+
+For a `receipt` check, restore results MUST report the independently resolved receipt reference and it MUST match the envelope.
+
+For an `existence` check, restore results MUST explicitly report a passed existence observation. Existence alone is insufficient to support an execution claim unless the artifact also carries a digest or receipt.
 
 The envelope points to evidence. It does not replace evidence.
 
@@ -210,6 +241,7 @@ Continuation material may contain prompt injection, stale instructions, secrets,
 Implementations MUST:
 
 - preserve authority classes through restoration;
+- enforce the authoritative-source allowlist;
 - prevent quoted or retrieved content from becoming an instruction channel;
 - redact or avoid storing secrets where possible;
 - support quarantine for suspicious material;
@@ -232,13 +264,16 @@ Implementations SHOULD:
 
 A conforming implementation MUST demonstrate:
 
-1. latest user constraint preservation;
-2. prevention of unsupported execution claims;
-3. authority-class preservation;
-4. rejected-approach preservation;
-5. pending-verification preservation;
-6. fail-closed restore behavior;
-7. canonical digest verification.
+1. JSON Schema enforcement for envelope and restore results;
+2. latest user constraint preservation;
+3. prevention of authority escalation from untrusted sources;
+4. prevention of unsupported execution claims;
+5. rejected-approach preservation;
+6. pending-verification preservation;
+7. fail-closed behavior for missing reads or checks;
+8. digest and receipt mismatch rejection;
+9. canonical digest verification;
+10. resumability only after all restore requirements are satisfied.
 
 Reference tests are provided in `conformance/`.
 
@@ -246,18 +281,19 @@ Reference tests are provided in `conformance/`.
 
 A runtime may adopt RFC-001 incrementally:
 
-1. emit the JSON envelope before compaction;
-2. inject or load it after compaction;
-3. enforce a restore gate;
-4. verify artifact references;
-5. expose conformance-test results;
-6. later add native UI, cross-session transport, or orchestration support.
+1. emit and schema-validate the JSON envelope before compaction;
+2. load it after compaction;
+3. produce restore results while reading required material and checking evidence;
+4. schema-validate restore results;
+5. enforce the restore gate;
+6. expose conformance-test results;
+7. later add native UI, cross-session transport, or orchestration support.
 
 ## 15. Open questions for v0.2
 
-- canonical serialization format across languages;
+- envelope and restore-results signing;
+- multi-party trust and remote attestations;
 - standard event taxonomy extensions;
-- envelope signing and multi-party trust;
 - cross-session addressability;
 - partial disclosure and redaction;
 - relationship to framework-specific checkpoints;
