@@ -1,0 +1,143 @@
+{
+  "schema_version": "0.1",
+  "envelope_id": "vce-example-001",
+  "created_at": "2026-06-30T04:30:00Z",
+  "transition_reason": "context_compaction",
+  "project": {
+    "project_id": "safal207/pythiaLabs",
+    "repository": "https://github.com/safal207/pythiaLabs",
+    "workspace": null,
+    "branch": "feat/verifiable-continuation-envelope-rfc-v0.1",
+    "head_sha": "d03cd1d26264a9cbc18e720339aa682289cb5f61"
+  },
+  "active_objective": {
+    "summary": "Publish a vendor-neutral RFC and executable conformance suite for agent continuity.",
+    "acceptance_criteria": [
+      "The latest user constraint survives restoration.",
+      "Execution claims require durable evidence.",
+      "Memory cannot silently regain authority.",
+      "Pending verification remains pending."
+    ]
+  },
+  "authority_model": {
+    "precedence": [
+      "system",
+      "developer",
+      "user",
+      "project_policy",
+      "memory"
+    ],
+    "memory_default": "non_authoritative_memory"
+  },
+  "operational_tail": [
+    {
+      "event_id": "evt-001",
+      "event_type": "user_instruction",
+      "occurred_at": "2026-06-30T04:20:00Z",
+      "authority_class": "constraint",
+      "payload": "Start with one implementable RFC before expanding into a broader standard.",
+      "provenance": {
+        "source_type": "user_message",
+        "source_ref": "conversation:current:user:lead-me"
+      },
+      "evidence_refs": []
+    },
+    {
+      "event_id": "evt-002",
+      "event_type": "agent_intent",
+      "occurred_at": "2026-06-30T04:21:00Z",
+      "authority_class": "information",
+      "payload": "Create RFC-001, a JSON schema, an example envelope, and conformance tests in a draft pull request.",
+      "provenance": {
+        "source_type": "agent_message",
+        "source_ref": "conversation:current:assistant:plan"
+      },
+      "evidence_refs": []
+    },
+    {
+      "event_id": "evt-003",
+      "event_type": "artifact_modified",
+      "occurred_at": "2026-06-30T04:25:00Z",
+      "authority_class": "evidence_ref",
+      "payload": "RFC and schema files were created on the feature branch.",
+      "provenance": {
+        "source_type": "git",
+        "source_ref": "commit:d03cd1d26264a9cbc18e720339aa682289cb5f61"
+      },
+      "evidence_refs": [
+        "artifact-rfc",
+        "artifact-schema"
+      ]
+    },
+    {
+      "event_id": "evt-004",
+      "event_type": "verification_started",
+      "occurred_at": "2026-06-30T04:29:00Z",
+      "authority_class": "information",
+      "payload": "Reference conformance tests are being added but have not yet passed in CI.",
+      "provenance": {
+        "source_type": "runtime",
+        "source_ref": "local:conformance-preparation"
+      },
+      "evidence_refs": []
+    }
+  ],
+  "artifact_refs": [
+    {
+      "artifact_id": "artifact-rfc",
+      "artifact_type": "file",
+      "locator": "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md",
+      "digest": null,
+      "relationship": "created",
+      "verification_status": "verified"
+    },
+    {
+      "artifact_id": "artifact-schema",
+      "artifact_type": "file",
+      "locator": "standards/agent-continuity/schema/continuation-envelope.schema.json",
+      "digest": null,
+      "relationship": "created",
+      "verification_status": "verified"
+    }
+  ],
+  "rejected_approaches": [
+    {
+      "approach": "Publish separate, vendor-specific proposals before defining common observable behavior.",
+      "reason": "That would duplicate the design and weaken interoperability.",
+      "status": "rejected",
+      "reopen_authority": "user"
+    }
+  ],
+  "pending_verification": [
+    {
+      "verification_id": "verify-tests",
+      "target": "Reference conformance suite",
+      "command_or_method": "python -m unittest discover -s standards/agent-continuity/conformance -p 'test_*.py' -v",
+      "status": "pending",
+      "evidence_refs": []
+    }
+  ],
+  "next_action": {
+    "description": "Add and run the reference conformance tests, then open a draft pull request.",
+    "requires_restore": true,
+    "blocked_by": [
+      "verify-tests"
+    ]
+  },
+  "restore_requirements": {
+    "required_reads": [
+      "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md",
+      "standards/agent-continuity/examples/continuation-envelope.example.json"
+    ],
+    "required_evidence_checks": [
+      "Confirm the feature branch and referenced files exist.",
+      "Run the reference conformance suite."
+    ],
+    "fail_closed": true
+  },
+  "envelope_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json-sort-keys-utf8-v1",
+    "value": "50bba0c03dbfb1ab12f44c8d7a26890b7396d1586da907bd62ce7dd8a9bc05c6"
+  }
+}
