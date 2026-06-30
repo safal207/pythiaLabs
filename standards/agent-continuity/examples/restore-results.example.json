@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1",
+  "envelope_id": "vce-example-001",
+  "completed_reads": [
+    "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md",
+    "standards/agent-continuity/examples/continuation-envelope.example.json"
+  ],
+  "evidence_checks": [
+    {
+      "check_id": "check-rfc-digest",
+      "artifact_id": "artifact-rfc",
+      "method": "digest",
+      "status": "passed",
+      "observed_digest": "sha256:c174f9d1a79023a588e9f2f5183690972849db6abdc3c6d3692610e98e1d9d84",
+      "receipt_ref": null
+    },
+    {
+      "check_id": "check-schema-digest",
+      "artifact_id": "artifact-schema",
+      "method": "digest",
+      "status": "passed",
+      "observed_digest": "sha256:dc2df1cccb9b6826d424e82ad0316568c87a20dff75fa4f4def9bad3c3f4a970",
+      "receipt_ref": null
+    }
+  ]
+}
