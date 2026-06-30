@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/agent-continuity/schema/restore-results.schema.json",
+  "title": "VCE Restore Results",
+  "description": "Runtime observations proving whether declared restore requirements were satisfied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "envelope_id",
+    "completed_reads",
+    "evidence_checks"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "envelope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completed_reads": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "evidence_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidenceCheckResult"
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "evidenceCheckResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "artifact_id",
+        "method",
+        "status",
+        "observed_digest",
+        "receipt_ref"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "enum": [
+            "digest",
+            "receipt",
+            "existence"
+          ]
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "pending",
+            "failed"
+          ]
+        },
+        "observed_digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

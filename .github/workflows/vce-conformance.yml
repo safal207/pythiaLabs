@@ -1,0 +1,41 @@
+name: VCE conformance
+
+on:
+  pull_request:
+    paths:
+      - "standards/agent-continuity/**"
+      - ".github/workflows/vce-conformance.yml"
+  push:
+    paths:
+      - "standards/agent-continuity/**"
+      - ".github/workflows/vce-conformance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install conformance dependency
+        run: |
+          python -m pip install --disable-pip-version-check \
+            -r standards/agent-continuity/conformance/requirements.txt
+
+      - name: Run VCE conformance suite
+        run: |
+          python -m unittest discover \
+            -s standards/agent-continuity/conformance \
+            -p 'test_*.py' \
+            -v
