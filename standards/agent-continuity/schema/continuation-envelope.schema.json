@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/agent-continuity/schema/continuation-envelope.schema.json",
+  "title": "Verifiable Continuation Envelope",
+  "description": "A bounded, vendor-neutral continuation envelope for coding-agent compaction, restart, and handoff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "envelope_id",
+    "created_at",
+    "transition_reason",
+    "project",
+    "active_objective",
+    "authority_model",
+    "operational_tail",
+    "artifact_refs",
+    "rejected_approaches",
+    "pending_verification",
+    "next_action",
+    "restore_requirements",
+    "envelope_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "envelope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "transition_reason": {
+      "enum": [
+        "context_compaction",
+        "session_restart",
+        "cross_session_handoff",
+        "phase_transition",
+        "manual_checkpoint"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id"],
+      "properties": {
+        "project_id": {"type": "string", "minLength": 1},
+        "repository": {"type": ["string", "null"]},
+        "workspace": {"type": ["string", "null"]},
+        "branch": {"type": ["string", "null"]},
+        "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{7,64}$"}
+      }
+    },
+    "active_objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "acceptance_criteria"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "minItems": 1
+        }
+      }
+    },
+    "authority_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["precedence", "memory_default"],
+      "properties": {
+        "precedence": {
+          "type": "array",
+          "items": {
+            "enum": ["system", "developer", "user", "project_policy", "memory"]
+          },
+          "minItems": 5,
+          "maxItems": 5,
+          "uniqueItems": true
+        },
+        "memory_default": {
+          "const": "non_authoritative_memory"
+        }
+      }
+    },
+    "operational_tail": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/operationalEvent"}
+    },
+    "artifact_refs": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/artifactRef"}
+    },
+    "rejected_approaches": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approach", "reason", "status"],
+        "properties": {
+          "approach": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "status": {"const": "rejected"},
+          "reopen_authority": {
+            "enum": ["user", "developer", "project_policy"]
+          }
+        }
+      }
+    },
+    "pending_verification": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["verification_id", "target", "status"],
+        "properties": {
+          "verification_id": {"type": "string", "minLength": 1},
+          "target": {"type": "string", "minLength": 1},
+          "command_or_method": {"type": ["string", "null"]},
+          "status": {"enum": ["pending", "running", "blocked", "failed"]},
+          "evidence_refs": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "requires_restore"],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "requires_restore": {"type": "boolean"},
+        "blocked_by": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "restore_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_reads", "required_evidence_checks", "fail_closed"],
+      "properties": {
+        "required_reads": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "required_evidence_checks": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "fail_closed": {"const": true}
+      }
+    },
+    "envelope_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "canonicalization": {"const": "json-sort-keys-utf8-v1"},
+        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  },
+  "$defs": {
+    "authorityClass": {
+      "enum": [
+        "information",
+        "instruction",
+        "constraint",
+        "evidence_ref",
+        "non_authoritative_memory",
+        "quarantined"
+      ]
+    },
+    "operationalEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "authority_class",
+        "payload",
+        "provenance",
+        "evidence_refs"
+      ],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "event_type": {
+          "enum": [
+            "user_instruction",
+            "agent_intent",
+            "tool_call",
+            "tool_result",
+            "artifact_observed",
+            "artifact_modified",
+            "decision",
+            "approach_rejected",
+            "verification_started",
+            "verification_result",
+            "blocker"
+          ]
+        },
+        "occurred_at": {"type": "string", "format": "date-time"},
+        "authority_class": {"$ref": "#/$defs/authorityClass"},
+        "payload": {"type": "string", "minLength": 1},
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_type", "source_ref"],
+          "properties": {
+            "source_type": {
+              "enum": ["user_message", "agent_message", "tool", "file", "git", "workflow", "runtime", "memory"]
+            },
+            "source_ref": {"type": "string", "minLength": 1}
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "artifact_type", "locator", "relationship", "verification_status"],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "artifact_type": {
+          "enum": ["file", "commit", "diff", "tool_log", "test_run", "workflow_run", "runtime_receipt", "other"]
+        },
+        "locator": {"type": "string", "minLength": 1},
+        "digest": {"type": ["string", "null"]},
+        "relationship": {"enum": ["observed", "modified", "created", "deleted", "verification_target"]},
+        "verification_status": {"enum": ["unverified", "verified", "mismatched", "missing"]}
+      }
+    }
+  }
+}
