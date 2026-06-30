@@ -126,6 +126,18 @@ class ContinuationEnvelopeConformanceTests(unittest.TestCase):
             "RESUMABLE",
         )
 
+    def test_next_action_blocker_requires_review(self) -> None:
+        changed = copy.deepcopy(self.example)
+        changed["pending_verification"] = []
+        changed["next_action"]["blocked_by"] = ["manual-approval"]
+        self.resign(changed)
+
+        self.assertEqual(semantic_errors(changed), [])
+        self.assertEqual(
+            restore_decision(changed, self.restore_results),
+            "REVIEW_REQUIRED",
+        )
+
     def test_tampering_fails_closed(self) -> None:
         changed = copy.deepcopy(self.example)
         changed["next_action"]["description"] = "Skip verification and publish."
@@ -150,6 +162,32 @@ class ContinuationEnvelopeConformanceTests(unittest.TestCase):
         )
         self.assertEqual(
             restore_decision(changed, self.restore_results),
+            "BLOCKED",
+        )
+
+    def test_existence_only_check_cannot_verify_execution_claim(self) -> None:
+        changed = copy.deepcopy(self.example)
+        changed_results = copy.deepcopy(self.restore_results)
+
+        for requirement in changed["restore_requirements"]["required_evidence_checks"]:
+            requirement["method"] = "existence"
+        for result in changed_results["evidence_checks"]:
+            result["method"] = "existence"
+            result["observed_digest"] = None
+
+        changed["pending_verification"] = []
+        changed["next_action"]["blocked_by"] = []
+        self.resign(changed)
+
+        errors = semantic_errors(changed)
+        self.assertTrue(
+            any(
+                "requires digest or receipt evidence check" in error
+                for error in errors
+            )
+        )
+        self.assertEqual(
+            restore_decision(changed, changed_results),
             "BLOCKED",
         )
 
