@@ -36,6 +36,7 @@ EXECUTION_EVENT_TYPES = {
     "verification_result",
 }
 
+DURABLE_EVIDENCE_METHODS = {"digest", "receipt"}
 DEFAULT_AUTHORITATIVE_SOURCES = {"user_message", "project_policy"}
 
 
@@ -127,6 +128,24 @@ def _artifact_index(
     return artifacts
 
 
+def _execution_artifact_ids(envelope: Mapping[str, Any]) -> set[str]:
+    artifact_ids: set[str] = set()
+    events = envelope.get("operational_tail")
+    if not isinstance(events, list):
+        return artifact_ids
+
+    for event in events:
+        if not isinstance(event, Mapping):
+            continue
+        if event.get("event_type") not in EXECUTION_EVENT_TYPES:
+            continue
+        refs = event.get("evidence_refs")
+        if not isinstance(refs, list):
+            continue
+        artifact_ids.update(ref for ref in refs if isinstance(ref, str))
+    return artifact_ids
+
+
 def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
     errors: list[str] = []
     missing = sorted(REQUIRED_TOP_LEVEL - set(envelope))
@@ -140,7 +159,10 @@ def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
     else:
         precedence = authority_model.get("precedence")
         if precedence != ["system", "developer", "user", "project_policy", "memory"]:
-            errors.append("authority precedence must be system > developer > user > project_policy > memory")
+            errors.append(
+                "authority precedence must be system > developer > user > "
+                "project_policy > memory"
+            )
         if authority_model.get("memory_default") != "non_authoritative_memory":
             errors.append("memory_default must be non_authoritative_memory")
         declared_sources = authority_model.get("authoritative_sources")
@@ -151,7 +173,9 @@ def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
             if not authoritative_sources:
                 errors.append("authoritative_sources cannot be empty")
             if not authoritative_sources <= DEFAULT_AUTHORITATIVE_SOURCES:
-                errors.append("authoritative_sources contains a source not allowed by RFC-001")
+                errors.append(
+                    "authoritative_sources contains a source not allowed by RFC-001"
+                )
 
     events = envelope.get("operational_tail")
     if not isinstance(events, list) or not events:
@@ -171,7 +195,9 @@ def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
         if not isinstance(checks, list):
             errors.append("required_evidence_checks must be an array")
         else:
-            required_checks = [item for item in checks if isinstance(item, Mapping)]
+            required_checks = [
+                item for item in checks if isinstance(item, Mapping)
+            ]
 
     checks_by_artifact: dict[str, list[Mapping[str, Any]]] = {}
     seen_check_ids: set[str] = set()
@@ -206,12 +232,17 @@ def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
         event_id = event.get("event_id", "<unknown>")
         authority = event.get("authority_class")
         provenance = event.get("provenance")
-        source_type = provenance.get("source_type") if isinstance(provenance, Mapping) else None
+        source_type = (
+            provenance.get("source_type")
+            if isinstance(provenance, Mapping)
+            else None
+        )
 
         if authority in {"instruction", "constraint"}:
             if source_type not in authoritative_sources:
                 errors.append(
-                    f"{event_id}: {source_type} cannot restore instruction or constraint authority"
+                    f"{event_id}: {source_type} cannot restore instruction or "
+                    "constraint authority"
                 )
             elif authority == "constraint":
                 active_constraints += 1
@@ -221,18 +252,35 @@ def semantic_errors(envelope: Mapping[str, Any]) -> list[str]:
             if not isinstance(refs, list) or not refs:
                 errors.append(f"{event_id}: execution event requires evidence refs")
                 continue
+
             for ref in refs:
                 artifact = artifacts.get(ref)
                 if artifact is None:
                     errors.append(f"{event_id}: missing artifact ref {ref}")
                     continue
                 if not artifact.get("digest") and not artifact.get("receipt_ref"):
-                    errors.append(f"{event_id}: artifact {ref} lacks a durable anchor")
-                if not checks_by_artifact.get(str(ref)):
-                    errors.append(f"{event_id}: artifact {ref} has no required evidence check")
+                    errors.append(
+                        f"{event_id}: artifact {ref} lacks a durable anchor"
+                    )
+
+                checks = checks_by_artifact.get(str(ref), [])
+                if not checks:
+                    errors.append(
+                        f"{event_id}: artifact {ref} has no required evidence check"
+                    )
+                elif not any(
+                    check.get("method") in DURABLE_EVIDENCE_METHODS
+                    for check in checks
+                ):
+                    errors.append(
+                        f"{event_id}: artifact {ref} requires digest or receipt "
+                        "evidence check"
+                    )
 
     if active_constraints == 0:
-        errors.append("at least one authoritative active constraint must survive restoration")
+        errors.append(
+            "at least one authoritative active constraint must survive restoration"
+        )
 
     rejected = envelope.get("rejected_approaches")
     if not isinstance(rejected, list):
@@ -259,10 +307,8 @@ def _restore_gate_state(
 ) -> str:
     if restore_results is None:
         return "BLOCKED"
-
     if schema_errors(restore_results, RESTORE_RESULTS_SCHEMA_PATH):
         return "BLOCKED"
-
     if restore_results.get("envelope_id") != envelope.get("envelope_id"):
         return "BLOCKED"
 
@@ -271,10 +317,8 @@ def _restore_gate_state(
         return "BLOCKED"
 
     completed_reads = restore_results.get("completed_reads")
-    if not isinstance(completed_reads, list):
-        return "BLOCKED"
     required_reads = requirements.get("required_reads")
-    if not isinstance(required_reads, list):
+    if not isinstance(completed_reads, list) or not isinstance(required_reads, list):
         return "BLOCKED"
     if not set(required_reads) <= set(completed_reads):
         return "BLOCKED"
@@ -287,6 +331,7 @@ def _restore_gate_state(
     result_rows = restore_results.get("evidence_checks")
     if not isinstance(result_rows, list):
         return "BLOCKED"
+
     result_by_id: dict[str, Mapping[str, Any]] = {}
     for result in result_rows:
         if not isinstance(result, Mapping):
@@ -300,15 +345,17 @@ def _restore_gate_state(
     if not isinstance(requirements_rows, list):
         return "BLOCKED"
 
+    execution_artifact_ids = _execution_artifact_ids(envelope)
     has_pending = False
+
     for requirement in requirements_rows:
         if not isinstance(requirement, Mapping):
             return "BLOCKED"
+
         check_id = requirement.get("check_id")
         result = result_by_id.get(check_id)
         if result is None:
             return "BLOCKED"
-
         if (
             result.get("artifact_id") != requirement.get("artifact_id")
             or result.get("method") != requirement.get("method")
@@ -322,7 +369,8 @@ def _restore_gate_state(
         if status != "passed":
             return "BLOCKED"
 
-        artifact = artifacts.get(requirement.get("artifact_id"))
+        artifact_id = requirement.get("artifact_id")
+        artifact = artifacts.get(artifact_id)
         if artifact is None:
             return "BLOCKED"
 
@@ -338,7 +386,8 @@ def _restore_gate_state(
             if not expected or observed != expected:
                 return "BLOCKED"
         elif method == "existence":
-            pass
+            if artifact_id in execution_artifact_ids:
+                return "BLOCKED"
         else:
             return "BLOCKED"
 
@@ -367,4 +416,14 @@ def restore_decision(
         for item in pending
     ):
         return "REVIEW_REQUIRED"
+
+    next_action = envelope.get("next_action")
+    if not isinstance(next_action, Mapping):
+        return "BLOCKED"
+    blocked_by = next_action.get("blocked_by", [])
+    if not isinstance(blocked_by, list):
+        return "BLOCKED"
+    if blocked_by:
+        return "REVIEW_REQUIRED"
+
     return "RESUMABLE"
