@@ -8,6 +8,8 @@ Vendor-neutral specifications and executable conformance checks for preserving o
 
 defines a bounded, structured envelope that carries the active operational tail without turning memory into hidden authority.
 
+A separate restore-results document records which required reads and evidence checks were actually completed. The envelope declares the gate; restore results satisfy it.
+
 ## Problem
 
 Coding agents may lose task continuity after compaction or handoff. They can repeat completed work, violate recent constraints, forget rejected approaches, or confidently reconstruct an execution history that is not supported by durable evidence.
@@ -19,17 +21,30 @@ Coding agents may lose task continuity after compaction or handoff. They can rep
 ## Package
 
 - RFC specification;
-- JSON Schema for the envelope;
-- example envelope;
-- standard-library conformance tests.
+- JSON Schemas for the envelope and restore results;
+- example envelope and restore results;
+- reference validator;
+- executable conformance tests.
 
 ## Quick validation
 
 ```bash
+python -m pip install -r standards/agent-continuity/conformance/requirements.txt
+
 python -m unittest discover \
   -s standards/agent-continuity/conformance \
   -p 'test_*.py' -v
 ```
+
+## What the suite verifies
+
+- published JSON Schema enforcement;
+- canonical envelope digest integrity;
+- trusted-source authority boundaries;
+- independent digest/receipt evidence checks;
+- required-read completion;
+- fail-closed restore behavior;
+- unresolved task verification remaining unresolved.
 
 ## Intended integrations
 
