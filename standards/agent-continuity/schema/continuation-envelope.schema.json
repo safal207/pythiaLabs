@@ -45,24 +45,59 @@
     "project": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["project_id"],
+      "required": [
+        "project_id"
+      ],
       "properties": {
-        "project_id": {"type": "string", "minLength": 1},
-        "repository": {"type": ["string", "null"]},
-        "workspace": {"type": ["string", "null"]},
-        "branch": {"type": ["string", "null"]},
-        "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{7,64}$"}
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "head_sha": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{40}$"
+        }
       }
     },
     "active_objective": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["summary", "acceptance_criteria"],
+      "required": [
+        "summary",
+        "acceptance_criteria"
+      ],
       "properties": {
-        "summary": {"type": "string", "minLength": 1},
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
         "acceptance_criteria": {
           "type": "array",
-          "items": {"type": "string", "minLength": 1},
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "minItems": 1
         }
       }
@@ -70,19 +105,48 @@
     "authority_model": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["precedence", "memory_default"],
+      "required": [
+        "precedence",
+        "memory_default",
+        "authoritative_sources"
+      ],
       "properties": {
         "precedence": {
           "type": "array",
-          "items": {
-            "enum": ["system", "developer", "user", "project_policy", "memory"]
-          },
+          "prefixItems": [
+            {
+              "const": "system"
+            },
+            {
+              "const": "developer"
+            },
+            {
+              "const": "user"
+            },
+            {
+              "const": "project_policy"
+            },
+            {
+              "const": "memory"
+            }
+          ],
+          "items": false,
           "minItems": 5,
-          "maxItems": 5,
-          "uniqueItems": true
+          "maxItems": 5
         },
         "memory_default": {
           "const": "non_authoritative_memory"
+        },
+        "authoritative_sources": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "user_message",
+              "project_policy"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
         }
       }
     },
@@ -90,12 +154,16 @@
       "type": "array",
       "minItems": 1,
       "maxItems": 50,
-      "items": {"$ref": "#/$defs/operationalEvent"}
+      "items": {
+        "$ref": "#/$defs/operationalEvent"
+      }
     },
     "artifact_refs": {
       "type": "array",
       "maxItems": 100,
-      "items": {"$ref": "#/$defs/artifactRef"}
+      "items": {
+        "$ref": "#/$defs/artifactRef"
+      }
     },
     "rejected_approaches": {
       "type": "array",
@@ -103,13 +171,29 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["approach", "reason", "status"],
+        "required": [
+          "approach",
+          "reason",
+          "status"
+        ],
         "properties": {
-          "approach": {"type": "string", "minLength": 1},
-          "reason": {"type": "string", "minLength": 1},
-          "status": {"const": "rejected"},
+          "approach": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "const": "rejected"
+          },
           "reopen_authority": {
-            "enum": ["user", "developer", "project_policy"]
+            "enum": [
+              "user",
+              "developer",
+              "project_policy"
+            ]
           }
         }
       }
@@ -120,15 +204,41 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["verification_id", "target", "status"],
+        "required": [
+          "verification_id",
+          "target",
+          "status"
+        ],
         "properties": {
-          "verification_id": {"type": "string", "minLength": 1},
-          "target": {"type": "string", "minLength": 1},
-          "command_or_method": {"type": ["string", "null"]},
-          "status": {"enum": ["pending", "running", "blocked", "failed"]},
+          "verification_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command_or_method": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "running",
+              "blocked",
+              "failed"
+            ]
+          },
           "evidence_refs": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
           }
         }
       }
@@ -136,40 +246,76 @@
     "next_action": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["description", "requires_restore"],
+      "required": [
+        "description",
+        "requires_restore"
+      ],
       "properties": {
-        "description": {"type": "string", "minLength": 1},
-        "requires_restore": {"type": "boolean"},
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires_restore": {
+          "type": "boolean"
+        },
         "blocked_by": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         }
       }
     },
     "restore_requirements": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["required_reads", "required_evidence_checks", "fail_closed"],
+      "required": [
+        "required_reads",
+        "required_evidence_checks",
+        "fail_closed"
+      ],
       "properties": {
         "required_reads": {
           "type": "array",
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         },
         "required_evidence_checks": {
           "type": "array",
-          "items": {"type": "string", "minLength": 1}
+          "items": {
+            "$ref": "#/$defs/evidenceCheckRequirement"
+          },
+          "uniqueItems": true
         },
-        "fail_closed": {"const": true}
+        "fail_closed": {
+          "const": true
+        }
       }
     },
     "envelope_digest": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["algorithm", "canonicalization", "value"],
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "value"
+      ],
       "properties": {
-        "algorithm": {"const": "sha256"},
-        "canonicalization": {"const": "json-sort-keys-utf8-v1"},
-        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "json-sort-keys-utf8-v1"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
       }
     }
   },
@@ -182,6 +328,19 @@
         "evidence_ref",
         "non_authoritative_memory",
         "quarantined"
+      ]
+    },
+    "sourceType": {
+      "enum": [
+        "user_message",
+        "project_policy",
+        "agent_message",
+        "tool",
+        "file",
+        "git",
+        "workflow",
+        "runtime",
+        "memory"
       ]
     },
     "operationalEvent": {
@@ -197,7 +356,10 @@
         "evidence_refs"
       ],
       "properties": {
-        "event_id": {"type": "string", "minLength": 1},
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "event_type": {
           "enum": [
             "user_instruction",
@@ -213,39 +375,147 @@
             "blocker"
           ]
         },
-        "occurred_at": {"type": "string", "format": "date-time"},
-        "authority_class": {"$ref": "#/$defs/authorityClass"},
-        "payload": {"type": "string", "minLength": 1},
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority_class": {
+          "$ref": "#/$defs/authorityClass"
+        },
+        "payload": {
+          "type": "string",
+          "minLength": 1
+        },
         "provenance": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["source_type", "source_ref"],
+          "required": [
+            "source_type",
+            "source_ref"
+          ],
           "properties": {
             "source_type": {
-              "enum": ["user_message", "agent_message", "tool", "file", "git", "workflow", "runtime", "memory"]
+              "$ref": "#/$defs/sourceType"
             },
-            "source_ref": {"type": "string", "minLength": 1}
+            "source_ref": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         },
         "evidence_refs": {
           "type": "array",
-          "items": {"type": "string"}
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         }
       }
     },
     "artifactRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["artifact_id", "artifact_type", "locator", "relationship", "verification_status"],
+      "required": [
+        "artifact_id",
+        "artifact_type",
+        "locator",
+        "digest",
+        "receipt_ref",
+        "relationship"
+      ],
       "properties": {
-        "artifact_id": {"type": "string", "minLength": 1},
-        "artifact_type": {
-          "enum": ["file", "commit", "diff", "tool_log", "test_run", "workflow_run", "runtime_receipt", "other"]
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
         },
-        "locator": {"type": "string", "minLength": 1},
-        "digest": {"type": ["string", "null"]},
-        "relationship": {"enum": ["observed", "modified", "created", "deleted", "verification_target"]},
-        "verification_status": {"enum": ["unverified", "verified", "mismatched", "missing"]}
+        "artifact_type": {
+          "enum": [
+            "file",
+            "commit",
+            "diff",
+            "tool_log",
+            "test_run",
+            "workflow_run",
+            "runtime_receipt",
+            "other"
+          ]
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "relationship": {
+          "enum": [
+            "observed",
+            "modified",
+            "created",
+            "deleted",
+            "verification_target"
+          ]
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "digest": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "digest"
+          ]
+        },
+        {
+          "properties": {
+            "receipt_ref": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "receipt_ref"
+          ]
+        }
+      ]
+    },
+    "evidenceCheckRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "artifact_id",
+        "method"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "enum": [
+            "digest",
+            "receipt",
+            "existence"
+          ]
+        }
       }
     }
   }
