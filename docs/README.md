@@ -58,6 +58,13 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 
 ---
 
+## Market Signals and Architecture Decisions
+
+- [Vint Cerf: Formal Protocols for AI Agents](market_signals/VINT_CERF_AGENT_PROTOCOLS.md) — records the reported industry signal, its verification status, relevance to PythiaLabs, product implications, and explicit non-endorsement boundary.
+- [ADR-001: Critical Agent Interactions Must Be Machine-Verifiable](adr/ADR-001-machine-verifiable-agent-interactions.md) — proposes a versioned action contract, deterministic decision flow, conformance target, trade-offs, and non-goals.
+
+---
+
 ## Demos and Expected Outputs
 
 - [Paid Review Demo Reviewer Checklist](paid_review_demo_reviewer_checklist.md) — concise review steps for running `make demo`, checking expected decisions, verifying evidence, and inspecting the artifact bundle.
