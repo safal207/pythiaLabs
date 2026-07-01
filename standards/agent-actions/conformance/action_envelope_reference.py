@@ -104,7 +104,7 @@ def verify_digest(envelope: Mapping[str, Any]) -> bool:
 def parse_time(value: Any) -> datetime:
     if not isinstance(value, str):
         raise ValueError("timestamp must be a string")
-    normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
+    normalized = value[:-1] + "+00:00" if value.endswith(("Z", "z")) else value
     parsed = datetime.fromisoformat(normalized)
     if parsed.tzinfo is None:
         raise ValueError("timestamp must include timezone")
