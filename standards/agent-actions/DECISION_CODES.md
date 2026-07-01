@@ -18,7 +18,8 @@ Consumers should branch on `decision` and `reason_code`, not on `detail`.
 | `BLOCK` | `UNSUPPORTED_SCHEMA_VERSION` | `schema_version` is not supported. |
 | `BLOCK` | `SCHEMA_INVALID` | The document violates the published schema or a uniqueness invariant. |
 | `BLOCK` | `DIGEST_MISMATCH` | Canonical envelope digest verification failed. |
-| `BLOCK` | `AUTHORIZATION_MISMATCH` | The grant is not bound to the proposed agent, capability, target, or environment. |
+| `BLOCK` | `DECISION_BEFORE_CREATION` | `decision_time` is earlier than `created_at`. |
+| `BLOCK` | `AUTHORIZATION_MISMATCH` | The grant is not bound to the proposed actor, agent, capability, operation, target, or environment. |
 | `BLOCK` | `AUTHORIZATION_NOT_YET_VALID` | The grant begins after `decision_time`. |
 | `BLOCK` | `AUTHORIZATION_EXPIRED` | The grant ended before `decision_time`. |
 | `BLOCK` | `EVIDENCE_ACTION_MISMATCH` | Evidence is bound to another `action_id`. |

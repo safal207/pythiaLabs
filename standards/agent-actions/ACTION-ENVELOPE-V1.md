@@ -31,6 +31,7 @@ Action Envelope V1 provides a minimal shape for that decision boundary.
 proposed action
   -> schema/version validation
   -> envelope digest verification
+  -> envelope temporal-order check
   -> authorization binding and time checks
   -> evidence action-binding and freshness checks
   -> precondition checks
@@ -87,6 +88,10 @@ The identifier for this procedure is `json-sort-keys-utf8-v1`.
 The digest protects the serialized proposal against accidental or malicious
 mutation. It does not authenticate the author. Production authorship requires a
 separate trustworthy signature and identity system.
+
+After digest verification, the evaluator requires `decision_time >= created_at`.
+A decision that predates the proposal is blocked with
+`DECISION_BEFORE_CREATION` before authorization or evidence checks continue.
 
 ## 7. Authorization binding
 

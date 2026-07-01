@@ -11,6 +11,7 @@ from action_envelope_reference import (
     AUTHORIZATION_MISMATCH,
     AUTHORIZATION_NOT_YET_VALID,
     BLOCK,
+    DECISION_BEFORE_CREATION,
     DIGEST_MISMATCH,
     EVIDENCE_ACTION_MISMATCH,
     EVIDENCE_NOT_YET_VALID,
@@ -72,6 +73,11 @@ class ActionEnvelopeConformanceTest(unittest.TestCase):
             row["observed_at"] = row["observed_at"][:-1] + "z"
             row["expires_at"] = row["expires_at"][:-1] + "z"
         self.assert_decision(redigest(value), ALLOW, ALLOW_OK)
+
+    def test_decision_before_creation_is_blocked(self):
+        value = load_example()
+        value["created_at"] = "2026-07-01T19:05:01Z"
+        self.assert_decision(redigest(value), BLOCK, DECISION_BEFORE_CREATION)
 
     def test_unsupported_string_version_fails_closed(self):
         value = load_example()

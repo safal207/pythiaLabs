@@ -19,6 +19,7 @@ ESCALATE = "ESCALATE"
 UNSUPPORTED_SCHEMA_VERSION = "UNSUPPORTED_SCHEMA_VERSION"
 SCHEMA_INVALID = "SCHEMA_INVALID"
 DIGEST_MISMATCH = "DIGEST_MISMATCH"
+DECISION_BEFORE_CREATION = "DECISION_BEFORE_CREATION"
 AUTHORIZATION_MISMATCH = "AUTHORIZATION_MISMATCH"
 AUTHORIZATION_NOT_YET_VALID = "AUTHORIZATION_NOT_YET_VALID"
 AUTHORIZATION_EXPIRED = "AUTHORIZATION_EXPIRED"
@@ -143,7 +144,15 @@ def evaluate_action(
     request = envelope["request"]
     actor = envelope["actor"]
     authorization = envelope["authorization"]
+    created_at = parse_time(envelope["created_at"])
     decision_time = parse_time(envelope["decision_time"])
+
+    if decision_time < created_at:
+        return decision(
+            BLOCK,
+            DECISION_BEFORE_CREATION,
+            "decision_time is earlier than created_at",
+        )
 
     authorization_bindings = {
         "actor_id": actor["actor_id"],

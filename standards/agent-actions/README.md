@@ -48,6 +48,7 @@ The reference slice checks:
 - explicit schema versioning with malformed-versus-unsupported classification;
 - strict unknown-field and required-field validation;
 - canonical SHA-256 envelope integrity;
+- temporal ordering that rejects `decision_time` earlier than `created_at`;
 - authorization binding to initiating actor, executing agent, capability,
   operation, target, and environment;
 - authorization validity at `decision_time`, including both time-window bounds;
