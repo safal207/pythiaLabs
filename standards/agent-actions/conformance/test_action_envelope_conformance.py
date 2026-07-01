@@ -62,6 +62,17 @@ class ActionEnvelopeConformanceTest(unittest.TestCase):
     def test_valid_envelope_allows(self):
         self.assert_decision(load_example(), ALLOW, ALLOW_OK)
 
+    def test_lowercase_utc_suffix_is_accepted_deterministically(self):
+        value = load_example()
+        value["created_at"] = "2026-07-01T19:00:00z"
+        value["decision_time"] = "2026-07-01T19:05:00z"
+        value["authorization"]["valid_from"] = "2026-07-01T18:00:00z"
+        value["authorization"]["valid_until"] = "2026-07-01T20:00:00z"
+        for row in value["evidence"]:
+            row["observed_at"] = row["observed_at"][:-1] + "z"
+            row["expires_at"] = row["expires_at"][:-1] + "z"
+        self.assert_decision(redigest(value), ALLOW, ALLOW_OK)
+
     def test_unsupported_string_version_fails_closed(self):
         value = load_example()
         value["schema_version"] = "2.0"
