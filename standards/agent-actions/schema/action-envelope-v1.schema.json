@@ -92,8 +92,10 @@
       "additionalProperties": false,
       "required": [
         "authorization_id",
+        "actor_id",
         "granted_to",
         "capability",
+        "operation",
         "target",
         "environment",
         "valid_from",
@@ -105,11 +107,19 @@
           "type": "string",
           "minLength": 1
         },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "granted_to": {
           "type": "string",
           "minLength": 1
         },
         "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
           "type": "string",
           "minLength": 1
         },

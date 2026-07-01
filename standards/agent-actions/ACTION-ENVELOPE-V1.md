@@ -54,7 +54,7 @@ that the tool executed or that the external result was correct.
 | `decision_time` | Defines the time at which temporal checks are evaluated. |
 | `actor` | Identifies the initiating actor and executing agent. |
 | `request` | Declares capability, operation, target, and environment. |
-| `authorization` | Declares the bounded grant used for this decision. |
+| `authorization` | Declares the actor- and action-bound grant used for this decision. |
 | `preconditions` | Declares passed, failed, or unresolved conditions. |
 | `evidence` | Carries durable references, action binding, provenance, and freshness. |
 | `idempotency` | Declares a caller-checkable replay key and rejection policy. |
@@ -62,7 +62,17 @@ that the tool executed or that the external result was correct.
 | `expected_state_transition` | Declares the intended before/after state. |
 | `envelope_digest` | Protects canonical envelope integrity. |
 
-## 5. Canonical digest
+## 5. Schema-version classification
+
+The evaluator distinguishes malformed input from a well-formed but unsupported
+protocol version:
+
+- a missing or non-string `schema_version` is `BLOCK / SCHEMA_INVALID`;
+- a string version other than `1.0` is `BLOCK / UNSUPPORTED_SCHEMA_VERSION`.
+
+This distinction is part of the machine-readable decision contract.
+
+## 6. Canonical digest
 
 The digest is SHA-256 over UTF-8 JSON after:
 
@@ -78,12 +88,14 @@ The digest protects the serialized proposal against accidental or malicious
 mutation. It does not authenticate the author. Production authorship requires a
 separate trustworthy signature and identity system.
 
-## 6. Authorization binding
+## 7. Authorization binding
 
-The evaluator requires the authorization grant to match:
+The evaluator requires the authorization grant to match all of:
 
+- `actor.actor_id`;
 - `actor.agent_id`;
 - `request.capability`;
+- `request.operation`;
 - `request.target`;
 - `request.environment`.
 
@@ -93,7 +105,7 @@ This narrow equality model is intentionally conservative. Wildcards, role
 resolution, hierarchical resources, and delegated scope reduction are outside
 this first slice.
 
-## 7. Evidence semantics
+## 8. Evidence semantics
 
 Every evidence row contains:
 
@@ -114,7 +126,7 @@ The current slice validates the declared digest shape but does not fetch the
 locator and recompute the external artifact digest. Integrations must perform
 that independent verification before treating the evidence as trustworthy.
 
-## 8. Preconditions
+## 9. Preconditions
 
 Each precondition is one of:
 
@@ -124,7 +136,7 @@ Each precondition is one of:
 
 Every precondition must reference at least one evidence row.
 
-## 9. Idempotency and replay
+## 10. Idempotency and replay
 
 The envelope declares an idempotency key with `reject_duplicate` policy. The
 reference evaluator accepts a caller-provided set of previously observed keys.
@@ -133,7 +145,7 @@ Durable storage, atomic check-and-record behavior, expiry, and distributed
 coordination are integration responsibilities. An in-memory test set is not a
 production replay defense.
 
-## 10. Recovery
+## 11. Recovery
 
 When `rollback_required` is true but `rollback_available` is false, the
 reference evaluator returns `ESCALATE / RECOVERY_NOT_READY`.
@@ -141,7 +153,7 @@ reference evaluator returns `ESCALATE / RECOVERY_NOT_READY`.
 A rollback reference is required whenever rollback is declared available. The
 evaluator does not execute or validate the rollback procedure itself.
 
-## 11. Decision semantics
+## 12. Decision semantics
 
 - `ALLOW` — every declared check in this bounded evaluator passed.
 - `BLOCK` — a deterministic safety or integrity condition failed.
@@ -150,7 +162,7 @@ evaluator does not execute or validate the rollback procedure itself.
 
 Stable reason codes are defined in [`DECISION_CODES.md`](DECISION_CODES.md).
 
-## 12. Relationship to continuation
+## 13. Relationship to continuation
 
 The Verifiable Continuation Envelope may preserve:
 
@@ -164,13 +176,14 @@ It must not silently create an Action Envelope authorization grant. A resumed
 agent still needs a separately constructed and evaluated Action Envelope before
 performing a high-risk side effect.
 
-## 13. Extension rule
+## 14. Extension rule
 
 Future domain-specific fields should be added through a versioned extension or
 new schema version. Implementations must not silently ignore unknown fields;
-the published schema therefore uses `additionalProperties: false`.
+the published schema therefore uses `additionalProperties: false`, and the
+conformance suite contains regressions for both top-level and nested fields.
 
-## 14. Non-goals
+## 15. Non-goals
 
 V1 does not define:
 

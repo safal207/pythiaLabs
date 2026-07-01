@@ -9,9 +9,11 @@ from action_envelope_reference import (
     ALLOW_OK,
     AUTHORIZATION_EXPIRED,
     AUTHORIZATION_MISMATCH,
+    AUTHORIZATION_NOT_YET_VALID,
     BLOCK,
     DIGEST_MISMATCH,
     EVIDENCE_ACTION_MISMATCH,
+    EVIDENCE_NOT_YET_VALID,
     EVIDENCE_STALE,
     ESCALATE,
     PRECONDITION_FAILED,
@@ -41,6 +43,13 @@ def redigest(value):
 
 
 class ActionEnvelopeConformanceTest(unittest.TestCase):
+    def assert_decision(self, value, expected_decision, expected_reason, **kwargs):
+        result = evaluate_action(value, **kwargs)
+        self.assertEqual(
+            (result["decision"], result["reason_code"]),
+            (expected_decision, expected_reason),
+        )
+
     def test_schema_is_valid_draft_2020_12(self):
         self.assertEqual(
             load_schema()["$schema"],
@@ -51,132 +60,117 @@ class ActionEnvelopeConformanceTest(unittest.TestCase):
         self.assertEqual(schema_errors(load_example()), [])
 
     def test_valid_envelope_allows(self):
-        result = evaluate_action(load_example())
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (ALLOW, ALLOW_OK),
-        )
+        self.assert_decision(load_example(), ALLOW, ALLOW_OK)
 
-    def test_unsupported_version_fails_closed(self):
+    def test_unsupported_string_version_fails_closed(self):
         value = load_example()
         value["schema_version"] = "2.0"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, UNSUPPORTED_SCHEMA_VERSION),
-        )
+        self.assert_decision(redigest(value), BLOCK, UNSUPPORTED_SCHEMA_VERSION)
 
-    def test_malformed_shape_fails_closed(self):
+    def test_missing_version_is_schema_invalid(self):
+        value = load_example()
+        del value["schema_version"]
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
+
+    def test_wrong_type_version_is_schema_invalid(self):
+        value = load_example()
+        value["schema_version"] = 1
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
+
+    def test_missing_required_field_fails_closed(self):
         value = load_example()
         del value["request"]["target"]
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, SCHEMA_INVALID),
-        )
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
+
+    def test_unknown_top_level_field_fails_closed(self):
+        value = load_example()
+        value["unexpected"] = True
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
+
+    def test_unknown_nested_field_fails_closed(self):
+        value = load_example()
+        value["authorization"]["unexpected"] = True
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
 
     def test_tampered_envelope_digest_fails_closed(self):
         value = load_example()
         value["request"]["operation"] = "delete_service"
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, DIGEST_MISMATCH),
-        )
+        self.assert_decision(value, BLOCK, DIGEST_MISMATCH)
 
-    def test_authorization_is_bound_to_agent_and_action(self):
+    def test_authorization_is_bound_to_full_action_identity(self):
+        cases = {
+            "actor_id": "user-other",
+            "granted_to": "agent-other",
+            "capability": "production.delete",
+            "operation": "delete_service",
+            "target": "service/other",
+            "environment": "staging",
+        }
+        for field, replacement in cases.items():
+            with self.subTest(field=field):
+                value = load_example()
+                value["authorization"][field] = replacement
+                self.assert_decision(redigest(value), BLOCK, AUTHORIZATION_MISMATCH)
+
+    def test_authorization_not_yet_valid_is_blocked(self):
         value = load_example()
-        value["authorization"]["granted_to"] = "agent-other"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, AUTHORIZATION_MISMATCH),
-        )
+        value["authorization"]["valid_from"] = "2026-07-01T19:05:01Z"
+        self.assert_decision(redigest(value), BLOCK, AUTHORIZATION_NOT_YET_VALID)
 
     def test_expired_authorization_is_blocked(self):
         value = load_example()
         value["authorization"]["valid_until"] = "2026-07-01T19:04:59Z"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, AUTHORIZATION_EXPIRED),
-        )
+        self.assert_decision(redigest(value), BLOCK, AUTHORIZATION_EXPIRED)
 
     def test_evidence_must_be_bound_to_action(self):
         value = load_example()
         value["evidence"][0]["action_id"] = "action-other"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, EVIDENCE_ACTION_MISMATCH),
-        )
+        self.assert_decision(redigest(value), BLOCK, EVIDENCE_ACTION_MISMATCH)
+
+    def test_evidence_observed_after_decision_time_is_blocked(self):
+        value = load_example()
+        value["evidence"][0]["observed_at"] = "2026-07-01T19:05:01Z"
+        self.assert_decision(redigest(value), BLOCK, EVIDENCE_NOT_YET_VALID)
 
     def test_stale_evidence_is_blocked(self):
         value = load_example()
         value["evidence"][0]["expires_at"] = "2026-07-01T19:04:59Z"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, EVIDENCE_STALE),
-        )
+        self.assert_decision(redigest(value), BLOCK, EVIDENCE_STALE)
+
+    def test_duplicate_evidence_id_is_schema_invalid(self):
+        value = load_example()
+        value["evidence"][1]["evidence_id"] = value["evidence"][0]["evidence_id"]
+        self.assert_decision(redigest(value), BLOCK, SCHEMA_INVALID)
 
     def test_unknown_evidence_reference_is_blocked(self):
         value = load_example()
         value["preconditions"][0]["evidence_refs"] = ["ev-missing"]
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, UNKNOWN_EVIDENCE_REF),
-        )
+        self.assert_decision(redigest(value), BLOCK, UNKNOWN_EVIDENCE_REF)
 
     def test_failed_precondition_is_blocked(self):
         value = load_example()
         value["preconditions"][0]["status"] = "failed"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, PRECONDITION_FAILED),
-        )
+        self.assert_decision(redigest(value), BLOCK, PRECONDITION_FAILED)
 
     def test_unknown_precondition_escalates(self):
         value = load_example()
         value["preconditions"][0]["status"] = "unknown"
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (ESCALATE, PRECONDITION_UNRESOLVED),
-        )
+        self.assert_decision(redigest(value), ESCALATE, PRECONDITION_UNRESOLVED)
 
     def test_duplicate_idempotency_key_is_blocked(self):
         value = load_example()
-        result = evaluate_action(
+        self.assert_decision(
             value,
+            BLOCK,
+            REPLAY_DETECTED,
             seen_idempotency_keys={value["idempotency"]["key"]},
-        )
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (BLOCK, REPLAY_DETECTED),
         )
 
     def test_required_but_missing_rollback_escalates(self):
         value = load_example()
         value["recovery"]["rollback_available"] = False
         value["recovery"]["rollback_ref"] = None
-        value = redigest(value)
-        result = evaluate_action(value)
-        self.assertEqual(
-            (result["decision"], result["reason_code"]),
-            (ESCALATE, RECOVERY_NOT_READY),
-        )
+        self.assert_decision(redigest(value), ESCALATE, RECOVERY_NOT_READY)
 
     def test_decision_reason_codes_are_stable_strings(self):
         result = evaluate_action(load_example())

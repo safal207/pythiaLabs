@@ -124,7 +124,8 @@ def evaluate_action(
     *,
     seen_idempotency_keys: Iterable[str] = (),
 ) -> dict[str, str]:
-    if envelope.get("schema_version") != SUPPORTED_SCHEMA_VERSION:
+    schema_version = envelope.get("schema_version")
+    if isinstance(schema_version, str) and schema_version != SUPPORTED_SCHEMA_VERSION:
         return decision(
             BLOCK,
             UNSUPPORTED_SCHEMA_VERSION,
@@ -145,8 +146,10 @@ def evaluate_action(
     decision_time = parse_time(envelope["decision_time"])
 
     authorization_bindings = {
+        "actor_id": actor["actor_id"],
         "granted_to": actor["agent_id"],
         "capability": request["capability"],
+        "operation": request["operation"],
         "target": request["target"],
         "environment": request["environment"],
     }

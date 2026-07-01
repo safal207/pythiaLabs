@@ -16,8 +16,10 @@
   },
   "authorization": {
     "authorization_id": "auth-77",
+    "actor_id": "user-alex",
     "granted_to": "agent-ci-autofix",
     "capability": "production.deploy",
+    "operation": "deploy_release",
     "target": "service/payments-api",
     "environment": "production",
     "valid_from": "2026-07-01T18:00:00Z",
@@ -87,6 +89,6 @@
   "envelope_digest": {
     "algorithm": "sha256",
     "canonicalization": "json-sort-keys-utf8-v1",
-    "value": "e87256363eed9baada866fcc65490ebcc9b7e15f25a50a490eebe6d0b1260083"
+    "value": "1e6394ab1a814e250b7815a141bfc84171993d0c2c675f4abad5c7feb136eb8c"
   }
 }

@@ -45,14 +45,15 @@ python -m unittest discover \
 
 The reference slice checks:
 
-- explicit schema versioning;
-- strict shape validation;
+- explicit schema versioning with malformed-versus-unsupported classification;
+- strict unknown-field and required-field validation;
 - canonical SHA-256 envelope integrity;
-- authorization binding to agent, capability, target, and environment;
-- authorization validity at `decision_time`;
+- authorization binding to initiating actor, executing agent, capability,
+  operation, target, and environment;
+- authorization validity at `decision_time`, including both time-window bounds;
 - evidence binding to the intended `action_id`;
-- evidence freshness at `decision_time`;
-- precondition evidence references;
+- evidence freshness at `decision_time`, including both time-window bounds;
+- unique evidence identifiers and valid precondition evidence references;
 - deterministic `ALLOW`, `BLOCK`, and `ESCALATE` outcomes;
 - duplicate idempotency-key detection supplied by the caller;
 - rollback readiness when rollback is declared mandatory.
