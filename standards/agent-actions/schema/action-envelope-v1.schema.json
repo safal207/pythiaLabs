@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/agent-actions/schema/action-envelope-v1.schema.json",
+  "title": "PythiaLabs Action Envelope V1",
+  "description": "A bounded, vendor-neutral contract for evaluating a proposed high-risk agent action before tool execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "envelope_id",
+    "action_id",
+    "created_at",
+    "decision_time",
+    "actor",
+    "request",
+    "authorization",
+    "preconditions",
+    "evidence",
+    "idempotency",
+    "recovery",
+    "expected_state_transition",
+    "envelope_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "envelope_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "agent_id"
+      ],
+      "properties": {
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "agent_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability",
+        "operation",
+        "target",
+        "environment"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorization_id",
+        "granted_to",
+        "capability",
+        "target",
+        "environment",
+        "valid_from",
+        "valid_until",
+        "delegation_chain"
+      ],
+      "properties": {
+        "authorization_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "granted_to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "delegation_chain": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "maxItems": 20
+        }
+      }
+    },
+    "preconditions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "precondition_id",
+          "status",
+          "evidence_refs"
+        ],
+        "properties": {
+          "precondition_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "unknown"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_id",
+          "action_id",
+          "evidence_type",
+          "locator",
+          "digest",
+          "observed_at",
+          "expires_at",
+          "provenance"
+        ],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_type": {
+            "enum": [
+              "approval",
+              "policy_snapshot",
+              "test_result",
+              "runtime_receipt",
+              "artifact_digest",
+              "other"
+            ]
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source_type",
+              "source_ref"
+            ],
+            "properties": {
+              "source_type": {
+                "enum": [
+                  "user",
+                  "policy",
+                  "tool",
+                  "workflow",
+                  "runtime",
+                  "file",
+                  "git",
+                  "other"
+                ]
+              },
+              "source_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "idempotency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "replay_policy"
+      ],
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replay_policy": {
+          "const": "reject_duplicate"
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rollback_required",
+        "rollback_available",
+        "rollback_ref"
+      ],
+      "properties": {
+        "rollback_required": {
+          "type": "boolean"
+        },
+        "rollback_available": {
+          "type": "boolean"
+        },
+        "rollback_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "rollback_available": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rollback_ref": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "expected_state_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "envelope_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "json-sort-keys-utf8-v1"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}
