@@ -30,6 +30,18 @@ action. An action envelope must not be treated as durable memory of a session.
   — executable conformance checks;
 - [`DECISION_CODES.md`](DECISION_CODES.md) — stable decision and reason-code registry.
 
+## Reference adapters
+
+- [`GITHUB-PR-MERGE-GATE.md`](GITHUB-PR-MERGE-GATE.md) — maps a bounded GitHub
+  pull-request snapshot into Action Envelope V1 for an exact-head
+  `merge_pull_request` decision;
+- [`schema/github-pr-merge-gate-input.schema.json`](schema/github-pr-merge-gate-input.schema.json)
+  — strict adapter input contract;
+- [`adapters/github_pr_merge_gate.py`](adapters/github_pr_merge_gate.py) —
+  reference adapter and evaluator;
+- [`conformance/test_github_pr_merge_gate.py`](conformance/test_github_pr_merge_gate.py)
+  — exact-head, freshness, replay, authorization, and recovery regressions.
+
 ## Quick validation
 
 ```bash
@@ -59,6 +71,11 @@ The reference slice checks:
 - duplicate idempotency-key detection supplied by the caller;
 - rollback readiness when rollback is declared mandatory.
 
+The GitHub merge-gate adapter additionally binds the action identity,
+authorization target, evidence, idempotency key, and expected transition to one
+exact pull-request head SHA. Checks or reviews from another head do not authorize
+the proposed merge.
+
 ## Non-claims
 
 This is an experimental local conformance package. It is not:
@@ -68,7 +85,9 @@ This is an experimental local conformance package. It is not:
 - a regulatory compliance certification;
 - a universal policy language;
 - a guarantee that an allowed action is safe;
-- an execution engine.
+- an execution engine;
+- a GitHub App, branch-protection replacement, or production merge queue.
 
-The caller remains responsible for trustworthy identity, durable replay
-storage, policy correctness, tool enforcement, and post-execution verification.
+The caller remains responsible for trustworthy identity, independent GitHub
+state retrieval, durable replay storage, policy correctness, tool enforcement,
+and post-execution verification.

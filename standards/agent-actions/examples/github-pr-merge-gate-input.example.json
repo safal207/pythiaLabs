@@ -1,0 +1,95 @@
+{
+  "schema_version": "pythia.github_pr_merge_gate.v0.1",
+  "created_at": "2026-07-01T21:00:00Z",
+  "decision_time": "2026-07-01T21:05:00Z",
+  "actor": {
+    "actor_id": "maintainer:safal207",
+    "agent_id": "agent:pythia-github-merge-gate"
+  },
+  "repository": "safal207/pythiaLabs",
+  "pull_request": {
+    "number": 214,
+    "base_ref": "main",
+    "state": "open",
+    "mergeable": true,
+    "expected_head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "observed_head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "observed_at": "2026-07-01T21:04:30Z",
+    "expires_at": "2026-07-01T21:10:00Z"
+  },
+  "authorization": {
+    "authorization_id": "auth-github-merge-214",
+    "actor_id": "maintainer:safal207",
+    "granted_to": "agent:pythia-github-merge-gate",
+    "capability": "repository.merge",
+    "operation": "merge_pull_request",
+    "target": "github://safal207/pythiaLabs/pulls/214@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment": "github",
+    "valid_from": "2026-07-01T20:55:00Z",
+    "valid_until": "2026-07-01T21:15:00Z",
+    "delegation_chain": [
+      "maintainer:safal207",
+      "policy:exact-head-merge-v1"
+    ]
+  },
+  "required_checks": [
+    "CI",
+    "Security",
+    "Action Envelope conformance"
+  ],
+  "checks": [
+    {
+      "name": "CI",
+      "conclusion": "success",
+      "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observed_at": "2026-07-01T21:02:00Z",
+      "expires_at": "2026-07-01T21:12:00Z",
+      "run_ref": "github-actions://safal207/pythiaLabs/runs/495"
+    },
+    {
+      "name": "Security",
+      "conclusion": "success",
+      "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observed_at": "2026-07-01T21:02:30Z",
+      "expires_at": "2026-07-01T21:12:30Z",
+      "run_ref": "github-actions://safal207/pythiaLabs/runs/406"
+    },
+    {
+      "name": "Action Envelope conformance",
+      "conclusion": "success",
+      "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observed_at": "2026-07-01T21:03:00Z",
+      "expires_at": "2026-07-01T21:13:00Z",
+      "run_ref": "github-actions://safal207/pythiaLabs/runs/8"
+    }
+  ],
+  "required_reviews": [
+    "coderabbitai",
+    "chatgpt-codex-connector"
+  ],
+  "reviews": [
+    {
+      "reviewer": "coderabbitai",
+      "reviewer_type": "code_review_bot",
+      "verdict": "approved",
+      "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "submitted_at": "2026-07-01T21:03:30Z",
+      "expires_at": "2026-07-01T21:13:30Z",
+      "review_ref": "github-review://safal207/pythiaLabs/pulls/214/coderabbitai"
+    },
+    {
+      "reviewer": "chatgpt-codex-connector",
+      "reviewer_type": "code_review_bot",
+      "verdict": "approved",
+      "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "submitted_at": "2026-07-01T21:04:00Z",
+      "expires_at": "2026-07-01T21:14:00Z",
+      "review_ref": "github-review://safal207/pythiaLabs/pulls/214/codex"
+    }
+  ],
+  "recovery": {
+    "rollback_required": true,
+    "rollback_available": true,
+    "rollback_ref": "github://safal207/pythiaLabs/pulls/214/revert-plan"
+  }
+}
