@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "envelope_id": "env-deploy-1842",
+  "action_id": "action-deploy-1842",
+  "created_at": "2026-07-01T19:00:00Z",
+  "decision_time": "2026-07-01T19:05:00Z",
+  "actor": {
+    "actor_id": "user-alex",
+    "agent_id": "agent-ci-autofix"
+  },
+  "request": {
+    "capability": "production.deploy",
+    "operation": "deploy_release",
+    "target": "service/payments-api",
+    "environment": "production"
+  },
+  "authorization": {
+    "authorization_id": "auth-77",
+    "granted_to": "agent-ci-autofix",
+    "capability": "production.deploy",
+    "target": "service/payments-api",
+    "environment": "production",
+    "valid_from": "2026-07-01T18:00:00Z",
+    "valid_until": "2026-07-01T20:00:00Z",
+    "delegation_chain": [
+      "user-alex",
+      "policy/release-managers"
+    ]
+  },
+  "preconditions": [
+    {
+      "precondition_id": "tests-passed",
+      "status": "passed",
+      "evidence_refs": [
+        "ev-tests"
+      ]
+    },
+    {
+      "precondition_id": "approval-present",
+      "status": "passed",
+      "evidence_refs": [
+        "ev-approval"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-tests",
+      "action_id": "action-deploy-1842",
+      "evidence_type": "test_result",
+      "locator": "github-actions://run/28543940380",
+      "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observed_at": "2026-07-01T18:58:00Z",
+      "expires_at": "2026-07-01T19:20:00Z",
+      "provenance": {
+        "source_type": "workflow",
+        "source_ref": "ci/run/28543940380"
+      }
+    },
+    {
+      "evidence_id": "ev-approval",
+      "action_id": "action-deploy-1842",
+      "evidence_type": "approval",
+      "locator": "approval://release/77",
+      "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "observed_at": "2026-07-01T19:01:00Z",
+      "expires_at": "2026-07-01T19:15:00Z",
+      "provenance": {
+        "source_type": "policy",
+        "source_ref": "release-policy/approval-77"
+      }
+    }
+  ],
+  "idempotency": {
+    "key": "deploy:payments-api:build-1842",
+    "replay_policy": "reject_duplicate"
+  },
+  "recovery": {
+    "rollback_required": true,
+    "rollback_available": true,
+    "rollback_ref": "runbook://payments-api/rollback"
+  },
+  "expected_state_transition": {
+    "from": "release_candidate",
+    "to": "deployed"
+  },
+  "envelope_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json-sort-keys-utf8-v1",
+    "value": "e87256363eed9baada866fcc65490ebcc9b7e15f25a50a490eebe6d0b1260083"
+  }
+}
