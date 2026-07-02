@@ -151,7 +151,9 @@ def _missing_required_evidence(snapshot: Mapping[str, Any]) -> list[str]:
 def _evidence_target_mismatches(snapshot: Mapping[str, Any]) -> list[str]:
     repository = snapshot["repository"]
     pull_request_number = snapshot["pull_request"]["number"]
-    check_prefix = f"github-actions://{repository}/runs/"
+    check_prefix = (
+        f"github-actions://{repository}/pulls/{pull_request_number}/runs/"
+    )
     review_prefix = (
         f"github-review://{repository}/pulls/{pull_request_number}/"
     )

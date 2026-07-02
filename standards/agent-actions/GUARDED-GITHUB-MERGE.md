@@ -84,8 +84,10 @@ A required check or review that is absent is a known unsafe execution state:
 BLOCK / REQUIRED_EVIDENCE_MISSING
 ```
 
-Workflow locators must belong to the proposed repository. Review locators must
-belong to the proposed repository and pull request. Cross-target locators return:
+Workflow locators must belong to the exact proposed repository and pull request
+using `github-actions://owner/repository/pulls/{number}/runs/{run_id}`. Review
+locators must also belong to the exact proposed repository and pull request.
+Cross-target locators return:
 
 ```text
 BLOCK / EVIDENCE_TARGET_MISMATCH
@@ -129,6 +131,7 @@ branch-protection integration remain outside this PR.
 - missing required check or review blocks;
 - foreign reviewer does not replace a required reviewer;
 - cross-repository workflow evidence blocks;
+- workflow evidence for another pull request blocks;
 - review evidence for another pull request blocks;
 - a backdated snapshot cannot revive stale evidence;
 - trusted-clock failure escalates before external state lookup;
