@@ -66,6 +66,11 @@ reviewing lineage.
 
 ### CrewAI discussion and acknowledgements
 
+- **2026-06-22 — CrewAI #5888:** Naga Satish explicitly acknowledged
+  `@safal207`'s TOCTOU gap and intent-binding model, mapped it to
+  `intent_digest`, `target_state_digest`, and `continuation_id`, and described
+  executor-side binding verification as the remaining enforcement boundary.
+  Source: https://github.com/crewAIInc/crewAI/issues/5888#issuecomment-4775035453
 - **2026-06-30 16:03 UTC — Correctover comment in CrewAI #4877:** addressed
   `@safal207`, described frozen action-envelope binding as the implementation
   path being proposed, and referred to 17 existing schema/fail-closed/crosswalk
@@ -81,6 +86,19 @@ reviewing lineage.
   phrase **“honesty theater”** for disclosure without decision-path dependency
   and described binding `reversibility` and `source_class` into a verdict digest.
   Source: https://github.com/crewAIInc/crewAI/issues/4877#issuecomment-4858225716
+- **2026-07-02 — Tuttotorna comment in CrewAI #5888:** proposed a five-case
+  transition-sufficiency conformance contract covering exact-action binding,
+  changed execution context, missing support basis, missing terminal outcome,
+  and withdrawn runtime support.
+  Source: https://github.com/crewAIInc/crewAI/issues/5888#issuecomment-4862087765
+- **2026-07-02 — Tuttotorna comment in CrewAI #5888:** proposed a portable
+  conformance result shape with `PASS`, `FAIL`, `NON_CONFORMANT`, and
+  `UNTESTABLE` outcomes.
+  Source: https://github.com/crewAIInc/crewAI/issues/5888#issuecomment-4862143110
+- **2026-07-02 — Tuttotorna comment in CrewAI #5888:** published the related
+  PHI-OMEGA-RUNTIME transition-sufficiency fixture and mapped relevant cases to
+  the governance-hook boundary.
+  Source: https://github.com/crewAIInc/crewAI/issues/5888#issuecomment-4862621606
 - **2026-07-01 19:55 UTC — PythiaLabs issue #211:** converted the existing
   PythiaLabs gate/evidence/replay work into a bounded roadmap for a formal,
   versioned machine-verifiable action protocol.
@@ -97,10 +115,10 @@ reviewing lineage.
 
 | Source concept or artifact | PythiaLabs artifact | Actual overlap | Independent additions in PythiaLabs | Attribution action |
 |---|---|---|---|---|
-| Generic pre-tool-call authorization / guardrail provider pattern | Action Envelope lifecycle and evaluator | Both gate an action before a side effect | Strict envelope schema, authorization tuple, evidence freshness, replay input, recovery readiness, stable reason codes | Cite CrewAI #4877 as related public discussion; do not imply CrewAI adoption |
+| Generic pre-tool-call authorization / guardrail provider pattern | Action Envelope lifecycle and evaluator | Both gate an action before a side effect | Strict envelope schema, authorization tuple, evidence freshness, replay input, recovery readiness, stable reason codes | Cite CrewAI #4877 and #5888 as related public discussion; do not imply CrewAI adoption |
 | PythiaLabs pre-execution gate (`ALLOW/BLOCK/ESCALATE`) from May 2026 | Decision semantics and tests | Direct internal lineage | Stable stop-reason registry and strict schema classification | Cite PythiaLabs #83, #128, #189, #190, and #192 |
 | ibex verifiable action chain and `ActionEnvelopeV1` | Canonical envelope integrity and exact action binding | Related implementation by the same maintainer; not the same schema | PythiaLabs adds evidence rows, temporal semantics, preconditions, recovery, and domain-neutral decision codes | Cite ibex PRs #63 and #64 as prior portfolio implementation |
-| “Frozen action-envelope binding” discussed in CrewAI #4877 | Digest mismatch and action-bound authorization/evidence tests | Shared structural principle | PythiaLabs uses its own schema, canonicalization identifier, decision codes, and evaluator ordering | Credit the CrewAI discussion and named participants where the discussion materially shaped presentation |
+| Frozen-transition and intent-binding discussion in CrewAI #4877/#5888 | Digest mismatch and action-bound authorization/evidence tests | Shared structural principle | PythiaLabs uses its own schema, canonicalization identifier, decision codes, and evaluator ordering | Credit the exact CrewAI comments and named participants where the discussion materially shaped presentation |
 | “Honesty theater” phrase | Governing principle that prose/disclosure must not replace machine-verifiable enforcement | Related conceptual framing; the exact phrase is not normative PythiaLabs terminology | Existing PythiaLabs gate predates the phrase; Pythia evaluator directly reads fields and changes decisions | Credit Correctover whenever the phrase itself is used or discussed |
 | Correctover guardrail-conformance benchmark | PythiaLabs executable conformance suite | Both test whether declared controls affect behavior | The case sets and decision models differ materially; see comparison below | Cite benchmark as related work; credit its README’s named contributors rather than attributing all five cases to one party |
 
@@ -140,7 +158,8 @@ benchmark, including:
 1. **Credit Correctover for the phrase “honesty theater”** whenever that phrase
    is used in PythiaLabs documentation or discussion.
 2. **Credit the broader CrewAI #4877/#5888 discussion** as related public work on
-   provider contracts, decision records, frozen transitions, and conformance.
+   provider contracts, decision records, frozen transitions, and conformance,
+   using exact comment anchors rather than issue-level references alone.
 3. **Credit contributors by the roles stated in the benchmark’s own README:**
    `@Tuttotorna`, `@babyblueviper1`, and Correctover.
 4. **Document PythiaLabs and ibex prior artifacts** so reviewers can distinguish
