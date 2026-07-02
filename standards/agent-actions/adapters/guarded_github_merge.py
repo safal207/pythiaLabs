@@ -14,12 +14,14 @@ ACTION_ALREADY_IN_PROGRESS = "ACTION_ALREADY_IN_PROGRESS"
 ACTION_ALREADY_EXECUTED = "ACTION_ALREADY_EXECUTED"
 TARGET_CHANGED_BEFORE_EXECUTION = "TARGET_CHANGED_BEFORE_EXECUTION"
 CURRENT_STATE_UNAVAILABLE = "CURRENT_STATE_UNAVAILABLE"
+TRUSTED_TIME_UNAVAILABLE = "TRUSTED_TIME_UNAVAILABLE"
 EXECUTION_FAILED = "EXECUTION_FAILED"
 
 NEW = "NEW"
 IN_PROGRESS = "IN_PROGRESS"
 SUCCEEDED = "SUCCEEDED"
 FAILED = "FAILED"
+NOT_ATTEMPTED = "NOT_ATTEMPTED"
 
 
 class DecisionClock(Protocol):
@@ -110,6 +112,8 @@ def _outcome(
     action_id: str | None = None,
     idempotency_key: str | None = None,
     executed: bool = False,
+    executor_called: bool = False,
+    execution_status: str = NOT_ATTEMPTED,
     execution_result: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
@@ -120,6 +124,8 @@ def _outcome(
         "action_id": action_id,
         "idempotency_key": idempotency_key,
         "executed": executed,
+        "executor_called": executor_called,
+        "execution_status": execution_status,
         "execution_result": (
             dict(execution_result) if execution_result is not None else None
         ),
@@ -206,6 +212,15 @@ def execute_guarded_merge(
             ),
         )
 
+    try:
+        trusted_decision_time = clock.now()
+    except Exception as exc:  # trusted-time availability boundary
+        return _outcome(
+            "ESCALATE",
+            TRUSTED_TIME_UNAVAILABLE,
+            detail=f"cannot obtain trusted decision time: {exc}",
+        )
+
     repository = snapshot["repository"]
     pull_request = snapshot["pull_request"]
     pull_request_number = pull_request["number"]
@@ -234,7 +249,7 @@ def execute_guarded_merge(
         )
 
     evaluated_snapshot = copy.deepcopy(dict(snapshot))
-    evaluated_snapshot["decision_time"] = clock.now()
+    evaluated_snapshot["decision_time"] = trusted_decision_time
     evaluated_snapshot["pull_request"]["observed_head_sha"] = first_head_sha
     gate = evaluate_github_pr_merge(evaluated_snapshot)
     action_id = gate.get("action_id")
@@ -321,6 +336,8 @@ def execute_guarded_merge(
             detail=f"merge executor failed: {exc}",
             action_id=action_id,
             idempotency_key=idempotency_key,
+            executor_called=True,
+            execution_status=FAILED,
         )
 
     execution_store.mark_succeeded(idempotency_key, execution_result)
@@ -331,5 +348,7 @@ def execute_guarded_merge(
         action_id=action_id,
         idempotency_key=idempotency_key,
         executed=True,
+        executor_called=True,
+        execution_status=SUCCEEDED,
         execution_result=execution_result,
     )
