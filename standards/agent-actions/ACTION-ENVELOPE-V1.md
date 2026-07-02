@@ -200,3 +200,25 @@ V1 does not define:
 - compensation transactions;
 - regulatory rules;
 - a universal agent-to-agent transport.
+
+## 16. Influences and prior work
+
+Action Envelope V1 builds on generic, widely shared ideas including
+pre-execution authorization, deterministic decision records, action/evidence
+binding, replay protection, and executable conformance tests.
+
+Relevant public work includes:
+
+- earlier PythiaLabs pre-execution gate, evidence-schema, and reproducible-case
+  artifacts from May and June 2026;
+- the same maintainer's verifiable action chain and strict `ActionEnvelopeV1`
+  implementation in `safal207/ibex-agent-verification`;
+- the CrewAI #4877 and #5888 discussions on provider contracts, frozen
+  transitions, decision records, and conformance;
+- Correctover's “honesty theater” phrase for disclosure without decision-path
+  dependency;
+- the public guardrail-conformance benchmark and the contributors named by its
+  own provenance section.
+
+The detailed chronology, concept mapping, five-case comparison, and attribution
+actions are documented in [`PROVENANCE.md`](PROVENANCE.md).
