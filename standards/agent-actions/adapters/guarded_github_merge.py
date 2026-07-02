@@ -22,6 +22,11 @@ SUCCEEDED = "SUCCEEDED"
 FAILED = "FAILED"
 
 
+class DecisionClock(Protocol):
+    def now(self) -> str:
+        """Return trusted RFC 3339 decision time."""
+
+
 class CurrentPullRequestStateProvider(Protocol):
     def get_head_sha(self, repository: str, pull_request: int) -> str:
         """Return the current GitHub head SHA for one pull request."""
@@ -160,12 +165,15 @@ def _evidence_target_mismatches(snapshot: Mapping[str, Any]) -> list[str]:
 def execute_guarded_merge(
     snapshot: Mapping[str, Any],
     *,
+    clock: DecisionClock,
     state_provider: CurrentPullRequestStateProvider,
     executor: MergeExecutor,
     execution_store: ExecutionStateStore,
 ) -> dict[str, Any]:
     """Evaluate and execute one exact-head GitHub merge at most once.
 
+    The caller-supplied snapshot cannot choose the effective decision time. The
+    service overwrites it with a trusted clock value before freshness checks.
     The executor is unreachable until the Action Envelope evaluator returns
     ALLOW, the semantic idempotency key is reserved, and the current GitHub head
     is checked a second time immediately before execution.
@@ -226,6 +234,7 @@ def execute_guarded_merge(
         )
 
     evaluated_snapshot = copy.deepcopy(dict(snapshot))
+    evaluated_snapshot["decision_time"] = clock.now()
     evaluated_snapshot["pull_request"]["observed_head_sha"] = first_head_sha
     gate = evaluate_github_pr_merge(evaluated_snapshot)
     action_id = gate.get("action_id")
