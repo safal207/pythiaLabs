@@ -20,6 +20,8 @@ action. An action envelope must not be treated as durable memory of a session.
 
 - [`ACTION-ENVELOPE-V1.md`](ACTION-ENVELOPE-V1.md) — protocol semantics and
   decision flow;
+- [`PROVENANCE.md`](PROVENANCE.md) — reviewer-verifiable chronology, related
+  prior work, five-case comparison, and attribution actions;
 - [`schema/action-envelope-v1.schema.json`](schema/action-envelope-v1.schema.json)
   — JSON Schema draft 2020-12;
 - [`examples/action-envelope-v1.example.json`](examples/action-envelope-v1.example.json)
