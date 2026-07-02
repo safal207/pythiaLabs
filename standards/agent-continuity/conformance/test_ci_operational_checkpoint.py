@@ -45,7 +45,10 @@ def next_checkpoint(previous):
 
 class CiOperationalCheckpointTest(unittest.TestCase):
     def assert_outcome(self, checkpoint, expected, **kwargs):
-        workspace = kwargs.pop("current_workspace", current_workspace(checkpoint))
+        if "current_workspace" in kwargs:
+            workspace = kwargs.pop("current_workspace")
+        else:
+            workspace = current_workspace(checkpoint)
         result = evaluate_resume(
             checkpoint,
             current_workspace=workspace,
@@ -89,6 +92,31 @@ class CiOperationalCheckpointTest(unittest.TestCase):
         self.assert_outcome(
             checkpoint,
             REVALIDATE_WORKSPACE,
+            current_workspace=workspace,
+        )
+
+    def test_missing_current_dirty_state_requires_revalidation(self):
+        checkpoint = load_example()
+        workspace = current_workspace(checkpoint)
+        workspace.pop("dirty_state_digest")
+
+        result = self.assert_outcome(
+            checkpoint,
+            REVALIDATE_WORKSPACE,
+            current_workspace=workspace,
+        )
+
+        self.assertEqual(result["reason_code"], "CURRENT_WORKSPACE_FIELD_MISSING")
+
+    def test_optional_dirty_state_may_be_omitted_from_checkpoint(self):
+        checkpoint = load_example()
+        checkpoint["workspace_state"].pop("dirty_state_digest")
+        checkpoint = with_computed_digest(checkpoint)
+        workspace = current_workspace(checkpoint)
+
+        self.assert_outcome(
+            checkpoint,
+            CONTINUE,
             current_workspace=workspace,
         )
 
@@ -145,17 +173,46 @@ class CiOperationalCheckpointTest(unittest.TestCase):
 
         self.assertEqual(result["reason_code"], "REJECTED_APPROACH_LOST")
 
-    def test_completed_verification_requires_evidence(self):
+    def test_rejected_approach_reason_cannot_be_rewritten(self):
+        previous = load_example()
+        checkpoint = next_checkpoint(previous)
+        checkpoint["rejected_approaches"][0]["reason"] = "Rewritten rationale"
+        checkpoint = with_computed_digest(checkpoint)
+
+        result = self.assert_outcome(
+            checkpoint,
+            REJECT_LINEAGE_MISMATCH,
+            previous_checkpoint=previous,
+        )
+
+        self.assertEqual(result["reason_code"], "REJECTED_APPROACH_CHANGED")
+
+    def test_completed_verification_requires_evidence_at_schema_boundary(self):
         checkpoint = load_example()
         checkpoint["verification"]["completed"][0]["evidence_refs"] = []
         checkpoint = with_computed_digest(checkpoint)
 
-        self.assert_outcome(checkpoint, REJECT_UNVERIFIED_COMPLETION)
+        result = self.assert_outcome(checkpoint, RESTART_REQUIRED)
+        self.assertEqual(result["reason_code"], "SCHEMA_INVALID")
 
     def test_memory_cannot_become_verification(self):
         checkpoint = load_example()
         checkpoint["verification"]["completed"][0]["evidence_refs"] = [
             "memory://the-agent-remembers-ci-was-green"
+        ]
+        checkpoint = with_computed_digest(checkpoint)
+
+        result = self.assert_outcome(
+            checkpoint,
+            REJECT_UNVERIFIED_COMPLETION,
+        )
+
+        self.assertEqual(result["reason_code"], "MEMORY_IS_NOT_VERIFICATION")
+
+    def test_memory_scheme_is_rejected_case_insensitively(self):
+        checkpoint = load_example()
+        checkpoint["verification"]["completed"][0]["evidence_refs"] = [
+            "Agent-Memory://the-agent-remembers-ci-was-green"
         ]
         checkpoint = with_computed_digest(checkpoint)
 
@@ -222,12 +279,69 @@ class CiOperationalCheckpointTest(unittest.TestCase):
             previous_checkpoint=previous,
         )
 
+    def test_completed_verification_target_cannot_change(self):
+        previous = load_example()
+        checkpoint = next_checkpoint(previous)
+        checkpoint["verification"]["completed"][0]["target"] = "Different target"
+        checkpoint = with_computed_digest(checkpoint)
+
+        result = self.assert_outcome(
+            checkpoint,
+            REJECT_UNVERIFIED_COMPLETION,
+            previous_checkpoint=previous,
+        )
+
+        self.assertEqual(result["reason_code"], "COMPLETED_VERIFICATION_CHANGED")
+
+    def test_completed_verification_evidence_cannot_be_removed(self):
+        previous = load_example()
+        checkpoint = next_checkpoint(previous)
+        checkpoint["verification"]["completed"][0]["evidence_refs"] = [
+            "git://safal207/pythiaLabs/replacement-proof"
+        ]
+        checkpoint = with_computed_digest(checkpoint)
+
+        result = self.assert_outcome(
+            checkpoint,
+            REJECT_UNVERIFIED_COMPLETION,
+            previous_checkpoint=previous,
+        )
+
+        self.assertEqual(result["reason_code"], "COMPLETED_VERIFICATION_CHANGED")
+
+    def test_completed_verification_may_append_evidence(self):
+        previous = load_example()
+        checkpoint = next_checkpoint(previous)
+        checkpoint["verification"]["completed"][0]["evidence_refs"].append(
+            "github-actions://safal207/pythiaLabs/runs/1"
+        )
+        checkpoint = with_computed_digest(checkpoint)
+
+        self.assert_outcome(
+            checkpoint,
+            CONTINUE,
+            previous_checkpoint=previous,
+        )
+
     def test_unknown_field_requires_restart(self):
         checkpoint = load_example()
         checkpoint["surprise"] = True
         checkpoint = with_computed_digest(checkpoint)
 
         result = self.assert_outcome(checkpoint, RESTART_REQUIRED)
+        self.assertEqual(result["reason_code"], "SCHEMA_INVALID")
+
+    def test_explicit_workspace_reaches_schema_validation_for_malformed_checkpoint(self):
+        checkpoint = load_example()
+        checkpoint.pop("workspace_state")
+        checkpoint = with_computed_digest(checkpoint)
+
+        result = self.assert_outcome(
+            checkpoint,
+            RESTART_REQUIRED,
+            current_workspace={},
+        )
+
         self.assertEqual(result["reason_code"], "SCHEMA_INVALID")
 
 
