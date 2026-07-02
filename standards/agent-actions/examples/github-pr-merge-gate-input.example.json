@@ -23,13 +23,13 @@
     "granted_to": "agent:pythia-github-merge-gate",
     "capability": "repository.merge",
     "operation": "merge_pull_request",
-    "target": "github://safal207/pythiaLabs/pulls/214@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "github://safal207/pythiaLabs/pulls/214@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?base=main",
     "environment": "github",
     "valid_from": "2026-07-01T20:55:00Z",
     "valid_until": "2026-07-01T21:15:00Z",
     "delegation_chain": [
       "maintainer:safal207",
-      "policy:exact-head-merge-v1"
+      "policy:exact-target-merge-v1"
     ]
   },
   "required_checks": [

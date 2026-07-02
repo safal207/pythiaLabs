@@ -44,11 +44,12 @@ class GitHubPrMergeGateTest(unittest.TestCase):
         envelope = result["envelope"]
         self.assertEqual(result["action_id"], canonical_action_id(snapshot))
         self.assertEqual(envelope["request"]["target"], target_ref(snapshot))
+        self.assertIn(":main:", envelope["idempotency"]["key"])
         self.assertTrue(
             all(row["action_id"] == result["action_id"] for row in envelope["evidence"])
         )
 
-    def test_action_id_is_stable_for_same_head(self):
+    def test_action_id_is_stable_for_same_target(self):
         first = canonical_action_id(load_example())
         second = canonical_action_id(load_example())
         self.assertEqual(first, second)
@@ -58,6 +59,13 @@ class GitHubPrMergeGateTest(unittest.TestCase):
         second = load_example()
         second["pull_request"]["expected_head_sha"] = "b" * 40
         second["pull_request"]["observed_head_sha"] = "b" * 40
+        second["authorization"]["target"] = target_ref(second)
+        self.assertNotEqual(canonical_action_id(first), canonical_action_id(second))
+
+    def test_action_id_changes_when_base_ref_changes(self):
+        first = load_example()
+        second = load_example()
+        second["pull_request"]["base_ref"] = "release"
         second["authorization"]["target"] = target_ref(second)
         self.assertNotEqual(canonical_action_id(first), canonical_action_id(second))
 

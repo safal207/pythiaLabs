@@ -15,6 +15,7 @@ from guarded_github_merge import (  # noqa: E402
     EVIDENCE_TARGET_MISMATCH,
     InMemoryExecutionStateStore,
     NOT_ATTEMPTED,
+    PullRequestState,
     execute_guarded_merge,
 )
 
@@ -30,22 +31,25 @@ class RecordingStateProvider:
     def __init__(self) -> None:
         self.calls = 0
 
-    def get_head_sha(self, repository: str, pull_request: int) -> str:
+    def get_state(self, repository: str, pull_request: int) -> PullRequestState:
         self.calls += 1
-        return "a" * 40
+        return PullRequestState("a" * 40, "main")
 
 
 class RecordingExecutor:
     def __init__(self) -> None:
-        self.calls: list[tuple[str, int, str]] = []
+        self.calls: list[tuple[str, int, str, str]] = []
 
     def merge_pull_request(
         self,
         repository: str,
         pull_request: int,
         expected_head_sha: str,
+        expected_base_ref: str,
     ):
-        self.calls.append((repository, pull_request, expected_head_sha))
+        self.calls.append(
+            (repository, pull_request, expected_head_sha, expected_base_ref)
+        )
         return {"merged": True}
 
 

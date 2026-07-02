@@ -1,18 +1,22 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass
 from threading import Lock
 from typing import Any, Mapping, Protocol
 
 from github_pr_merge_gate import evaluate_github_pr_merge, input_errors
 
 ALLOW_OK = "ALLOW_OK"
+GITHUB_ENVELOPE_INVALID = "GITHUB_ENVELOPE_INVALID"
 REQUIRED_EVIDENCE_MISSING = "REQUIRED_EVIDENCE_MISSING"
 EVIDENCE_TARGET_MISMATCH = "EVIDENCE_TARGET_MISMATCH"
 HEAD_SHA_MISMATCH = "HEAD_SHA_MISMATCH"
+BASE_REF_MISMATCH = "BASE_REF_MISMATCH"
 ACTION_ALREADY_IN_PROGRESS = "ACTION_ALREADY_IN_PROGRESS"
 ACTION_ALREADY_EXECUTED = "ACTION_ALREADY_EXECUTED"
 TARGET_CHANGED_BEFORE_EXECUTION = "TARGET_CHANGED_BEFORE_EXECUTION"
+BASE_CHANGED_BEFORE_EXECUTION = "BASE_CHANGED_BEFORE_EXECUTION"
 CURRENT_STATE_UNAVAILABLE = "CURRENT_STATE_UNAVAILABLE"
 TRUSTED_TIME_UNAVAILABLE = "TRUSTED_TIME_UNAVAILABLE"
 EXECUTION_FAILED = "EXECUTION_FAILED"
@@ -24,14 +28,20 @@ FAILED = "FAILED"
 NOT_ATTEMPTED = "NOT_ATTEMPTED"
 
 
+@dataclass(frozen=True)
+class PullRequestState:
+    head_sha: str
+    base_ref: str
+
+
 class DecisionClock(Protocol):
     def now(self) -> str:
         """Return trusted RFC 3339 decision time."""
 
 
 class CurrentPullRequestStateProvider(Protocol):
-    def get_head_sha(self, repository: str, pull_request: int) -> str:
-        """Return the current GitHub head SHA for one pull request."""
+    def get_state(self, repository: str, pull_request: int) -> PullRequestState:
+        """Return the current GitHub head SHA and base ref for one pull request."""
 
 
 class MergeExecutor(Protocol):
@@ -40,8 +50,9 @@ class MergeExecutor(Protocol):
         repository: str,
         pull_request: int,
         expected_head_sha: str,
+        expected_base_ref: str,
     ) -> Mapping[str, Any]:
-        """Execute a merge that is conditionally bound to expected_head_sha."""
+        """Execute a merge bound to the expected head SHA and base ref."""
 
 
 class ExecutionStateStore(Protocol):
@@ -50,6 +61,9 @@ class ExecutionStateStore(Protocol):
 
     def reserve(self, idempotency_key: str) -> bool:
         """Atomically transition NEW to IN_PROGRESS."""
+
+    def release(self, idempotency_key: str) -> None:
+        """Transition an unattempted IN_PROGRESS action back to NEW."""
 
     def mark_succeeded(
         self,
@@ -80,6 +94,13 @@ class InMemoryExecutionStateStore:
                 return False
             self._states[idempotency_key] = IN_PROGRESS
             return True
+
+    def release(self, idempotency_key: str) -> None:
+        with self._lock:
+            if self._states.get(idempotency_key, NEW) != IN_PROGRESS:
+                raise RuntimeError("only an unattempted in-progress action may be released")
+            self._states.pop(idempotency_key, None)
+            self._results.pop(idempotency_key, None)
 
     def mark_succeeded(
         self,
@@ -170,6 +191,16 @@ def _evidence_target_mismatches(snapshot: Mapping[str, Any]) -> list[str]:
     return mismatches
 
 
+def _extract_idempotency_key(envelope: Any) -> str | None:
+    if not isinstance(envelope, Mapping):
+        return None
+    idempotency = envelope.get("idempotency")
+    if not isinstance(idempotency, Mapping):
+        return None
+    key = idempotency.get("key")
+    return key if isinstance(key, str) and key else None
+
+
 def execute_guarded_merge(
     snapshot: Mapping[str, Any],
     *,
@@ -178,13 +209,13 @@ def execute_guarded_merge(
     executor: MergeExecutor,
     execution_store: ExecutionStateStore,
 ) -> dict[str, Any]:
-    """Evaluate and execute one exact-head GitHub merge at most once.
+    """Evaluate and execute one exact-target GitHub merge at most once.
 
     The caller-supplied snapshot cannot choose the effective decision time. The
     service overwrites it with a trusted clock value before freshness checks.
     The executor is unreachable until the Action Envelope evaluator returns
     ALLOW, the semantic idempotency key is reserved, and the current GitHub head
-    is checked a second time immediately before execution.
+    and base are checked a second time immediately before execution.
     """
 
     errors = input_errors(snapshot)
@@ -227,9 +258,10 @@ def execute_guarded_merge(
     pull_request = snapshot["pull_request"]
     pull_request_number = pull_request["number"]
     expected_head_sha = pull_request["expected_head_sha"]
+    expected_base_ref = pull_request["base_ref"]
 
     try:
-        first_head_sha = state_provider.get_head_sha(
+        first_state = state_provider.get_state(
             repository,
             pull_request_number,
         )
@@ -237,28 +269,36 @@ def execute_guarded_merge(
         return _outcome(
             "ESCALATE",
             CURRENT_STATE_UNAVAILABLE,
-            detail=f"cannot load current pull-request head: {exc}",
+            detail=f"cannot load current pull-request state: {exc}",
         )
 
-    if first_head_sha != expected_head_sha:
+    if first_state.head_sha != expected_head_sha:
         return _outcome(
             "BLOCK",
             HEAD_SHA_MISMATCH,
             detail=(
                 f"expected head {expected_head_sha}, "
-                f"current head is {first_head_sha}"
+                f"current head is {first_state.head_sha}"
+            ),
+        )
+
+    if first_state.base_ref != expected_base_ref:
+        return _outcome(
+            "BLOCK",
+            BASE_REF_MISMATCH,
+            detail=(
+                f"expected base {expected_base_ref}, "
+                f"current base is {first_state.base_ref}"
             ),
         )
 
     evaluated_snapshot = copy.deepcopy(dict(snapshot))
     evaluated_snapshot["decision_time"] = trusted_decision_time
-    evaluated_snapshot["pull_request"]["observed_head_sha"] = first_head_sha
+    evaluated_snapshot["pull_request"]["observed_head_sha"] = first_state.head_sha
     gate = evaluate_github_pr_merge(evaluated_snapshot)
     action_id = gate.get("action_id")
     envelope = gate.get("envelope")
-    idempotency_key = (
-        envelope["idempotency"]["key"] if envelope is not None else None
-    )
+    idempotency_key = _extract_idempotency_key(envelope)
 
     if gate["decision"] != "ALLOW":
         return _outcome(
@@ -272,7 +312,7 @@ def execute_guarded_merge(
     if idempotency_key is None:
         return _outcome(
             "BLOCK",
-            "GITHUB_INPUT_INVALID",
+            GITHUB_ENVELOPE_INVALID,
             detail="allowed gate result did not contain an idempotency key",
             action_id=action_id,
         )
@@ -294,21 +334,21 @@ def execute_guarded_merge(
         )
 
     try:
-        second_head_sha = state_provider.get_head_sha(
+        second_state = state_provider.get_state(
             repository,
             pull_request_number,
         )
-    except Exception as exc:  # external availability boundary
-        execution_store.mark_failed(idempotency_key, CURRENT_STATE_UNAVAILABLE)
+    except Exception as exc:  # external availability boundary before execution
+        execution_store.release(idempotency_key)
         return _outcome(
             "ESCALATE",
             CURRENT_STATE_UNAVAILABLE,
-            detail=f"cannot re-check pull-request head before execution: {exc}",
+            detail=f"cannot re-check pull-request state before execution: {exc}",
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
 
-    if second_head_sha != expected_head_sha:
+    if second_state.head_sha != expected_head_sha:
         execution_store.mark_failed(
             idempotency_key,
             TARGET_CHANGED_BEFORE_EXECUTION,
@@ -318,7 +358,23 @@ def execute_guarded_merge(
             TARGET_CHANGED_BEFORE_EXECUTION,
             detail=(
                 f"head changed after evaluation: expected {expected_head_sha}, "
-                f"current head is {second_head_sha}"
+                f"current head is {second_state.head_sha}"
+            ),
+            action_id=action_id,
+            idempotency_key=idempotency_key,
+        )
+
+    if second_state.base_ref != expected_base_ref:
+        execution_store.mark_failed(
+            idempotency_key,
+            BASE_CHANGED_BEFORE_EXECUTION,
+        )
+        return _outcome(
+            "BLOCK",
+            BASE_CHANGED_BEFORE_EXECUTION,
+            detail=(
+                f"base changed after evaluation: expected {expected_base_ref}, "
+                f"current base is {second_state.base_ref}"
             ),
             action_id=action_id,
             idempotency_key=idempotency_key,
@@ -329,6 +385,7 @@ def execute_guarded_merge(
             repository,
             pull_request_number,
             expected_head_sha,
+            expected_base_ref,
         )
     except Exception as exc:  # execution boundary
         execution_store.mark_failed(idempotency_key, EXECUTION_FAILED)
@@ -346,7 +403,7 @@ def execute_guarded_merge(
     return _outcome(
         "ALLOW",
         ALLOW_OK,
-        detail="gate allowed and exact-head merge executed once",
+        detail="gate allowed and exact-target merge executed once",
         action_id=action_id,
         idempotency_key=idempotency_key,
         executed=True,

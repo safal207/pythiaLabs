@@ -86,7 +86,7 @@ def target_ref(snapshot: Mapping[str, Any]) -> str:
     pull_request = snapshot["pull_request"]
     return (
         f"github://{snapshot['repository']}/pulls/{pull_request['number']}"
-        f"@{pull_request['expected_head_sha']}"
+        f"@{pull_request['expected_head_sha']}?base={pull_request['base_ref']}"
     )
 
 
@@ -96,6 +96,7 @@ def canonical_action_id(snapshot: Mapping[str, Any]) -> str:
         "operation": "merge_pull_request",
         "repository": snapshot["repository"],
         "pull_request_number": pull_request["number"],
+        "base_ref": pull_request["base_ref"],
         "expected_head_sha": pull_request["expected_head_sha"],
     }
     return f"github-pr-merge:sha256:{_sha256_hex(identity)}"
@@ -155,6 +156,7 @@ def build_github_pr_merge_envelope(snapshot: Mapping[str, Any]) -> dict[str, Any
 
     pull_request = snapshot["pull_request"]
     expected_head_sha = pull_request["expected_head_sha"]
+    base_ref = pull_request["base_ref"]
     action_id = canonical_action_id(snapshot)
     target = target_ref(snapshot)
     evidence: list[dict[str, Any]] = []
@@ -170,7 +172,7 @@ def build_github_pr_merge_envelope(snapshot: Mapping[str, Any]) -> dict[str, Any
             observed_at=pull_request["observed_at"],
             expires_at=pull_request["expires_at"],
             source_type="runtime",
-            source_ref=f"github-pr/{pull_request['number']}/head",
+            source_ref=f"github-pr/{pull_request['number']}/head-and-base",
             record=pull_request,
         )
     )
@@ -302,14 +304,14 @@ def build_github_pr_merge_envelope(snapshot: Mapping[str, Any]) -> dict[str, Any
         "idempotency": {
             "key": (
                 f"github:merge:{snapshot['repository']}:{pull_request['number']}"
-                f":{expected_head_sha}"
+                f":{base_ref}:{expected_head_sha}"
             ),
             "replay_policy": "reject_duplicate",
         },
         "recovery": dict(snapshot["recovery"]),
         "expected_state_transition": {
-            "from": f"open@{expected_head_sha}",
-            "to": f"merged@{expected_head_sha}",
+            "from": f"open:{base_ref}@{expected_head_sha}",
+            "to": f"merged:{base_ref}@{expected_head_sha}",
         },
     }
     return _ACTION_REFERENCE.with_computed_digest(envelope)
@@ -328,6 +330,7 @@ def evaluate_github_pr_merge(
             "detail": errors[0],
             "action_id": None,
             "expected_head_sha": None,
+            "expected_base_ref": None,
             "envelope": None,
         }
 
@@ -340,5 +343,6 @@ def evaluate_github_pr_merge(
         **result,
         "action_id": envelope["action_id"],
         "expected_head_sha": snapshot["pull_request"]["expected_head_sha"],
+        "expected_base_ref": snapshot["pull_request"]["base_ref"],
         "envelope": envelope,
     }

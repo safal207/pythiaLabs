@@ -59,13 +59,16 @@ evaluating the envelope.
 
 | Decision | Reason code | Meaning |
 |---|---|---|
+| `BLOCK` | `GITHUB_ENVELOPE_INVALID` | An allowed adapter result violated an internal envelope invariant required for guarded execution. |
 | `BLOCK` | `REQUIRED_EVIDENCE_MISSING` | A required check or required reviewer is absent. |
 | `BLOCK` | `EVIDENCE_TARGET_MISMATCH` | A workflow or review locator belongs to another repository or pull request. |
 | `BLOCK` | `HEAD_SHA_MISMATCH` | The current pull-request head differs from the proposed exact head before evaluation. |
+| `BLOCK` | `BASE_REF_MISMATCH` | The current pull-request base differs from the proposed base before evaluation. |
 | `BLOCK` | `ACTION_ALREADY_IN_PROGRESS` | The semantic idempotency key is already reserved by another execution. |
 | `BLOCK` | `ACTION_ALREADY_EXECUTED` | The semantic idempotency key is already in a terminal state. |
 | `BLOCK` | `TARGET_CHANGED_BEFORE_EXECUTION` | The pull-request head changed after `ALLOW` and before the executor call. |
-| `ESCALATE` | `CURRENT_STATE_UNAVAILABLE` | Current GitHub state could not be retrieved or revalidated. |
+| `BLOCK` | `BASE_CHANGED_BEFORE_EXECUTION` | The pull-request base changed after `ALLOW` and before the executor call. |
+| `ESCALATE` | `CURRENT_STATE_UNAVAILABLE` | Current GitHub state could not be retrieved or revalidated. A failure before executor reachability remains retryable. |
 | `ESCALATE` | `TRUSTED_TIME_UNAVAILABLE` | A trusted decision timestamp could not be obtained, so freshness cannot be evaluated safely. |
 | `BLOCK` | `EXECUTION_FAILED` | The executor was called, failed, and the semantic action was recorded as failed. |
 

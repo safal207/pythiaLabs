@@ -4,6 +4,7 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -14,14 +15,19 @@ if str(ADAPTERS) not in sys.path:
 from guarded_github_merge import (  # noqa: E402
     ACTION_ALREADY_EXECUTED,
     ACTION_ALREADY_IN_PROGRESS,
+    BASE_CHANGED_BEFORE_EXECUTION,
+    BASE_REF_MISMATCH,
     CURRENT_STATE_UNAVAILABLE,
     EVIDENCE_TARGET_MISMATCH,
     EXECUTION_FAILED,
     FAILED,
+    GITHUB_ENVELOPE_INVALID,
     HEAD_SHA_MISMATCH,
     IN_PROGRESS,
     InMemoryExecutionStateStore,
+    NEW,
     NOT_ATTEMPTED,
+    PullRequestState,
     REQUIRED_EVIDENCE_MISSING,
     SUCCEEDED,
     TARGET_CHANGED_BEFORE_EXECUTION,
@@ -54,35 +60,45 @@ class FakeClock:
 
 
 class FakeStateProvider:
-    def __init__(self, *heads: str) -> None:
-        self._heads = list(heads)
+    def __init__(self, *states: object) -> None:
+        self._states = list(states)
         self.calls = 0
 
-    def get_head_sha(self, repository: str, pull_request: int) -> str:
+    def get_state(self, repository: str, pull_request: int) -> PullRequestState:
         self.calls += 1
-        if not self._heads:
-            raise RuntimeError("no configured head")
-        value = self._heads.pop(0)
+        if not self._states:
+            raise RuntimeError("no configured state")
+        value = self._states.pop(0)
         if value == "ERROR":
             raise RuntimeError("GitHub unavailable")
-        return value
+        if isinstance(value, tuple):
+            head_sha, base_ref = value
+            return PullRequestState(str(head_sha), str(base_ref))
+        return PullRequestState(str(value), "main")
 
 
 class FakeMergeExecutor:
     def __init__(self, *, fail: bool = False) -> None:
         self.fail = fail
-        self.calls: list[tuple[str, int, str]] = []
+        self.calls: list[tuple[str, int, str, str]] = []
 
     def merge_pull_request(
         self,
         repository: str,
         pull_request: int,
         expected_head_sha: str,
+        expected_base_ref: str,
     ):
-        self.calls.append((repository, pull_request, expected_head_sha))
+        self.calls.append(
+            (repository, pull_request, expected_head_sha, expected_base_ref)
+        )
         if self.fail:
             raise RuntimeError("merge rejected")
-        return {"merged": True, "sha": expected_head_sha}
+        return {
+            "merged": True,
+            "sha": expected_head_sha,
+            "base_ref": expected_base_ref,
+        }
 
 
 class GuardedGitHubMergeTest(unittest.TestCase):
@@ -105,7 +121,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         self.assertEqual(result["execution_status"], NOT_ATTEMPTED)
         self.assertEqual(executor.calls, [])
 
-    def test_allow_executes_once_after_two_exact_head_reads(self):
+    def test_allow_executes_once_after_two_exact_target_reads(self):
         snapshot = load_example()
         expected = snapshot["pull_request"]["expected_head_sha"]
         provider = FakeStateProvider(expected, expected)
@@ -123,6 +139,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         self.assertEqual(result["execution_status"], SUCCEEDED)
         self.assertEqual(provider.calls, 2)
         self.assertEqual(len(executor.calls), 1)
+        self.assertEqual(executor.calls[0][3], "main")
         self.assertEqual(store.get(result["idempotency_key"]), SUCCEEDED)
 
     def test_initial_head_mismatch_blocks_without_executor(self):
@@ -133,6 +150,17 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         result = self.execute(snapshot, provider, executor)
 
         self.assertEqual(result["reason_code"], HEAD_SHA_MISMATCH)
+        self.assert_not_attempted(result, executor)
+
+    def test_initial_base_mismatch_blocks_without_executor(self):
+        snapshot = load_example()
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider((expected, "release"))
+        executor = FakeMergeExecutor()
+
+        result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(result["reason_code"], BASE_REF_MISMATCH)
         self.assert_not_attempted(result, executor)
 
     def test_missing_required_check_blocks_not_escalates(self):
@@ -160,8 +188,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
             for row in snapshot["reviews"]
             if row["reviewer"] != "coderabbitai"
         ]
-        expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
+        provider = FakeStateProvider()
         executor = FakeMergeExecutor()
 
         result = self.execute(snapshot, provider, executor)
@@ -173,8 +200,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
     def test_foreign_approval_does_not_satisfy_required_reviewer(self):
         snapshot = load_example()
         snapshot["reviews"][0]["reviewer"] = "mallory"
-        expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
+        provider = FakeStateProvider()
         executor = FakeMergeExecutor()
 
         result = self.execute(snapshot, provider, executor)
@@ -188,8 +214,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         snapshot["reviews"][0]["review_ref"] = (
             "github-review://safal207/pythiaLabs/pulls/999/coderabbitai"
         )
-        expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
+        provider = FakeStateProvider()
         executor = FakeMergeExecutor()
 
         result = self.execute(snapshot, provider, executor)
@@ -201,10 +226,9 @@ class GuardedGitHubMergeTest(unittest.TestCase):
     def test_check_from_another_repository_blocks(self):
         snapshot = load_example()
         snapshot["checks"][0]["run_ref"] = (
-            "github-actions://attacker/fork/runs/1"
+            "github-actions://attacker/fork/pulls/214/runs/1"
         )
-        expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
+        provider = FakeStateProvider()
         executor = FakeMergeExecutor()
 
         result = self.execute(snapshot, provider, executor)
@@ -231,8 +255,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
 
     def test_trusted_clock_failure_escalates_without_executor(self):
         snapshot = load_example()
-        expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
+        provider = FakeStateProvider()
         executor = FakeMergeExecutor()
 
         result = self.execute(
@@ -277,6 +300,76 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         self.assert_not_attempted(result, executor)
         self.assertEqual(store.get(result["idempotency_key"]), FAILED)
 
+    def test_base_change_between_gate_and_executor_blocks(self):
+        snapshot = load_example()
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider((expected, "main"), (expected, "release"))
+        executor = FakeMergeExecutor()
+        store = InMemoryExecutionStateStore()
+
+        result = self.execute(snapshot, provider, executor, store)
+
+        self.assertEqual(result["reason_code"], BASE_CHANGED_BEFORE_EXECUTION)
+        self.assert_not_attempted(result, executor)
+        self.assertEqual(store.get(result["idempotency_key"]), FAILED)
+
+    def test_transient_second_state_read_failure_releases_for_retry(self):
+        snapshot = load_example()
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        executor = FakeMergeExecutor()
+        store = InMemoryExecutionStateStore()
+
+        first = self.execute(
+            snapshot,
+            FakeStateProvider(expected, "ERROR"),
+            executor,
+            store,
+        )
+
+        self.assertEqual(
+            (first["decision"], first["reason_code"]),
+            ("ESCALATE", CURRENT_STATE_UNAVAILABLE),
+        )
+        self.assert_not_attempted(first, executor)
+        self.assertEqual(store.get(first["idempotency_key"]), NEW)
+
+        second = self.execute(
+            snapshot,
+            FakeStateProvider(expected, expected),
+            executor,
+            store,
+        )
+
+        self.assertEqual(second["reason_code"], "ALLOW_OK")
+        self.assertEqual(len(executor.calls), 1)
+        self.assertEqual(store.get(second["idempotency_key"]), SUCCEEDED)
+
+    def test_allowed_gate_without_idempotency_key_is_envelope_invalid(self):
+        snapshot = load_example()
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
+        fake_gate = {
+            "decision": "ALLOW",
+            "reason_code": "ALLOW_OK",
+            "detail": "synthetic invariant probe",
+            "action_id": "action-test",
+            "envelope": {},
+        }
+
+        with patch(
+            "guarded_github_merge.evaluate_github_pr_merge",
+            return_value=fake_gate,
+        ):
+            result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(
+            (result["decision"], result["reason_code"]),
+            ("BLOCK", GITHUB_ENVELOPE_INVALID),
+        )
+        self.assertEqual(provider.calls, 1)
+        self.assert_not_attempted(result, executor)
+
     def test_successful_action_cannot_execute_twice(self):
         snapshot = load_example()
         expected = snapshot["pull_request"]["expected_head_sha"]
@@ -289,7 +382,7 @@ class GuardedGitHubMergeTest(unittest.TestCase):
 
         self.assertEqual(first["reason_code"], "ALLOW_OK")
         self.assertEqual(second["reason_code"], ACTION_ALREADY_EXECUTED)
-        self.assert_not_attempted(second, FakeMergeExecutor())
+        self.assertFalse(second["executor_called"])
         self.assertEqual(len(executor.calls), 1)
 
     def test_in_progress_action_is_blocked(self):

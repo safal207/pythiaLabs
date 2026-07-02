@@ -7,153 +7,99 @@
 
 ## Purpose
 
-The snapshot adapter proves that a proposed merge is eligible for `ALLOW`, but
-an evaluator alone does not prevent a caller from invoking a merge too early,
-with backdated freshness inputs, or more than once.
-
-`adapters/guarded_github_merge.py` adds the executable boundary:
+`adapters/guarded_github_merge.py` adds an executable boundary around the merge
+gate:
 
 ```text
 validate snapshot
   -> reject missing or cross-target evidence
   -> obtain trusted decision time
-  -> load current GitHub head
+  -> load current GitHub head and base
   -> evaluate Action Envelope V1
   -> atomically reserve semantic idempotency key
-  -> load current GitHub head again
+  -> load current GitHub head and base again
   -> call injected merge executor only after ALLOW
   -> record SUCCEEDED or FAILED
 ```
 
-Every rejection before the executor call returns:
-
-```text
-executor_called = false
-execution_status = NOT_ATTEMPTED
-```
-
-`BLOCK / EXECUTION_FAILED` is different: the gate allowed the action, the
-executor boundary was reached, and the executor failed. That outcome returns
-`executor_called = true` and `execution_status = FAILED`.
+Every rejection before the executor call returns `executor_called=false` and
+`execution_status=NOT_ATTEMPTED`. Executor failure is distinct: the boundary was
+reached, so it returns `executor_called=true` and `execution_status=FAILED`.
 
 ## Trusted decision time
 
-The effective `decision_time` is supplied by an injected trusted clock. The
-caller-provided value in the snapshot is overwritten before authorization and
-evidence-freshness evaluation.
+The effective `decision_time` comes from an injected trusted clock. The
+caller-provided value is overwritten before authorization and evidence
+freshness evaluation. Clock failure returns
+`ESCALATE / TRUSTED_TIME_UNAVAILABLE` without reaching GitHub state or executor.
 
-This prevents a caller from backdating the decision to make expired evidence
-appear fresh. If trusted time cannot be obtained, the service returns:
+## Exact-target invariant
 
-```text
-ESCALATE / TRUSTED_TIME_UNAVAILABLE
-```
-
-The executor is not called.
-
-## Exact-head invariant
-
-The current head is checked twice:
+The current head SHA and base ref are checked twice:
 
 1. before gate evaluation;
 2. immediately before the executor call.
 
-If the first head differs from the proposed head, execution returns:
+Initial mismatches return `HEAD_SHA_MISMATCH` or `BASE_REF_MISMATCH`.
+Changes after `ALLOW` return `TARGET_CHANGED_BEFORE_EXECUTION` or
+`BASE_CHANGED_BEFORE_EXECUTION`. The executor receives both expected values.
 
-```text
-BLOCK / HEAD_SHA_MISMATCH
-```
-
-If the head changes after evaluation but before execution, it returns:
-
-```text
-BLOCK / TARGET_CHANGED_BEFORE_EXECUTION
-```
-
-In both cases the merge executor is not called.
-
-The executor interface also receives `expected_head_sha`. A production GitHub
-implementation must pass that value to GitHub's conditional merge operation so
-GitHub itself rejects a moved head.
+A production implementation must use GitHub's conditional head-SHA merge guard
+and independently revalidate the base ref before issuing the side effect.
 
 ## Evidence binding
 
-A required check or review that is absent is a known unsafe execution state:
+Missing required checks or reviewers return `REQUIRED_EVIDENCE_MISSING`.
+Workflow and review locators must belong to the exact repository and pull
+request. Cross-target locators return `EVIDENCE_TARGET_MISMATCH` before external
+state lookup.
 
-```text
-BLOCK / REQUIRED_EVIDENCE_MISSING
-```
+## Replay and retry semantics
 
-Workflow locators must belong to the exact proposed repository and pull request
-using `github-actions://owner/repository/pulls/{number}/runs/{run_id}`. Review
-locators must also belong to the exact proposed repository and pull request.
-Cross-target locators return:
-
-```text
-BLOCK / EVIDENCE_TARGET_MISMATCH
-```
-
-The existing Action Envelope evaluator separately checks exact-head binding,
-action binding, freshness, successful result, and authorization.
-
-## Replay protection
-
-The reference in-memory store exposes four states:
+The reference store exposes:
 
 ```text
 NEW -> IN_PROGRESS -> SUCCEEDED | FAILED
+          |
+          +-> NEW  (release before executor reachability)
 ```
 
-A semantic idempotency key can be reserved once. Reservation is protected by a
-lock so `NEW -> IN_PROGRESS` is atomic within the reference process. A repeated
-attempt is blocked with `ACTION_ALREADY_IN_PROGRESS` or
-`ACTION_ALREADY_EXECUTED`.
+Reservation is atomic within the process. A transient failure during the second
+GitHub state read occurs before executor reachability, so the reservation is
+released back to `NEW`; a later retry may proceed. Target drift and executor
+failure are terminal for that semantic action.
 
-This store is deliberately process-local. Durable atomic replay storage and
-distributed coordination belong to the LiminalDB follow-up.
+An allowed lower-layer result that lacks the required idempotency key is an
+internal contract violation and returns `GITHUB_ENVELOPE_INVALID`, not
+`GITHUB_INPUT_INVALID`.
 
 ## Interfaces
 
-The orchestration depends on three injected boundaries:
+The orchestration depends on:
 
 - `DecisionClock.now()`;
-- `CurrentPullRequestStateProvider.get_head_sha(...)`;
-- `MergeExecutor.merge_pull_request(..., expected_head_sha)`.
-
-Tests use fakes to prove call ordering, freshness behavior, and executor
-reachability. A production GitHub client, credentials, webhook handling, and
-branch-protection integration remain outside this PR.
+- `CurrentPullRequestStateProvider.get_state(...)` returning head and base;
+- `MergeExecutor.merge_pull_request(..., expected_head_sha, expected_base_ref)`;
+- `ExecutionStateStore` with reserve, release, success, and failure transitions.
 
 ## Covered scenarios
 
-- valid exact-head action executes once;
-- initial head mismatch blocks;
-- missing required check or review blocks;
-- foreign reviewer does not replace a required reviewer;
-- cross-repository workflow evidence blocks;
-- workflow evidence for another pull request blocks;
-- review evidence for another pull request blocks;
-- a backdated snapshot cannot revive stale evidence;
-- trusted-clock failure escalates before external state lookup;
-- old-head CI evidence blocks;
-- head drift between evaluation and execution blocks;
-- replay after success blocks;
-- concurrent in-progress action blocks;
-- GitHub state unavailability escalates;
-- executor failure is recorded as an attempted but failed execution.
+- valid exact-target action executes once;
+- initial head or base mismatch blocks;
+- missing or cross-target evidence blocks;
+- stale evidence and backdating block;
+- head or base drift after `ALLOW` blocks;
+- transient second-read outage releases the reservation and permits retry;
+- replay and concurrent execution block;
+- malformed internal allowed-envelope state blocks with a dedicated code;
+- executor failure is terminal and reported as attempted.
 
 ## Non-claims
 
-This reference slice does not provide:
+This reference slice does not provide a live GitHub client, production
+credentials, distributed locking, durable replay storage, post-merge
+verification, compensation, or automatic revert execution.
 
-- a live GitHub API client;
-- production credentials or webhook authentication;
-- distributed locking;
-- durable replay storage;
-- post-merge verification;
-- compensation or automatic revert execution.
-
-It demonstrates the safety property required before those integrations:
-
-> A merge implementation is reachable only after fresh exact-head evidence is
-> allowed, the semantic action is reserved, and the target is revalidated.
+> A merge implementation is reachable only after fresh exact-target evidence is
+> allowed, the semantic action is reserved, and both base and head are
+> revalidated.
