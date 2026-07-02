@@ -28,10 +28,19 @@ from guarded_github_merge import (  # noqa: E402
 )
 
 EXAMPLE_PATH = ROOT / "examples" / "github-pr-merge-gate-input.example.json"
+TRUSTED_DECISION_TIME = "2026-07-01T21:05:00Z"
 
 
 def load_example():
     return json.loads(EXAMPLE_PATH.read_text(encoding="utf-8"))
+
+
+class FakeClock:
+    def __init__(self, value: str = TRUSTED_DECISION_TIME) -> None:
+        self.value = value
+
+    def now(self) -> str:
+        return self.value
 
 
 class FakeStateProvider:
@@ -67,12 +76,14 @@ class FakeMergeExecutor:
 
 
 class GuardedGitHubMergeTest(unittest.TestCase):
-    def execute(self, snapshot, provider, executor, store=None):
+    def execute(self, snapshot, provider, executor, store=None, clock=None):
         execution_store = (
             store if store is not None else InMemoryExecutionStateStore()
         )
+        decision_clock = clock if clock is not None else FakeClock()
         return execute_guarded_merge(
             snapshot,
+            clock=decision_clock,
             state_provider=provider,
             executor=executor,
             execution_store=execution_store,
@@ -183,6 +194,22 @@ class GuardedGitHubMergeTest(unittest.TestCase):
 
         self.assertEqual(result["reason_code"], EVIDENCE_TARGET_MISMATCH)
         self.assertEqual(provider.calls, 0)
+        self.assertEqual(executor.calls, [])
+
+    def test_backdated_snapshot_cannot_extend_evidence_freshness(self):
+        snapshot = load_example()
+        snapshot["decision_time"] = "2026-07-01T21:01:00Z"
+        snapshot["checks"][0]["expires_at"] = "2026-07-01T21:04:59Z"
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
+
+        result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(
+            (result["decision"], result["reason_code"]),
+            ("BLOCK", "EVIDENCE_STALE"),
+        )
         self.assertEqual(executor.calls, [])
 
     def test_old_head_check_blocks_without_executor(self):
