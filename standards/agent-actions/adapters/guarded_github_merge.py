@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import copy
+import logging
 from dataclasses import dataclass
 from threading import Lock
 from typing import Any, Mapping, Protocol
 
 from github_pr_merge_gate import evaluate_github_pr_merge, input_errors
+
+logger = logging.getLogger(__name__)
 
 ALLOW_OK = "ALLOW_OK"
 GITHUB_ENVELOPE_INVALID = "GITHUB_ENVELOPE_INVALID"
@@ -289,11 +292,12 @@ def execute_guarded_merge(
 
     try:
         trusted_decision_time = clock.now()
-    except Exception as exc:
+    except Exception:
+        logger.exception("trusted decision clock failed")
         return _outcome(
             "ESCALATE",
             TRUSTED_TIME_UNAVAILABLE,
-            detail=f"cannot obtain trusted decision time: {exc}",
+            detail="cannot obtain trusted decision time",
         )
 
     repository = snapshot["repository"]
@@ -304,11 +308,12 @@ def execute_guarded_merge(
 
     try:
         first_state = state_provider.get_state(repository, pull_request_number)
-    except Exception as exc:
+    except Exception:
+        logger.exception("initial pull-request state read failed")
         return _outcome(
             "ESCALATE",
             CURRENT_STATE_UNAVAILABLE,
-            detail=f"cannot load current pull-request state: {exc}",
+            detail="cannot load current pull-request state",
         )
 
     if first_state.head_sha != expected_head_sha:
@@ -357,12 +362,13 @@ def execute_guarded_merge(
 
     try:
         second_state = state_provider.get_state(repository, pull_request_number)
-    except Exception as exc:
+    except Exception:
+        logger.exception("pre-execution pull-request state recheck failed")
         execution_store.release(idempotency_key)
         return _outcome(
             "ESCALATE",
             CURRENT_STATE_UNAVAILABLE,
-            detail=f"cannot re-check pull-request state before execution: {exc}",
+            detail="cannot re-check pull-request state before execution",
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
@@ -399,12 +405,13 @@ def execute_guarded_merge(
             expected_head_sha,
             expected_base_ref,
         )
-    except Exception as exc:
+    except Exception:
+        logger.exception("merge executor failed")
         execution_store.mark_failed(idempotency_key, EXECUTION_FAILED)
         return _outcome(
             "BLOCK",
             EXECUTION_FAILED,
-            detail=f"merge executor failed: {exc}",
+            detail="merge executor failed",
             action_id=action_id,
             idempotency_key=idempotency_key,
             executor_called=True,
