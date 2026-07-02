@@ -1,0 +1,357 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/agent-continuity/schema/ci-operational-checkpoint-v0.1.schema.json",
+  "title": "CI Operational Checkpoint v0.1",
+  "description": "A bounded continuity checkpoint for safely resuming agentic CI/CD work without carrying tool authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "trajectory_id",
+    "checkpoint_id",
+    "parent_checkpoint_id",
+    "sequence",
+    "created_at",
+    "authority",
+    "source",
+    "workspace_state",
+    "objective",
+    "phase",
+    "constraints",
+    "rejected_approaches",
+    "touched_resources",
+    "verification",
+    "next_action",
+    "checkpoint_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "pythia.ci_operational_checkpoint.v0.1"
+    },
+    "trajectory_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "checkpoint_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "parent_checkpoint_id": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authority": {
+      "const": "context_only"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "session_id"],
+      "properties": {
+        "agent_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "workspace_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "working_directory",
+        "base_ref",
+        "head_sha",
+        "dirty_state_digest"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "working_directory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "base_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "head_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "dirty_state_digest": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          ]
+        }
+      }
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal", "acceptance_criteria"],
+      "properties": {
+        "goal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    },
+    "phase": {
+      "enum": [
+        "collect",
+        "checkpoint",
+        "normalize",
+        "triage",
+        "decide",
+        "reserve",
+        "revalidate",
+        "execute",
+        "prove",
+        "learn",
+        "waiting",
+        "review"
+      ]
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["must", "must_not"],
+      "properties": {
+        "must": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "must_not": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        }
+      }
+    },
+    "rejected_approaches": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approach_id", "description", "reason", "status"],
+        "properties": {
+          "approach_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "status": {
+            "const": "rejected"
+          }
+        }
+      }
+    },
+    "touched_resources": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resource_ref", "change_type"],
+        "properties": {
+          "resource_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "change_type": {
+            "enum": ["observed", "created", "modified", "deleted"]
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "completed", "pending"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "completed": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/completedVerification"
+          }
+        },
+        "pending": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/pendingVerification"
+          }
+        }
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "action_class",
+        "requires_fresh_authority"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "action_class": {
+          "enum": [
+            "read",
+            "analyze",
+            "edit",
+            "test",
+            "review",
+            "merge",
+            "deploy",
+            "other"
+          ]
+        },
+        "requires_fresh_authority": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checkpoint_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value"],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "json-sort-keys-utf8-v1"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "completedVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verification_id", "target", "evidence_refs"],
+      "properties": {
+        "verification_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "evidence_refs": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "pendingVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verification_id", "target", "status"],
+      "properties": {
+        "verification_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "status": {
+          "enum": ["pending", "running", "blocked", "failed"]
+        }
+      }
+    }
+  }
+}
