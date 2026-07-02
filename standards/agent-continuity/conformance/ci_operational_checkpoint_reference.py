@@ -1,0 +1,274 @@
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+from typing import Any, Iterable, Mapping
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+SCHEMA_PATH = ROOT / "schema" / "ci-operational-checkpoint-v0.1.schema.json"
+
+CONTINUE = "CONTINUE"
+REVALIDATE_WORKSPACE = "REVALIDATE_WORKSPACE"
+RESTART_REQUIRED = "RESTART_REQUIRED"
+IDEMPOTENT_REPLAY = "IDEMPOTENT_REPLAY"
+REJECT_LINEAGE_MISMATCH = "REJECT_LINEAGE_MISMATCH"
+REJECT_UNVERIFIED_COMPLETION = "REJECT_UNVERIFIED_COMPLETION"
+REJECT_INVALID_AUTHORITY = "REJECT_INVALID_AUTHORITY"
+
+MEMORY_ONLY_PREFIXES = ("memory://", "agent-memory://", "summary://")
+
+
+def load_schema() -> dict[str, Any]:
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    if not isinstance(schema, dict):
+        raise ValueError("checkpoint schema root must be an object")
+    Draft202012Validator.check_schema(schema)
+    return schema
+
+
+def _canonical_bytes(checkpoint: Mapping[str, Any]) -> bytes:
+    value = copy.deepcopy(dict(checkpoint))
+    value.pop("checkpoint_digest", None)
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+
+
+def computed_digest(checkpoint: Mapping[str, Any]) -> str:
+    return hashlib.sha256(_canonical_bytes(checkpoint)).hexdigest()
+
+
+def with_computed_digest(checkpoint: Mapping[str, Any]) -> dict[str, Any]:
+    result = copy.deepcopy(dict(checkpoint))
+    result.setdefault(
+        "checkpoint_digest",
+        {
+            "algorithm": "sha256",
+            "canonicalization": "json-sort-keys-utf8-v1",
+            "value": "0" * 64,
+        },
+    )
+    result["checkpoint_digest"]["value"] = computed_digest(result)
+    return result
+
+
+def _schema_errors(checkpoint: Mapping[str, Any]) -> list[Any]:
+    validator = Draft202012Validator(
+        load_schema(),
+        format_checker=FormatChecker(),
+    )
+    return sorted(
+        validator.iter_errors(dict(checkpoint)),
+        key=lambda error: [str(part) for part in error.absolute_path],
+    )
+
+
+def _result(outcome: str, reason_code: str, detail: str) -> dict[str, str]:
+    return {
+        "outcome": outcome,
+        "reason_code": reason_code,
+        "detail": detail,
+    }
+
+
+def _verification_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[str, Any]]:
+    return {str(row["verification_id"]): row for row in rows}
+
+
+def evaluate_resume(
+    checkpoint: Mapping[str, Any],
+    *,
+    current_workspace: Mapping[str, Any],
+    previous_checkpoint: Mapping[str, Any] | None = None,
+    seen_checkpoint_ids: Iterable[str] = (),
+    known_parent_ids: Iterable[str] = (),
+) -> dict[str, str]:
+    errors = _schema_errors(checkpoint)
+    if errors:
+        first = errors[0]
+        path = "/".join(str(part) for part in first.absolute_path) or "<root>"
+        if path == "authority":
+            return _result(
+                REJECT_INVALID_AUTHORITY,
+                "AUTHORITY_NOT_CONTEXT_ONLY",
+                first.message,
+            )
+        return _result(
+            RESTART_REQUIRED,
+            "SCHEMA_INVALID",
+            f"{path}: {first.message}",
+        )
+
+    expected_digest = checkpoint["checkpoint_digest"]["value"]
+    actual_digest = computed_digest(checkpoint)
+    if expected_digest != actual_digest:
+        return _result(
+            RESTART_REQUIRED,
+            "DIGEST_MISMATCH",
+            f"expected {expected_digest}, computed {actual_digest}",
+        )
+
+    checkpoint_id = checkpoint["checkpoint_id"]
+    if checkpoint_id in set(seen_checkpoint_ids):
+        return _result(
+            IDEMPOTENT_REPLAY,
+            "CHECKPOINT_ALREADY_CONSUMED",
+            f"checkpoint {checkpoint_id} was already consumed",
+        )
+
+    sequence = checkpoint["sequence"]
+    parent_checkpoint_id = checkpoint["parent_checkpoint_id"]
+    if sequence == 0 and parent_checkpoint_id is not None:
+        return _result(
+            REJECT_LINEAGE_MISMATCH,
+            "ROOT_HAS_PARENT",
+            "sequence 0 checkpoint must not declare a parent",
+        )
+    if sequence > 0 and parent_checkpoint_id is None:
+        return _result(
+            REJECT_LINEAGE_MISMATCH,
+            "PARENT_REQUIRED",
+            "non-root checkpoint must declare parent_checkpoint_id",
+        )
+
+    if previous_checkpoint is None:
+        if sequence > 0 and parent_checkpoint_id not in set(known_parent_ids):
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "PARENT_NOT_FOUND",
+                f"parent checkpoint {parent_checkpoint_id} is not known",
+            )
+    else:
+        if checkpoint["trajectory_id"] != previous_checkpoint.get("trajectory_id"):
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "TRAJECTORY_CHANGED",
+                "checkpoint trajectory differs from previous checkpoint",
+            )
+        if parent_checkpoint_id != previous_checkpoint.get("checkpoint_id"):
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "PARENT_MISMATCH",
+                "parent_checkpoint_id does not reference the previous checkpoint",
+            )
+        if sequence != previous_checkpoint.get("sequence", -1) + 1:
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "SEQUENCE_MISMATCH",
+                "checkpoint sequence is not previous sequence + 1",
+            )
+
+        previous_rejected = {
+            row["approach_id"]
+            for row in previous_checkpoint.get("rejected_approaches", [])
+        }
+        current_rejected = {
+            row["approach_id"] for row in checkpoint["rejected_approaches"]
+        }
+        missing_rejections = sorted(previous_rejected - current_rejected)
+        if missing_rejections:
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "REJECTED_APPROACH_LOST",
+                "rejected approaches disappeared: " + ", ".join(missing_rejections),
+            )
+
+        previous_completed = _verification_index(
+            previous_checkpoint.get("verification", {}).get("completed", [])
+        )
+        current_completed = _verification_index(
+            checkpoint["verification"]["completed"]
+        )
+        lost_completed = sorted(set(previous_completed) - set(current_completed))
+        if lost_completed:
+            return _result(
+                REJECT_UNVERIFIED_COMPLETION,
+                "COMPLETED_VERIFICATION_LOST",
+                "completed verification disappeared: " + ", ".join(lost_completed),
+            )
+
+    required_ids = set(checkpoint["verification"]["required"])
+    completed_rows = checkpoint["verification"]["completed"]
+    pending_rows = checkpoint["verification"]["pending"]
+    completed_ids = [row["verification_id"] for row in completed_rows]
+    pending_ids = [row["verification_id"] for row in pending_rows]
+
+    all_ids = completed_ids + pending_ids
+    if len(all_ids) != len(set(all_ids)):
+        return _result(
+            REJECT_UNVERIFIED_COMPLETION,
+            "VERIFICATION_ID_DUPLICATED",
+            "verification IDs must be unique across completed and pending lists",
+        )
+
+    represented_ids = set(all_ids)
+    if represented_ids != required_ids:
+        missing = sorted(required_ids - represented_ids)
+        unexpected = sorted(represented_ids - required_ids)
+        return _result(
+            REJECT_UNVERIFIED_COMPLETION,
+            "VERIFICATION_SET_MISMATCH",
+            f"missing={missing}; unexpected={unexpected}",
+        )
+
+    for row in completed_rows:
+        refs = row["evidence_refs"]
+        if not refs:
+            return _result(
+                REJECT_UNVERIFIED_COMPLETION,
+                "COMPLETION_EVIDENCE_MISSING",
+                f"{row['verification_id']} has no evidence references",
+            )
+        if any(str(ref).startswith(MEMORY_ONLY_PREFIXES) for ref in refs):
+            return _result(
+                REJECT_UNVERIFIED_COMPLETION,
+                "MEMORY_IS_NOT_VERIFICATION",
+                f"{row['verification_id']} relies on memory-only evidence",
+            )
+
+    next_action = checkpoint["next_action"]
+    if (
+        next_action["action_class"] in {"merge", "deploy"}
+        and not next_action["requires_fresh_authority"]
+    ):
+        return _result(
+            REJECT_INVALID_AUTHORITY,
+            "FRESH_AUTHORITY_REQUIRED",
+            "merge and deploy actions require a fresh action authorization",
+        )
+
+    expected_workspace = checkpoint["workspace_state"]
+    for field in ("repository", "working_directory"):
+        if current_workspace.get(field) != expected_workspace[field]:
+            return _result(
+                RESTART_REQUIRED,
+                "WORKSPACE_IDENTITY_MISMATCH",
+                f"{field} differs from the checkpoint",
+            )
+
+    changed_fields = [
+        field
+        for field in ("base_ref", "head_sha", "dirty_state_digest")
+        if current_workspace.get(field) != expected_workspace[field]
+    ]
+    if changed_fields:
+        return _result(
+            REVALIDATE_WORKSPACE,
+            "WORKSPACE_STATE_CHANGED",
+            "changed workspace fields: " + ", ".join(changed_fields),
+        )
+
+    return _result(
+        CONTINUE,
+        "CONTINUE_OK",
+        "checkpoint is valid, workspace matches, and authority remains context-only",
+    )
