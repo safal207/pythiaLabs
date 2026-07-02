@@ -15,8 +15,8 @@ to merge, deploy, send, publish, or invoke another consequential tool.
 checkpoint context
   -> validate schema and digest
   -> validate lineage
-  -> preserve rejected approaches
-  -> preserve required verification
+  -> preserve rejected approaches and their rationale
+  -> preserve completed verification targets and evidence
   -> compare current workspace
   -> CONTINUE | REVALIDATE | RESTART | REJECT
 ```
@@ -36,8 +36,8 @@ A conforming checkpoint records:
 
 - trajectory, checkpoint, parent, and sequence identity;
 - source agent and session;
-- exact repository, working directory, base ref, head SHA, and optional
-  dirty-state digest;
+- exact repository, working directory, base ref, and head SHA;
+- optional dirty-state digest when the producer can observe workspace changes;
 - goal and acceptance criteria;
 - current delivery phase;
 - active `must` and `must_not` constraints;
@@ -54,13 +54,22 @@ The strict schema is
 
 A verification item may appear in `completed` only when it carries at least one
 durable evidence reference. Narrative memory and agent summaries are not
-verification evidence. The required verification set must equal the union of
-completed and pending IDs.
+verification evidence, regardless of URI-scheme letter case. The required
+verification set must equal the union of completed and pending IDs.
+
+A later checkpoint must preserve, for every previously completed verification:
+
+- the same verification ID;
+- the same target;
+- every previously recorded evidence reference.
+
+Additional evidence references may be appended. Existing proof must not be
+removed or replaced.
 
 A later checkpoint must not:
 
 - drop a previously completed verification;
-- drop a rejected approach;
+- drop or rewrite a rejected approach or its reason;
 - silently mark pending work completed without evidence;
 - change trajectory or skip sequence;
 - point at the wrong parent.
@@ -69,9 +78,17 @@ A later checkpoint must not:
 
 Repository or working-directory mismatch returns `RESTART_REQUIRED`.
 
-Changes to base ref, head SHA, or dirty-state digest return
-`REVALIDATE_WORKSPACE`. The resumed agent must inspect the changed workspace and
-create a new checkpoint before consequential work continues.
+Changes to base ref, head SHA, or a declared dirty-state digest return
+`REVALIDATE_WORKSPACE`.
+
+When a checkpoint declares `dirty_state_digest`, the resumed runtime MUST
+explicitly report the current field, including `null` for a positively observed
+clean workspace. Omitting that observation returns
+`REVALIDATE_WORKSPACE / CURRENT_WORKSPACE_FIELD_MISSING`; absence is never
+interpreted as clean.
+
+When the checkpoint omits `dirty_state_digest`, that field is outside this
+checkpoint's comparison boundary.
 
 ## 6. Replay
 
