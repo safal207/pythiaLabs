@@ -15,7 +15,7 @@ a consequential action.
 validate schema and digest
   -> check replay
   -> validate parent checkpoint and lineage
-  -> preserve rejected rationale and completed proof
+  -> preserve objective, constraints, rejected rationale, and verification proof
   -> compare current workspace
   -> CONTINUE | REVALIDATE | RESTART | IDEMPOTENT_REPLAY | REJECT
 ```
@@ -38,20 +38,32 @@ and a canonical SHA-256 digest. `dirty_state_digest` is optional.
 The strict schema is
 [`schema/ci-operational-checkpoint-v0.1.schema.json`](schema/ci-operational-checkpoint-v0.1.schema.json).
 
-## Verification continuity
+## Active-state continuity
+
+Within one trajectory:
+
+- child creation time MUST NOT precede parent creation time;
+- objective and acceptance criteria MUST remain unchanged;
+- every prior `must` and `must_not` constraint MUST remain active;
+- every rejected approach row and rationale MUST remain unchanged;
+- every completed verification target and prior evidence reference MUST remain;
+- every pending verification MUST remain with the same target or move to
+  completed with durable evidence.
+
+Constraints and evidence may be added. Existing active state and proof may not be
+silently removed or rewritten. A changed objective requires a new trajectory.
+
+## Verification boundary
 
 Completed verification requires durable evidence. Memory and agent summaries
-are not verification evidence, regardless of URI-scheme letter case.
-
-A later checkpoint MUST preserve the prior verification ID, target, and every
-existing evidence reference. Additional evidence may be appended. It MUST also
-preserve each rejected approach row, including its rationale.
+are not verification evidence, regardless of URI-scheme letter case. Additional
+evidence may be appended, but existing evidence cannot be removed or replaced.
 
 ## Parent-checkpoint integrity
 
 Every non-root resume requires the full previous checkpoint. A known parent ID
-alone is insufficient because it cannot prove rejected-approach or completed
-verification continuity.
+alone is insufficient because it cannot prove active-state or verification
+continuity.
 
 Before comparison, the previous checkpoint MUST pass schema validation,
 canonical digest verification, identifier uniqueness, verification-set
