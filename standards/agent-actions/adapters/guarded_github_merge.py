@@ -8,6 +8,7 @@ from github_pr_merge_gate import evaluate_github_pr_merge, input_errors
 
 ALLOW_OK = "ALLOW_OK"
 REQUIRED_EVIDENCE_MISSING = "REQUIRED_EVIDENCE_MISSING"
+EVIDENCE_TARGET_MISMATCH = "EVIDENCE_TARGET_MISMATCH"
 HEAD_SHA_MISMATCH = "HEAD_SHA_MISMATCH"
 ACTION_ALREADY_IN_PROGRESS = "ACTION_ALREADY_IN_PROGRESS"
 ACTION_ALREADY_EXECUTED = "ACTION_ALREADY_EXECUTED"
@@ -136,6 +137,26 @@ def _missing_required_evidence(snapshot: Mapping[str, Any]) -> list[str]:
     return missing_checks + missing_reviews
 
 
+def _evidence_target_mismatches(snapshot: Mapping[str, Any]) -> list[str]:
+    repository = snapshot["repository"]
+    pull_request_number = snapshot["pull_request"]["number"]
+    check_prefix = f"github-actions://{repository}/runs/"
+    review_prefix = (
+        f"github-review://{repository}/pulls/{pull_request_number}/"
+    )
+    mismatches = [
+        f"check:{row['name']}"
+        for row in snapshot.get("checks", [])
+        if not row["run_ref"].startswith(check_prefix)
+    ]
+    mismatches.extend(
+        f"review:{row['reviewer']}"
+        for row in snapshot.get("reviews", [])
+        if not row["review_ref"].startswith(review_prefix)
+    )
+    return mismatches
+
+
 def execute_guarded_merge(
     snapshot: Mapping[str, Any],
     *,
@@ -164,6 +185,17 @@ def execute_guarded_merge(
             "BLOCK",
             REQUIRED_EVIDENCE_MISSING,
             detail="missing required evidence: " + ", ".join(missing),
+        )
+
+    target_mismatches = _evidence_target_mismatches(snapshot)
+    if target_mismatches:
+        return _outcome(
+            "BLOCK",
+            EVIDENCE_TARGET_MISMATCH,
+            detail=(
+                "evidence locator is not bound to the proposed target: "
+                + ", ".join(target_mismatches)
+            ),
         )
 
     repository = snapshot["repository"]
