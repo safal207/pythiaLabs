@@ -88,6 +88,75 @@ def _rejected_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[str,
     return {str(row["approach_id"]): row for row in rows}
 
 
+def _duplicate_ids(rows: Iterable[Mapping[str, Any]], field: str) -> list[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for row in rows:
+        value = str(row[field])
+        if value in seen:
+            duplicates.add(value)
+        seen.add(value)
+    return sorted(duplicates)
+
+
+def _previous_checkpoint_integrity_error(
+    previous_checkpoint: Mapping[str, Any],
+) -> tuple[str, str] | None:
+    errors = _schema_errors(previous_checkpoint)
+    if errors:
+        first = errors[0]
+        path = "/".join(str(part) for part in first.absolute_path) or "<root>"
+        return (
+            "PREVIOUS_CHECKPOINT_SCHEMA_INVALID",
+            f"{path}: {first.message}",
+        )
+
+    expected_digest = previous_checkpoint["checkpoint_digest"]["value"]
+    actual_digest = computed_digest(previous_checkpoint)
+    if expected_digest != actual_digest:
+        return (
+            "PREVIOUS_CHECKPOINT_DIGEST_MISMATCH",
+            f"expected {expected_digest}, computed {actual_digest}",
+        )
+
+    duplicate_approaches = _duplicate_ids(
+        previous_checkpoint["rejected_approaches"],
+        "approach_id",
+    )
+    if duplicate_approaches:
+        return (
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+            "duplicate rejected approach IDs: " + ", ".join(duplicate_approaches),
+        )
+
+    previous_verification = previous_checkpoint["verification"]
+    previous_completed = previous_verification["completed"]
+    previous_pending = previous_verification["pending"]
+    verification_ids = [
+        row["verification_id"] for row in previous_completed + previous_pending
+    ]
+    if len(verification_ids) != len(set(verification_ids)):
+        return (
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+            "verification IDs are duplicated across completed and pending lists",
+        )
+    if set(verification_ids) != set(previous_verification["required"]):
+        return (
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+            "required verification IDs do not match completed and pending rows",
+        )
+    for row in previous_completed:
+        if any(
+            str(ref).casefold().startswith(MEMORY_ONLY_PREFIXES)
+            for ref in row["evidence_refs"]
+        ):
+            return (
+                "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+                f"{row['verification_id']} relies on memory-only evidence",
+            )
+    return None
+
+
 def evaluate_resume(
     checkpoint: Mapping[str, Any],
     *,
@@ -129,6 +198,17 @@ def evaluate_resume(
             f"checkpoint {checkpoint_id} was already consumed",
         )
 
+    duplicate_approaches = _duplicate_ids(
+        checkpoint["rejected_approaches"],
+        "approach_id",
+    )
+    if duplicate_approaches:
+        return _result(
+            REJECT_LINEAGE_MISMATCH,
+            "REJECTED_APPROACH_ID_DUPLICATED",
+            "duplicate rejected approach IDs: " + ", ".join(duplicate_approaches),
+        )
+
     sequence = checkpoint["sequence"]
     parent_checkpoint_id = checkpoint["parent_checkpoint_id"]
     if sequence == 0 and parent_checkpoint_id is not None:
@@ -145,26 +225,40 @@ def evaluate_resume(
         )
 
     if previous_checkpoint is None:
-        if sequence > 0 and parent_checkpoint_id not in set(known_parent_ids):
+        if sequence > 0:
+            if parent_checkpoint_id not in set(known_parent_ids):
+                return _result(
+                    REJECT_LINEAGE_MISMATCH,
+                    "PARENT_NOT_FOUND",
+                    f"parent checkpoint {parent_checkpoint_id} is not known",
+                )
             return _result(
                 REJECT_LINEAGE_MISMATCH,
-                "PARENT_NOT_FOUND",
-                f"parent checkpoint {parent_checkpoint_id} is not known",
+                "PREVIOUS_CHECKPOINT_REQUIRED",
+                "non-root resume requires the full previous checkpoint",
             )
     else:
-        if checkpoint["trajectory_id"] != previous_checkpoint.get("trajectory_id"):
+        integrity_error = _previous_checkpoint_integrity_error(previous_checkpoint)
+        if integrity_error is not None:
+            reason_code, detail = integrity_error
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                reason_code,
+                detail,
+            )
+        if checkpoint["trajectory_id"] != previous_checkpoint["trajectory_id"]:
             return _result(
                 REJECT_LINEAGE_MISMATCH,
                 "TRAJECTORY_CHANGED",
                 "checkpoint trajectory differs from previous checkpoint",
             )
-        if parent_checkpoint_id != previous_checkpoint.get("checkpoint_id"):
+        if parent_checkpoint_id != previous_checkpoint["checkpoint_id"]:
             return _result(
                 REJECT_LINEAGE_MISMATCH,
                 "PARENT_MISMATCH",
                 "parent_checkpoint_id does not reference the previous checkpoint",
             )
-        if sequence != previous_checkpoint.get("sequence", -1) + 1:
+        if sequence != previous_checkpoint["sequence"] + 1:
             return _result(
                 REJECT_LINEAGE_MISMATCH,
                 "SEQUENCE_MISMATCH",
@@ -172,7 +266,7 @@ def evaluate_resume(
             )
 
         previous_rejected = _rejected_index(
-            previous_checkpoint.get("rejected_approaches", [])
+            previous_checkpoint["rejected_approaches"]
         )
         current_rejected = _rejected_index(checkpoint["rejected_approaches"])
         missing_rejections = sorted(set(previous_rejected) - set(current_rejected))
@@ -195,7 +289,7 @@ def evaluate_resume(
             )
 
         previous_completed = _verification_index(
-            previous_checkpoint.get("verification", {}).get("completed", [])
+            previous_checkpoint["verification"]["completed"]
         )
         current_completed = _verification_index(
             checkpoint["verification"]["completed"]
