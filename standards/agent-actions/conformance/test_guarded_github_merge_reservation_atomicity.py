@@ -36,13 +36,14 @@ class FixedClock:
 
 
 class FixedStateProvider:
-    def __init__(self, head_sha: str) -> None:
+    def __init__(self, head_sha: str, base_ref: str) -> None:
         self.head_sha = head_sha
+        self.base_ref = base_ref
         self.calls = 0
 
     def get_state(self, repository: str, pull_request: int) -> PullRequestState:
         self.calls += 1
-        return PullRequestState(self.head_sha, "main")
+        return PullRequestState(self.head_sha, self.base_ref)
 
 
 class RecordingExecutor:
@@ -100,12 +101,14 @@ class ImpossibleNewObservationStore(ReleaseAfterAtomicObservationStore):
 class GuardedMergeAtomicReservationTest(unittest.TestCase):
     def execute(self, store):
         snapshot = load_example()
-        expected = snapshot["pull_request"]["expected_head_sha"]
+        pull_request = snapshot["pull_request"]
+        expected = pull_request["expected_head_sha"]
+        expected_base = pull_request["base_ref"]
         executor = RecordingExecutor()
         result = execute_guarded_merge(
             snapshot,
             clock=FixedClock(),
-            state_provider=FixedStateProvider(expected),
+            state_provider=FixedStateProvider(expected, expected_base),
             executor=executor,
             execution_store=store,
         )
