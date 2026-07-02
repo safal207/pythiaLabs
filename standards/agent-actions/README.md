@@ -30,7 +30,7 @@ action. An action envelope must not be treated as durable memory of a session.
   — executable conformance checks;
 - [`DECISION_CODES.md`](DECISION_CODES.md) — stable decision and reason-code registry.
 
-## Reference adapters
+## Reference adapters and enforcement
 
 - [`GITHUB-PR-MERGE-GATE.md`](GITHUB-PR-MERGE-GATE.md) — maps a bounded GitHub
   pull-request snapshot into Action Envelope V1 for an exact-head
@@ -40,7 +40,14 @@ action. An action envelope must not be treated as durable memory of a session.
 - [`adapters/github_pr_merge_gate.py`](adapters/github_pr_merge_gate.py) —
   reference adapter and evaluator;
 - [`conformance/test_github_pr_merge_gate.py`](conformance/test_github_pr_merge_gate.py)
-  — exact-head, freshness, replay, authorization, and recovery regressions.
+  — exact-head, freshness, replay, authorization, and recovery regressions;
+- [`GUARDED-GITHUB-MERGE.md`](GUARDED-GITHUB-MERGE.md) — pre-execution
+  orchestration that reserves the semantic action, rechecks the target, and only
+  then reaches an injected merge executor;
+- [`adapters/guarded_github_merge.py`](adapters/guarded_github_merge.py) —
+  reference execution boundary with in-memory replay state;
+- [`conformance/test_guarded_github_merge.py`](conformance/test_guarded_github_merge.py)
+  — executor reachability, double head-check, replay, and failure regressions.
 
 ## Quick validation
 
@@ -76,6 +83,14 @@ authorization target, evidence, idempotency key, and expected transition to one
 exact pull-request head SHA. Checks or reviews from another head do not authorize
 the proposed merge.
 
+The guarded merge service adds an enforceable call-order property:
+
+- missing required evidence blocks before external state is loaded;
+- current GitHub head is checked before evaluation and before execution;
+- the semantic idempotency key is reserved before the second head check;
+- an injected merge executor is unreachable unless the gate returned `ALLOW`;
+- repeated or concurrent execution is blocked.
+
 ## Non-claims
 
 This is an experimental local conformance package. It is not:
@@ -85,9 +100,10 @@ This is an experimental local conformance package. It is not:
 - a regulatory compliance certification;
 - a universal policy language;
 - a guarantee that an allowed action is safe;
-- an execution engine;
+- a production execution engine;
 - a GitHub App, branch-protection replacement, or production merge queue.
 
-The caller remains responsible for trustworthy identity, independent GitHub
-state retrieval, durable replay storage, policy correctness, tool enforcement,
-and post-execution verification.
+The reference executor boundary uses injected interfaces and an in-memory store.
+The caller remains responsible for production GitHub authentication, trustworthy
+identity, durable atomic replay storage, policy correctness, conditional merge
+execution, and post-execution verification.
