@@ -67,11 +67,14 @@ class FakeMergeExecutor:
 
 class GuardedGitHubMergeTest(unittest.TestCase):
     def execute(self, snapshot, provider, executor, store=None):
+        execution_store = (
+            store if store is not None else InMemoryExecutionStateStore()
+        )
         return execute_guarded_merge(
             snapshot,
             state_provider=provider,
             executor=executor,
-            execution_store=store or InMemoryExecutionStateStore(),
+            execution_store=execution_store,
         )
 
     def test_allow_executes_once_after_two_exact_head_reads(self):
@@ -83,7 +86,10 @@ class GuardedGitHubMergeTest(unittest.TestCase):
 
         result = self.execute(snapshot, provider, executor, store)
 
-        self.assertEqual((result["decision"], result["reason_code"]), ("ALLOW", "ALLOW_OK"))
+        self.assertEqual(
+            (result["decision"], result["reason_code"]),
+            ("ALLOW", "ALLOW_OK"),
+        )
         self.assertTrue(result["executed"])
         self.assertEqual(provider.calls, 2)
         self.assertEqual(len(executor.calls), 1)
@@ -180,18 +186,17 @@ class GuardedGitHubMergeTest(unittest.TestCase):
     def test_in_progress_action_is_blocked(self):
         snapshot = load_example()
         expected = snapshot["pull_request"]["expected_head_sha"]
-        provider = FakeStateProvider(expected)
-        executor = FakeMergeExecutor()
-        store = InMemoryExecutionStateStore()
-
         probe = self.execute(
             snapshot,
             FakeStateProvider(expected, expected),
             FakeMergeExecutor(),
-            store,
         )
         key = probe["idempotency_key"]
-        store._states[key] = IN_PROGRESS
+        store = InMemoryExecutionStateStore()
+        self.assertTrue(store.reserve(key))
+        self.assertEqual(store.get(key), IN_PROGRESS)
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
 
         result = self.execute(snapshot, provider, executor, store)
 
