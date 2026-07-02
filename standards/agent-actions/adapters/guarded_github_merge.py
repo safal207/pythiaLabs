@@ -26,12 +26,21 @@ IN_PROGRESS = "IN_PROGRESS"
 SUCCEEDED = "SUCCEEDED"
 FAILED = "FAILED"
 NOT_ATTEMPTED = "NOT_ATTEMPTED"
+TERMINAL_STATES = frozenset({SUCCEEDED, FAILED})
 
 
 @dataclass(frozen=True)
 class PullRequestState:
     head_sha: str
     base_ref: str
+
+
+@dataclass(frozen=True)
+class ReservationObservation:
+    """One atomic reservation result and the state observed under the same lock."""
+
+    reserved: bool
+    observed_state: str
 
 
 class DecisionClock(Protocol):
@@ -57,10 +66,10 @@ class MergeExecutor(Protocol):
 
 class ExecutionStateStore(Protocol):
     def get(self, idempotency_key: str) -> str:
-        """Return NEW, IN_PROGRESS, SUCCEEDED, or FAILED."""
+        """Return NEW, IN_PROGRESS, SUCCEEDED, or FAILED for diagnostics."""
 
-    def reserve(self, idempotency_key: str) -> bool:
-        """Atomically transition NEW to IN_PROGRESS."""
+    def try_reserve(self, idempotency_key: str) -> ReservationObservation:
+        """Atomically observe state and transition NEW to IN_PROGRESS."""
 
     def release(self, idempotency_key: str) -> None:
         """Transition an unattempted IN_PROGRESS action back to NEW."""
@@ -77,7 +86,7 @@ class ExecutionStateStore(Protocol):
 
 
 class InMemoryExecutionStateStore:
-    """Thread-safe reference store; PR #215 adds durable coordination."""
+    """Thread-safe reference store; durable coordination is separate work."""
 
     def __init__(self) -> None:
         self._states: dict[str, str] = {}
@@ -88,12 +97,18 @@ class InMemoryExecutionStateStore:
         with self._lock:
             return self._states.get(idempotency_key, NEW)
 
-    def reserve(self, idempotency_key: str) -> bool:
+    def try_reserve(self, idempotency_key: str) -> ReservationObservation:
         with self._lock:
-            if self._states.get(idempotency_key, NEW) != NEW:
-                return False
+            observed_state = self._states.get(idempotency_key, NEW)
+            if observed_state != NEW:
+                return ReservationObservation(False, observed_state)
             self._states[idempotency_key] = IN_PROGRESS
-            return True
+            return ReservationObservation(True, NEW)
+
+    def reserve(self, idempotency_key: str) -> bool:
+        """Compatibility helper; guarded execution uses try_reserve()."""
+
+        return self.try_reserve(idempotency_key).reserved
 
     def release(self, idempotency_key: str) -> None:
         with self._lock:
@@ -172,12 +187,8 @@ def _missing_required_evidence(snapshot: Mapping[str, Any]) -> list[str]:
 def _evidence_target_mismatches(snapshot: Mapping[str, Any]) -> list[str]:
     repository = snapshot["repository"]
     pull_request_number = snapshot["pull_request"]["number"]
-    check_prefix = (
-        f"github-actions://{repository}/pulls/{pull_request_number}/runs/"
-    )
-    review_prefix = (
-        f"github-review://{repository}/pulls/{pull_request_number}/"
-    )
+    check_prefix = f"github-actions://{repository}/pulls/{pull_request_number}/runs/"
+    review_prefix = f"github-review://{repository}/pulls/{pull_request_number}/"
     mismatches = [
         f"check:{row['name']}"
         for row in snapshot.get("checks", [])
@@ -201,6 +212,41 @@ def _extract_idempotency_key(envelope: Any) -> str | None:
     return key if isinstance(key, str) and key else None
 
 
+def _reservation_failure(
+    observation: ReservationObservation,
+    *,
+    action_id: str | None,
+    idempotency_key: str,
+) -> dict[str, Any]:
+    observed_state = observation.observed_state
+    if observed_state == IN_PROGRESS:
+        return _outcome(
+            "BLOCK",
+            ACTION_ALREADY_IN_PROGRESS,
+            detail="the semantic merge action is already in progress",
+            action_id=action_id,
+            idempotency_key=idempotency_key,
+        )
+    if observed_state in TERMINAL_STATES:
+        return _outcome(
+            "BLOCK",
+            ACTION_ALREADY_EXECUTED,
+            detail=f"the semantic merge action is terminal: {observed_state}",
+            action_id=action_id,
+            idempotency_key=idempotency_key,
+        )
+    return _outcome(
+        "ESCALATE",
+        CURRENT_STATE_UNAVAILABLE,
+        detail=(
+            "atomic reservation failed with a non-terminal coordination state: "
+            f"{observed_state}"
+        ),
+        action_id=action_id,
+        idempotency_key=idempotency_key,
+    )
+
+
 def execute_guarded_merge(
     snapshot: Mapping[str, Any],
     *,
@@ -214,17 +260,13 @@ def execute_guarded_merge(
     The caller-supplied snapshot cannot choose the effective decision time. The
     service overwrites it with a trusted clock value before freshness checks.
     The executor is unreachable until the Action Envelope evaluator returns
-    ALLOW, the semantic idempotency key is reserved, and the current GitHub head
-    and base are checked a second time immediately before execution.
+    ALLOW, reservation succeeds atomically, and the current GitHub head and base
+    are checked a second time immediately before execution.
     """
 
     errors = input_errors(snapshot)
     if errors:
-        return _outcome(
-            "BLOCK",
-            "GITHUB_INPUT_INVALID",
-            detail=errors[0],
-        )
+        return _outcome("BLOCK", "GITHUB_INPUT_INVALID", detail=errors[0])
 
     missing = _missing_required_evidence(snapshot)
     if missing:
@@ -247,7 +289,7 @@ def execute_guarded_merge(
 
     try:
         trusted_decision_time = clock.now()
-    except Exception as exc:  # trusted-time availability boundary
+    except Exception as exc:
         return _outcome(
             "ESCALATE",
             TRUSTED_TIME_UNAVAILABLE,
@@ -261,11 +303,8 @@ def execute_guarded_merge(
     expected_base_ref = pull_request["base_ref"]
 
     try:
-        first_state = state_provider.get_state(
-            repository,
-            pull_request_number,
-        )
-    except Exception as exc:  # external availability boundary
+        first_state = state_provider.get_state(repository, pull_request_number)
+    except Exception as exc:
         return _outcome(
             "ESCALATE",
             CURRENT_STATE_UNAVAILABLE,
@@ -276,20 +315,13 @@ def execute_guarded_merge(
         return _outcome(
             "BLOCK",
             HEAD_SHA_MISMATCH,
-            detail=(
-                f"expected head {expected_head_sha}, "
-                f"current head is {first_state.head_sha}"
-            ),
+            detail=f"expected head {expected_head_sha}, current head is {first_state.head_sha}",
         )
-
     if first_state.base_ref != expected_base_ref:
         return _outcome(
             "BLOCK",
             BASE_REF_MISMATCH,
-            detail=(
-                f"expected base {expected_base_ref}, "
-                f"current base is {first_state.base_ref}"
-            ),
+            detail=f"expected base {expected_base_ref}, current base is {first_state.base_ref}",
         )
 
     evaluated_snapshot = copy.deepcopy(dict(snapshot))
@@ -297,8 +329,7 @@ def execute_guarded_merge(
     evaluated_snapshot["pull_request"]["observed_head_sha"] = first_state.head_sha
     gate = evaluate_github_pr_merge(evaluated_snapshot)
     action_id = gate.get("action_id")
-    envelope = gate.get("envelope")
-    idempotency_key = _extract_idempotency_key(envelope)
+    idempotency_key = _extract_idempotency_key(gate.get("envelope"))
 
     if gate["decision"] != "ALLOW":
         return _outcome(
@@ -308,7 +339,6 @@ def execute_guarded_merge(
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
-
     if idempotency_key is None:
         return _outcome(
             "BLOCK",
@@ -317,28 +347,17 @@ def execute_guarded_merge(
             action_id=action_id,
         )
 
-    if not execution_store.reserve(idempotency_key):
-        existing_state = execution_store.get(idempotency_key)
-        if existing_state == IN_PROGRESS:
-            reason_code = ACTION_ALREADY_IN_PROGRESS
-            detail = "the semantic merge action is already in progress"
-        else:
-            reason_code = ACTION_ALREADY_EXECUTED
-            detail = f"the semantic merge action is terminal: {existing_state}"
-        return _outcome(
-            "BLOCK",
-            reason_code,
-            detail=detail,
+    reservation = execution_store.try_reserve(idempotency_key)
+    if not reservation.reserved:
+        return _reservation_failure(
+            reservation,
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
 
     try:
-        second_state = state_provider.get_state(
-            repository,
-            pull_request_number,
-        )
-    except Exception as exc:  # external availability boundary before execution
+        second_state = state_provider.get_state(repository, pull_request_number)
+    except Exception as exc:
         execution_store.release(idempotency_key)
         return _outcome(
             "ESCALATE",
@@ -349,10 +368,7 @@ def execute_guarded_merge(
         )
 
     if second_state.head_sha != expected_head_sha:
-        execution_store.mark_failed(
-            idempotency_key,
-            TARGET_CHANGED_BEFORE_EXECUTION,
-        )
+        execution_store.mark_failed(idempotency_key, TARGET_CHANGED_BEFORE_EXECUTION)
         return _outcome(
             "BLOCK",
             TARGET_CHANGED_BEFORE_EXECUTION,
@@ -363,12 +379,8 @@ def execute_guarded_merge(
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
-
     if second_state.base_ref != expected_base_ref:
-        execution_store.mark_failed(
-            idempotency_key,
-            BASE_CHANGED_BEFORE_EXECUTION,
-        )
+        execution_store.mark_failed(idempotency_key, BASE_CHANGED_BEFORE_EXECUTION)
         return _outcome(
             "BLOCK",
             BASE_CHANGED_BEFORE_EXECUTION,
@@ -387,7 +399,7 @@ def execute_guarded_merge(
             expected_head_sha,
             expected_base_ref,
         )
-    except Exception as exc:  # execution boundary
+    except Exception as exc:
         execution_store.mark_failed(idempotency_key, EXECUTION_FAILED)
         return _outcome(
             "BLOCK",
