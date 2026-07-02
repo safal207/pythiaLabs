@@ -15,6 +15,7 @@ from guarded_github_merge import (  # noqa: E402
     ACTION_ALREADY_EXECUTED,
     ACTION_ALREADY_IN_PROGRESS,
     CURRENT_STATE_UNAVAILABLE,
+    EVIDENCE_TARGET_MISMATCH,
     EXECUTION_FAILED,
     FAILED,
     HEAD_SHA_MISMATCH,
@@ -138,6 +139,49 @@ class GuardedGitHubMergeTest(unittest.TestCase):
         result = self.execute(snapshot, provider, executor)
 
         self.assertEqual(result["reason_code"], REQUIRED_EVIDENCE_MISSING)
+        self.assertEqual(provider.calls, 0)
+        self.assertEqual(executor.calls, [])
+
+    def test_foreign_approval_does_not_satisfy_required_reviewer(self):
+        snapshot = load_example()
+        snapshot["reviews"][0]["reviewer"] = "mallory"
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
+
+        result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(result["reason_code"], REQUIRED_EVIDENCE_MISSING)
+        self.assertEqual(provider.calls, 0)
+        self.assertEqual(executor.calls, [])
+
+    def test_review_for_another_pull_request_blocks(self):
+        snapshot = load_example()
+        snapshot["reviews"][0]["review_ref"] = (
+            "github-review://safal207/pythiaLabs/pulls/999/coderabbitai"
+        )
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
+
+        result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(result["reason_code"], EVIDENCE_TARGET_MISMATCH)
+        self.assertEqual(provider.calls, 0)
+        self.assertEqual(executor.calls, [])
+
+    def test_check_from_another_repository_blocks(self):
+        snapshot = load_example()
+        snapshot["checks"][0]["run_ref"] = (
+            "github-actions://attacker/fork/runs/1"
+        )
+        expected = snapshot["pull_request"]["expected_head_sha"]
+        provider = FakeStateProvider(expected)
+        executor = FakeMergeExecutor()
+
+        result = self.execute(snapshot, provider, executor)
+
+        self.assertEqual(result["reason_code"], EVIDENCE_TARGET_MISMATCH)
         self.assertEqual(provider.calls, 0)
         self.assertEqual(executor.calls, [])
 
