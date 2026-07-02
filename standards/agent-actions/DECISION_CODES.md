@@ -10,9 +10,20 @@ The reference evaluator returns:
 }
 ```
 
-The guarded GitHub merge service additionally returns `reason_codes`, currently
-a one-element array containing the same stable code. Consumers should branch on
-`decision` and `reason_code`, not on `detail`.
+The guarded GitHub merge service additionally returns:
+
+```json
+{
+  "reason_codes": ["STABLE_MACHINE_CODE"],
+  "executed": false,
+  "executor_called": false,
+  "execution_status": "NOT_ATTEMPTED | SUCCEEDED | FAILED"
+}
+```
+
+`executed` means the action completed successfully. `executor_called` records
+whether the side-effect boundary was reached. Consumers should branch on stable
+machine fields, not on `detail`.
 
 ## Action Envelope V1 codes
 
@@ -55,10 +66,19 @@ evaluating the envelope.
 | `BLOCK` | `ACTION_ALREADY_EXECUTED` | The semantic idempotency key is already in a terminal state. |
 | `BLOCK` | `TARGET_CHANGED_BEFORE_EXECUTION` | The pull-request head changed after `ALLOW` and before the executor call. |
 | `ESCALATE` | `CURRENT_STATE_UNAVAILABLE` | Current GitHub state could not be retrieved or revalidated. |
-| `BLOCK` | `EXECUTION_FAILED` | The injected merge executor failed and the action was recorded as failed. |
+| `ESCALATE` | `TRUSTED_TIME_UNAVAILABLE` | A trusted decision timestamp could not be obtained, so freshness cannot be evaluated safely. |
+| `BLOCK` | `EXECUTION_FAILED` | The executor was called, failed, and the semantic action was recorded as failed. |
 
 The guarded service can also return adapter or Action Envelope V1 codes when a
 lower layer rejects the action.
+
+## Execution-status semantics
+
+| `executor_called` | `execution_status` | Meaning |
+|---|---|---|
+| `false` | `NOT_ATTEMPTED` | The gate blocked or escalated before the side-effect boundary. |
+| `true` | `SUCCEEDED` | The executor completed and the store was marked `SUCCEEDED`. |
+| `true` | `FAILED` | The executor was reached but failed; the store was marked `FAILED`. |
 
 ## Compatibility rule
 
