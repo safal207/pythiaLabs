@@ -61,6 +61,16 @@ def evaluate_resume(
                     "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
                     "previous checkpoint cannot be its own parent",
                 )
+            previous_action = previous_checkpoint["next_action"]
+            if (
+                previous_action["action_class"] in {"merge", "deploy"}
+                and not previous_action["requires_fresh_authority"]
+            ):
+                return _core._result(
+                    _core.REJECT_LINEAGE_MISMATCH,
+                    "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+                    "parent merge or deploy intent requires fresh authority",
+                )
 
     return _core.evaluate_resume(
         checkpoint,
