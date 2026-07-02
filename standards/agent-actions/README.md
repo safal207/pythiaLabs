@@ -30,6 +30,25 @@ action. An action envelope must not be treated as durable memory of a session.
   — executable conformance checks;
 - [`DECISION_CODES.md`](DECISION_CODES.md) — stable decision and reason-code registry.
 
+## Reference adapters and enforcement
+
+- [`GITHUB-PR-MERGE-GATE.md`](GITHUB-PR-MERGE-GATE.md) — maps a bounded GitHub
+  pull-request snapshot into Action Envelope V1 for an exact-target
+  `merge_pull_request` decision;
+- [`schema/github-pr-merge-gate-input.schema.json`](schema/github-pr-merge-gate-input.schema.json)
+  — strict adapter input contract;
+- [`adapters/github_pr_merge_gate.py`](adapters/github_pr_merge_gate.py) —
+  reference adapter and evaluator;
+- [`conformance/test_github_pr_merge_gate.py`](conformance/test_github_pr_merge_gate.py)
+  — base/head identity, freshness, replay, authorization, and recovery regressions;
+- [`GUARDED-GITHUB-MERGE.md`](GUARDED-GITHUB-MERGE.md) — pre-execution
+  orchestration that reserves the semantic action, rechecks base and head, and
+  only then reaches an injected merge executor;
+- [`adapters/guarded_github_merge.py`](adapters/guarded_github_merge.py) —
+  reference execution boundary with retryable pre-execution reservations;
+- [`conformance/test_guarded_github_merge.py`](conformance/test_guarded_github_merge.py)
+  — executor reachability, double target-check, retry, replay, and failure tests.
+
 ## Quick validation
 
 ```bash
@@ -43,32 +62,30 @@ python -m unittest discover \
 
 ## Current guarantees
 
-The reference slice checks:
+The reference slice checks schema versioning, strict shape, canonical digest,
+temporal ordering, full authorization binding, evidence action/freshness,
+preconditions, replay detection, recovery readiness, and deterministic
+`ALLOW / BLOCK / ESCALATE` outcomes.
 
-- explicit schema versioning with malformed-versus-unsupported classification;
-- strict unknown-field and required-field validation;
-- canonical SHA-256 envelope integrity;
-- temporal ordering that rejects `decision_time` earlier than `created_at`;
-- authorization binding to initiating actor, executing agent, capability,
-  operation, target, and environment;
-- authorization validity at `decision_time`, including both time-window bounds;
-- evidence binding to the intended `action_id`;
-- evidence freshness at `decision_time`, including both time-window bounds;
-- unique evidence identifiers and valid precondition evidence references;
-- deterministic `ALLOW`, `BLOCK`, and `ESCALATE` outcomes;
-- duplicate idempotency-key detection supplied by the caller;
-- rollback readiness when rollback is declared mandatory.
+The GitHub merge-gate adapter binds action identity, authorization target,
+idempotency, and expected transition to the exact repository, PR, base ref, and
+head SHA. Checks and reviews remain exact-head bound.
+
+The guarded merge service additionally guarantees:
+
+- missing or cross-target evidence blocks before external state lookup;
+- current GitHub base and head are checked before evaluation and execution;
+- the semantic idempotency key is reserved before the second target check;
+- transient second-read outages release the reservation for retry;
+- an injected merge executor is unreachable unless the gate returned `ALLOW`;
+- repeated, concurrent, or retargeted execution is blocked.
 
 ## Non-claims
 
-This is an experimental local conformance package. It is not:
+This is not an internet standard, production identity system, compliance
+certification, universal policy language, GitHub App, branch-protection
+replacement, production merge queue, or safety guarantee.
 
-- an internet standard;
-- a production identity, IAM, or cryptographic system;
-- a regulatory compliance certification;
-- a universal policy language;
-- a guarantee that an allowed action is safe;
-- an execution engine.
-
-The caller remains responsible for trustworthy identity, durable replay
-storage, policy correctness, tool enforcement, and post-execution verification.
+The caller remains responsible for production GitHub authentication,
+trustworthy identity, durable atomic replay storage, policy correctness,
+conditional merge execution, and post-execution verification.
