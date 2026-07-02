@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from threading import Lock
 from typing import Any, Mapping, Protocol
 
 from github_pr_merge_gate import evaluate_github_pr_merge, input_errors
@@ -35,40 +36,64 @@ class MergeExecutor(Protocol):
         """Execute a merge that is conditionally bound to expected_head_sha."""
 
 
-class InMemoryExecutionStateStore:
-    """Reference-only replay store; PR #215 replaces this with durable storage."""
-
-    def __init__(self) -> None:
-        self._states: dict[str, str] = {}
-        self._results: dict[str, Mapping[str, Any]] = {}
-
+class ExecutionStateStore(Protocol):
     def get(self, idempotency_key: str) -> str:
-        return self._states.get(idempotency_key, NEW)
+        """Return NEW, IN_PROGRESS, SUCCEEDED, or FAILED."""
 
     def reserve(self, idempotency_key: str) -> bool:
-        if self.get(idempotency_key) != NEW:
-            return False
-        self._states[idempotency_key] = IN_PROGRESS
-        return True
+        """Atomically transition NEW to IN_PROGRESS."""
 
     def mark_succeeded(
         self,
         idempotency_key: str,
         result: Mapping[str, Any],
     ) -> None:
-        if self.get(idempotency_key) != IN_PROGRESS:
-            raise RuntimeError("only an in-progress action may succeed")
-        self._states[idempotency_key] = SUCCEEDED
-        self._results[idempotency_key] = dict(result)
+        """Transition an in-progress action to SUCCEEDED."""
 
     def mark_failed(self, idempotency_key: str, reason: str) -> None:
-        if self.get(idempotency_key) != IN_PROGRESS:
-            raise RuntimeError("only an in-progress action may fail")
-        self._states[idempotency_key] = FAILED
-        self._results[idempotency_key] = {"reason": reason}
+        """Transition an in-progress action to FAILED."""
+
+
+class InMemoryExecutionStateStore:
+    """Thread-safe reference store; PR #215 adds durable coordination."""
+
+    def __init__(self) -> None:
+        self._states: dict[str, str] = {}
+        self._results: dict[str, Mapping[str, Any]] = {}
+        self._lock = Lock()
+
+    def get(self, idempotency_key: str) -> str:
+        with self._lock:
+            return self._states.get(idempotency_key, NEW)
+
+    def reserve(self, idempotency_key: str) -> bool:
+        with self._lock:
+            if self._states.get(idempotency_key, NEW) != NEW:
+                return False
+            self._states[idempotency_key] = IN_PROGRESS
+            return True
+
+    def mark_succeeded(
+        self,
+        idempotency_key: str,
+        result: Mapping[str, Any],
+    ) -> None:
+        with self._lock:
+            if self._states.get(idempotency_key, NEW) != IN_PROGRESS:
+                raise RuntimeError("only an in-progress action may succeed")
+            self._states[idempotency_key] = SUCCEEDED
+            self._results[idempotency_key] = dict(result)
+
+    def mark_failed(self, idempotency_key: str, reason: str) -> None:
+        with self._lock:
+            if self._states.get(idempotency_key, NEW) != IN_PROGRESS:
+                raise RuntimeError("only an in-progress action may fail")
+            self._states[idempotency_key] = FAILED
+            self._results[idempotency_key] = {"reason": reason}
 
     def result(self, idempotency_key: str) -> Mapping[str, Any] | None:
-        return self._results.get(idempotency_key)
+        with self._lock:
+            return self._results.get(idempotency_key)
 
 
 def _outcome(
@@ -116,7 +141,7 @@ def execute_guarded_merge(
     *,
     state_provider: CurrentPullRequestStateProvider,
     executor: MergeExecutor,
-    execution_store: InMemoryExecutionStateStore,
+    execution_store: ExecutionStateStore,
 ) -> dict[str, Any]:
     """Evaluate and execute one exact-head GitHub merge at most once.
 
@@ -194,28 +219,18 @@ def execute_guarded_merge(
             action_id=action_id,
         )
 
-    existing_state = execution_store.get(idempotency_key)
-    if existing_state == IN_PROGRESS:
-        return _outcome(
-            "BLOCK",
-            ACTION_ALREADY_IN_PROGRESS,
-            detail="the semantic merge action is already in progress",
-            action_id=action_id,
-            idempotency_key=idempotency_key,
-        )
-    if existing_state in {SUCCEEDED, FAILED}:
-        return _outcome(
-            "BLOCK",
-            ACTION_ALREADY_EXECUTED,
-            detail=f"the semantic merge action is terminal: {existing_state}",
-            action_id=action_id,
-            idempotency_key=idempotency_key,
-        )
     if not execution_store.reserve(idempotency_key):
+        existing_state = execution_store.get(idempotency_key)
+        if existing_state == IN_PROGRESS:
+            reason_code = ACTION_ALREADY_IN_PROGRESS
+            detail = "the semantic merge action is already in progress"
+        else:
+            reason_code = ACTION_ALREADY_EXECUTED
+            detail = f"the semantic merge action is terminal: {existing_state}"
         return _outcome(
             "BLOCK",
-            ACTION_ALREADY_IN_PROGRESS,
-            detail="the semantic merge action could not be reserved",
+            reason_code,
+            detail=detail,
             action_id=action_id,
             idempotency_key=idempotency_key,
         )
