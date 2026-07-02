@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -86,6 +87,11 @@ def _verification_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[
 
 def _rejected_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[str, Any]]:
     return {str(row["approach_id"]): row for row in rows}
+
+
+def _parse_time(value: str) -> datetime:
+    normalized = value[:-1] + "+00:00" if value.endswith(("Z", "z")) else value
+    return datetime.fromisoformat(normalized)
 
 
 def _duplicate_ids(rows: Iterable[Mapping[str, Any]], field: str) -> list[str]:
@@ -252,6 +258,30 @@ def evaluate_resume(
                 "TRAJECTORY_CHANGED",
                 "checkpoint trajectory differs from previous checkpoint",
             )
+        if _parse_time(checkpoint["created_at"]) < _parse_time(
+            previous_checkpoint["created_at"]
+        ):
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "CREATION_TIME_REGRESSED",
+                "checkpoint creation time is earlier than its parent",
+            )
+        if checkpoint["objective"] != previous_checkpoint["objective"]:
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "OBJECTIVE_CHANGED",
+                "objective changed within the same trajectory",
+            )
+        for field in ("must", "must_not"):
+            previous_constraints = set(previous_checkpoint["constraints"][field])
+            current_constraints = set(checkpoint["constraints"][field])
+            lost_constraints = sorted(previous_constraints - current_constraints)
+            if lost_constraints:
+                return _result(
+                    REJECT_LINEAGE_MISMATCH,
+                    "CONSTRAINT_LOST",
+                    f"{field} constraints disappeared: " + ", ".join(lost_constraints),
+                )
         if parent_checkpoint_id != previous_checkpoint["checkpoint_id"]:
             return _result(
                 REJECT_LINEAGE_MISMATCH,
@@ -316,6 +346,29 @@ def evaluate_resume(
                         "completed verification target changed or prior evidence "
                         f"was removed: {verification_id}"
                     ),
+                )
+
+        previous_pending = _verification_index(
+            previous_checkpoint["verification"]["pending"]
+        )
+        current_pending = _verification_index(
+            checkpoint["verification"]["pending"]
+        )
+        for verification_id, previous_row in previous_pending.items():
+            current_row = current_pending.get(verification_id)
+            completed_row = current_completed.get(verification_id)
+            if current_row is None and completed_row is None:
+                return _result(
+                    REJECT_UNVERIFIED_COMPLETION,
+                    "PENDING_VERIFICATION_LOST",
+                    f"pending verification disappeared: {verification_id}",
+                )
+            successor = completed_row if completed_row is not None else current_row
+            if successor["target"] != previous_row["target"]:
+                return _result(
+                    REJECT_UNVERIFIED_COMPLETION,
+                    "PENDING_VERIFICATION_CHANGED",
+                    f"pending verification target changed: {verification_id}",
                 )
 
     required_ids = set(checkpoint["verification"]["required"])
