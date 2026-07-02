@@ -60,7 +60,7 @@
         "verification_id": "verification:schema",
         "target": "CI operational checkpoint JSON Schema",
         "evidence_refs": [
-          "git://safal207/pythiaLabs/standards/agent-continuity/schema/ci-operational-checkpoint-v0.1.schema.json"
+          "git://safal207/pythiaLabs@0b11b697300d00ab210dbc48a857e3aa4a963937/standards/agent-continuity/schema/ci-operational-checkpoint-v0.1.schema.json"
         ]
       }
     ],
@@ -80,6 +80,6 @@
   "checkpoint_digest": {
     "algorithm": "sha256",
     "canonicalization": "json-sort-keys-utf8-v1",
-    "value": "e67301839ba684347c432d48b3f8557d8aba9283c370e0256dc8553c50556ae1"
+    "value": "a54e8cc08bec0ddc86347f66dcd11f0dfb671127197d6f7ea5ab9463b4a05867"
   }
 }
