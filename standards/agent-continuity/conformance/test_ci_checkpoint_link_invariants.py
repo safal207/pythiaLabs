@@ -78,6 +78,21 @@ class CheckpointLinkInvariantTest(unittest.TestCase):
         child = with_computed_digest(child)
         self.assert_reason(evaluate(child, parent), "CHECKPOINT_ID_REUSED")
 
+    def test_parent_cannot_carry_merge_authority_without_revalidation(self):
+        parent = load_example()
+        child = child_of(parent)
+        invalid_parent = copy.deepcopy(parent)
+        invalid_parent["next_action"] = {
+            "description": "Merge without a fresh authorization.",
+            "action_class": "merge",
+            "requires_fresh_authority": False,
+        }
+        invalid_parent = with_computed_digest(invalid_parent)
+        self.assert_reason(
+            evaluate(child, invalid_parent),
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
