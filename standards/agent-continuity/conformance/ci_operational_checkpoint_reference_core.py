@@ -6,27 +6,22 @@ from typing import Any, Iterable, Mapping
 import ci_operational_checkpoint_reference_impl as _impl
 from ci_operational_checkpoint_reference_impl import *  # noqa: F401,F403
 
-# Preserve private helpers used by the compatibility wrapper and conformance tests.
 _result = _impl._result
 _schema_errors = _impl._schema_errors
+_ORIGINAL_LOAD_SCHEMA = _impl.load_schema
 
 
 @lru_cache(maxsize=1)
 def load_schema() -> dict[str, Any]:
-    """Load and validate the published schema once per process."""
-
-    return _impl.load_schema()
+    return _ORIGINAL_LOAD_SCHEMA()
 
 
-# Make every validator path in the implementation share the cached schema.
 _impl.load_schema = load_schema
 
 
 def _previous_checkpoint_integrity_error(
     previous_checkpoint: Mapping[str, Any],
 ) -> tuple[str, str] | None:
-    """Validate a parent checkpoint before it can contribute lineage state."""
-
     verification = previous_checkpoint.get("verification")
     if isinstance(verification, Mapping):
         completed = verification.get("completed")
@@ -84,8 +79,6 @@ def evaluate_resume(
     seen_checkpoint_ids: Iterable[str] = (),
     known_parent_ids: Iterable[str] = (),
 ) -> dict[str, str]:
-    """Apply canonical fail-closed guards, then delegate to the implementation."""
-
     errors = _schema_errors(checkpoint)
     if errors:
         authority_error = next(
