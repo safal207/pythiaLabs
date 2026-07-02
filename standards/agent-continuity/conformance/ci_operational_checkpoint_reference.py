@@ -84,6 +84,10 @@ def _verification_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[
     return {str(row["verification_id"]): row for row in rows}
 
 
+def _rejected_index(rows: Iterable[Mapping[str, Any]]) -> dict[str, Mapping[str, Any]]:
+    return {str(row["approach_id"]): row for row in rows}
+
+
 def evaluate_resume(
     checkpoint: Mapping[str, Any],
     *,
@@ -167,19 +171,27 @@ def evaluate_resume(
                 "checkpoint sequence is not previous sequence + 1",
             )
 
-        previous_rejected = {
-            row["approach_id"]
-            for row in previous_checkpoint.get("rejected_approaches", [])
-        }
-        current_rejected = {
-            row["approach_id"] for row in checkpoint["rejected_approaches"]
-        }
-        missing_rejections = sorted(previous_rejected - current_rejected)
+        previous_rejected = _rejected_index(
+            previous_checkpoint.get("rejected_approaches", [])
+        )
+        current_rejected = _rejected_index(checkpoint["rejected_approaches"])
+        missing_rejections = sorted(set(previous_rejected) - set(current_rejected))
         if missing_rejections:
             return _result(
                 REJECT_LINEAGE_MISMATCH,
                 "REJECTED_APPROACH_LOST",
                 "rejected approaches disappeared: " + ", ".join(missing_rejections),
+            )
+        changed_rejections = sorted(
+            approach_id
+            for approach_id, previous_row in previous_rejected.items()
+            if current_rejected[approach_id] != previous_row
+        )
+        if changed_rejections:
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "REJECTED_APPROACH_CHANGED",
+                "rejected approaches changed: " + ", ".join(changed_rejections),
             )
 
         previous_completed = _verification_index(
@@ -195,6 +207,22 @@ def evaluate_resume(
                 "COMPLETED_VERIFICATION_LOST",
                 "completed verification disappeared: " + ", ".join(lost_completed),
             )
+        for verification_id, previous_row in previous_completed.items():
+            current_row = current_completed[verification_id]
+            previous_refs = set(previous_row["evidence_refs"])
+            current_refs = set(current_row["evidence_refs"])
+            if (
+                current_row["target"] != previous_row["target"]
+                or not previous_refs.issubset(current_refs)
+            ):
+                return _result(
+                    REJECT_UNVERIFIED_COMPLETION,
+                    "COMPLETED_VERIFICATION_CHANGED",
+                    (
+                        "completed verification target changed or prior evidence "
+                        f"was removed: {verification_id}"
+                    ),
+                )
 
     required_ids = set(checkpoint["verification"]["required"])
     completed_rows = checkpoint["verification"]["completed"]
@@ -228,7 +256,7 @@ def evaluate_resume(
                 "COMPLETION_EVIDENCE_MISSING",
                 f"{row['verification_id']} has no evidence references",
             )
-        if any(str(ref).startswith(MEMORY_ONLY_PREFIXES) for ref in refs):
+        if any(str(ref).casefold().startswith(MEMORY_ONLY_PREFIXES) for ref in refs):
             return _result(
                 REJECT_UNVERIFIED_COMPLETION,
                 "MEMORY_IS_NOT_VERIFICATION",
@@ -247,18 +275,39 @@ def evaluate_resume(
         )
 
     expected_workspace = checkpoint["workspace_state"]
-    for field in ("repository", "working_directory"):
-        if current_workspace.get(field) != expected_workspace[field]:
+    identity_fields = ("repository", "working_directory")
+    for field in identity_fields:
+        if field not in current_workspace:
+            return _result(
+                RESTART_REQUIRED,
+                "CURRENT_WORKSPACE_FIELD_MISSING",
+                f"current workspace did not report {field}",
+            )
+        if current_workspace[field] != expected_workspace[field]:
             return _result(
                 RESTART_REQUIRED,
                 "WORKSPACE_IDENTITY_MISMATCH",
                 f"{field} differs from the checkpoint",
             )
 
+    state_fields = ["base_ref", "head_sha"]
+    if "dirty_state_digest" in expected_workspace:
+        state_fields.append("dirty_state_digest")
+
+    missing_state_fields = [
+        field for field in state_fields if field not in current_workspace
+    ]
+    if missing_state_fields:
+        return _result(
+            REVALIDATE_WORKSPACE,
+            "CURRENT_WORKSPACE_FIELD_MISSING",
+            "current workspace did not report: " + ", ".join(missing_state_fields),
+        )
+
     changed_fields = [
         field
-        for field in ("base_ref", "head_sha", "dirty_state_digest")
-        if current_workspace.get(field) != expected_workspace[field]
+        for field in state_fields
+        if current_workspace[field] != expected_workspace[field]
     ]
     if changed_fields:
         return _result(
