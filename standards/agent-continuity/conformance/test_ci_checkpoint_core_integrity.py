@@ -80,7 +80,7 @@ class CoreIntegrityGuardTest(unittest.TestCase):
         self.assert_result(
             result,
             core.REJECT_LINEAGE_MISMATCH,
-            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+            "PREVIOUS_CHECKPOINT_SCHEMA_INVALID",
         )
 
     def test_authority_error_wins_over_unrelated_schema_error(self):
