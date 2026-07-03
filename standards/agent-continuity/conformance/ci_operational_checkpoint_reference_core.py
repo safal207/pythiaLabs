@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from functools import lru_cache
 from typing import Any, Iterable, Mapping
 
 import ci_operational_checkpoint_reference_impl as _impl
@@ -8,35 +7,17 @@ from ci_operational_checkpoint_reference_impl import *  # noqa: F401,F403
 
 _result = _impl._result
 _schema_errors = _impl._schema_errors
-_ORIGINAL_LOAD_SCHEMA = _impl.load_schema
-
-
-@lru_cache(maxsize=1)
-def load_schema() -> dict[str, Any]:
-    return _ORIGINAL_LOAD_SCHEMA()
-
-
-_impl.load_schema = load_schema
+_ORIGINAL_PREVIOUS_CHECKPOINT_INTEGRITY_ERROR = (
+    _impl._previous_checkpoint_integrity_error
+)
 
 
 def _previous_checkpoint_integrity_error(
     previous_checkpoint: Mapping[str, Any],
 ) -> tuple[str, str] | None:
-    verification = previous_checkpoint.get("verification")
-    if isinstance(verification, Mapping):
-        completed = verification.get("completed")
-        if isinstance(completed, list):
-            for row in completed:
-                if not isinstance(row, Mapping):
-                    continue
-                refs = row.get("evidence_refs")
-                if isinstance(refs, list) and not refs:
-                    return (
-                        "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
-                        f"{row.get('verification_id', '<unknown>')} has no evidence references",
-                    )
+    """Extend parent integrity after canonical schema and digest validation."""
 
-    error = _impl._previous_checkpoint_integrity_error(previous_checkpoint)
+    error = _ORIGINAL_PREVIOUS_CHECKPOINT_INTEGRITY_ERROR(previous_checkpoint)
     if error is not None:
         return error
 
@@ -59,6 +40,13 @@ def _previous_checkpoint_integrity_error(
             "previous checkpoint cannot be its own parent",
         )
 
+    for row in previous_checkpoint["verification"]["completed"]:
+        if not row["evidence_refs"]:
+            return (
+                "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
+                f"{row['verification_id']} has no evidence references",
+            )
+
     next_action = previous_checkpoint["next_action"]
     if (
         next_action["action_class"] in {"merge", "deploy"}
@@ -71,6 +59,10 @@ def _previous_checkpoint_integrity_error(
     return None
 
 
+# Install the enhanced parent hook into the canonical ordered implementation.
+_impl._previous_checkpoint_integrity_error = _previous_checkpoint_integrity_error
+
+
 def evaluate_resume(
     checkpoint: Mapping[str, Any],
     *,
@@ -79,37 +71,41 @@ def evaluate_resume(
     seen_checkpoint_ids: Iterable[str] = (),
     known_parent_ids: Iterable[str] = (),
 ) -> dict[str, str]:
+    """Preserve canonical validation order and stable authority diagnostics."""
+
     errors = _schema_errors(checkpoint)
-    if errors:
-        authority_error = next(
-            (
-                error
-                for error in errors
-                if list(error.absolute_path) == ["authority"]
-            ),
-            None,
+    authority_error = next(
+        (
+            error
+            for error in errors
+            if list(error.absolute_path) == ["authority"]
+        ),
+        None,
+    )
+    if authority_error is not None:
+        return _result(
+            REJECT_INVALID_AUTHORITY,
+            "AUTHORITY_NOT_CONTEXT_ONLY",
+            authority_error.message,
         )
-        if authority_error is not None:
-            return _result(
-                REJECT_INVALID_AUTHORITY,
-                "AUTHORITY_NOT_CONTEXT_ONLY",
-                authority_error.message,
-            )
 
-    if previous_checkpoint is not None:
-        error = _previous_checkpoint_integrity_error(previous_checkpoint)
-        if error is not None:
-            reason_code, detail = error
-            return _result(
-                REJECT_LINEAGE_MISMATCH,
-                reason_code,
-                detail,
-            )
-
-    return _impl.evaluate_resume(
+    result = _impl.evaluate_resume(
         checkpoint,
         current_workspace=current_workspace,
         previous_checkpoint=previous_checkpoint,
         seen_checkpoint_ids=seen_checkpoint_ids,
         known_parent_ids=known_parent_ids,
     )
+
+    if result["outcome"] == CONTINUE:
+        sequence = checkpoint["sequence"]
+        if (
+            sequence > 0
+            and checkpoint["checkpoint_id"] == checkpoint["parent_checkpoint_id"]
+        ):
+            return _result(
+                REJECT_LINEAGE_MISMATCH,
+                "CHECKPOINT_ID_REUSED",
+                "a checkpoint cannot reuse its parent checkpoint ID",
+            )
+    return result
