@@ -17,14 +17,14 @@ class MemoryRefNormalizationTest(unittest.TestCase):
         result = ref.evaluate_resume(current, current_workspace=current["workspace_state"])
         self.assertEqual(result["reason_code"], "MEMORY_IS_NOT_VERIFICATION")
 
+        parent["verification"]["completed"][0]["evidence_refs"] = ["\n agent-memory://x"]
+        parent = ref.with_computed_digest(parent)
         child = copy.deepcopy(parent)
         child["checkpoint_id"] = "checkpoint:memory-normalization"
         child["parent_checkpoint_id"] = parent["checkpoint_id"]
         child["sequence"] = 1
         child["created_at"] = "2026-07-03T13:30:00Z"
         child = ref.with_computed_digest(child)
-        parent["verification"]["completed"][0]["evidence_refs"] = ["\n agent-memory://x"]
-        parent = ref.with_computed_digest(parent)
         result = ref.evaluate_resume(child, current_workspace=child["workspace_state"], previous_checkpoint=parent)
         self.assertEqual(result["reason_code"], "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID")
 
