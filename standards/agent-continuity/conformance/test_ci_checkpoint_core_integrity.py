@@ -29,15 +29,30 @@ def child_of(parent):
     return core.with_computed_digest(child)
 
 
-def evaluate(checkpoint, previous=None):
+def semantic_invalid_parent():
+    parent = load_example()
+    parent["rejected_approaches"].append(
+        copy.deepcopy(parent["rejected_approaches"][0])
+    )
+    return core.with_computed_digest(parent)
+
+
+def evaluate(checkpoint, previous=None, **kwargs):
     return core.evaluate_resume(
         checkpoint,
         current_workspace=copy.deepcopy(checkpoint["workspace_state"]),
         previous_checkpoint=previous,
+        **kwargs,
     )
 
 
 class CoreIntegrityGuardTest(unittest.TestCase):
+    def assert_result(self, result, outcome, reason_code):
+        self.assertEqual(
+            (result["outcome"], result["reason_code"]),
+            (outcome, reason_code),
+        )
+
     def test_core_rejects_impossible_parent_lineage(self):
         parent = load_example()
         child = child_of(parent)
@@ -47,9 +62,10 @@ class CoreIntegrityGuardTest(unittest.TestCase):
 
         result = evaluate(child, invalid_parent)
 
-        self.assertEqual(
-            (result["outcome"], result["reason_code"]),
-            (core.REJECT_LINEAGE_MISMATCH, "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID"),
+        self.assert_result(
+            result,
+            core.REJECT_LINEAGE_MISMATCH,
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
         )
 
     def test_core_rejects_empty_parent_completion_evidence(self):
@@ -61,9 +77,10 @@ class CoreIntegrityGuardTest(unittest.TestCase):
 
         result = evaluate(child, invalid_parent)
 
-        self.assertEqual(
-            (result["outcome"], result["reason_code"]),
-            (core.REJECT_LINEAGE_MISMATCH, "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID"),
+        self.assert_result(
+            result,
+            core.REJECT_LINEAGE_MISMATCH,
+            "PREVIOUS_CHECKPOINT_SEMANTIC_INVALID",
         )
 
     def test_authority_error_wins_over_unrelated_schema_error(self):
@@ -74,9 +91,78 @@ class CoreIntegrityGuardTest(unittest.TestCase):
 
         result = evaluate(checkpoint)
 
-        self.assertEqual(
-            (result["outcome"], result["reason_code"]),
-            (core.REJECT_INVALID_AUTHORITY, "AUTHORITY_NOT_CONTEXT_ONLY"),
+        self.assert_result(
+            result,
+            core.REJECT_INVALID_AUTHORITY,
+            "AUTHORITY_NOT_CONTEXT_ONLY",
+        )
+
+    def test_current_digest_mismatch_wins_over_invalid_parent(self):
+        parent = semantic_invalid_parent()
+        child = child_of(load_example())
+        child["objective"]["goal"] = "tampered without recomputing digest"
+
+        result = evaluate(child, parent)
+
+        self.assert_result(result, core.RESTART_REQUIRED, "DIGEST_MISMATCH")
+
+    def test_current_replay_wins_over_invalid_parent(self):
+        parent = semantic_invalid_parent()
+        child = child_of(load_example())
+
+        result = evaluate(
+            child,
+            parent,
+            seen_checkpoint_ids={child["checkpoint_id"]},
+        )
+
+        self.assert_result(
+            result,
+            core.IDEMPOTENT_REPLAY,
+            "CHECKPOINT_ALREADY_CONSUMED",
+        )
+
+    def test_current_root_lineage_error_wins_over_invalid_parent(self):
+        checkpoint = load_example()
+        checkpoint["parent_checkpoint_id"] = "checkpoint:unexpected-parent"
+        checkpoint = core.with_computed_digest(checkpoint)
+
+        result = evaluate(checkpoint, semantic_invalid_parent())
+
+        self.assert_result(
+            result,
+            core.REJECT_LINEAGE_MISMATCH,
+            "ROOT_HAS_PARENT",
+        )
+
+    def test_parent_schema_error_wins_over_empty_evidence(self):
+        parent = load_example()
+        child = child_of(parent)
+        invalid_parent = copy.deepcopy(parent)
+        invalid_parent.pop("authority")
+        invalid_parent["verification"]["completed"][0]["evidence_refs"] = []
+        invalid_parent = core.with_computed_digest(invalid_parent)
+
+        result = evaluate(child, invalid_parent)
+
+        self.assert_result(
+            result,
+            core.REJECT_LINEAGE_MISMATCH,
+            "PREVIOUS_CHECKPOINT_SCHEMA_INVALID",
+        )
+
+    def test_checkpoint_id_reuse_is_rejected_after_canonical_validation(self):
+        parent = load_example()
+        child = child_of(parent)
+        child["checkpoint_id"] = parent["checkpoint_id"]
+        child = core.with_computed_digest(child)
+
+        result = evaluate(child, parent)
+
+        self.assert_result(
+            result,
+            core.REJECT_LINEAGE_MISMATCH,
+            "CHECKPOINT_ID_REUSED",
         )
 
 
