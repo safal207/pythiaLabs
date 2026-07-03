@@ -7,8 +7,16 @@ from ci_operational_checkpoint_reference_impl import *  # noqa: F401,F403
 
 _result = _impl._result
 _schema_errors = _impl._schema_errors
-_ORIGINAL_PREVIOUS_CHECKPOINT_INTEGRITY_ERROR = (
-    _impl._previous_checkpoint_integrity_error
+_ORIGINAL_HOOK_ATTR = "_ci_checkpoint_original_previous_integrity_error"
+if not hasattr(_impl, _ORIGINAL_HOOK_ATTR):
+    setattr(
+        _impl,
+        _ORIGINAL_HOOK_ATTR,
+        _impl._previous_checkpoint_integrity_error,
+    )
+_ORIGINAL_PREVIOUS_CHECKPOINT_INTEGRITY_ERROR = getattr(
+    _impl,
+    _ORIGINAL_HOOK_ATTR,
 )
 
 
