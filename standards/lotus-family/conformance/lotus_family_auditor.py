@@ -1,6 +1,6 @@
-from lotus_family_runtime_v2 import *  # noqa: F403
+from lotus_family_runtime_v3 import *  # noqa: F403
 from lotus_family_schema import DRIFT, PASS, UNKNOWN, load_manifest
-from lotus_family_runtime_v2 import main
+from lotus_family_runtime_v3 import main
 
 
 if __name__ == "__main__":
