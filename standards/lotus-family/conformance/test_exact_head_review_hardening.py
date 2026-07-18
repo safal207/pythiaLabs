@@ -155,6 +155,47 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
 
         self._assert_blocked_config(result, "pyproject.toml")
 
+    def test_toml_semantic_pytest_headers_block_default_discovery(self) -> None:
+        cases = {
+            "commented header": (
+                "[tool.pytest.ini_options] # valid TOML comment\n"
+                "addopts = '-k not lotus'\n"
+            ),
+            "spaced dotted keys": (
+                "[tool . pytest]\n"
+                "python_files = ['not_contract.py']\n"
+            ),
+            "quoted key": (
+                "[tool.\"pytest\"]\n"
+                "python_files = ['not_contract.py']\n"
+            ),
+        }
+        for name, content in cases.items():
+            with self.subTest(name=name):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    _write(repository_root, "pyproject.toml", content)
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, "pyproject.toml")
+
+    def test_invalid_pyproject_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_cml(snapshot_root, self.manifest)
+            _write(
+                repository_root,
+                "pyproject.toml",
+                "[tool.pytest\npython_files = ['not_contract.py']\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "pyproject.toml")
+
     def test_hidden_pytest_ini_blocks_default_discovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
