@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import re
@@ -259,12 +260,34 @@ def _read_file(
         return None, f"cannot read {relative_path}: {exc.__class__.__name__}"
 
 
+def _strip_unquoted_shell_comment(line: str) -> str:
+    in_single = False
+    in_double = False
+    escaped = False
+    for index, character in enumerate(line):
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\" and not in_single:
+            escaped = True
+            continue
+        if character == "'" and not in_double:
+            in_single = not in_single
+            continue
+        if character == '"' and not in_single:
+            in_double = not in_double
+            continue
+        if character == "#" and not in_single and not in_double:
+            return line[:index]
+    return line
+
+
 def _shell_commands(text: str) -> list[str]:
     lines = text.splitlines()
     commands: list[str] = []
     index = 0
     while index < len(lines):
-        stripped = lines[index].strip()
+        stripped = _strip_unquoted_shell_comment(lines[index]).strip()
         if "python -m pytest" not in stripped:
             index += 1
             continue
@@ -273,10 +296,37 @@ def _shell_commands(text: str) -> list[str]:
         while parts[-1].rstrip().endswith("\\") and index + 1 < len(lines):
             parts[-1] = parts[-1].rstrip()[:-1]
             index += 1
-            parts.append(lines[index].strip())
+            continuation = _strip_unquoted_shell_comment(lines[index]).strip()
+            if continuation:
+                parts.append(continuation)
         commands.append(" ".join(parts))
         index += 1
     return commands
+
+
+def _ignore_path_covers_test(ignore_path: str, test_path: str) -> bool:
+    normalized = ignore_path.strip().replace("\\", "/").rstrip("/")
+    if not normalized:
+        return True
+    ignored = PurePosixPath(normalized)
+    test = PurePosixPath(test_path)
+    if ignored.is_absolute() or ".." in ignored.parts:
+        return True
+    return ignored == test or ignored in test.parents
+
+
+def _ignore_glob_covers_test(pattern: str, test_path: str) -> bool:
+    normalized = pattern.strip().replace("\\", "/")
+    if not normalized:
+        return True
+    test = PurePosixPath(test_path)
+    candidates = [test.as_posix(), test.name]
+    candidates.extend(
+        parent.as_posix()
+        for parent in test.parents
+        if parent != PurePosixPath(".")
+    )
+    return any(fnmatch.fnmatchcase(candidate, normalized) for candidate in candidates)
 
 
 def _is_pytest_default_discovery(command: str, test_path: str) -> bool:
@@ -299,6 +349,24 @@ def _is_pytest_default_discovery(command: str, test_path: str) -> bool:
         return False
     if any(test_path in argument for argument in arguments):
         return False
+
+    for index, argument in enumerate(arguments):
+        if argument.startswith("--ignore="):
+            if _ignore_path_covers_test(argument.split("=", 1)[1], test_path):
+                return False
+        elif argument == "--ignore":
+            if index + 1 >= len(arguments):
+                return False
+            if _ignore_path_covers_test(arguments[index + 1], test_path):
+                return False
+        elif argument.startswith("--ignore-glob="):
+            if _ignore_glob_covers_test(argument.split("=", 1)[1], test_path):
+                return False
+        elif argument == "--ignore-glob":
+            if index + 1 >= len(arguments):
+                return False
+            if _ignore_glob_covers_test(arguments[index + 1], test_path):
+                return False
 
     # Fail closed on positional selectors. The supported full-discovery form may
     # carry options, but it may not name a test file, directory, or node id.
