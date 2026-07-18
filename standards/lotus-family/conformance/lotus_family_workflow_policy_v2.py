@@ -13,6 +13,7 @@ _NON_FAIL_FAST_CUSTOM_SHELLS = {
     ("bash", "{0}"),
     ("sh", "{0}"),
 }
+_PROVEN_FAILURE_COMMANDS = {"false"}
 _PYTEST_ENV_NAME = re.compile(r"\bPYTEST_[A-Za-z0-9_]*\b")
 _YAML_ANCHOR_ONLY = re.compile(r"&\S+\Z")
 _YAML_ALIAS_ONLY = re.compile(r"\*\S+\Z")
@@ -148,6 +149,12 @@ def _workflow_execution_is_gating(text: str) -> bool:
     )
 
 
+def _proven_failure(command: str) -> bool:
+    """Recognize only commands that deterministically stop later job steps."""
+    parts = previous.base._tokens(command)
+    return bool(parts) and parts[0] in _PROVEN_FAILURE_COMMANDS
+
+
 def github_run_scripts(text: str) -> list[str]:
     """Expose scripts only from workflows with a gating execution context."""
     if not _workflow_execution_is_gating(text):
@@ -158,12 +165,59 @@ def github_run_scripts(text: str) -> list[str]:
 def _ci_discovery_one(
     discovery: Mapping[str, Any], workflow_text: str
 ) -> tuple[bool, list[str]]:
-    """Evaluate one workflow only after proving its execution remains gating."""
+    """Find a gating test after safe setup while rejecting proven blockers."""
     if not _workflow_execution_is_gating(workflow_text):
         return False, []
     if _uses_pytest(discovery) and _has_unproven_pytest_env(workflow_text):
         return False, []
-    return previous._ci_discovery_one(discovery, workflow_text)
+
+    groups = previous._github_run_step_groups(workflow_text)
+    scripts = [script for group in groups for script, _ in group]
+    if _uses_pytest(discovery) and (
+        any(
+            name.startswith("PYTEST_")
+            for name in previous.legacy.yaml_env_names(workflow_text)
+        )
+        or any(
+            _PYTEST_ENV_NAME.search(
+                "\n".join(
+                    previous.legacy.strip_comment(line)
+                    for line in script.splitlines()
+                )
+            )
+            for script in scripts
+        )
+    ):
+        return False, []
+
+    matches: list[str] = []
+    for group in groups:
+        for script, continue_on_error in group:
+            kind, command = previous._analyze_script(script)
+            if kind == "invalid":
+                break
+            if kind in {"empty", "prelude"}:
+                continue
+            if command is None:
+                break
+
+            current = previous._command_matches(discovery, command)
+            if current:
+                if continue_on_error is not False:
+                    continue
+                for pattern in current:
+                    if pattern not in matches:
+                        matches.append(pattern)
+                break
+
+            if continue_on_error is None:
+                break
+            if continue_on_error is False and _proven_failure(command):
+                break
+            # A normal setup step may fail the job, but it does not make the
+            # later configured test non-gating when setup succeeds.
+            continue
+    return bool(matches), matches
 
 
 def ci_discovery(
