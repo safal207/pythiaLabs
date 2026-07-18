@@ -20,7 +20,7 @@ Machine-readable sources:
 
 - `lotus-family-system-v0.1.json` — 49 nodes, 64 unique directed
   relationships, centers, and four canonical trajectories;
-- `system-routes-v0.1.json` — 32 connected routes, including runtime
+- `system-routes-v0.1.json` — 36 connected routes, including runtime
   regressions and governance-only merge trajectories.
 
 ## Centers without centralized authority

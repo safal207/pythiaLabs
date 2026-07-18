@@ -1,3 +1,3 @@
 """Public fail-closed GitHub Actions discovery API."""
 
-from lotus_family_workflow_hardened import *  # noqa: F403
+from lotus_family_workflow_policy import *  # noqa: F403

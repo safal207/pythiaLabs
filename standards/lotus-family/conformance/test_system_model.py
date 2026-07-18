@@ -101,7 +101,7 @@ SCENARIOS = {
     ),
     "ci-shell-control-001": workflow(
         "if false; then\n  python -m pytest\nfi"
-   ),
+    ),
     "cml-subset-001": workflow(
         "python -m pytest tests/test_other.py"
     ),
@@ -120,8 +120,19 @@ SCENARIOS = {
         "python -m pytest",
         step_extra="        shell: cat {0}\n",
     ),
+    "ci-shell-noexec-001": workflow(
+        "python -m pytest",
+        step_extra="        shell: bash -n {0}\n",
+    ),
+    "ci-shell-version-001": workflow(
+        "python -m pytest",
+        step_extra="        shell: bash --version {0}\n",
+    ),
     "ci-terminator-exit-001": workflow(
         "exit 0\npython -m pytest"
+    ),
+    "ci-wrapped-terminator-001": workflow(
+        "command exit 0\npython -m pytest"
     ),
     "ci-needs-skip-001": workflow(
         "python -m pytest",
@@ -132,6 +143,21 @@ SCENARIOS = {
             "    runs-on: ubuntu-latest\n"
             "    steps:\n"
             "      - run: echo skipped\n"
+        ),
+    ),
+    "ci-needs-cycle-001": workflow(
+        "python -m pytest",
+        job_extra=(
+            "    needs: gate\n"
+            "    if: ${{ always() }}\n"
+        ),
+        prefix_jobs=(
+            "  gate:\n"
+            "    needs: test\n"
+            "    if: ${{ always() }}\n"
+            "    runs-on: ubuntu-latest\n"
+            "    steps:\n"
+            "      - run: echo cyclic\n"
         ),
     ),
     "ci-needs-always-pass-001": workflow(
@@ -196,7 +222,7 @@ SCENARIOS = {
             "      run:\n"
             "        working-directory: subdir\n"
         ),
-   ),
+    ),
     "ci-step-workdir-override-pass-001": workflow(
         "python -m pytest",
         workflow_extra=(
@@ -246,7 +272,7 @@ def materialize(
     path.write_text(
         text or workflow(valid_command(discovery)),
         encoding="utf-8",
-   )
+    )
     return repository
 
 
@@ -267,7 +293,7 @@ class SystemModelTest(unittest.TestCase):
         view = validate_graph(self.graph)
         self.assertEqual(len(view["nodes"]), 49)
         self.assertEqual(len(view["edges"]), 64)
-        self.assertEqual(len(self.routes), 32)
+        self.assertEqual(len(self.routes), 36)
         self.assertEqual(
             set(self.graph["dimensions"]),
             {
