@@ -71,6 +71,6 @@ defmodule Pythia.LotusDocsContractTest do
 
     assert limitations =~ "human-readable judgment contract, not a new enforcement claim"
     assert limitations =~ "do not upgrade the MVP into a certified safety system"
-    assert limitations =~ "do not" or limitations =~ "does not"
+    assert limitations =~ "do not replace domain-specific authorization and execution controls"
   end
 end
