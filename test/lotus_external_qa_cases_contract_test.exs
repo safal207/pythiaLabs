@@ -2,8 +2,9 @@ defmodule Pythia.LotusExternalQACasesContractTest do
   use ExUnit.Case, async: true
 
   @root Path.expand("..", __DIR__)
-  @tradernet Path.join(@root, "examples/lotus-cases/tradernet-public-web-judgment-v1.json")
-  @takeprofit Path.join(@root, "examples/lotus-cases/takeprofit-public-chart-quote-judgment-v1.json")
+  @cases Path.join(@root, "examples/lotus-cases")
+  @tradernet Path.join(@cases, "tradernet-public-web-judgment-v1.json")
+  @takeprofit Path.join(@cases, "takeprofit-public-chart-quote-judgment-v1.json")
 
   defp load!(path), do: path |> File.read!() |> Jason.decode!()
 
@@ -12,14 +13,7 @@ defmodule Pythia.LotusExternalQACasesContractTest do
       assert packet["verdict"] == "ESCALATE"
       assert packet["authority"]["mode"] == "audit_only"
 
-      for grant <- [
-            "ownership",
-            "approval",
-            "execution",
-            "delivery",
-            "external_submission",
-            "merge"
-          ] do
+      for grant <- ~w(ownership approval execution delivery external_submission merge) do
         assert packet["authority"][grant] == false
       end
     end
@@ -28,15 +22,16 @@ defmodule Pythia.LotusExternalQACasesContractTest do
   test "TakeProfit publishes only the bounded ChartStore regression" do
     packet = load!(@takeprofit)
     findings = packet["confirmed_findings"]
+    finding = hd(findings)
 
     assert length(findings) == 1
-    assert hd(findings)["id"] == "chartstore-required-fields-changed-form"
-    assert hd(findings)["severity"] == "P2"
-    assert hd(findings)["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
-    assert hd(findings)["evidence"]["exact_head_sha"] ==
+    assert finding["id"] == "chartstore-required-fields-changed-form"
+    assert finding["severity"] == "P2"
+    assert finding["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
+    assert finding["evidence"]["exact_head_sha"] ==
              "27bf4fe23d8c63dcf6691ae7cf3b5f34b672e89c"
 
-    assert hd(findings)["evidence"]["run_id"] == 29_662_910_618
+    assert finding["evidence"]["run_id"] == 29_662_910_618
   end
 
   test "stale-price harm remains a bounded hypothesis until cadence-aware evidence exists" do
