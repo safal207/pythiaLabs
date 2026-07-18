@@ -1,273 +1,20 @@
 from __future__ import annotations
 
-import argparse
-import fnmatch
-import hashlib
 import json
 import re
 import shlex
-from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
-PASS = "PASS"
-DRIFT = "DRIFT"
-UNKNOWN = "UNKNOWN"
+import lotus_family_auditor_core as _core
+from lotus_family_auditor_core import *  # noqa: F403
 
-_COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
-_PYTEST_STARTS = (("python", "-m", "pytest"), ("pytest",))
-_SAFE_PYTEST_FLAGS = {
-    "-q", "--quiet", "-v", "--verbose", "--strict-markers",
-    "--strict-config", "--disable-warnings",
-}
-_SAFE_PYTEST_PREFIXES = (
-    "--junitxml=", "--cov=", "--cov-report=", "--color=", "--tb=",
-    "--durations=", "--maxfail=",
-)
-_FORBIDDEN_PYTEST_FLAGS = {
-    "--collect-only", "--co", "--setup-only", "--pyargs",
-    "-k", "--keyword", "-m", "--markers", "--deselect",
-}
+_YAML_KEY = re.compile(r"([A-Za-z_][A-Za-z0-9_-]*)\s*:\s*(.*)\Z")
+_BLOCK_SCALAR = re.compile(r"([|>])(?:[1-9][+-]?|[+-][1-9]?)?\Z")
+_ENV_ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*\Z")
 _SHELL_CONTROL = {"&&", "||", ";", "|", "&"}
 
 
-def load_json_object(path: Path) -> dict[str, Any]:
-    value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict):
-        raise ValueError(f"{path} root must be an object")
-    return value
-
-
-def _non_empty_string(value: Any, field: str) -> str:
-    if not isinstance(value, str) or not value.strip():
-        raise ValueError(f"{field} must be a non-empty string")
-    return value
-
-
-def _relative_manifest_path(value: Any, field: str) -> str:
-    text = _non_empty_string(value, field)
-    if "\\" in text:
-        raise ValueError(f"{field} must use repository-style '/' separators")
-    path = PurePosixPath(text)
-    if path.is_absolute() or path == PurePosixPath(".") or ".." in path.parts:
-        raise ValueError(f"{field} must stay inside the repository snapshot")
-    return path.as_posix()
-
-
-def _validate_manifest(manifest: Mapping[str, Any]) -> None:
-    if manifest.get("schema_version") != "pythia.lotus_family_manifest.v0.1":
-        raise ValueError("unsupported Lotus Family manifest schema")
-    if manifest.get("authority") != "audit_only":
-        raise ValueError("Lotus Family manifest authority must be audit_only")
-    repositories = manifest.get("repositories")
-    if not isinstance(repositories, list) or not repositories:
-        raise ValueError("manifest repositories must be a non-empty list")
-
-    ids: set[str] = set()
-    dirs: set[str] = set()
-    for repo_index, repo in enumerate(repositories):
-        prefix = f"repositories[{repo_index}]"
-        if not isinstance(repo, Mapping):
-            raise ValueError(f"{prefix} must be an object")
-        repo_id = _non_empty_string(repo.get("id"), f"{prefix}.id")
-        if repo_id in ids:
-            raise ValueError(f"duplicate repository id: {repo_id}")
-        ids.add(repo_id)
-        _non_empty_string(repo.get("repository"), f"{prefix}.repository")
-        snapshot_dir = _relative_manifest_path(
-            repo.get("snapshot_dir"), f"{prefix}.snapshot_dir"
-        )
-        if "/" in snapshot_dir:
-            raise ValueError(f"{prefix}.snapshot_dir must be one directory name")
-        if snapshot_dir in dirs:
-            raise ValueError(f"duplicate snapshot_dir: {snapshot_dir}")
-        dirs.add(snapshot_dir)
-
-        checks = repo.get("file_checks")
-        if not isinstance(checks, list) or not checks:
-            raise ValueError(f"{prefix}.file_checks must be a non-empty list")
-        check_ids: set[str] = set()
-        checked_paths: set[str] = set()
-        for check_index, check in enumerate(checks):
-            check_prefix = f"{prefix}.file_checks[{check_index}]"
-            if not isinstance(check, Mapping):
-                raise ValueError(f"{check_prefix} must be an object")
-            check_id = _non_empty_string(check.get("id"), f"{check_prefix}.id")
-            if check_id in check_ids:
-                raise ValueError(f"duplicate check id in {repo_id}: {check_id}")
-            check_ids.add(check_id)
-            checked_paths.add(
-                _relative_manifest_path(check.get("path"), f"{check_prefix}.path")
-            )
-            terms = check.get("contains_all")
-            if not isinstance(terms, list) or not terms:
-                raise ValueError(
-                    f"{check_prefix}.contains_all must be a non-empty list"
-                )
-            for term_index, term in enumerate(terms):
-                _non_empty_string(
-                    term, f"{check_prefix}.contains_all[{term_index}]"
-                )
-
-        discovery = repo.get("ci_discovery")
-        if not isinstance(discovery, Mapping):
-            raise ValueError(f"{prefix}.ci_discovery must be an object")
-        workflows = discovery.get("workflow_paths")
-        if not isinstance(workflows, list) or not workflows:
-            raise ValueError(
-                f"{prefix}.ci_discovery.workflow_paths must be a non-empty list"
-            )
-        for path_index, workflow_path in enumerate(workflows):
-            _relative_manifest_path(
-                workflow_path,
-                f"{prefix}.ci_discovery.workflow_paths[{path_index}]",
-            )
-
-        strategy = discovery.get("strategy")
-        if strategy == "contains_any":
-            patterns = discovery.get("contains_any")
-            if not isinstance(patterns, list) or not patterns:
-                raise ValueError(
-                    f"{prefix}.ci_discovery.contains_any must be a non-empty list"
-                )
-            for pattern_index, pattern in enumerate(patterns):
-                _non_empty_string(
-                    pattern,
-                    f"{prefix}.ci_discovery.contains_any[{pattern_index}]",
-                )
-        elif strategy == "pytest_default_discovery":
-            command = _non_empty_string(
-                discovery.get("command"), f"{prefix}.ci_discovery.command"
-            )
-            if command != "python -m pytest":
-                raise ValueError(
-                    f"{prefix}.ci_discovery.command must be 'python -m pytest'"
-                )
-            test_path = _relative_manifest_path(
-                discovery.get("test_path"), f"{prefix}.ci_discovery.test_path"
-            )
-            test_name = PurePosixPath(test_path).name
-            if not (test_name.startswith("test_") and test_name.endswith(".py")):
-                raise ValueError(
-                    f"{prefix}.ci_discovery.test_path is not pytest-discoverable"
-                )
-            if test_path not in checked_paths:
-                raise ValueError(
-                    f"{prefix}.ci_discovery.test_path must also be a checked file"
-                )
-        else:
-            raise ValueError(
-                f"{prefix}.ci_discovery.strategy is unsupported: {strategy}"
-            )
-
-
-def load_manifest(path: Path) -> dict[str, Any]:
-    manifest = load_json_object(path)
-    _validate_manifest(manifest)
-    return manifest
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _result(
-    *,
-    outcome: str,
-    reason_code: str,
-    detail: str,
-    repository: str,
-    repository_id: str,
-    repository_ref: str,
-    commit_sha: str,
-    manifest_schema: str,
-    checks: list[dict[str, Any]],
-    files: list[dict[str, str]],
-) -> dict[str, Any]:
-    return {
-        "schema_version": "pythia.lotus_family_audit_result.v0.1",
-        "outcome": outcome,
-        "reason_code": reason_code,
-        "detail": detail,
-        "repository": repository,
-        "repository_id": repository_id,
-        "repository_ref": repository_ref,
-        "commit_sha": commit_sha,
-        "manifest_schema": manifest_schema,
-        "checks": checks,
-        "files": sorted(files, key=lambda row: row["path"]),
-        "authority": {
-            "mode": "audit_only",
-            "grants_ownership": False,
-            "grants_approval": False,
-            "grants_execution": False,
-            "grants_delivery": False,
-            "grants_merge": False,
-        },
-    }
-
-
-def _manifest_invalid_result(
-    detail: str,
-    repository_id: str,
-    repository_ref: str,
-    commit_sha: str,
-    manifest_schema: str,
-) -> dict[str, Any]:
-    return _result(
-        outcome=UNKNOWN,
-        reason_code="MANIFEST_INVALID",
-        detail=detail,
-        repository="",
-        repository_id=repository_id,
-        repository_ref=repository_ref,
-        commit_sha=commit_sha,
-        manifest_schema=manifest_schema,
-        checks=[],
-        files=[],
-    )
-
-
-def _repository_config(
-    manifest: Mapping[str, Any], repository_id: str
-) -> Mapping[str, Any] | None:
-    return next(
-        (row for row in manifest["repositories"] if row.get("id") == repository_id),
-        None,
-    )
-
-
-def _contained_path(
-    root: Path, relative_path: str
-) -> tuple[Path | None, str | None]:
-    try:
-        normalized = _relative_manifest_path(relative_path, "manifest path")
-        root_resolved = root.resolve()
-        path = (root_resolved / Path(*PurePosixPath(normalized).parts)).resolve()
-        path.relative_to(root_resolved)
-        return path, None
-    except (OSError, ValueError):
-        return None, f"path escapes repository snapshot: {relative_path}"
-
-
-def _read_file(
-    root: Path,
-    relative_path: str,
-    files: list[dict[str, str]],
-) -> tuple[str | None, str | None]:
-    path, error = _contained_path(root, relative_path)
-    if error is not None or path is None:
-        return None, error
-    if not path.is_file():
-        return None, f"required file is missing: {relative_path}"
-    try:
-        text = path.read_text(encoding="utf-8")
-        files.append({"path": relative_path, "sha256": _sha256(path)})
-        return text, None
-    except (OSError, UnicodeError) as exc:
-        return None, f"cannot read {relative_path}: {exc.__class__.__name__}"
-
-
-def _strip_unquoted_shell_comment(line: str) -> str:
+def _strip_unquoted_comment(line: str) -> str:
     in_single = False
     in_double = False
     escaped = False
@@ -289,170 +36,300 @@ def _strip_unquoted_shell_comment(line: str) -> str:
     return line
 
 
-def _shell_commands(text: str) -> list[str]:
-    lines = text.splitlines()
-    commands: list[str] = []
-    index = 0
+def _indent_of(line: str) -> int | None:
+    prefix = line[: len(line) - len(line.lstrip(" \t"))]
+    if "\t" in prefix:
+        return None
+    return len(prefix)
+
+
+def _yaml_header(line: str) -> tuple[int, bool, int, str, str] | None:
+    indent = _indent_of(line)
+    if indent is None:
+        return None
+    stripped = line[indent:]
+    if not stripped or stripped.startswith("#"):
+        return None
+
+    is_list = False
+    key_indent = indent
+    if stripped.startswith("-"):
+        match = re.match(r"-([ ]+)(.*)\Z", stripped)
+        if match is None:
+            return None
+        is_list = True
+        key_indent = indent + 1 + len(match.group(1))
+        stripped = match.group(2)
+    match = _YAML_KEY.fullmatch(stripped)
+    if match is None:
+        return None
+    return indent, is_list, key_indent, match.group(1), match.group(2)
+
+
+def _scalar_indicator(value: str) -> str | None:
+    normalized = _strip_unquoted_comment(value).strip()
+    match = _BLOCK_SCALAR.fullmatch(normalized)
+    return match.group(1) if match is not None else None
+
+
+def _block_scalar_end(lines: list[str], start: int, key_indent: int) -> int:
+    index = start + 1
     while index < len(lines):
-        first = _strip_unquoted_shell_comment(lines[index]).strip()
-        if not first:
+        line = lines[index]
+        if not line.strip():
             index += 1
             continue
-        parts = [first]
-        while parts[-1].rstrip().endswith("\\") and index + 1 < len(lines):
-            parts[-1] = parts[-1].rstrip()[:-1]
-            index += 1
-            continuation = _strip_unquoted_shell_comment(lines[index]).strip()
-            if continuation:
-                parts.append(continuation)
-        commands.append(" ".join(parts))
+        indent = _indent_of(line)
+        if indent is None or indent <= key_indent:
+            break
         index += 1
-    return commands
+    return index
+
+
+def _block_scalar_text(
+    lines: list[str], start: int, end: int, style: str
+) -> str:
+    body = lines[start + 1 : end]
+    indents = [
+        indent
+        for line in body
+        if line.strip() and (indent := _indent_of(line)) is not None
+    ]
+    if not indents:
+        return ""
+    content_indent = min(indents)
+    deindented = [line[content_indent:] if line.strip() else "" for line in body]
+    if style == "|":
+        return "\n".join(deindented) + "\n"
+
+    paragraphs: list[str] = []
+    current: list[str] = []
+    for line in deindented:
+        if line:
+            current.append(line)
+        elif current:
+            paragraphs.append(" ".join(current))
+            current = []
+        elif paragraphs:
+            paragraphs.append("")
+    if current:
+        paragraphs.append(" ".join(current))
+    return "\n".join(paragraphs) + ("\n" if paragraphs else "")
+
+
+def _inline_yaml_scalar(value: str) -> str | None:
+    text = _strip_unquoted_comment(value).strip()
+    if not text or text in {"null", "Null", "NULL", "~"}:
+        return None
+    if text.startswith("'"):
+        if len(text) < 2 or not text.endswith("'"):
+            return None
+        return text[1:-1].replace("''", "'")
+    if text.startswith('"'):
+        if len(text) < 2 or not text.endswith('"'):
+            return None
+        try:
+            decoded = json.loads(text)
+        except json.JSONDecodeError:
+            return None
+        return decoded if isinstance(decoded, str) else None
+    return text
+
+
+def _scalar_ranges(lines: list[str]) -> dict[int, tuple[int, str]]:
+    ranges: dict[int, tuple[int, str]] = {}
+    index = 0
+    while index < len(lines):
+        header = _yaml_header(lines[index])
+        if header is None:
+            index += 1
+            continue
+        style = _scalar_indicator(header[4])
+        if style is None:
+            index += 1
+            continue
+        end = _block_scalar_end(lines, index, header[2])
+        ranges[index] = (end, style)
+        index = end
+    return ranges
+
+
+def _github_actions_run_scripts(text: str) -> list[str]:
+    lines = text.splitlines()
+    scalar_ranges = _scalar_ranges(lines)
+    scalar_body_lines = {
+        line_index
+        for start, (end, _) in scalar_ranges.items()
+        for line_index in range(start + 1, end)
+    }
+    scripts: list[str] = []
+    index = 0
+
+    while index < len(lines):
+        if index in scalar_body_lines:
+            index += 1
+            continue
+        header = _yaml_header(lines[index])
+        if (
+            header is None
+            or header[3] != "steps"
+            or _inline_yaml_scalar(header[4]) is not None
+        ):
+            index += 1
+            continue
+
+        steps_indent = header[2]
+        block_end = index + 1
+        while block_end < len(lines):
+            line = lines[block_end]
+            if not line.strip() or line.lstrip().startswith("#"):
+                block_end += 1
+                continue
+            indent = _indent_of(line)
+            if indent is None or indent <= steps_indent:
+                break
+            block_end += 1
+
+        item_indices: list[int] = []
+        item_indent: int | None = None
+        for cursor in range(index + 1, block_end):
+            if cursor in scalar_body_lines:
+                continue
+            indent = _indent_of(lines[cursor])
+            stripped = lines[cursor][indent:] if indent is not None else ""
+            if indent is not None and stripped.startswith("-"):
+                if item_indent is None:
+                    item_indent = indent
+                if indent == item_indent:
+                    item_indices.append(cursor)
+
+        for position, item_start in enumerate(item_indices):
+            item_end = (
+                item_indices[position + 1]
+                if position + 1 < len(item_indices)
+                else block_end
+            )
+            item_header = _yaml_header(lines[item_start])
+            if item_header is not None and item_header[1]:
+                direct_indent = item_header[2]
+            else:
+                candidates = [
+                    candidate[2]
+                    for row in range(item_start + 1, item_end)
+                    if row not in scalar_body_lines
+                    and (candidate := _yaml_header(lines[row])) is not None
+                    and not candidate[1]
+                ]
+                if not candidates:
+                    continue
+                direct_indent = min(candidates)
+
+            for row in range(item_start, item_end):
+                if row in scalar_body_lines:
+                    continue
+                row_header = _yaml_header(lines[row])
+                if row_header is None:
+                    continue
+                _, is_list, key_indent, key, value = row_header
+                if key != "run" or key_indent != direct_indent:
+                    continue
+                if row != item_start and is_list:
+                    continue
+                scalar = scalar_ranges.get(row)
+                if scalar is not None:
+                    end, style = scalar
+                    scripts.append(_block_scalar_text(lines, row, end, style))
+                else:
+                    inline = _inline_yaml_scalar(value)
+                    if inline is not None:
+                        scripts.append(inline)
+                break
+        index = block_end
+    return scripts
+
+
+def _yaml_env_names(text: str) -> set[str]:
+    lines = text.splitlines()
+    scalar_ranges = _scalar_ranges(lines)
+    scalar_body_lines = {
+        line_index
+        for start, (end, _) in scalar_ranges.items()
+        for line_index in range(start + 1, end)
+    }
+    names: set[str] = set()
+    for index, line in enumerate(lines):
+        if index in scalar_body_lines:
+            continue
+        header = _yaml_header(line)
+        if header is None or header[3] != "env":
+            continue
+        env_indent = header[2]
+        inline = _strip_unquoted_comment(header[4]).strip()
+        if inline:
+            names.update(re.findall(r"\bPYTEST_[A-Za-z0-9_]*\b", inline))
+            continue
+        for cursor in range(index + 1, len(lines)):
+            if cursor in scalar_body_lines:
+                continue
+            candidate = lines[cursor]
+            if not candidate.strip() or candidate.lstrip().startswith("#"):
+                continue
+            candidate_indent = _indent_of(candidate)
+            if candidate_indent is None or candidate_indent <= env_indent:
+                break
+            child = _yaml_header(candidate)
+            if child is not None and not child[1] and child[2] > env_indent:
+                names.add(child[3])
+    return names
+
+
+def _has_forbidden_pytest_environment(text: str, scripts: list[str]) -> bool:
+    if any(name.startswith("PYTEST_") for name in _yaml_env_names(text)):
+        return True
+    for script in scripts:
+        executable = "\n".join(
+            _strip_unquoted_comment(line) for line in script.splitlines()
+        )
+        if re.search(r"\bPYTEST_[A-Za-z0-9_]*\b", executable):
+            return True
+    return False
 
 
 def _tokenize_executed_command(command: str) -> list[str] | None:
     try:
-        tokens = shlex.split(command)
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|")
+        lexer.whitespace_split = True
+        lexer.commenters = ""
+        tokens = list(lexer)
     except ValueError:
         return None
     if not tokens or any(token in _SHELL_CONTROL for token in tokens):
         return None
-    index = 0
-    while index < len(tokens) and re.fullmatch(
-        r"[A-Za-z_][A-Za-z0-9_]*=.*", tokens[index]
-    ):
-        index += 1
-    return tokens[index:] or None
-
-
-def _pytest_parts(tokens: list[str]) -> tuple[list[str], list[str]] | None:
-    for start in _PYTEST_STARTS:
-        if tuple(tokens[: len(start)]) == start:
-            return list(start), tokens[len(start) :]
-    return None
-
-
-def _normalize_repo_pattern(value: str) -> str:
-    normalized = value.strip().replace("\\", "/")
-    while normalized.startswith("./"):
-        normalized = normalized[2:]
-    return normalized.rstrip("/")
-
-
-def _ignore_path_covers_test(ignore_path: str, test_path: str) -> bool:
-    normalized = _normalize_repo_pattern(ignore_path)
-    if not normalized:
-        return True
-    ignored = PurePosixPath(normalized)
-    test = PurePosixPath(test_path)
-    if ignored.is_absolute() or ".." in ignored.parts:
-        return True
-    return ignored == test or ignored in test.parents
-
-
-def _ignore_glob_covers_test(pattern: str, test_path: str) -> bool:
-    normalized = _normalize_repo_pattern(pattern)
-    if not normalized:
-        return True
-    test = PurePosixPath(test_path)
-    candidates = [test.as_posix(), test.name]
-    candidates.extend(
-        parent.as_posix()
-        for parent in test.parents
-        if parent != PurePosixPath(".")
-    )
-    return any(
-        fnmatch.fnmatchcase(candidate, normalized) for candidate in candidates
-    )
-
-
-def _pytest_arguments_safe(
-    arguments: list[str], test_path: str, *, require_test_path: bool
-) -> bool:
-    positive_paths: list[str] = []
-    index = 0
-    while index < len(arguments):
-        argument = arguments[index]
-        if argument in _FORBIDDEN_PYTEST_FLAGS or argument.startswith(
-            ("-k=", "--keyword=", "-m=", "--markers=", "--deselect=")
-        ):
-            return False
-        if argument.startswith("--ignore="):
-            if _ignore_path_covers_test(argument.split("=", 1)[1], test_path):
-                return False
-        elif argument == "--ignore":
-            if index + 1 >= len(arguments):
-                return False
-            if _ignore_path_covers_test(arguments[index + 1], test_path):
-                return False
-            index += 1
-        elif argument.startswith("--ignore-glob="):
-            if _ignore_glob_covers_test(argument.split("=", 1)[1], test_path):
-                return False
-        elif argument == "--ignore-glob":
-            if index + 1 >= len(arguments):
-                return False
-            if _ignore_glob_covers_test(arguments[index + 1], test_path):
-                return False
-            index += 1
-        elif argument in _SAFE_PYTEST_FLAGS or argument.startswith(
-            _SAFE_PYTEST_PREFIXES
-        ):
-            pass
-        elif argument.startswith("-"):
-            return False
-        else:
-            positive_paths.append(
-                _normalize_repo_pattern(argument.split("::", 1)[0])
-            )
-        index += 1
-
-    normalized_test = _normalize_repo_pattern(test_path)
-    if require_test_path:
-        return normalized_test in positive_paths
-    return not positive_paths
-
-
-def _is_pytest_default_discovery(command: str, test_path: str) -> bool:
-    tokens = _tokenize_executed_command(command)
-    if tokens is None:
-        return False
-    parts = _pytest_parts(tokens)
-    return parts is not None and _pytest_arguments_safe(
-        parts[1], test_path, require_test_path=False
-    )
-
-
-def _is_explicit_pytest_test_command(command: str, test_path: str) -> bool:
-    tokens = _tokenize_executed_command(command)
-    if tokens is None:
-        return False
-    parts = _pytest_parts(tokens)
-    return parts is not None and _pytest_arguments_safe(
-        parts[1], test_path, require_test_path=True
-    )
-
-
-def _is_command_prefix(command: str, prefix: str) -> bool:
-    tokens = _tokenize_executed_command(command)
-    if tokens is None:
-        return False
-    try:
-        required = shlex.split(prefix)
-    except ValueError:
-        return False
-    return tokens[: len(required)] == required
+    if _ENV_ASSIGNMENT.fullmatch(tokens[0]):
+        return None
+    return tokens
 
 
 def _ci_discovery(
-    discovery: Mapping[str, Any], combined: str
+    discovery: Mapping[str, Any], workflow_text: str | list[str]
 ) -> tuple[bool, list[str]]:
-    commands = _shell_commands(combined)
+    if isinstance(workflow_text, list):
+        workflow_text = "\n".join(workflow_text)
+    scripts = _github_actions_run_scripts(workflow_text)
+    commands = [
+        command for script in scripts for command in _core._shell_commands(script)
+    ]
     strategy = discovery["strategy"]
+    uses_pytest = strategy == "pytest_default_discovery" or any(
+        str(pattern).endswith(".py") for pattern in discovery.get("contains_any", [])
+    )
+    if uses_pytest and _has_forbidden_pytest_environment(workflow_text, scripts):
+        return False, []
+
     if strategy == "pytest_default_discovery":
         test_path = str(discovery["test_path"])
         matched = any(
-            _is_pytest_default_discovery(command, test_path)
+            _core._is_pytest_default_discovery(command, test_path)
             for command in commands
         )
         return matched, [str(discovery["command"])] if matched else []
@@ -462,246 +339,20 @@ def _ci_discovery(
         pattern = str(pattern_value)
         if pattern.endswith(".py"):
             if any(
-                _is_explicit_pytest_test_command(command, pattern)
+                _core._is_explicit_pytest_test_command(command, pattern)
                 for command in commands
             ):
                 matches.append(pattern)
-        elif any(_is_command_prefix(command, pattern) for command in commands):
+        elif any(_core._is_command_prefix(command, pattern) for command in commands):
             matches.append(pattern)
     return bool(matches), matches
 
 
-def audit_repository(
-    manifest: Mapping[str, Any],
-    *,
-    repository_id: str,
-    snapshot_root: Path,
-    repository_ref: str,
-    commit_sha: str,
-) -> dict[str, Any]:
-    manifest_schema = str(manifest.get("schema_version", ""))
-    try:
-        _validate_manifest(manifest)
-    except (TypeError, ValueError) as exc:
-        return _manifest_invalid_result(
-            str(exc),
-            repository_id,
-            repository_ref,
-            commit_sha,
-            manifest_schema,
-        )
-
-    config = _repository_config(manifest, repository_id)
-    if config is None:
-        return _result(
-            outcome=UNKNOWN,
-            reason_code="REPOSITORY_NOT_CONFIGURED",
-            detail=f"repository adapter is not configured: {repository_id}",
-            repository="",
-            repository_id=repository_id,
-            repository_ref=repository_ref,
-            commit_sha=commit_sha,
-            manifest_schema=manifest_schema,
-            checks=[],
-            files=[],
-        )
-
-    repository = str(config["repository"])
-    if not repository_ref:
-        return _result(
-            outcome=UNKNOWN,
-            reason_code="REPOSITORY_REF_MISSING",
-            detail="an exact repository ref is required",
-            repository=repository,
-            repository_id=repository_id,
-            repository_ref=repository_ref,
-            commit_sha=commit_sha,
-            manifest_schema=manifest_schema,
-            checks=[],
-            files=[],
-        )
-    if not _COMMIT_SHA.fullmatch(commit_sha):
-        return _result(
-            outcome=UNKNOWN,
-            reason_code="COMMIT_SHA_INVALID",
-            detail="commit_sha must be a lowercase 40-character hexadecimal SHA",
-            repository=repository,
-            repository_id=repository_id,
-            repository_ref=repository_ref,
-            commit_sha=commit_sha,
-            manifest_schema=manifest_schema,
-            checks=[],
-            files=[],
-        )
-
-    snapshot_root_resolved = snapshot_root.resolve()
-    repository_root = (
-        snapshot_root_resolved / str(config["snapshot_dir"])
-    ).resolve()
-    try:
-        repository_root.relative_to(snapshot_root_resolved)
-    except ValueError:
-        return _result(
-            outcome=UNKNOWN,
-            reason_code="SNAPSHOT_UNAVAILABLE",
-            detail="repository snapshot escapes snapshot_root",
-            repository=repository,
-            repository_id=repository_id,
-            repository_ref=repository_ref,
-            commit_sha=commit_sha,
-            manifest_schema=manifest_schema,
-            checks=[],
-            files=[],
-        )
-    if not repository_root.is_dir():
-        return _result(
-            outcome=UNKNOWN,
-            reason_code="SNAPSHOT_UNAVAILABLE",
-            detail=f"repository snapshot is unavailable: {config['snapshot_dir']}",
-            repository=repository,
-            repository_id=repository_id,
-            repository_ref=repository_ref,
-            commit_sha=commit_sha,
-            manifest_schema=manifest_schema,
-            checks=[],
-            files=[],
-        )
-
-    checks: list[dict[str, Any]] = []
-    files: list[dict[str, str]] = []
-    drift: list[str] = []
-    for check in config["file_checks"]:
-        check_id = str(check["id"])
-        relative_path = str(check["path"])
-        text, error = _read_file(repository_root, relative_path, files)
-        if error is not None or text is None:
-            checks.append(
-                {
-                    "check_id": check_id,
-                    "outcome": DRIFT,
-                    "path": relative_path,
-                    "missing_terms": [],
-                    "detail": error,
-                }
-            )
-            drift.append(check_id)
-            continue
-        terms = [str(term) for term in check["contains_all"]]
-        missing_terms = [term for term in terms if term not in text]
-        outcome = PASS if not missing_terms else DRIFT
-        checks.append(
-            {
-                "check_id": check_id,
-                "outcome": outcome,
-                "path": relative_path,
-                "missing_terms": missing_terms,
-                "detail": (
-                    "all required terms are present"
-                    if outcome == PASS
-                    else "required terms are missing"
-                ),
-            }
-        )
-        if outcome == DRIFT:
-            drift.append(check_id)
-
-    discovery = config["ci_discovery"]
-    workflow_paths = [str(path) for path in discovery["workflow_paths"]]
-    workflow_texts: list[str] = []
-    read_errors: list[str] = []
-    for relative_path in workflow_paths:
-        text, error = _read_file(repository_root, relative_path, files)
-        if error is not None or text is None:
-            read_errors.append(error or f"cannot read {relative_path}")
-        else:
-            workflow_texts.append(text)
-
-    discovered, matched_patterns = _ci_discovery(
-        discovery, "\n".join(workflow_texts)
-    )
-    if read_errors and not workflow_texts:
-        ci_outcome = DRIFT
-        detail = "; ".join(read_errors)
-    elif discovered:
-        ci_outcome = PASS
-        detail = "contract regression test is discovered by executable CI"
-    else:
-        ci_outcome = DRIFT
-        detail = "no configured executable CI discovery rule matched"
-    if ci_outcome == DRIFT:
-        drift.append("ci_discovery")
-    checks.append(
-        {
-            "check_id": "ci_discovery",
-            "outcome": ci_outcome,
-            "paths": workflow_paths,
-            "matched_patterns": matched_patterns,
-            "detail": detail,
-        }
-    )
-
-    if drift:
-        outcome = DRIFT
-        reason_code = "LOTUS_CONTRACT_DRIFT"
-        detail = "non-conforming checks: " + ", ".join(sorted(set(drift)))
-    else:
-        outcome = PASS
-        reason_code = "LOTUS_CONTRACT_CONFORMANT"
-        detail = "all configured Lotus Family invariants passed"
-
-    unique_files = {(row["path"], row["sha256"]): row for row in files}
-    return _result(
-        outcome=outcome,
-        reason_code=reason_code,
-        detail=detail,
-        repository=repository,
-        repository_id=repository_id,
-        repository_ref=repository_ref,
-        commit_sha=commit_sha,
-        manifest_schema=manifest_schema,
-        checks=checks,
-        files=list(unique_files.values()),
-    )
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Audit one exact repository snapshot against the Lotus Family manifest."
-    )
-    parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--snapshot-root", type=Path, required=True)
-    parser.add_argument("--repository-id", required=True)
-    parser.add_argument("--repository-ref", required=True)
-    parser.add_argument("--commit-sha", required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args(argv)
-
-    try:
-        manifest = load_manifest(args.manifest)
-        result = audit_repository(
-            manifest,
-            repository_id=args.repository_id,
-            snapshot_root=args.snapshot_root,
-            repository_ref=args.repository_ref,
-            commit_sha=args.commit_sha,
-        )
-    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
-        result = _manifest_invalid_result(
-            str(exc),
-            args.repository_id,
-            args.repository_ref,
-            args.commit_sha,
-            "",
-        )
-
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-    return {PASS: 0, DRIFT: 2, UNKNOWN: 3}.get(result["outcome"], 3)
+_core._tokenize_executed_command = _tokenize_executed_command
+_core._ci_discovery = _ci_discovery
+if "--cov-fail-under=" not in _core._SAFE_PYTEST_PREFIXES:
+    _core._SAFE_PYTEST_PREFIXES += ("--cov-fail-under=",)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_core.main())
