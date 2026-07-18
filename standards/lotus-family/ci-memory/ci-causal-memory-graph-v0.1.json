@@ -1,0 +1,138 @@
+{
+  "schema_version": "lotus.ci_causal_memory_graph.v0.1",
+  "graph_id": "ci-causal-memory-v0.1",
+  "model_kind": "causal_spacetime_learning_advisory",
+  "dimensions": {
+    "spatial": "Where an observation sits in repository, commit, workflow, job, step, command, test, and artifact topology",
+    "temporal": "How immutable runs precede, supersede, repeat, validate, or stale prior evidence",
+    "causal": "How observations support hypotheses, fixes, validations, and regression guards without equating correlation with cause",
+    "hierarchy": "How evidence, learning state, proposals, and human authority remain separated"
+  },
+  "node_columns": [
+    "id",
+    "type",
+    "space",
+    "time",
+    "authority"
+  ],
+  "nodes": [
+    ["space.repository", "location", "repository", "stable", "none"],
+    ["space.ref", "location", "ref", "run", "none"],
+    ["space.commit", "location", "commit", "run", "none"],
+    ["space.workflow", "location", "workflow", "run", "none"],
+    ["space.job", "location", "job", "run", "none"],
+    ["space.step", "location", "step", "run", "none"],
+    ["space.command", "location", "command", "run", "none"],
+    ["space.test_target", "location", "test", "run", "none"],
+    ["evidence.observation", "evidence", "artifact", "run", "advisory"],
+    ["evidence.failure_signature", "evidence", "memory", "cross_run", "advisory"],
+    ["time.prior_observation", "temporal", "memory", "prior", "none"],
+    ["time.current_observation", "temporal", "memory", "current", "none"],
+    ["time.evidence_stale", "temporal", "memory", "superseded", "none"],
+    ["memory.observed_once", "learning_state", "memory", "current", "advisory"],
+    ["memory.pattern_repeated", "learning_state", "memory", "cross_run", "advisory"],
+    ["cause.hypothesis", "causal_state", "memory", "cross_run", "advisory"],
+    ["cause.confirmed", "causal_state", "memory", "validated", "human_required"],
+    ["fix.applied", "change", "commit", "later", "human"],
+    ["fix.validated", "validation", "run", "later", "advisory"],
+    ["guard.regression_added", "guard", "test", "later", "human"],
+    ["memory.proposal_created", "proposal", "issue_or_draft_pr", "later", "human_required"],
+    ["authority.human_acceptance_required", "boundary", "governance", "always", "human"]
+  ],
+  "edge_columns": [
+    "id",
+    "source",
+    "target",
+    "relation",
+    "dimension"
+  ],
+  "edges": [
+    ["M01", "space.repository", "space.ref", "contains", "spatial"],
+    ["M02", "space.ref", "space.commit", "resolves_to_claim", "spatial"],
+    ["M03", "space.commit", "space.workflow", "evaluated_by", "spatial"],
+    ["M04", "space.workflow", "space.job", "contains", "spatial"],
+    ["M05", "space.job", "space.step", "contains", "spatial"],
+    ["M06", "space.step", "space.command", "executes", "spatial"],
+    ["M07", "space.command", "space.test_target", "tests", "spatial"],
+    ["M08", "space.test_target", "evidence.observation", "observed_at", "spatial"],
+    ["M09", "time.prior_observation", "time.current_observation", "preceded_by", "temporal"],
+    ["M10", "time.current_observation", "evidence.observation", "materializes", "temporal"],
+    ["M11", "evidence.observation", "evidence.failure_signature", "normalizes_to", "causal"],
+    ["M12", "evidence.failure_signature", "memory.observed_once", "first_seen_as", "temporal"],
+    ["M13", "evidence.failure_signature", "memory.pattern_repeated", "recurred_as", "temporal"],
+    ["M14", "memory.observed_once", "cause.hypothesis", "may_support", "causal"],
+    ["M15", "memory.pattern_repeated", "cause.hypothesis", "strengthens_without_confirming", "causal"],
+    ["M16", "cause.hypothesis", "cause.confirmed", "requires_reproduction_and_validation", "causal"],
+    ["M17", "cause.confirmed", "fix.applied", "mitigated_by", "causal"],
+    ["M18", "fix.applied", "fix.validated", "validated_by_later_run", "temporal"],
+    ["M19", "fix.validated", "guard.regression_added", "protected_by", "causal"],
+    ["M20", "memory.pattern_repeated", "memory.proposal_created", "proposes_regression", "causal"],
+    ["M21", "memory.proposal_created", "authority.human_acceptance_required", "requires", "hierarchy"],
+    ["M22", "cause.confirmed", "authority.human_acceptance_required", "requires", "hierarchy"],
+    ["M23", "guard.regression_added", "authority.human_acceptance_required", "requires", "hierarchy"],
+    ["M24", "time.evidence_stale", "cause.hypothesis", "invalidates_automatic_reuse", "temporal"],
+    ["M25", "cause.hypothesis", "authority.human_acceptance_required", "requires_before_action", "hierarchy"]
+  ],
+  "trajectories": [
+    {
+      "id": "new-failure",
+      "path": [
+        "space.repository",
+        "space.ref",
+        "space.commit",
+        "space.workflow",
+        "space.job",
+        "space.step",
+        "space.command",
+        "space.test_target",
+        "evidence.observation",
+        "evidence.failure_signature",
+        "memory.observed_once",
+        "cause.hypothesis",
+        "authority.human_acceptance_required"
+      ],
+      "outcome": "advisory_investigation"
+    },
+    {
+      "id": "recurrence",
+      "path": [
+        "time.prior_observation",
+        "time.current_observation",
+        "evidence.observation",
+        "evidence.failure_signature",
+        "memory.pattern_repeated",
+        "memory.proposal_created",
+        "authority.human_acceptance_required"
+      ],
+      "outcome": "advisory_regression_proposal"
+    },
+    {
+      "id": "validated-fix",
+      "path": [
+        "cause.hypothesis",
+        "cause.confirmed",
+        "fix.applied",
+        "fix.validated",
+        "guard.regression_added",
+        "authority.human_acceptance_required"
+      ],
+      "outcome": "human_reviewed_durable_guard"
+    },
+    {
+      "id": "stale-learning",
+      "path": [
+        "time.evidence_stale",
+        "cause.hypothesis",
+        "authority.human_acceptance_required"
+      ],
+      "outcome": "no_automatic_reuse"
+    }
+  ],
+  "invariants": {
+    "correlation_is_not_confirmation": true,
+    "single_run_cause_state": "unconfirmed",
+    "automatic_mutation_allowed": false,
+    "human_acceptance_required": true,
+    "pass_is_not_approval_or_merge": true
+  }
+}

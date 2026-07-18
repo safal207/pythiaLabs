@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/lotus-family/ci-memory/ci-causal-observation-v0.1.schema.json",
+  "title": "Lotus CI causal observation v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observation_id",
+    "spatial",
+    "temporal",
+    "causal",
+    "evidence",
+    "learning",
+    "limitations",
+    "authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "lotus.ci_causal_observation.v0.1"
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^obs-[0-9a-f]{64}$"
+    },
+    "spatial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "ref",
+        "commit_sha",
+        "workflow",
+        "job",
+        "step",
+        "command",
+        "test_target",
+        "changed_paths"
+      ],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "ref": {"type": "string", "minLength": 1},
+        "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "workflow": {"type": "string", "minLength": 1},
+        "job": {"type": "string", "minLength": 1},
+        "step": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "test_target": {"type": ["string", "null"]},
+        "changed_paths": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_run_id",
+        "workflow_run_attempt",
+        "observed_at",
+        "predecessor_observation_id"
+      ],
+      "properties": {
+        "workflow_run_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "workflow_run_attempt": {"type": "integer", "minimum": 1},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "predecessor_observation_id": {
+          "type": ["string", "null"],
+          "pattern": "^obs-[0-9a-f]{64}$"
+        }
+      }
+    },
+    "causal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conclusion", "reason_code", "failure_signature", "cause_state"],
+      "properties": {
+        "conclusion": {
+          "enum": ["success", "failure", "cancelled", "skipped", "unknown"]
+        },
+        "reason_code": {"type": ["string", "null"]},
+        "failure_signature": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["algorithm", "digest", "basis"],
+              "properties": {
+                "algorithm": {"const": "sha256"},
+                "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "basis": {"type": "string", "minLength": 1}
+              }
+            }
+          ]
+        },
+        "cause_state": {
+          "enum": ["unconfirmed", "hypothesis", "confirmed"]
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command_sha256", "detector_versions", "environment_fingerprint"],
+      "properties": {
+        "command_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "detector_versions": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "environment_fingerprint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["runner_os", "runner_arch", "python_version"],
+          "properties": {
+            "runner_os": {"type": ["string", "null"]},
+            "runner_arch": {"type": ["string", "null"]},
+            "python_version": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "learning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confidence", "proposal_allowed", "automatic_mutation_allowed"],
+      "properties": {
+        "confidence": {
+          "enum": [
+            "observed_once",
+            "repeated",
+            "reproduced",
+            "fix_correlated",
+            "fix_validated",
+            "regression_protected"
+          ]
+        },
+        "proposal_allowed": {"const": true},
+        "automatic_mutation_allowed": {"const": false}
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "ownership",
+        "approval",
+        "execution",
+        "delivery",
+        "deployment",
+        "merge"
+      ],
+      "properties": {
+        "mode": {"const": "advisory_only"},
+        "ownership": {"const": false},
+        "approval": {"const": false},
+        "execution": {"const": false},
+        "delivery": {"const": false},
+        "deployment": {"const": false},
+        "merge": {"const": false}
+      }
+    }
+  }
+}
