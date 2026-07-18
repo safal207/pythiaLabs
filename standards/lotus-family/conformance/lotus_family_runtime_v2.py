@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import tomllib
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -53,12 +54,12 @@ def _activates_pytest_configuration(path: str, text: str) -> bool:
     if path in _DEDICATED_PYTEST_CONFIGS:
         return _has_meaningful_lines(text)
     if path == "pyproject.toml":
-        return bool(
-            re.search(
-                r"(?mi)^\s*\[\s*tool\.pytest(?:\.ini_options)?\s*\]\s*$",
-                text,
-            )
-        )
+        try:
+            document = tomllib.loads(text)
+        except tomllib.TOMLDecodeError:
+            return True
+        tool = document.get("tool")
+        return isinstance(tool, dict) and "pytest" in tool
     if path == "tox.ini":
         return bool(re.search(r"(?mi)^\s*\[\s*pytest\s*\]\s*$", text))
     if path == "setup.cfg":
