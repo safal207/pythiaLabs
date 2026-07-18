@@ -181,6 +181,60 @@ class LotusFamilyAuditorTest(unittest.TestCase):
             )
             self.assertEqual(discovery["outcome"], DRIFT)
 
+    def test_cml_commented_pytest_command_is_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            config = self.config("cml")
+            repository_root = _materialize_repository(snapshot_root, config)
+            workflow = repository_root / ".github/workflows/ci.yml"
+            workflow.write_text("# python -m pytest\n", encoding="utf-8")
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], DRIFT)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["matched_patterns"], [])
+
+    def test_cml_pytest_ignore_directory_covering_contract_test_is_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            config = self.config("cml")
+            repository_root = _materialize_repository(snapshot_root, config)
+            workflow = repository_root / ".github/workflows/ci.yml"
+            workflow.write_text(
+                "python -m pytest --ignore=tests\n",
+                encoding="utf-8",
+            )
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], DRIFT)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["matched_patterns"], [])
+
+    def test_cml_pytest_ignore_glob_covering_contract_test_is_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            config = self.config("cml")
+            repository_root = _materialize_repository(snapshot_root, config)
+            workflow = repository_root / ".github/workflows/ci.yml"
+            workflow.write_text(
+                "python -m pytest --ignore-glob='tests/*'\n",
+                encoding="utf-8",
+            )
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], DRIFT)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["matched_patterns"], [])
+
     def test_empty_manifest_term_list_is_unknown_not_pass(self):
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
