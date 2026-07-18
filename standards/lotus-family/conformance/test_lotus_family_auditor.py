@@ -19,6 +19,12 @@ def _write(root: Path, relative_path: str, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def _discovery_fixture(discovery: dict) -> str:
+    if discovery.get("strategy") == "pytest_default_discovery":
+        return "python -m pytest \\\n  --junitxml=artifacts/junit.xml \\\n  --cov=cml\n"
+    return "\n".join(discovery["contains_any"]) + "\n"
+
+
 def _materialize_repository(snapshot_root: Path, config: dict) -> Path:
     repository_root = snapshot_root / config["snapshot_dir"]
     terms_by_path: dict[str, list[str]] = {}
@@ -30,7 +36,7 @@ def _materialize_repository(snapshot_root: Path, config: dict) -> Path:
     _write(
         repository_root,
         discovery["workflow_paths"][0],
-        "\n".join(discovery["contains_any"]) + "\n",
+        _discovery_fixture(discovery),
     )
     return repository_root
 
@@ -79,6 +85,19 @@ class LotusFamilyAuditorTest(unittest.TestCase):
                 self.assertRegex(row["sha256"], r"^[0-9a-f]{64}$")
             self.assertFalse(result["authority"]["grants_merge"])
 
+    def test_valid_cml_default_pytest_discovery_passes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            _materialize_repository(snapshot_root, self.config("cml"))
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], PASS)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["matched_patterns"], ["python -m pytest"])
+
     def test_bilingual_authority_deletion_is_drift(self):
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
@@ -122,6 +141,88 @@ class LotusFamilyAuditorTest(unittest.TestCase):
             )
             self.assertEqual(discovery["outcome"], DRIFT)
             self.assertEqual(discovery["matched_patterns"], [])
+
+    def test_cml_unrelated_pytest_subset_is_not_full_discovery(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            config = self.config("cml")
+            repository_root = _materialize_repository(snapshot_root, config)
+            workflow = repository_root / ".github/workflows/ci.yml"
+            workflow.write_text(
+                "python -m pytest tests/test_other.py\n",
+                encoding="utf-8",
+            )
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], DRIFT)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["outcome"], DRIFT)
+            self.assertEqual(discovery["matched_patterns"], [])
+
+    def test_cml_pytest_ignore_of_contract_test_is_drift(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            config = self.config("cml")
+            repository_root = _materialize_repository(snapshot_root, config)
+            workflow = repository_root / ".github/workflows/ci.yml"
+            workflow.write_text(
+                "python -m pytest --ignore=tests/test_lotus_docs_contract.py\n",
+                encoding="utf-8",
+            )
+
+            result = self.audit("cml", snapshot_root)
+
+            self.assertEqual(result["outcome"], DRIFT)
+            discovery = next(
+                row for row in result["checks"] if row["check_id"] == "ci_discovery"
+            )
+            self.assertEqual(discovery["outcome"], DRIFT)
+
+    def test_empty_manifest_term_list_is_unknown_not_pass(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            _materialize_repository(snapshot_root, self.config("pythia"))
+            manifest = copy.deepcopy(self.manifest)
+            manifest["repositories"][0]["file_checks"][0]["contains_all"] = []
+
+            result = audit_repository(
+                manifest,
+                repository_id="pythia",
+                snapshot_root=snapshot_root,
+                repository_ref="refs/heads/main",
+                commit_sha=SHA,
+            )
+
+            self.assertEqual(
+                (result["outcome"], result["reason_code"]),
+                (UNKNOWN, "MANIFEST_INVALID"),
+            )
+
+    def test_manifest_path_traversal_is_unknown_and_not_hashed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            _materialize_repository(snapshot_root, self.config("pythia"))
+            outside = snapshot_root / "outside.md"
+            outside.write_text("all required terms\n", encoding="utf-8")
+            manifest = copy.deepcopy(self.manifest)
+            manifest["repositories"][0]["file_checks"][0]["path"] = "../outside.md"
+
+            result = audit_repository(
+                manifest,
+                repository_id="pythia",
+                snapshot_root=snapshot_root,
+                repository_ref="refs/heads/main",
+                commit_sha=SHA,
+            )
+
+            self.assertEqual(
+                (result["outcome"], result["reason_code"]),
+                (UNKNOWN, "MANIFEST_INVALID"),
+            )
+            self.assertEqual(result["files"], [])
 
     def test_missing_repository_snapshot_is_unknown_not_pass(self):
         with tempfile.TemporaryDirectory() as directory:
