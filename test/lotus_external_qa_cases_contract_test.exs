@@ -19,37 +19,38 @@ defmodule Pythia.LotusExternalQACasesContractTest do
     end
   end
 
-  test "TakeProfit publishes only the bounded ChartStore regression" do
+  test "TakeProfit publishes exactly two bounded P2 findings" do
     packet = load!(@takeprofit)
     findings = packet["confirmed_findings"]
-    finding = hd(findings)
+    by_id = Map.new(findings, &{&1["id"], &1})
 
-    assert length(findings) == 1
-    assert finding["id"] == "chartstore-required-fields-changed-form"
-    assert finding["severity"] == "P2"
-    assert finding["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
+    assert length(findings) == 2
 
-    assert finding["evidence"]["exact_head_sha"] ==
-             "27bf4fe23d8c63dcf6691ae7cf3b5f34b672e89c"
+    chartstore = by_id["chartstore-required-fields-changed-form"]
+    assert chartstore["severity"] == "P2"
+    assert chartstore["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
+    assert chartstore["evidence"]["run_id"] == 29_662_910_618
 
-    assert finding["evidence"]["run_id"] == 29_662_910_618
+    freshness = by_id["public-chart-missing-freshness-boundary-during-outage"]
+    assert freshness["severity"] == "P2"
+    assert freshness["status"] == "CONFIRMED_REPEATED_OUTAGE"
+    assert freshness["evidence"]["run_id"] == 29_665_413_400
+
+    assert freshness["evidence"]["exact_head_sha"] ==
+             "fe17c3ddad4e4540d91cb30ba40456f2114dc997"
+
+    assert Enum.map(freshness["evidence"]["rounds"], & &1["quote_responses_during_outage"]) ==
+             [0, 0, 0]
   end
 
-  test "stale-price harm remains a bounded hypothesis until cadence-aware evidence exists" do
+  test "the superseded overlapping-response method cannot support freshness confirmation" do
     packet = load!(@takeprofit)
+    confirmed_text = packet["confirmed_findings"] |> Jason.encode!()
+    unknowns = Enum.join(packet["unknowns"], " ")
 
-    hypothesis =
-      Enum.find(packet["bounded_hypotheses"], fn item ->
-        item["id"] == "stale-quote-without-freshness-boundary"
-      end)
-
-    assert hypothesis["status"] == "NEEDS_LONGER_OUTAGE_EVIDENCE"
-    assert hypothesis["confidence"] == 65
-    assert hypothesis["falsifier"] =~ "42–60 second quote cadence"
-
-    refute Enum.any?(packet["confirmed_findings"], fn item ->
-             item["id"] == "stale-quote-without-freshness-boundary"
-           end)
+    refute confirmed_text =~ "SUPPORTED_STALE_STATE_GAP"
+    assert unknowns =~ "Visible application rollback"
+    assert packet["verdict_meaning"] =~ "do not claim numerical price inaccuracy"
   end
 
   test "unknown authenticated and trading impact stays explicit" do
@@ -58,6 +59,6 @@ defmodule Pythia.LotusExternalQACasesContractTest do
 
     assert unknowns =~ "authenticated workspace"
     assert unknowns =~ "trading-decision impact"
-    assert packet["verdict_meaning"] =~ "do not claim stale-price harm"
+    assert unknowns =~ "external market source"
   end
 end
