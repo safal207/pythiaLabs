@@ -51,6 +51,19 @@ Current demos are deterministic local artifacts.
 
 They are useful as reviewer-facing seed evidence, but they do not prove broad deployment readiness.
 
+## Lotus judgment boundary
+
+The [`Pythia Lotus Layer`](../LOTUS.md) adds a human-readable judgment contract, not a new enforcement claim.
+
+- A verdict must expose its evidence and uncertainty.
+- `ALLOW` does not execute the proposed action and does not create missing authorization.
+- A prior verdict does not remain valid after relevant inputs, policy, environment, credentials, recovery context, or code state change.
+- `BLOCK` is a gate result, not punishment or proof of malicious intent.
+- `ESCALATE` is an explicit outcome when configured policy cannot safely decide.
+- Human reviewers must remain able to reproduce and challenge the decision.
+
+These principles do not upgrade the MVP into a certified safety system, guarantee good outcomes, or replace domain-specific authorization and execution controls.
+
 ## Correct funding framing
 
 The strongest funding framing is:
