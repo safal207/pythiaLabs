@@ -7,6 +7,12 @@ on:
     paths:
       - .github/workflows/tmp-format-lotus-external-qa.yml
       - test/lotus_external_qa_cases_contract_test.exs
+  pull_request:
+    branches:
+      - agent/tradernet-lotus-judgment-v0-1
+    paths:
+      - .github/workflows/tmp-format-lotus-external-qa.yml
+      - test/lotus_external_qa_cases_contract_test.exs
 
 permissions:
   contents: read
