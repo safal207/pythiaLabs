@@ -68,6 +68,17 @@ defmodule Pythia.LotusDocsContractTest do
     end
   end
 
+  test "English and Russian contracts preserve the no-authority boundary" do
+    lotus = File.read!(@lotus)
+    [english, russian] = String.split(lotus, "# Слой Лотоса Pythia", parts: 2)
+
+    assert english =~ "has no ownership, credential, execution, delivery, or merge authority"
+    assert russian =~ "не имеет права собственности"
+    assert russian =~ "credentials"
+    assert russian =~ "права на исполнение"
+    assert russian =~ "доставку или merge"
+  end
+
   test "Lotus remains a limitation contract rather than a safety overclaim" do
     limitations = File.read!(@limitations)
 
