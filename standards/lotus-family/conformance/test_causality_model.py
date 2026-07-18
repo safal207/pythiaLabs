@@ -288,6 +288,10 @@ class CausalityModelTest(unittest.TestCase):
                             ],
                             identity_mode,
                         )
+                    self.assertEqual(
+                        result["authority"]["mode"],
+                        "audit_only",
+                    )
                     for grant in AUTHORITY_GRANTS:
                         self.assertFalse(
                             result["authority"][grant],
