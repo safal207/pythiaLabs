@@ -20,23 +20,35 @@ caller-provided claims recorded in evidence. Results expose
 `identity_assurance.mode = caller_claim_only` so consumers cannot mistake these
 claims for verified provenance.
 
-Remote identity verification, trusted materialization, and evidence attestation
-remain follow-up work. Until then, `PASS` means conformance of the supplied
+SHA-256 evidence binds each check to the exact bytes read and evaluated from the
+supplied snapshot. It does **not** prove that those bytes came from the claimed
+remote repository, ref, or commit. Independent trusted materialization and
+provenance verification are required before evidence may be called fresh for an
+exact head.
+
+Until that verification exists, `PASS` means conformance of the supplied
 snapshot contents, not cryptographic proof that the snapshot came from the
 claimed remote commit.
 
-## Causal testing model
+## Causal spacetime testing model
 
-The primary test model lives in:
+The test model has two compatible layers:
 
-- `causality/lotus-family-causality-v0.1.json` — causes, controls, risks, evidence,
-  outcomes, and authority boundaries;
-- `causality/test-paths-v0.1.json` — executable end-to-end routes through that graph;
-- `causality/TRACEABILITY.md` — a reviewable matrix derived from the routes.
+- `causality/lotus-family-causality-v0.1.json` and
+  `causality/test-paths-v0.1.json` preserve the original causal routes;
+- `causality/lotus-family-system-v0.1.json` and
+  `causality/system-routes-v0.1.json` add spatial, temporal, hierarchical, and
+  trajectory views.
 
-Every new blocker must add or reuse a causal node and include an executable route.
-This prevents isolated regression tests from hiding missing relationships between
-workflow structure, command execution, test selection, evidence, and verdicts.
+The system graph separates bounded snapshot `PASS` from independently verified
+exact-head freshness and merge eligibility. Centrality means review priority and
+blast radius only; it never grants ownership, approval, execution, delivery, or
+merge authority.
+
+Every new blocker must add or reuse a graph node and include an executable route
+when runtime behavior is involved. This prevents isolated regression tests from
+hiding missing relationships between workflow structure, inherited execution
+context, test selection, evidence, and verdicts.
 
 ## Boundary
 
@@ -44,7 +56,7 @@ The auditor is read-only and `audit_only`. Its result does not grant ownership,
 approval, execution, delivery, deployment, or merge authority.
 
 It does not fetch repositories, call GitHub, merge pull requests, or deploy
-software. An integration materializes the repository snapshot it wants audited.
+software. An integration materializes the repository snapshot it wants to audit.
 
 ## Snapshot layout
 
