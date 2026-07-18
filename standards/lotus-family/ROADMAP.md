@@ -3,15 +3,18 @@
 ## v0.1
 
 - manifest for Pythia, CML, and LS;
-- exact repository ref and commit SHA requirement;
+- syntactically exact repository ref and commit SHA claims;
+- explicit `caller_claim_only` identity assurance;
 - `PASS / DRIFT / UNKNOWN` outcomes;
-- bilingual contract, authority firewall, regression test, and CI discovery checks;
-- SHA-256 evidence artifact;
+- bilingual contract, authority firewall, regression test, and executable CI discovery checks;
+- causal graph, executable causal routes, and derived traceability;
+- SHA-256 evidence from the same bytes used for evaluation;
 - audit-only authority boundary.
 
 ## Follow-up
 
-- materialize exact snapshots from a trusted integration;
-- verify remote repository identity and commit reachability;
+- materialize snapshots through a trusted integration;
+- verify remote repository identity, commit reachability, and clean snapshot state;
+- sign or attest evidence artifacts without granting execution authority;
 - aggregate three repository results into one family report;
-- sign or attest evidence artifacts without granting execution authority.
+- generate selected regression fixtures from causal routes while keeping human review.

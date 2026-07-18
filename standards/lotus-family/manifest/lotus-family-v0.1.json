@@ -57,10 +57,9 @@
         "workflow_paths": [
           ".github/workflows/ci.yml"
         ],
-        "strategy": "contains_any",
-        "contains_any": [
-          "mix test"
-        ]
+        "strategy": "mix_default_discovery",
+        "command": "mix test",
+        "test_path": "test/lotus_docs_contract_test.exs"
       }
     },
     {
