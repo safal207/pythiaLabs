@@ -117,6 +117,18 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
             commit_sha=SHA,
         )
 
+    def _assert_blocked_config(self, result: dict, path: str) -> None:
+        self.assertEqual(result["outcome"], DRIFT)
+        self.assertEqual(result["reason_code"], "LOTUS_CONTRACT_DRIFT")
+        config_check = next(
+            row
+            for row in result["checks"]
+            if row["check_id"] == "pytest_configuration"
+        )
+        self.assertEqual(config_check["outcome"], DRIFT)
+        self.assertIn(path, config_check["blocked_paths"])
+        self.assertIn(path, {row["path"] for row in result["files"]})
+
     def test_active_pyproject_pytest_scope_blocks_default_discovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
@@ -128,19 +140,33 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
             )
             result = self._audit(snapshot_root)
 
-        self.assertEqual(result["outcome"], DRIFT)
-        self.assertEqual(result["reason_code"], "LOTUS_CONTRACT_DRIFT")
-        config_check = next(
-            row
-            for row in result["checks"]
-            if row["check_id"] == "pytest_configuration"
-        )
-        self.assertEqual(config_check["outcome"], DRIFT)
-        self.assertIn("pyproject.toml", config_check["blocked_paths"])
-        self.assertIn(
-            "pyproject.toml",
-            {row["path"] for row in result["files"]},
-        )
+        self._assert_blocked_config(result, "pyproject.toml")
+
+    def test_native_pyproject_pytest_scope_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_cml(snapshot_root, self.manifest)
+            _write(
+                repository_root,
+                "pyproject.toml",
+                "[tool.pytest]\npython_files = ['not_contract.py']\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "pyproject.toml")
+
+    def test_hidden_pytest_ini_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_cml(snapshot_root, self.manifest)
+            _write(
+                repository_root,
+                ".pytest.ini",
+                "[pytest]\naddopts = --ignore=tests/test_lotus_docs_contract.py\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, ".pytest.ini")
 
     def test_non_pytest_pyproject_scope_is_hashed_and_keeps_pass(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
