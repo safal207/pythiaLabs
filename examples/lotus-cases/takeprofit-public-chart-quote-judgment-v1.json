@@ -1,0 +1,102 @@
+{
+  "authority": {
+    "approval": false,
+    "delivery": false,
+    "execution": false,
+    "external_submission": false,
+    "merge": false,
+    "mode": "audit_only",
+    "ownership": false
+  },
+  "bounded_hypotheses": [
+    {
+      "claim": "The public BTC/USDT chart may leave a stale last-known price visible without a freshness boundary after market-data loss.",
+      "confidence": 65,
+      "falsifier": "A controlled interruption longer than the observed 42–60 second quote cadence shows a visible stale, delayed, offline, or reconnecting state before the quote exceeds the product freshness threshold.",
+      "id": "stale-quote-without-freshness-boundary",
+      "status": "NEEDS_LONGER_OUTAGE_EVIDENCE"
+    },
+    {
+      "claim": "Incomplete ChartStore settings may later cause visible candle, indicator, or interaction corruption.",
+      "confidence": 60,
+      "falsifier": "Repeated interaction, symbol/timeframe transition, history-backfill, and reload tests show no visible divergence while the validation errors remain.",
+      "id": "chartstore-validation-user-impact",
+      "status": "USER_IMPACT_UNPROVEN"
+    }
+  ],
+  "case_id": "takeprofit-public-chart-quote-2026-07-19",
+  "confirmed_findings": [
+    {
+      "claim": "The published BTC/USDT indicator chart initializes with missing required ChartStore settings on first load and repeats the same validation failure after reload.",
+      "confidence": 98,
+      "evidence": {
+        "artifact_sha256": "2158374d653f5fd4e56bf96fa3489868a64b69c590fc0950dda1ac84c05f1105",
+        "exact_head_sha": "27bf4fe23d8c63dcf6691ae7cf3b5f34b672e89c",
+        "result_sha256": "f8eccc551a033af8fbe1417803240c7c9d63988f4bccb47d4aa8bc3f285e7a89",
+        "run_id": 29662910618,
+        "source_pr": 56
+      },
+      "id": "chartstore-required-fields-changed-form",
+      "observed_errors": [
+        "[ChartStore] settings.chart.timeToCloseLabel is a required field",
+        "settings.chart.style.lineSource is a required field",
+        "settings.chart.style.tpo is a required field"
+      ],
+      "regression_relation": "The January 2026 manual audit reported the same initialization-contract family with different missing ChartStore and IndicatorManager fields.",
+      "severity": "P2",
+      "status": "STILL_PRESENT_IN_CHANGED_FORM"
+    }
+  ],
+  "generated_at": "2026-07-19T00:00:00.000Z",
+  "passed_checks": [
+    {
+      "claim": "The public page loaded BTC/USDT metadata, historical bars, and changing quote payloads.",
+      "evidence": {
+        "distinct_quote_bodies": 4,
+        "list_bars_requests": 3,
+        "list_quotes_requests": 5
+      },
+      "id": "public-quote-and-bars-bootstrap",
+      "result": "PASS"
+    },
+    {
+      "claim": "Market-data activity resumed after the bounded short network interruption.",
+      "evidence": {
+        "market_events_after_online": 2
+      },
+      "id": "bounded-reconnect-activity",
+      "result": "PASS"
+    },
+    {
+      "claim": "The BTC chart reconstructed after reload, although ChartStore validation errors repeated.",
+      "id": "reload-reconstruction",
+      "result": "PASS_WITH_VALIDATION_WARNING"
+    }
+  ],
+  "recommended_human_actions": [
+    "Report the repeated ChartStore required-field initialization failure as a bounded P2 regression.",
+    "Do not report stale-price user harm as confirmed from the five-second interruption.",
+    "Run three controlled 90–120 second interruptions and record quote age, expected cadence, visible freshness state, and recovery time.",
+    "Test out-of-order quote responses and atomic BTC→ETH→BTC transitions in a separately authorized scope.",
+    "Keep authenticated workspace, alerts, orders, and trading-decision impact outside this public audit."
+  ],
+  "schema_version": "pythia-lotus-external-qa-judgment-v1",
+  "subject": {
+    "evidence_prs": [
+      56,
+      61
+    ],
+    "platform": "TakeProfit",
+    "scope": "public unauthenticated published-indicator chart and quote behavior",
+    "source_repository": "https://github.com/safal207/LiminalQAengineer"
+  },
+  "unknowns": [
+    "The five-second network interruption was shorter than the observed approximately 42–60 second public quote cadence, so absence of a stale marker is not yet a confirmed defect.",
+    "The authenticated workspace may use a different quote transport, freshness threshold, and recovery policy.",
+    "Historical backfill, candle/indicator layer integrity, and duplicate or missing bars were not established.",
+    "Symbol and timeframe transition atomicity were not tested on an authorized interactive workspace.",
+    "No user-visible trading-decision impact was established for the ChartStore console regression."
+  ],
+  "verdict": "ESCALATE",
+  "verdict_meaning": "Present the confirmed ChartStore regression and the bounded freshness hypotheses to an authorized human owner; do not claim stale-price harm, submit externally, execute, or merge automatically."
+}
