@@ -13,7 +13,9 @@ defmodule Pythia.LotusDocsContractTest do
     assert template =~ "Validation command"
     assert template =~ "Validation was run or rerun after the most recent PR head change"
     assert template =~ "Evidence becomes stale"
-    assert template =~ "evaluated inputs, policy, environment, authorization, credential, or recovery context changes"
+
+    assert template =~
+             "evaluated inputs, policy, environment, authorization, credential, or recovery context changes"
   end
 
   test "ALLOW requires positive authorization and does not imply execution" do
@@ -71,6 +73,8 @@ defmodule Pythia.LotusDocsContractTest do
 
     assert limitations =~ "human-readable judgment contract, not a new enforcement claim"
     assert limitations =~ "do not upgrade the MVP into a certified safety system"
-    assert limitations =~ "do not replace domain-specific authorization and execution controls"
+
+    assert limitations =~
+             "do not replace domain-specific authorization and execution controls"
   end
 end
