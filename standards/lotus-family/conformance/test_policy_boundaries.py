@@ -64,6 +64,36 @@ class WorkflowBoundaryTest(unittest.TestCase):
             (True, ["python -m pytest"]),
         )
 
+    def test_anchored_pytest_env_mapping_blocks_discovery(self) -> None:
+        text = (
+            "name: CI\n"
+            "env: &pytest_env\n"
+            "  PYTEST_ADDOPTS: "
+            "--ignore=tests/test_lotus_docs_contract.py\n"
+            "jobs:\n"
+            "  test:\n"
+            "    runs-on: ubuntu-latest\n"
+            "    steps:\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
+    def test_aliased_env_mapping_fails_closed(self) -> None:
+        text = (
+            "name: CI\n"
+            "pytest-env: &pytest_env\n"
+            "  SAFE_VALUE: true\n"
+            "env: *pytest_env\n"
+            "jobs:\n"
+            "  test:\n"
+            "    runs-on: ubuntu-latest\n"
+            "    steps:\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
     def test_unknown_failing_predecessor_blocks_later_pytest(self) -> None:
         self.assertEqual(
             ci_discovery(
