@@ -26,7 +26,7 @@ def workflow_steps(steps: str) -> str:
 
 
 class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
-    """Keep unknown step policy and wrapped blockers fail-closed."""
+    """Keep unknown policy, blockers, and runner resolution fail-closed."""
 
     def test_expression_continue_on_error_blocks_later_test(self) -> None:
         text = workflow_steps(
@@ -43,6 +43,31 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
             with self.subTest(command=command):
                 text = workflow_steps(
                     "      - name: Proven wrapped failure\n"
+                    f"        run: {command}\n"
+                    "      - name: Contract test\n"
+                    "        run: python -m pytest\n"
+                )
+                self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
+    def test_github_path_mutation_blocks_later_test(self) -> None:
+        text = workflow_steps(
+            "      - name: Replace command resolution\n"
+            "        run: echo \"$PWD/bin\" >> \"$GITHUB_PATH\"\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
+    def test_direct_path_and_runner_alias_mutations_block_later_test(self) -> None:
+        commands = (
+            "export PATH=\"$PWD/bin:$PATH\"",
+            "alias python='true'",
+            "python() { true; }",
+        )
+        for command in commands:
+            with self.subTest(command=command):
+                text = workflow_steps(
+                    "      - name: Mutate runner resolution\n"
                     f"        run: {command}\n"
                     "      - name: Contract test\n"
                     "        run: python -m pytest\n"
