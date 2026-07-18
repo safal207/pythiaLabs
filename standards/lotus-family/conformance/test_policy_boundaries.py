@@ -45,6 +45,11 @@ DISCOVERY = {
     "test_path": "tests/test_lotus_docs_contract.py",
     "command": "python -m pytest",
 }
+MIX_DISCOVERY = {
+    "strategy": "mix_default_discovery",
+    "test_path": "test/lotus_docs_contract_test.exs",
+    "command": "mix test",
+}
 
 
 class WorkflowBoundaryTest(unittest.TestCase):
@@ -122,6 +127,18 @@ class WorkflowBoundaryTest(unittest.TestCase):
         self.assertEqual(
             ci_discovery(DISCOVERY, text),
             (False, []),
+        )
+
+    def test_normal_setup_step_keeps_later_mix_test_discoverable(self) -> None:
+        text = workflow_steps(
+            "      - name: Install local tooling\n"
+            "        run: mix local.hex --force\n"
+            "      - name: Contract test\n"
+            "        run: mix test\n"
+        )
+        self.assertEqual(
+            ci_discovery(MIX_DISCOVERY, text),
+            (True, ["mix test"]),
         )
 
     def test_explicitly_ignored_predecessor_keeps_test_reachable(self) -> None:
