@@ -50,6 +50,14 @@ MIX_DISCOVERY = {
     "test_path": "test/lotus_docs_contract_test.exs",
     "command": "mix test",
 }
+EXPLICIT_PY_DISCOVERY = {
+    "strategy": "contains_any",
+    "contains_any": ["tests/test_lotus_docs_contract.py"],
+}
+EXPLICIT_MIX_DISCOVERY = {
+    "strategy": "contains_any",
+    "contains_any": ["test/lotus_docs_contract_test.exs"],
+}
 
 
 class WorkflowBoundaryTest(unittest.TestCase):
@@ -169,6 +177,36 @@ class WorkflowBoundaryTest(unittest.TestCase):
         text = workflow_steps(
             "      - name: Repo controlled shell\n"
             "        shell: ./bash {0}\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(
+            ci_discovery(DISCOVERY, text),
+            (False, []),
+        )
+
+    def test_dynamic_test_arguments_fail_closed(self) -> None:
+        cases = (
+            (
+                EXPLICIT_PY_DISCOVERY,
+                "python -m pytest tests/test_lotus_docs_contract.py $FILTER",
+            ),
+            (
+                EXPLICIT_MIX_DISCOVERY,
+                "mix test test/lotus_docs_contract_test.exs ${FILTER}",
+            ),
+        )
+        for discovery, command in cases:
+            with self.subTest(command=command):
+                self.assertEqual(
+                    ci_discovery(discovery, workflow(command)),
+                    (False, []),
+                )
+
+    def test_github_env_mutation_blocks_later_test(self) -> None:
+        text = workflow_steps(
+            "      - name: Mutate future pytest selection\n"
+            "        run: echo 'PYTEST_ADDOPTS=-k smoke' >> \"$GITHUB_ENV\"\n"
+            "      - name: Contract test\n"
             "        run: python -m pytest\n"
         )
         self.assertEqual(
