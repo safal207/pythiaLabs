@@ -180,8 +180,19 @@ def _unsafe_state_change(parts: list[str]) -> bool:
     return False
 
 
+def _safe_prelude(parts: list[str]) -> bool:
+    """Return true only for shell setup commands that cannot hide a test."""
+    return parts in (
+        ["set", "-e"],
+        ["set", "-eu"],
+        ["set", "-euo", "pipefail"],
+        ["set", "-o", "pipefail"],
+        [":"],
+    )
+
+
 def shell_commands(text: str) -> list[str]:
-    """Reject scripts whose later test commands cannot be proven reachable."""
+    """Return only a first provably reachable substantive command."""
     stripped = "\n".join(legacy.strip_comment(line) for line in text.splitlines())
     # Heredoc bodies are data, not commands. Conservatively reject the whole
     # script rather than risk matching a test command inside the payload.
@@ -197,7 +208,6 @@ def shell_commands(text: str) -> list[str]:
     if any(token in _CONTROL or token in legacy.CONTROL_WORDS for token in tokens):
         return []
 
-    commands: list[str] = []
     lines = text.splitlines()
     index = 0
     while index < len(lines):
@@ -221,24 +231,27 @@ def shell_commands(text: str) -> list[str]:
             legacy.ENV_ASSIGNMENT.fullmatch(parsed[0]) or _unsafe_state_change(parsed)
         ):
             return []
-        commands.append(command)
-        index += 1
-    return commands
+        if parsed and _safe_prelude(parsed):
+            index += 1
+            continue
+        # Under fail-fast shells, any unknown predecessor may stop execution.
+        # Therefore only the first substantive command is provably reachable.
+        return [command] if parsed else []
+    return []
 
 
-def ci_discovery(
-    discovery: Mapping[str, Any], workflow_texts: str | list[str]
+def _ci_discovery_one(
+    discovery: Mapping[str, Any], workflow_text: str
 ) -> tuple[bool, list[str]]:
-    """Apply the final extraction policy before matching configured tests."""
-    text = "\n".join(workflow_texts) if isinstance(workflow_texts, list) else workflow_texts
-    scripts = github_run_scripts(text)
+    """Evaluate one workflow document without cross-file state leakage."""
+    scripts = github_run_scripts(workflow_text)
     commands = [command for script in scripts for command in shell_commands(script)]
     strategy = discovery["strategy"]
     uses_pytest = strategy == "pytest_default_discovery" or any(
         str(pattern).endswith(".py") for pattern in discovery.get("contains_any", [])
     )
     if uses_pytest and (
-        any(name.startswith("PYTEST_") for name in legacy.yaml_env_names(text))
+        any(name.startswith("PYTEST_") for name in legacy.yaml_env_names(workflow_text))
         or any(
             re.search(
                 r"\bPYTEST_[A-Za-z0-9_]*\b",
@@ -284,6 +297,22 @@ def ci_discovery(
             ):
                 matches.append(pattern)
     return bool(matches), matches
+
+
+def ci_discovery(
+    discovery: Mapping[str, Any], workflow_texts: str | list[str]
+) -> tuple[bool, list[str]]:
+    """Evaluate workflow documents independently and union safe matches."""
+    texts = workflow_texts if isinstance(workflow_texts, list) else [workflow_texts]
+    matched: list[str] = []
+    discovered = False
+    for text in texts:
+        current, patterns = _ci_discovery_one(discovery, text)
+        discovered = discovered or current
+        for pattern in patterns:
+            if pattern not in matched:
+                matched.append(pattern)
+    return discovered, matched
 
 
 pytest_command = base.pytest_command
