@@ -13,9 +13,10 @@ _PROVEN_FAILURE_COMMANDS = {"false"}
 _SHELL_WRAPPERS = {"command", "builtin"}
 _COMMAND_RESOLUTION_MUTATION = re.compile(
     r"(?:\bGITHUB_PATH\b|"
-    r"(?m)^\s*(?:export\s+)?PATH\s*=|"
-    r"(?m)^\s*alias\s+(?:python(?:3)?|mix)\s*=|"
-    r"(?m)^\s*(?:function\s+)?(?:python(?:3)?|mix)\s*\(\s*\))"
+    r"^\s*(?:export\s+)?PATH\s*=|"
+    r"^\s*alias\s+(?:python(?:3)?|mix)\s*=|"
+    r"^\s*(?:function\s+)?(?:python(?:3)?|mix)\s*\(\s*\))",
+    re.MULTILINE,
 )
 
 
