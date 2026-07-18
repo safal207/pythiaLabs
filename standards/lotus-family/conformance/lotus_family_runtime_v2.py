@@ -22,11 +22,21 @@ from lotus_family_schema import (
 
 _PYTEST_CONFIG_PATHS = (
     "pytest.toml",
+    ".pytest.toml",
     "pytest.ini",
+    ".pytest.ini",
     "pyproject.toml",
     "tox.ini",
     "setup.cfg",
 )
+
+
+_DEDICATED_PYTEST_CONFIGS = {
+    "pytest.toml",
+    ".pytest.toml",
+    "pytest.ini",
+    ".pytest.ini",
+}
 
 
 def _has_meaningful_lines(text: str) -> bool:
@@ -40,12 +50,12 @@ def _has_meaningful_lines(text: str) -> bool:
 
 def _activates_pytest_configuration(path: str, text: str) -> bool:
     """Detect config scopes that can alter default pytest collection."""
-    if path in {"pytest.toml", "pytest.ini"}:
+    if path in _DEDICATED_PYTEST_CONFIGS:
         return _has_meaningful_lines(text)
     if path == "pyproject.toml":
         return bool(
             re.search(
-                r"(?mi)^\s*\[\s*tool\.pytest\.ini_options\s*\]\s*$",
+                r"(?mi)^\s*\[\s*tool\.pytest(?:\.ini_options)?\s*\]\s*$",
                 text,
             )
         )
