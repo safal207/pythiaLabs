@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 import shlex
-from pathlib import PurePosixPath
 from typing import Any, Mapping
 
 import lotus_family_workflow_hardened as base
@@ -18,7 +17,7 @@ _CONTROL = legacy.CONTROL_TOKENS | {"(", ")", "{", "}"}
 
 
 def _supported_shell(value: str) -> bool:
-    """Accept only shell forms that provably execute the generated script."""
+    """Accept only exact shell forms that provably execute the generated script."""
     scalar = legacy.inline_scalar(value)
     if scalar is None:
         return False
@@ -26,14 +25,10 @@ def _supported_shell(value: str) -> bool:
         parts = shlex.split(scalar)
     except ValueError:
         return False
-    if not parts:
-        return False
-    shell = PurePosixPath(parts[0]).name
-    if shell not in _POSIX_SHELLS:
+    if not parts or parts[0] not in _POSIX_SHELLS:
         return False
     if len(parts) == 1:
-        # Only the exact GitHub built-in keywords receive an implicit temp script.
-        return parts[0] in _POSIX_SHELLS
+        return True
     allowed = {
         ("bash", "{0}"),
         ("bash", "-e", "{0}"),
@@ -41,7 +36,7 @@ def _supported_shell(value: str) -> bool:
         ("sh", "{0}"),
         ("sh", "-e", "{0}"),
     }
-    return tuple([shell, *parts[1:]]) in allowed
+    return tuple(parts) in allowed
 
 
 def _dependencies_proven(
@@ -70,8 +65,24 @@ def _dependencies_proven(
     return visit(job_name)
 
 
-def github_run_scripts(text: str) -> list[str]:
-    """Extract only reachable, repo-root scripts under the final shell policy."""
+def _boolean_entry(
+    entry: tuple[int, tuple[int, bool, int, str, str]] | None,
+    *,
+    default: bool,
+) -> bool | None:
+    """Resolve a literal GitHub Actions boolean and preserve unknown expressions."""
+    if entry is None:
+        return default
+    condition = base._condition(entry[1][4])
+    if condition == "true":
+        return True
+    if condition == "false":
+        return False
+    return None
+
+
+def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
+    """Extract ordered run-step groups from provably runnable jobs."""
     lines = text.splitlines()
     ranges = legacy.scalar_ranges(lines)
     scalar_body = {
@@ -101,7 +112,7 @@ def github_run_scripts(text: str) -> list[str]:
             [] if needs is None else base._parse_needs(needs[1][4])
         )
 
-    scripts: list[str] = []
+    groups: list[list[tuple[str, bool | None]]] = []
     for job_name, (_, _, job_end, properties) in records.items():
         runs_on = properties.get("runs-on")
         if runs_on is None or legacy.inline_scalar(runs_on[1][4]) is None:
@@ -112,7 +123,11 @@ def github_run_scripts(text: str) -> list[str]:
             continue
         job_if = properties.get("if")
         if needs is not None:
-            if not dependencies or job_if is None or base._condition(job_if[1][4]) != "always()":
+            if (
+                not dependencies
+                or job_if is None
+                or base._condition(job_if[1][4]) != "always()"
+            ):
                 continue
         elif job_if is not None and base._condition(job_if[1][4]) != "true":
             continue
@@ -121,11 +136,16 @@ def github_run_scripts(text: str) -> list[str]:
         steps = properties.get("steps")
         if job_defaults is None or steps is None:
             continue
-        if legacy.inline_scalar(steps[1][4]) is not None or legacy.scalar_indicator(steps[1][4]) is not None:
+        if (
+            legacy.inline_scalar(steps[1][4]) is not None
+            or legacy.scalar_indicator(steps[1][4]) is not None
+        ):
             continue
         steps_end = legacy.block_end(lines, steps[0], steps[1][2])
         items = legacy.item_starts(lines, steps[0] + 1, steps_end, scalar_body)
 
+        group: list[tuple[str, bool | None]] = []
+        blocked = False
         for index, item_row in enumerate(items):
             item_end = items[index + 1] if index + 1 < len(items) else steps_end
             first = legacy.yaml_header(lines[item_row])
@@ -136,28 +156,61 @@ def github_run_scripts(text: str) -> list[str]:
                 if row in scalar_body:
                     continue
                 header = legacy.yaml_header(lines[row])
-                if header is not None and not header[1] and header[2] == first[2]:
+                if (
+                    header is not None
+                    and not header[1]
+                    and header[2] == first[2]
+                ):
                     step[header[3]] = (row, header)
-            step_if = step.get("if")
-            if step_if is not None and base._condition(step_if[1][4]) != "true":
+
+            step_if = _boolean_entry(step.get("if"), default=True)
+            if step_if is False:
                 continue
+            if step_if is not True:
+                blocked = True
+                break
+
             run = step.get("run")
             if run is None:
                 continue
-            shell = base._effective_entry(step, job_defaults, workflow_defaults, "shell")
+            shell = base._effective_entry(
+                step, job_defaults, workflow_defaults, "shell"
+            )
             if shell is not None and not _supported_shell(shell[1][4]):
-                continue
+                blocked = True
+                break
             working_directory = base._effective_entry(
                 step, job_defaults, workflow_defaults, "working-directory"
             )
             if not base._repo_root_working_directory(working_directory):
-                continue
+                blocked = True
+                break
+
+            continue_on_error = _boolean_entry(
+                step.get("continue-on-error"), default=False
+            )
             if run[0] in ranges:
                 end, style = ranges[run[0]]
-                scripts.append(legacy.scalar_text(lines, run[0], end, style))
-            elif (value := legacy.inline_scalar(run[1][4])) is not None:
-                scripts.append(value)
-    return scripts
+                script = legacy.scalar_text(lines, run[0], end, style)
+            else:
+                script = legacy.inline_scalar(run[1][4])
+                if script is None:
+                    blocked = True
+                    break
+            group.append((script, continue_on_error))
+
+        if group and not blocked:
+            groups.append(group)
+    return groups
+
+
+def github_run_scripts(text: str) -> list[str]:
+    """Return extracted scripts while preserving the public compatibility API."""
+    return [
+        script
+        for group in _github_run_step_groups(text)
+        for script, _ in group
+    ]
 
 
 def _unsafe_state_change(parts: list[str]) -> bool:
@@ -166,7 +219,6 @@ def _unsafe_state_change(parts: list[str]) -> bool:
         return False
     command = parts[0]
     if command == "eval":
-        # Eval can hide quoted terminators, directory changes, or control flow.
         return True
     if command in _TERMINATORS or command in _DIRECTORY_MUTATORS:
         return True
@@ -191,32 +243,41 @@ def _safe_prelude(parts: list[str]) -> bool:
     )
 
 
-def shell_commands(text: str) -> list[str]:
-    """Return only a first provably reachable substantive command."""
-    stripped = "\n".join(legacy.strip_comment(line) for line in text.splitlines())
-    # Heredoc bodies are data, not commands. Conservatively reject the whole
-    # script rather than risk matching a test command inside the payload.
+def _analyze_script(text: str) -> tuple[str, str | None]:
+    """Classify a script as invalid, prelude-only, or one reachable command."""
+    stripped = "\n".join(
+        legacy.strip_comment(line) for line in text.splitlines()
+    )
     if "<<" in stripped:
-        return []
+        return "invalid", None
     try:
-        lexer = shlex.shlex(stripped, posix=True, punctuation_chars=";&|(){}")
+        lexer = shlex.shlex(
+            stripped, posix=True, punctuation_chars=";&|(){}"
+        )
         lexer.whitespace_split = True
         lexer.commenters = ""
         tokens = list(lexer)
     except ValueError:
-        return []
-    if any(token in _CONTROL or token in legacy.CONTROL_WORDS for token in tokens):
-        return []
+        return "invalid", None
+    if any(
+        token in _CONTROL or token in legacy.CONTROL_WORDS
+        for token in tokens
+    ):
+        return "invalid", None
 
     lines = text.splitlines()
     index = 0
+    saw_prelude = False
     while index < len(lines):
         first = legacy.strip_comment(lines[index]).strip()
         if not first:
             index += 1
             continue
         parts = [first]
-        while parts[-1].rstrip().endswith("\\") and index + 1 < len(lines):
+        while (
+            parts[-1].rstrip().endswith("\\")
+            and index + 1 < len(lines)
+        ):
             parts[-1] = parts[-1].rstrip()[:-1]
             index += 1
             continuation = legacy.strip_comment(lines[index]).strip()
@@ -226,63 +287,51 @@ def shell_commands(text: str) -> list[str]:
         try:
             parsed = shlex.split(command)
         except ValueError:
-            return []
+            return "invalid", None
         if parsed and (
-            legacy.ENV_ASSIGNMENT.fullmatch(parsed[0]) or _unsafe_state_change(parsed)
+            legacy.ENV_ASSIGNMENT.fullmatch(parsed[0])
+            or _unsafe_state_change(parsed)
         ):
-            return []
+            return "invalid", None
         if parsed and _safe_prelude(parsed):
+            saw_prelude = True
             index += 1
             continue
-        # Under fail-fast shells, any unknown predecessor may stop execution.
-        # Therefore only the first substantive command is provably reachable.
-        return [command] if parsed else []
-    return []
+        return ("command", command) if parsed else ("invalid", None)
+    return ("prelude", None) if saw_prelude else ("empty", None)
 
 
-def _ci_discovery_one(
-    discovery: Mapping[str, Any], workflow_text: str
-) -> tuple[bool, list[str]]:
-    """Evaluate one workflow document without cross-file state leakage."""
-    scripts = github_run_scripts(workflow_text)
-    commands = [command for script in scripts for command in shell_commands(script)]
+def shell_commands(text: str) -> list[str]:
+    """Return only a first provably reachable substantive command."""
+    kind, command = _analyze_script(text)
+    return [command] if kind == "command" and command is not None else []
+
+
+def _command_matches(
+    discovery: Mapping[str, Any], command: str
+) -> list[str]:
+    """Return configured patterns satisfied by one executable command."""
     strategy = discovery["strategy"]
-    uses_pytest = strategy == "pytest_default_discovery" or any(
-        str(pattern).endswith(".py") for pattern in discovery.get("contains_any", [])
-    )
-    if uses_pytest and (
-        any(name.startswith("PYTEST_") for name in legacy.yaml_env_names(workflow_text))
-        or any(
-            re.search(
-                r"\bPYTEST_[A-Za-z0-9_]*\b",
-                "\n".join(legacy.strip_comment(line) for line in script.splitlines()),
-            )
-            for script in scripts
-        )
-    ):
-        return False, []
     if strategy == "pytest_default_discovery":
-        matched = any(
-            base.pytest_command(command, str(discovery["test_path"]), False)
-            for command in commands
-        )
-        return matched, [str(discovery["command"])] if matched else []
+        if base.pytest_command(
+            command, str(discovery["test_path"]), False
+        ):
+            return [str(discovery["command"])]
+        return []
     if strategy == "mix_default_discovery":
-        matched = any(
-            base.mix_command(command, str(discovery["test_path"]))
-            for command in commands
-        )
-        return matched, [str(discovery["command"])] if matched else []
+        if base.mix_command(command, str(discovery["test_path"])):
+            return [str(discovery["command"])]
+        return []
 
     matches: list[str] = []
     for value in discovery["contains_any"]:
         pattern = str(value)
-        if pattern.endswith(".py") and any(
-            base.pytest_command(command, pattern, True) for command in commands
+        if pattern.endswith(".py") and base.pytest_command(
+            command, pattern, True
         ):
             matches.append(pattern)
-        elif pattern.endswith(".exs") and any(
-            base.mix_command(command, pattern, True) for command in commands
+        elif pattern.endswith(".exs") and base.mix_command(
+            command, pattern, True
         ):
             matches.append(pattern)
         elif not pattern.endswith((".py", ".exs")):
@@ -290,12 +339,66 @@ def _ci_discovery_one(
                 required = shlex.split(pattern)
             except ValueError:
                 continue
-            if any(
-                (parts := base._tokens(command))
-                and parts[: len(required)] == required
-                for command in commands
-            ):
+            parts = base._tokens(command)
+            if parts and parts[: len(required)] == required:
                 matches.append(pattern)
+    return matches
+
+
+def _ci_discovery_one(
+    discovery: Mapping[str, Any], workflow_text: str
+) -> tuple[bool, list[str]]:
+    """Evaluate one workflow document without cross-file state leakage."""
+    groups = _github_run_step_groups(workflow_text)
+    scripts = [
+        script for group in groups for script, _ in group
+    ]
+    strategy = discovery["strategy"]
+    uses_pytest = strategy == "pytest_default_discovery" or any(
+        str(pattern).endswith(".py")
+        for pattern in discovery.get("contains_any", [])
+    )
+    if uses_pytest and (
+        any(
+            name.startswith("PYTEST_")
+            for name in legacy.yaml_env_names(workflow_text)
+        )
+        or any(
+            re.search(
+                r"\bPYTEST_[A-Za-z0-9_]*\b",
+                "\n".join(
+                    legacy.strip_comment(line)
+                    for line in script.splitlines()
+                ),
+            )
+            for script in scripts
+        )
+    ):
+        return False, []
+
+    matches: list[str] = []
+    for group in groups:
+        for script, continue_on_error in group:
+            kind, command = _analyze_script(script)
+            if kind == "invalid":
+                break
+            if kind in {"empty", "prelude"}:
+                continue
+            if command is None:
+                break
+
+            current = _command_matches(discovery, command)
+            if current and continue_on_error is False:
+                for pattern in current:
+                    if pattern not in matches:
+                        matches.append(pattern)
+                break
+
+            if continue_on_error is True:
+                continue
+            # Unknown or disabled failure propagation means a later run step
+            # is not provably reachable under GitHub's fail-fast semantics.
+            break
     return bool(matches), matches
 
 
@@ -303,7 +406,11 @@ def ci_discovery(
     discovery: Mapping[str, Any], workflow_texts: str | list[str]
 ) -> tuple[bool, list[str]]:
     """Evaluate workflow documents independently and union safe matches."""
-    texts = workflow_texts if isinstance(workflow_texts, list) else [workflow_texts]
+    texts = (
+        workflow_texts
+        if isinstance(workflow_texts, list)
+        else [workflow_texts]
+    )
     matched: list[str] = []
     discovered = False
     for text in texts:
