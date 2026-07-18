@@ -75,6 +75,6 @@ defmodule Pythia.LotusDocsContractTest do
     assert limitations =~ "do not upgrade the MVP into a certified safety system"
 
     assert limitations =~
-             "do not replace domain-specific authorization and execution controls"
+             "or replace domain-specific authorization and execution controls"
   end
 end
