@@ -28,8 +28,11 @@ def rows(
     declared = model.get(f"{key[:-1]}_columns") if key.endswith("s") else None
     if declared != columns:
         raise ValueError(f"unexpected {key} columns")
+    raw_rows = model.get(key)
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise ValueError(f"{key} must be a non-empty list")
     result = []
-    for raw in model.get(key, []):
+    for raw in raw_rows:
         if not isinstance(raw, list) or len(raw) != len(columns):
             raise ValueError(f"invalid {key} row")
         result.append(dict(zip(columns, raw)))
