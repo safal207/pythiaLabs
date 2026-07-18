@@ -12,8 +12,15 @@ def workflow(command, env=""):
 
 
 def fixture(discovery):
-    if discovery.get("strategy") == "pytest_default_discovery":
-        command = "python -m pytest \\\n  --junitxml=artifacts/junit.xml \\\n  --cov=cml\n"
+    strategy = discovery.get("strategy")
+    if strategy == "pytest_default_discovery":
+        command = (
+            "python -m pytest \\\n"
+            "  --junitxml=artifacts/junit.xml \\\n"
+            "  --cov=cml\n"
+        )
+    elif strategy == "mix_default_discovery":
+        command = "mix test\n"
     else:
         pattern = discovery["contains_any"][0]
         command = f"python -m pytest {pattern}\n" if pattern.endswith(".py") else pattern + "\n"
@@ -62,7 +69,7 @@ def cml_addopts(self):
 
 def ls_addopts(self):
     self.assert_ci_drift("ls", "PYTEST_ADDOPTS='--ignore=tests/test_lotus_docs_contract.py' "
-                          "python -m pytest tests/test_lotus_docs_contract.py\n")
+                           "python -m pytest tests/test_lotus_docs_contract.py\n")
 
 
 def yaml_addopts(self):
