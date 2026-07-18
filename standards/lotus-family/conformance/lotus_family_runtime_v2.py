@@ -55,6 +55,32 @@ def _is_conftest(path: str) -> bool:
     return path == "conftest.py" or path.endswith("/conftest.py")
 
 
+def _contains_python_test_reference(value: object) -> bool:
+    """Return true when a discovery value names a Python test target."""
+    if not isinstance(value, str):
+        return False
+    for token in value.split():
+        normalized = token.strip("'\"").split("::", 1)[0]
+        if normalized.lower().endswith(".py"):
+            return True
+    return False
+
+
+def _requires_pytest_configuration_audit(
+    discovery: Mapping[str, Any],
+) -> bool:
+    """Identify discovery strategies whose execution is affected by pytest config."""
+    strategy = discovery.get("strategy")
+    if strategy == "pytest_default_discovery":
+        return True
+    if strategy != "contains_any":
+        return False
+    candidates = discovery.get("contains_any")
+    return isinstance(candidates, list) and any(
+        _contains_python_test_reference(candidate) for candidate in candidates
+    )
+
+
 def _activates_pytest_configuration(path: str, text: str) -> bool:
     """Detect config scopes or hooks that can alter default pytest collection."""
     if _is_conftest(path):
@@ -158,7 +184,9 @@ def audit_repository(
     if config is None:
         return audit
     discovery = config.get("ci_discovery", {})
-    if discovery.get("strategy") != "pytest_default_discovery":
+    if not isinstance(discovery, Mapping) or not _requires_pytest_configuration_audit(
+        discovery
+    ):
         return audit
 
     repository_root = (
@@ -172,7 +200,7 @@ def audit_repository(
         "paths": observed,
         "blocked_paths": blockers,
         "detail": (
-            "active, unreadable, or executable pytest configuration can alter default collection"
+            "active, unreadable, or executable pytest configuration can alter test collection or selection"
             if blockers
             else "known pytest configuration and conftest files were absent or hashed without an active pytest scope"
         ),
