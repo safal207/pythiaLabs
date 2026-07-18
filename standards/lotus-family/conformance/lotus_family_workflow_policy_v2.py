@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import shlex
 from typing import Any, Mapping
 
@@ -12,6 +13,9 @@ _NON_FAIL_FAST_CUSTOM_SHELLS = {
     ("bash", "{0}"),
     ("sh", "{0}"),
 }
+_PYTEST_ENV_NAME = re.compile(r"\bPYTEST_[A-Za-z0-9_]*\b")
+_YAML_ANCHOR_ONLY = re.compile(r"&\S+\Z")
+_YAML_ALIAS_ONLY = re.compile(r"\*\S+\Z")
 
 
 def _shell_parts(value: str) -> tuple[str, ...] | None:
@@ -80,6 +84,62 @@ def _has_non_gating_job(text: str) -> bool:
     return False
 
 
+def _uses_pytest(discovery: Mapping[str, Any]) -> bool:
+    """Return true when repository configuration can affect discovery."""
+    if discovery.get("strategy") == "pytest_default_discovery":
+        return True
+    values = discovery.get("contains_any", [])
+    return isinstance(values, list) and any(
+        isinstance(value, str) and value.split("::", 1)[0].endswith(".py")
+        for value in values
+    )
+
+
+def _has_unproven_pytest_env(text: str) -> bool:
+    """Reject pytest env hidden behind aliases or anchored mapping syntax."""
+    lines = text.splitlines()
+    ranges = previous.legacy.scalar_ranges(lines)
+    scalar_body = {
+        row
+        for start, (end, _) in ranges.items()
+        for row in range(start + 1, end)
+    }
+    for index, line in enumerate(lines):
+        if index in scalar_body:
+            continue
+        header = previous.legacy.yaml_header(line)
+        if header is None or header[3] != "env":
+            continue
+
+        inline = previous.legacy.strip_comment(header[4]).strip()
+        if _YAML_ALIAS_ONLY.fullmatch(inline):
+            return True
+        if inline.startswith("&") and not _YAML_ANCHOR_ONLY.fullmatch(inline):
+            return True
+        if inline and not _YAML_ANCHOR_ONLY.fullmatch(inline):
+            if _PYTEST_ENV_NAME.search(inline):
+                return True
+            continue
+
+        for row in range(index + 1, len(lines)):
+            if row in scalar_body:
+                continue
+            if not lines[row].strip() or lines[row].lstrip().startswith("#"):
+                continue
+            indent = previous.legacy.indent_of(lines[row])
+            if indent is None or indent <= header[2]:
+                break
+            child = previous.legacy.yaml_header(lines[row])
+            if (
+                child is not None
+                and not child[1]
+                and child[2] > header[2]
+                and child[3].startswith("PYTEST_")
+            ):
+                return True
+    return False
+
+
 def _workflow_execution_is_gating(text: str) -> bool:
     """Require fail-fast shells and jobs whose failure gates the workflow."""
     return not (
@@ -100,6 +160,8 @@ def _ci_discovery_one(
 ) -> tuple[bool, list[str]]:
     """Evaluate one workflow only after proving its execution remains gating."""
     if not _workflow_execution_is_gating(workflow_text):
+        return False, []
+    if _uses_pytest(discovery) and _has_unproven_pytest_env(workflow_text):
         return False, []
     return previous._ci_discovery_one(discovery, workflow_text)
 
