@@ -57,6 +57,7 @@
         "workflow_paths": [
           ".github/workflows/ci.yml"
         ],
+        "strategy": "contains_any",
         "contains_any": [
           "mix test"
         ]
@@ -101,9 +102,9 @@
         "workflow_paths": [
           ".github/workflows/ci.yml"
         ],
-        "contains_any": [
-          "python -m pytest"
-        ]
+        "strategy": "pytest_default_discovery",
+        "command": "python -m pytest",
+        "test_path": "tests/test_lotus_docs_contract.py"
       }
     },
     {
@@ -147,6 +148,7 @@
         "workflow_paths": [
           ".github/workflows/ci.yml"
         ],
+        "strategy": "contains_any",
         "contains_any": [
           "tests/test_lotus_docs_contract.py"
         ]
