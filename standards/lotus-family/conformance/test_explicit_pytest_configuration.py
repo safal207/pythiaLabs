@@ -53,6 +53,24 @@ def _materialize_ls(snapshot_root: Path, manifest: dict) -> Path:
     return repository_root
 
 
+def _audit_ls(snapshot_root: Path, manifest: dict) -> dict:
+    return audit_repository(
+        manifest,
+        repository_id="ls",
+        snapshot_root=snapshot_root,
+        repository_ref="refs/heads/main",
+        commit_sha=SHA,
+    )
+
+
+def _configuration_check(result: dict) -> dict:
+    return next(
+        row
+        for row in result["checks"]
+        if row["check_id"] == "pytest_configuration"
+    )
+
+
 class ExplicitPytestConfigurationTest(unittest.TestCase):
     """Fail closed when pytest config narrows an explicit Python test run."""
 
@@ -70,25 +88,42 @@ class ExplicitPytestConfigurationTest(unittest.TestCase):
                     "tests/test_lotus_docs_contract.py\n"
                 ),
             )
-            result = audit_repository(
-                manifest,
-                repository_id="ls",
-                snapshot_root=snapshot_root,
-                repository_ref="refs/heads/main",
-                commit_sha=SHA,
-            )
+            result = _audit_ls(snapshot_root, manifest)
 
         self.assertEqual(result["outcome"], DRIFT)
         self.assertEqual(result["reason_code"], "LOTUS_CONTRACT_DRIFT")
-        config_check = next(
-            row
-            for row in result["checks"]
-            if row["check_id"] == "pytest_configuration"
-        )
+        config_check = _configuration_check(result)
         self.assertEqual(config_check["outcome"], DRIFT)
         self.assertIn("pytest.ini", config_check["blocked_paths"])
         self.assertIn(
             "pytest.ini",
+            {row["path"] for row in result["files"]},
+        )
+
+    def test_target_parent_pytest_ini_blocks_explicit_contract_test(self) -> None:
+        manifest = load_manifest(MANIFEST_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_ls(snapshot_root, manifest)
+            _write(
+                repository_root,
+                "tests/pytest.ini",
+                (
+                    "[pytest]\n"
+                    "addopts = --deselect "
+                    "tests/test_lotus_docs_contract.py\n"
+                ),
+            )
+            result = _audit_ls(snapshot_root, manifest)
+
+        self.assertEqual(result["outcome"], DRIFT)
+        self.assertEqual(result["reason_code"], "LOTUS_CONTRACT_DRIFT")
+        config_check = _configuration_check(result)
+        self.assertEqual(config_check["outcome"], DRIFT)
+        self.assertIn("tests/pytest.ini", config_check["paths"])
+        self.assertIn("tests/pytest.ini", config_check["blocked_paths"])
+        self.assertIn(
+            "tests/pytest.ini",
             {row["path"] for row in result["files"]},
         )
 
