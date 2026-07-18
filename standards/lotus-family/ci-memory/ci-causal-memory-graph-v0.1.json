@@ -70,7 +70,8 @@
     ["M21", "memory.proposal_created", "authority.human_acceptance_required", "requires", "hierarchy"],
     ["M22", "cause.confirmed", "authority.human_acceptance_required", "requires", "hierarchy"],
     ["M23", "guard.regression_added", "authority.human_acceptance_required", "requires", "hierarchy"],
-    ["M24", "time.evidence_stale", "cause.hypothesis", "invalidates_automatic_reuse", "temporal"]
+    ["M24", "time.evidence_stale", "cause.hypothesis", "invalidates_automatic_reuse", "temporal"],
+    ["M25", "cause.hypothesis", "authority.human_acceptance_required", "requires_before_action", "hierarchy"]
   ],
   "trajectories": [
     {
