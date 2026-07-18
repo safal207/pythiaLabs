@@ -1,0 +1,33 @@
+name: Temporary Lotus formatter
+
+on:
+  push:
+    branches:
+      - agent/takeprofit-lotus-judgment-v0-1
+    paths:
+      - .github/workflows/tmp-format-lotus-external-qa.yml
+      - test/lotus_external_qa_cases_contract_test.exs
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.16'
+          otp-version: '26'
+      - run: |
+          mix local.hex --force
+          mix local.rebar --force
+          mix deps.get
+          mix format test/lotus_external_qa_cases_contract_test.exs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatted-lotus-external-qa-${{ github.run_id }}
+          path: test/lotus_external_qa_cases_contract_test.exs
+          if-no-files-found: error
+          retention-days: 1
