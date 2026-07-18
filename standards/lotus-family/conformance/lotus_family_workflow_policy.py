@@ -11,8 +11,9 @@ import lotus_family_workflow_hardened as base
 import lotus_family_workflow_legacy as legacy
 
 _POSIX_SHELLS = {"bash", "sh"}
-_SHELL_WRAPPERS = {"command", "builtin", "eval"}
+_SHELL_WRAPPERS = {"command", "builtin"}
 _TERMINATORS = {"exit", "exec", "return", "break", "continue"}
+_DIRECTORY_MUTATORS = {"cd", "pushd", "popd", "source", "."}
 _CONTROL = legacy.CONTROL_TOKENS | {"(", ")", "{", "}"}
 
 
@@ -31,7 +32,8 @@ def _supported_shell(value: str) -> bool:
     if shell not in _POSIX_SHELLS:
         return False
     if len(parts) == 1:
-        return True
+        # Only the exact GitHub built-in keywords receive an implicit temp script.
+        return parts[0] in _POSIX_SHELLS
     allowed = {
         ("bash", "{0}"),
         ("bash", "-e", "{0}"),
@@ -158,19 +160,33 @@ def github_run_scripts(text: str) -> list[str]:
     return scripts
 
 
-def _terminates(parts: list[str]) -> bool:
+def _unsafe_state_change(parts: list[str]) -> bool:
+    """Reject commands that can end execution or change later command meaning."""
     if not parts:
         return False
-    if parts[0] in _TERMINATORS:
+    command = parts[0]
+    if command == "eval":
+        # Eval can hide quoted terminators, directory changes, or control flow.
         return True
-    return parts[0] in _SHELL_WRAPPERS and any(
-        token in _TERMINATORS for token in parts[1:]
-    )
+    if command in _TERMINATORS or command in _DIRECTORY_MUTATORS:
+        return True
+    if command in _SHELL_WRAPPERS and len(parts) > 1:
+        wrapped = parts[1]
+        return (
+            wrapped == "eval"
+            or wrapped in _TERMINATORS
+            or wrapped in _DIRECTORY_MUTATORS
+        )
+    return False
 
 
 def shell_commands(text: str) -> list[str]:
-    """Reject control flow and direct or wrapper-invoked terminators."""
+    """Reject scripts whose later test commands cannot be proven reachable."""
     stripped = "\n".join(legacy.strip_comment(line) for line in text.splitlines())
+    # Heredoc bodies are data, not commands. Conservatively reject the whole
+    # script rather than risk matching a test command inside the payload.
+    if "<<" in stripped:
+        return []
     try:
         lexer = shlex.shlex(stripped, posix=True, punctuation_chars=";&|(){}")
         lexer.whitespace_split = True
@@ -202,7 +218,7 @@ def shell_commands(text: str) -> list[str]:
         except ValueError:
             return []
         if parsed and (
-            legacy.ENV_ASSIGNMENT.fullmatch(parsed[0]) or _terminates(parsed)
+            legacy.ENV_ASSIGNMENT.fullmatch(parsed[0]) or _unsafe_state_change(parsed)
         ):
             return []
         commands.append(command)
