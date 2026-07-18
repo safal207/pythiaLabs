@@ -4,7 +4,8 @@ import argparse
 import hashlib
 import json
 import re
-from pathlib import Path
+import shlex
+from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 PASS = "PASS"
@@ -12,6 +13,7 @@ DRIFT = "DRIFT"
 UNKNOWN = "UNKNOWN"
 
 _COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+_PYTEST_START = ("python", "-m", "pytest")
 
 
 def load_json_object(path: Path) -> dict[str, Any]:
@@ -21,15 +23,139 @@ def load_json_object(path: Path) -> dict[str, Any]:
     return value
 
 
-def load_manifest(path: Path) -> dict[str, Any]:
-    manifest = load_json_object(path)
+def _non_empty_string(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+    return value
+
+
+def _relative_manifest_path(value: Any, field: str) -> str:
+    path_text = _non_empty_string(value, field)
+    if "\\" in path_text:
+        raise ValueError(f"{field} must use repository-style '/' separators")
+    path = PurePosixPath(path_text)
+    if path.is_absolute() or path == PurePosixPath(".") or ".." in path.parts:
+        raise ValueError(f"{field} must stay inside the repository snapshot")
+    return path.as_posix()
+
+
+def _validate_manifest(manifest: Mapping[str, Any]) -> None:
     if manifest.get("schema_version") != "pythia.lotus_family_manifest.v0.1":
         raise ValueError("unsupported Lotus Family manifest schema")
     if manifest.get("authority") != "audit_only":
         raise ValueError("Lotus Family manifest authority must be audit_only")
+
     repositories = manifest.get("repositories")
     if not isinstance(repositories, list) or not repositories:
         raise ValueError("manifest repositories must be a non-empty list")
+
+    repository_ids: set[str] = set()
+    snapshot_dirs: set[str] = set()
+    for repository_index, repository in enumerate(repositories):
+        prefix = f"repositories[{repository_index}]"
+        if not isinstance(repository, Mapping):
+            raise ValueError(f"{prefix} must be an object")
+
+        repository_id = _non_empty_string(repository.get("id"), f"{prefix}.id")
+        if repository_id in repository_ids:
+            raise ValueError(f"duplicate repository id: {repository_id}")
+        repository_ids.add(repository_id)
+
+        _non_empty_string(repository.get("repository"), f"{prefix}.repository")
+        snapshot_dir = _relative_manifest_path(
+            repository.get("snapshot_dir"), f"{prefix}.snapshot_dir"
+        )
+        if "/" in snapshot_dir:
+            raise ValueError(f"{prefix}.snapshot_dir must be one directory name")
+        if snapshot_dir in snapshot_dirs:
+            raise ValueError(f"duplicate snapshot_dir: {snapshot_dir}")
+        snapshot_dirs.add(snapshot_dir)
+
+        file_checks = repository.get("file_checks")
+        if not isinstance(file_checks, list) or not file_checks:
+            raise ValueError(f"{prefix}.file_checks must be a non-empty list")
+
+        check_ids: set[str] = set()
+        checked_paths: set[str] = set()
+        for check_index, check in enumerate(file_checks):
+            check_prefix = f"{prefix}.file_checks[{check_index}]"
+            if not isinstance(check, Mapping):
+                raise ValueError(f"{check_prefix} must be an object")
+
+            check_id = _non_empty_string(check.get("id"), f"{check_prefix}.id")
+            if check_id in check_ids:
+                raise ValueError(f"duplicate check id in {repository_id}: {check_id}")
+            check_ids.add(check_id)
+
+            checked_paths.add(
+                _relative_manifest_path(check.get("path"), f"{check_prefix}.path")
+            )
+            terms = check.get("contains_all")
+            if not isinstance(terms, list) or not terms:
+                raise ValueError(
+                    f"{check_prefix}.contains_all must be a non-empty list"
+                )
+            for term_index, term in enumerate(terms):
+                _non_empty_string(
+                    term, f"{check_prefix}.contains_all[{term_index}]"
+                )
+
+        discovery = repository.get("ci_discovery")
+        if not isinstance(discovery, Mapping):
+            raise ValueError(f"{prefix}.ci_discovery must be an object")
+
+        workflow_paths = discovery.get("workflow_paths")
+        if not isinstance(workflow_paths, list) or not workflow_paths:
+            raise ValueError(
+                f"{prefix}.ci_discovery.workflow_paths must be a non-empty list"
+            )
+        for path_index, workflow_path in enumerate(workflow_paths):
+            _relative_manifest_path(
+                workflow_path,
+                f"{prefix}.ci_discovery.workflow_paths[{path_index}]",
+            )
+
+        strategy = discovery.get("strategy", "contains_any")
+        if strategy == "contains_any":
+            patterns = discovery.get("contains_any")
+            if not isinstance(patterns, list) or not patterns:
+                raise ValueError(
+                    f"{prefix}.ci_discovery.contains_any must be a non-empty list"
+                )
+            for pattern_index, pattern in enumerate(patterns):
+                _non_empty_string(
+                    pattern,
+                    f"{prefix}.ci_discovery.contains_any[{pattern_index}]",
+                )
+        elif strategy == "pytest_default_discovery":
+            command = _non_empty_string(
+                discovery.get("command"), f"{prefix}.ci_discovery.command"
+            )
+            if command != "python -m pytest":
+                raise ValueError(
+                    f"{prefix}.ci_discovery.command must be 'python -m pytest'"
+                )
+            test_path = _relative_manifest_path(
+                discovery.get("test_path"), f"{prefix}.ci_discovery.test_path"
+            )
+            test_name = PurePosixPath(test_path).name
+            if not (test_name.startswith("test_") and test_name.endswith(".py")):
+                raise ValueError(
+                    f"{prefix}.ci_discovery.test_path is not pytest-discoverable"
+                )
+            if test_path not in checked_paths:
+                raise ValueError(
+                    f"{prefix}.ci_discovery.test_path must also be a checked file"
+                )
+        else:
+            raise ValueError(
+                f"{prefix}.ci_discovery.strategy is unsupported: {strategy}"
+            )
+
+
+def load_manifest(path: Path) -> dict[str, Any]:
+    manifest = load_json_object(path)
+    _validate_manifest(manifest)
     return manifest
 
 
@@ -73,6 +199,28 @@ def _result(
     }
 
 
+def _manifest_invalid_result(
+    *,
+    detail: str,
+    repository_id: str,
+    repository_ref: str,
+    commit_sha: str,
+    manifest_schema: str,
+) -> dict[str, Any]:
+    return _result(
+        outcome=UNKNOWN,
+        reason_code="MANIFEST_INVALID",
+        detail=detail,
+        repository="",
+        repository_id=repository_id,
+        repository_ref=repository_ref,
+        commit_sha=commit_sha,
+        manifest_schema=manifest_schema,
+        checks=[],
+        files=[],
+    )
+
+
 def _repository_config(
     manifest: Mapping[str, Any], repository_id: str
 ) -> Mapping[str, Any] | None:
@@ -82,12 +230,25 @@ def _repository_config(
     return None
 
 
+def _contained_path(root: Path, relative_path: str) -> tuple[Path | None, str | None]:
+    try:
+        normalized = _relative_manifest_path(relative_path, "manifest path")
+        root_resolved = root.resolve()
+        path = (root_resolved / Path(*PurePosixPath(normalized).parts)).resolve()
+        path.relative_to(root_resolved)
+        return path, None
+    except (OSError, ValueError):
+        return None, f"path escapes repository snapshot: {relative_path}"
+
+
 def _read_file(
     root: Path,
     relative_path: str,
     files: list[dict[str, str]],
 ) -> tuple[str | None, str | None]:
-    path = root / relative_path
+    path, containment_error = _contained_path(root, relative_path)
+    if containment_error is not None or path is None:
+        return None, containment_error
     if not path.is_file():
         return None, f"required file is missing: {relative_path}"
     try:
@@ -96,6 +257,75 @@ def _read_file(
         return text, None
     except (OSError, UnicodeError) as exc:
         return None, f"cannot read {relative_path}: {exc.__class__.__name__}"
+
+
+def _shell_commands(text: str) -> list[str]:
+    lines = text.splitlines()
+    commands: list[str] = []
+    index = 0
+    while index < len(lines):
+        stripped = lines[index].strip()
+        if "python -m pytest" not in stripped:
+            index += 1
+            continue
+
+        parts = [stripped]
+        while parts[-1].rstrip().endswith("\\") and index + 1 < len(lines):
+            parts[-1] = parts[-1].rstrip()[:-1]
+            index += 1
+            parts.append(lines[index].strip())
+        commands.append(" ".join(parts))
+        index += 1
+    return commands
+
+
+def _is_pytest_default_discovery(command: str, test_path: str) -> bool:
+    try:
+        tokens = shlex.split(command)
+    except ValueError:
+        return False
+
+    start = None
+    for index in range(len(tokens) - 2):
+        if tuple(tokens[index : index + 3]) == _PYTEST_START:
+            start = index + 3
+            break
+    if start is None:
+        return False
+
+    arguments = tokens[start:]
+    forbidden_options = {"--collect-only", "--co", "--setup-only"}
+    if any(argument in forbidden_options for argument in arguments):
+        return False
+    if any(test_path in argument for argument in arguments):
+        return False
+
+    # Fail closed on positional selectors. The supported full-discovery form may
+    # carry options, but it may not name a test file, directory, or node id.
+    return all(argument.startswith("-") for argument in arguments)
+
+
+def _ci_discovery(
+    discovery: Mapping[str, Any],
+    combined: str,
+) -> tuple[bool, list[str]]:
+    strategy = discovery.get("strategy", "contains_any")
+    if strategy == "contains_any":
+        patterns = [str(pattern) for pattern in discovery["contains_any"]]
+        matches = [pattern for pattern in patterns if pattern in combined]
+        return bool(matches), matches
+
+    if strategy == "pytest_default_discovery":
+        command_name = str(discovery["command"])
+        test_path = str(discovery["test_path"])
+        matches = [
+            command
+            for command in _shell_commands(combined)
+            if _is_pytest_default_discovery(command, test_path)
+        ]
+        return bool(matches), [command_name] if matches else []
+
+    return False, []
 
 
 def audit_repository(
@@ -107,6 +337,17 @@ def audit_repository(
     commit_sha: str,
 ) -> dict[str, Any]:
     manifest_schema = str(manifest.get("schema_version", ""))
+    try:
+        _validate_manifest(manifest)
+    except (TypeError, ValueError) as exc:
+        return _manifest_invalid_result(
+            detail=str(exc),
+            repository_id=repository_id,
+            repository_ref=repository_ref,
+            commit_sha=commit_sha,
+            manifest_schema=manifest_schema,
+        )
+
     config = _repository_config(manifest, repository_id)
     if config is None:
         return _result(
@@ -150,7 +391,26 @@ def audit_repository(
             files=[],
         )
 
-    repository_root = snapshot_root / str(config["snapshot_dir"])
+    snapshot_root_resolved = snapshot_root.resolve()
+    repository_root = (
+        snapshot_root_resolved / str(config["snapshot_dir"])
+    ).resolve()
+    try:
+        repository_root.relative_to(snapshot_root_resolved)
+    except ValueError:
+        return _result(
+            outcome=UNKNOWN,
+            reason_code="SNAPSHOT_UNAVAILABLE",
+            detail="repository snapshot escapes snapshot_root",
+            repository=repository,
+            repository_id=repository_id,
+            repository_ref=repository_ref,
+            commit_sha=commit_sha,
+            manifest_schema=manifest_schema,
+            checks=[],
+            files=[],
+        )
+
     if not repository_root.is_dir():
         return _result(
             outcome=UNKNOWN,
@@ -169,7 +429,7 @@ def audit_repository(
     files: list[dict[str, str]] = []
     drift: list[str] = []
 
-    for check in config.get("file_checks", []):
+    for check in config["file_checks"]:
         check_id = str(check["id"])
         relative_path = str(check["path"])
         text, error = _read_file(repository_root, relative_path, files)
@@ -186,9 +446,8 @@ def audit_repository(
             drift.append(check_id)
             continue
 
-        missing_terms = [
-            term for term in check.get("contains_all", []) if term not in text
-        ]
+        terms = [str(term) for term in check["contains_all"]]
+        missing_terms = [term for term in terms if term not in text]
         outcome = PASS if not missing_terms else DRIFT
         checks.append(
             {
@@ -206,43 +465,39 @@ def audit_repository(
         if outcome == DRIFT:
             drift.append(check_id)
 
-    discovery = config.get("ci_discovery")
-    if discovery:
-        workflow_paths = [str(path) for path in discovery["workflow_paths"]]
-        workflow_texts: list[str] = []
-        read_errors: list[str] = []
-        for relative_path in workflow_paths:
-            text, error = _read_file(repository_root, relative_path, files)
-            if error is not None:
-                read_errors.append(error)
-            else:
-                workflow_texts.append(text)
-
-        combined = "\n".join(workflow_texts)
-        patterns = [str(pattern) for pattern in discovery["contains_any"]]
-        discovered = any(pattern in combined for pattern in patterns)
-        if read_errors and not workflow_texts:
-            outcome = DRIFT
-            detail = "; ".join(read_errors)
-            drift.append("ci_discovery")
-        elif discovered:
-            outcome = PASS
-            detail = "contract regression test is discovered by CI"
+    discovery = config["ci_discovery"]
+    workflow_paths = [str(path) for path in discovery["workflow_paths"]]
+    workflow_texts: list[str] = []
+    read_errors: list[str] = []
+    for relative_path in workflow_paths:
+        text, error = _read_file(repository_root, relative_path, files)
+        if error is not None:
+            read_errors.append(error)
         else:
-            outcome = DRIFT
-            detail = "no configured CI discovery pattern was found"
-            drift.append("ci_discovery")
-        checks.append(
-            {
-                "check_id": "ci_discovery",
-                "outcome": outcome,
-                "paths": workflow_paths,
-                "matched_patterns": [
-                    pattern for pattern in patterns if pattern in combined
-                ],
-                "detail": detail,
-            }
-        )
+            workflow_texts.append(text)
+
+    combined = "\n".join(workflow_texts)
+    discovered, matched_patterns = _ci_discovery(discovery, combined)
+    if read_errors and not workflow_texts:
+        outcome = DRIFT
+        detail = "; ".join(read_errors)
+        drift.append("ci_discovery")
+    elif discovered:
+        outcome = PASS
+        detail = "contract regression test is discovered by CI"
+    else:
+        outcome = DRIFT
+        detail = "no configured contract-specific CI discovery rule matched"
+        drift.append("ci_discovery")
+    checks.append(
+        {
+            "check_id": "ci_discovery",
+            "outcome": outcome,
+            "paths": workflow_paths,
+            "matched_patterns": matched_patterns,
+            "detail": detail,
+        }
+    )
 
     if drift:
         outcome = DRIFT
@@ -290,20 +545,13 @@ def main(argv: list[str] | None = None) -> int:
             commit_sha=args.commit_sha,
         )
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
-        result = {
-            "schema_version": "pythia.lotus_family_audit_result.v0.1",
-            "outcome": UNKNOWN,
-            "reason_code": "MANIFEST_INVALID",
-            "detail": str(exc),
-            "authority": {
-                "mode": "audit_only",
-                "grants_ownership": False,
-                "grants_approval": False,
-                "grants_execution": False,
-                "grants_delivery": False,
-                "grants_merge": False,
-            },
-        }
+        result = _manifest_invalid_result(
+            detail=str(exc),
+            repository_id=args.repository_id,
+            repository_ref=args.repository_ref,
+            commit_sha=args.commit_sha,
+            manifest_schema="",
+        )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
