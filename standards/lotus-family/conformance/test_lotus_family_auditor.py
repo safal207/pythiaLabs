@@ -4,11 +4,12 @@ from pathlib import Path
 import lotus_family_auditor_legacy_tests as old
 
 
-def workflow(command, env=""):
+def workflow(command, env="", shell=""):
     env_block = "env:\n" + "\n".join(f"  {x}" for x in env.splitlines()) + "\n" if env else ""
+    shell_line = f"        shell: {shell}\n" if shell else ""
     body = "\n".join(f"          {x}" if x else "" for x in command.splitlines())
     return ("name: CI\n" + env_block + "jobs:\n  test:\n    runs-on: ubuntu-latest\n"
-            "    steps:\n      - name: Run tests\n        run: |\n" + body + "\n")
+            "    steps:\n      - name: Run tests\n" + shell_line + "        run: |\n" + body + "\n")
 
 
 def fixture(discovery):
@@ -27,11 +28,13 @@ def fixture(discovery):
     return workflow(command)
 
 
-def assert_drift(self, repo_id, command, *, raw=False, env=""):
+def assert_drift(self, repo_id, command, *, raw=False, env="", shell=""):
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         repo = old._materialize_repository(root, self.config(repo_id))
-        self.workflow(repo).write_text(command if raw else workflow(command, env), encoding="utf-8")
+        self.workflow(repo).write_text(
+            command if raw else workflow(command, env, shell), encoding="utf-8"
+        )
         result = self.audit(repo_id, root)
         self.assertEqual(result["outcome"], old.DRIFT)
         self.assertEqual(self.discovery(result)["outcome"], old.DRIFT)
@@ -81,6 +84,26 @@ def pytest_plugins(self):
     self.assert_ci_drift("cml", "PYTEST_PLUGINS=custom_plugin python -m pytest\n")
 
 
+def quoted_eval_exit(self):
+    self.assert_ci_drift("cml", "eval 'exit 0'\npython -m pytest\n")
+
+
+def command_eval_exit(self):
+    self.assert_ci_drift("cml", "command eval 'exit 0'\npython -m pytest\n")
+
+
+def heredoc_body(self):
+    self.assert_ci_drift("cml", "cat <<'EOF'\npython -m pytest\nEOF\n")
+
+
+def directory_change(self):
+    self.assert_ci_drift("cml", "cd subdir\npython -m pytest\n")
+
+
+def path_like_builtin_shell(self):
+    self.assert_ci_drift("cml", "python -m pytest\n", shell="./bash")
+
+
 new_tests = {
     "test_bare_shell_text_is_not_a_run_step": bare,
     "test_pytest_text_in_workflow_env_value_is_not_executed": workflow_env_text,
@@ -90,6 +113,11 @@ new_tests = {
     "test_ls_pytest_addopts_assignment_is_drift": ls_addopts,
     "test_workflow_pytest_addopts_env_is_drift": yaml_addopts,
     "test_pytest_plugin_environment_assignment_is_drift": pytest_plugins,
+    "test_quoted_eval_terminator_is_drift": quoted_eval_exit,
+    "test_command_eval_terminator_is_drift": command_eval_exit,
+    "test_pytest_text_inside_heredoc_is_drift": heredoc_body,
+    "test_directory_change_before_pytest_is_drift": directory_change,
+    "test_path_like_builtin_shell_without_placeholder_is_drift": path_like_builtin_shell,
 }
 for name, method in new_tests.items():
     setattr(old.LotusFamilyAuditorTest, name, method)
