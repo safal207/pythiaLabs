@@ -28,6 +28,7 @@ defmodule Pythia.LotusExternalQACasesContractTest do
     assert finding["id"] == "chartstore-required-fields-changed-form"
     assert finding["severity"] == "P2"
     assert finding["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
+
     assert finding["evidence"]["exact_head_sha"] ==
              "27bf4fe23d8c63dcf6691ae7cf3b5f34b672e89c"
 
