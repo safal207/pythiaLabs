@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping
 
 import lotus_family_workflow_hardened as base
@@ -10,6 +11,12 @@ import lotus_family_workflow_policy_v2 as previous
 
 _PROVEN_FAILURE_COMMANDS = {"false"}
 _SHELL_WRAPPERS = {"command", "builtin"}
+_COMMAND_RESOLUTION_MUTATION = re.compile(
+    r"(?:\bGITHUB_PATH\b|"
+    r"(?m)^\s*(?:export\s+)?PATH\s*=|"
+    r"(?m)^\s*alias\s+(?:python(?:3)?|mix)\s*=|"
+    r"(?m)^\s*(?:function\s+)?(?:python(?:3)?|mix)\s*\(\s*\))"
+)
 
 
 def _proven_failure(command: str) -> bool:
@@ -26,6 +33,14 @@ def _proven_failure(command: str) -> bool:
     while index < len(parts) and parts[index].startswith("-"):
         index += 1
     return index < len(parts) and parts[index] in _PROVEN_FAILURE_COMMANDS
+
+
+def _mutates_command_resolution(script: str) -> bool:
+    """Fail closed when setup can replace the later Python or Mix executable."""
+    visible = "\n".join(
+        execution.legacy.strip_comment(line) for line in script.splitlines()
+    )
+    return bool(_COMMAND_RESOLUTION_MUTATION.search(visible))
 
 
 def _ci_discovery_one(
@@ -61,6 +76,8 @@ def _ci_discovery_one(
     matches: list[str] = []
     for group in groups:
         for script, continue_on_error in group:
+            if _mutates_command_resolution(script):
+                break
             kind, command = execution._analyze_script(script)
             if kind == "invalid":
                 break
@@ -85,7 +102,8 @@ def _ci_discovery_one(
             if continue_on_error is False and _proven_failure(command):
                 break
             # Ordinary setup steps may precede a later gating test. Only a
-            # proven blocker or unknown execution policy stops reachability.
+            # proven blocker, command-resolution mutation, or unknown execution
+            # policy stops reachability.
             continue
     return bool(matches), matches
 
