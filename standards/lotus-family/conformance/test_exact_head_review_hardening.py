@@ -209,6 +209,27 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
 
         self._assert_blocked_config(result, ".pytest.ini")
 
+    def test_conftest_hooks_block_default_discovery(self) -> None:
+        for relative_path in ("conftest.py", "support/conftest.py"):
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    _write(
+                        repository_root,
+                        relative_path,
+                        (
+                            "def pytest_ignore_collect(collection_path, config):\n"
+                            "    return True\n"
+                        ),
+                    )
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, relative_path)
+
     def test_non_pytest_pyproject_scope_is_hashed_and_keeps_pass(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
