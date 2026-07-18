@@ -154,6 +154,33 @@ def _scalar_ranges(lines: list[str]) -> dict[int, tuple[int, str]]:
     return ranges
 
 
+
+def _github_actions_steps_indices(
+    lines: list[str], scalar_body_lines: set[int]
+) -> set[int]:
+    stack: list[tuple[int, str]] = []
+    valid: set[int] = set()
+    for index, line in enumerate(lines):
+        if index in scalar_body_lines:
+            continue
+        header = _yaml_header(line)
+        if header is None or header[1]:
+            continue
+        _, _, key_indent, key, value = header
+        while stack and stack[-1][0] >= key_indent:
+            stack.pop()
+        parent_keys = [entry[1] for entry in stack]
+        if (
+            key == "steps"
+            and _inline_yaml_scalar(value) is None
+            and len(parent_keys) == 2
+            and parent_keys[0] == "jobs"
+        ):
+            valid.add(index)
+        if _inline_yaml_scalar(value) is None and _scalar_indicator(value) is None:
+            stack.append((key_indent, key))
+    return valid
+
 def _github_actions_run_scripts(text: str) -> list[str]:
     lines = text.splitlines()
     scalar_ranges = _scalar_ranges(lines)
@@ -162,6 +189,7 @@ def _github_actions_run_scripts(text: str) -> list[str]:
         for start, (end, _) in scalar_ranges.items()
         for line_index in range(start + 1, end)
     }
+    valid_steps = _github_actions_steps_indices(lines, scalar_body_lines)
     scripts: list[str] = []
     index = 0
 
@@ -170,11 +198,7 @@ def _github_actions_run_scripts(text: str) -> list[str]:
             index += 1
             continue
         header = _yaml_header(lines[index])
-        if (
-            header is None
-            or header[3] != "steps"
-            or _inline_yaml_scalar(header[4]) is not None
-        ):
+        if index not in valid_steps or header is None:
             index += 1
             continue
 

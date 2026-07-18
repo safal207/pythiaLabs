@@ -51,6 +51,11 @@ def step_env_text(self):
                          "          NOTE: python -m pytest\n        uses: actions/checkout@v4\n", raw=True)
 
 
+def fake_steps_in_metadata(self):
+    self.assert_ci_drift("cml", "name: CI\nmetadata:\n  fake-job:\n    steps:\n"
+                         "      - run: python -m pytest\njobs: {}\n", raw=True)
+
+
 def cml_addopts(self):
     self.assert_ci_drift("cml", "PYTEST_ADDOPTS='--ignore=tests/test_lotus_docs_contract.py' python -m pytest\n")
 
@@ -73,6 +78,7 @@ new_tests = {
     "test_bare_shell_text_is_not_a_run_step": bare,
     "test_pytest_text_in_workflow_env_value_is_not_executed": workflow_env_text,
     "test_pytest_text_in_step_env_value_is_not_executed": step_env_text,
+    "test_steps_outside_jobs_are_not_executable": fake_steps_in_metadata,
     "test_cml_pytest_addopts_assignment_is_drift": cml_addopts,
     "test_ls_pytest_addopts_assignment_is_drift": ls_addopts,
     "test_workflow_pytest_addopts_env_is_drift": yaml_addopts,
