@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import tomllib
 from pathlib import Path
@@ -49,8 +50,15 @@ def _has_meaningful_lines(text: str) -> bool:
     )
 
 
+def _is_conftest(path: str) -> bool:
+    """Return true for a repository-relative pytest conftest path."""
+    return path == "conftest.py" or path.endswith("/conftest.py")
+
+
 def _activates_pytest_configuration(path: str, text: str) -> bool:
-    """Detect config scopes that can alter default pytest collection."""
+    """Detect config scopes or hooks that can alter default pytest collection."""
+    if _is_conftest(path):
+        return True
     if path in _DEDICATED_PYTEST_CONFIGS:
         return _has_meaningful_lines(text)
     if path == "pyproject.toml":
@@ -72,14 +80,42 @@ def _activates_pytest_configuration(path: str, text: str) -> bool:
     return False
 
 
+def _discover_conftest_paths(repository_root: Path) -> list[str]:
+    """Find conftest files deterministically without traversing symlink dirs."""
+    discovered: list[str] = []
+    for directory, dirnames, filenames in os.walk(
+        repository_root,
+        followlinks=False,
+    ):
+        directory_path = Path(directory)
+        dirnames[:] = sorted(
+            name
+            for name in dirnames
+            if not (directory_path / name).is_symlink()
+        )
+        if "conftest.py" not in filenames:
+            continue
+        candidate = directory_path / "conftest.py"
+        try:
+            relative_path = candidate.relative_to(repository_root).as_posix()
+        except ValueError:
+            continue
+        discovered.append(relative_path)
+    return sorted(set(discovered))
+
+
 def _audit_pytest_configuration(
     repository_root: Path,
     files: list[dict[str, str]],
 ) -> tuple[list[str], list[str]]:
-    """Hash known pytest configs and return active or unreadable blockers."""
+    """Hash pytest configs and fail closed on active, unreadable, or hook files."""
     observed: list[str] = []
     blockers: list[str] = []
-    for relative_path in _PYTEST_CONFIG_PATHS:
+    candidate_paths = (
+        *_PYTEST_CONFIG_PATHS,
+        *_discover_conftest_paths(repository_root),
+    )
+    for relative_path in dict.fromkeys(candidate_paths):
         candidate = repository_root / relative_path
         if not candidate.exists() and not candidate.is_symlink():
             continue
@@ -136,9 +172,9 @@ def audit_repository(
         "paths": observed,
         "blocked_paths": blockers,
         "detail": (
-            "active or unreadable pytest configuration can alter default collection"
+            "active, unreadable, or executable pytest configuration can alter default collection"
             if blockers
-            else "known pytest configuration files were absent or hashed without an active pytest scope"
+            else "known pytest configuration and conftest files were absent or hashed without an active pytest scope"
         ),
     }
     audit.setdefault("checks", []).append(check)
