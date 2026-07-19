@@ -37,9 +37,16 @@ defmodule Pythia.LotusExternalQACasesContractTest do
 
     paired = quote_status["evidence"]["paired_quote_block"]
     assert paired["run_id"] == 29_666_238_811
-    assert paired["exact_head_sha"] == "18d703929c31d53789814890a3565550283d5120"
+
+    assert paired["exact_head_sha"] ==
+             "18d703929c31d53789814890a3565550283d5120"
+
     assert length(paired["pairs"]) == 3
-    assert Enum.all?(paired["pairs"], &(&1["chart_visible"] && &1["body_text_same"]))
+
+    assert Enum.all?(
+             paired["pairs"],
+             &(&1["chart_visible"] && &1["body_text_same"])
+           )
   end
 
   test "quote-status evidence blocks stale-live and rollback overclaims" do
@@ -58,7 +65,10 @@ defmodule Pythia.LotusExternalQACasesContractTest do
     packet = load!(@takeprofit)
 
     quote_status =
-      Enum.find(packet["confirmed_findings"], &(&1["id"] == "quote-connectivity-status-icon-only"))
+      Enum.find(
+        packet["confirmed_findings"],
+        &(&1["id"] == "quote-connectivity-status-icon-only")
+      )
 
     evidence = quote_status["evidence"]["paired_quote_block"]
 
