@@ -15,6 +15,13 @@
       "falsifier": "Repeated interaction, symbol/timeframe transition, history-backfill, and reload tests show no visible divergence while the validation errors remain.",
       "id": "chartstore-validation-user-impact",
       "status": "USER_IMPACT_UNPROVEN"
+    },
+    {
+      "claim": "The public published-indicator chart may be an intentionally fixed historical snapshot rather than a live chart.",
+      "confidence": 75,
+      "falsifier": "Product documentation or an explicit visible state contract identifies the chart as live or delayed and defines which visible elements consume current quote payloads.",
+      "id": "public-chart-live-delayed-snapshot-intent",
+      "status": "PRODUCT_INTENT_UNKNOWN"
     }
   ],
   "case_id": "takeprofit-public-chart-quote-2026-07-19",
@@ -40,43 +47,80 @@
       "status": "STILL_PRESENT_IN_CHANGED_FORM"
     },
     {
-      "claim": "During three independent 90–120 second browser-level network outages, the public BTC/USDT chart and price remained visibly plausible without an offline, stale, delayed, disconnected, or reconnecting state; zero quote responses arrived during each outage and a new non-empty quote response arrived after every restore.",
+      "claim": "When current ListQuotes requests are unavailable, the public chart remains fully visible and plausible while the only visible connection-state change is disappearance of a small green icon next to BYBIT; no textual offline, stale, delayed, disconnected, reconnecting, snapshot, or last-updated state appears.",
       "confidence": 99,
       "evidence": {
-        "artifact_sha256": "2064e033deae3895e647ec11ba0541aecd2947d614ab03a07bf19089a132dafd",
-        "exact_head_sha": "fe17c3ddad4e4540d91cb30ba40456f2114dc997",
-        "result_sha256": "0625dcd4f97a161bc0610ff31735fb8c399082a718f6678fd8bb9c921af9c73f",
-        "run_id": 29665413400,
-        "source_pr": 63,
-        "rounds": [
-          {
-            "actual_outage_ms": 90402,
-            "quote_responses_during_outage": 0,
-            "recovery": "PASS"
-          },
-          {
-            "actual_outage_ms": 105462,
-            "quote_responses_during_outage": 0,
-            "recovery": "PASS"
-          },
-          {
-            "actual_outage_ms": 120513,
-            "quote_responses_during_outage": 0,
-            "recovery": "PASS"
-          }
-        ]
+        "cadence_aware_outage": {
+          "artifact_sha256": "2064e033deae3895e647ec11ba0541aecd2947d614ab03a07bf19089a132dafd",
+          "exact_head_sha": "fe17c3ddad4e4540d91cb30ba40456f2114dc997",
+          "result_sha256": "0625dcd4f97a161bc0610ff31735fb8c399082a718f6678fd8bb9c921af9c73f",
+          "rounds": [
+            {
+              "actual_outage_ms": 90402,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            },
+            {
+              "actual_outage_ms": 105462,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            },
+            {
+              "actual_outage_ms": 120513,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            }
+          ],
+          "run_id": 29665413400,
+          "source_pr": 63
+        },
+        "paired_quote_block": {
+          "artifact_sha256": "6900d32df4805706dc1ec8cc9d19f409e079c9ebbde6b907fce20d0534328838",
+          "exact_head_sha": "18d703929c31d53789814890a3565550283d5120",
+          "pairs": [
+            {
+              "baseline_quote_responses": 2,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 1,
+              "treatment_blocked_requests": 1
+            },
+            {
+              "baseline_quote_responses": 1,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 2,
+              "treatment_blocked_requests": 2
+            },
+            {
+              "baseline_quote_responses": 1,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 3,
+              "treatment_blocked_requests": 2
+            }
+          ],
+          "raw_result_sha256": "cd57984cc134fd4ea99861e0640388fc712795eac4f86e637dd766fdbead0838",
+          "run_id": 29666238811,
+          "source_pr": 69,
+          "visual_difference": "The small green status icon disappears and the 1h control shifts left; candles, indicator lines, axes, price labels, and body text remain unchanged."
+        }
       },
-      "id": "public-chart-missing-freshness-boundary-during-outage",
+      "id": "quote-connectivity-status-icon-only",
       "limitations": [
-        "The visible price was not compared with an external market source.",
+        "The public chart is not proven to consume the current quote payload.",
+        "The visible chart may be an intentionally historical or published snapshot.",
         "The evidence does not establish authenticated workspace behavior or trading-decision impact.",
-        "The evidence does not establish visible application rollback from an older response."
+        "The evidence does not establish numerical price inaccuracy or visible application rollback."
       ],
       "severity": "P2",
-      "status": "CONFIRMED_REPEATED_OUTAGE"
+      "status": "CONFIRMED_ICON_ONLY_STATE_LOSS"
     }
   ],
-  "generated_at": "2026-07-19T02:45:00.000+03:00",
+  "generated_at": "2026-07-19T03:15:00.000+03:00",
   "passed_checks": [
     {
       "claim": "The public page loaded BTC/USDT metadata, historical bars, and changing quote payloads.",
@@ -99,6 +143,27 @@
       "result": "PASS"
     },
     {
+      "claim": "Blocking naturally initiated ListQuotes requests removed the same small green status icon in three paired runs while preserving the visible chart and all body text.",
+      "evidence": {
+        "baseline_chart_sha256": "72402381f037ca7afec422a9d8dcaa1cced117742811f8f63c195c289b9ffc79",
+        "difference_bbox": "x=148..193, y=8..27",
+        "pairs": 3,
+        "treatment_chart_sha256": "005ab2fd1bed42c57fcf678afa196dc38a71f203ed4609b8daf42450c5e0eaa1"
+      },
+      "id": "paired-quote-status-isolation",
+      "result": "PASS"
+    },
+    {
+      "claim": "Holding the second non-empty quote response for about 90 seconds produced no later non-empty response in three rounds, scoping natural steady-state polling as serialized while a request is pending.",
+      "evidence": {
+        "exact_head_sha": "d9d5e2d08c20bea2296f0c167565642121cd9874",
+        "rounds": 3,
+        "run_id": 29665870021
+      },
+      "id": "steady-state-polling-serialization",
+      "result": "PASS"
+    },
+    {
       "claim": "The BTC chart reconstructed after reload, although ChartStore validation errors repeated.",
       "id": "reload-reconstruction",
       "result": "PASS_WITH_VALIDATION_WARNING"
@@ -106,23 +171,26 @@
   ],
   "recommended_human_actions": [
     "Report the repeated ChartStore required-field initialization failure as a bounded P2 regression.",
-    "Report the missing public freshness boundary during prolonged network outage as a separate bounded P2 user-control defect.",
-    "Add an explicit stale, offline, delayed, or reconnecting state tied to quote age and transport recovery.",
-    "Do not claim that the retained visible price was numerically inaccurate without an external market comparison.",
-    "Keep authenticated workspace, alerts, orders, application rollback, and trading-decision impact outside this public audit."
+    "Report the icon-only quote-connectivity state as a separate bounded P2 user-control defect.",
+    "Add visible and accessible Live, Delayed, Offline, or Snapshot text with a last-updated timestamp tied to the displayed data source.",
+    "Document whether the published indicator chart is live, delayed, or a fixed historical snapshot.",
+    "Do not claim that a visible price was numerically inaccurate or rolled back without data-source and application-order evidence.",
+    "Keep authenticated workspace, alerts, orders, and trading-decision impact outside this public audit."
   ],
   "schema_version": "pythia-lotus-external-qa-judgment-v1",
   "subject": {
     "evidence_prs": [
       56,
       61,
-      63
+      63,
+      69
     ],
     "platform": "TakeProfit",
-    "scope": "public unauthenticated published-indicator chart, quote freshness, outage, and recovery behavior",
+    "scope": "public unauthenticated published-indicator chart, quote connectivity, freshness visibility, outage, and recovery behavior",
     "source_repository": "https://github.com/safal207/LiminalQAengineer"
   },
   "unknowns": [
+    "The public chart is not proven to consume current quote payloads; its live, delayed, or snapshot contract remains unknown.",
     "The retained visible price was not compared with an external market source, so numerical inaccuracy is not claimed.",
     "The authenticated workspace may use a different quote transport, freshness threshold, and recovery policy.",
     "Historical backfill, candle/indicator layer integrity, and duplicate or missing bars were not established.",
@@ -131,5 +199,5 @@
     "No user-visible trading-decision impact was established for either confirmed public finding."
   ],
   "verdict": "ESCALATE",
-  "verdict_meaning": "Present the two confirmed bounded P2 findings and remaining uncertainty to an authorized human owner; do not claim numerical price inaccuracy, submit externally, execute, or merge automatically."
+  "verdict_meaning": "Present the two bounded P2 findings—ChartStore initialization regression and icon-only quote-connectivity state—to an authorized human owner; preserve the live, delayed, or snapshot ambiguity and do not claim numerical price inaccuracy, visible rollback, authenticated behavior, external submission, execution, or merge authority."
 }
