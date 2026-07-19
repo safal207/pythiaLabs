@@ -1,0 +1,203 @@
+{
+  "authority": {
+    "approval": false,
+    "delivery": false,
+    "execution": false,
+    "external_submission": false,
+    "merge": false,
+    "mode": "audit_only",
+    "ownership": false
+  },
+  "bounded_hypotheses": [
+    {
+      "claim": "Incomplete ChartStore settings may later cause visible candle, indicator, or interaction corruption.",
+      "confidence": 60,
+      "falsifier": "Repeated interaction, symbol/timeframe transition, history-backfill, and reload tests show no visible divergence while the validation errors remain.",
+      "id": "chartstore-validation-user-impact",
+      "status": "USER_IMPACT_UNPROVEN"
+    },
+    {
+      "claim": "The public published-indicator chart may be an intentionally fixed historical snapshot rather than a live chart.",
+      "confidence": 75,
+      "falsifier": "Product documentation or an explicit visible state contract identifies the chart as live or delayed and defines which visible elements consume current quote payloads.",
+      "id": "public-chart-live-delayed-snapshot-intent",
+      "status": "PRODUCT_INTENT_UNKNOWN"
+    }
+  ],
+  "case_id": "takeprofit-public-chart-quote-2026-07-19",
+  "confirmed_findings": [
+    {
+      "claim": "The published BTC/USDT indicator chart initializes with missing required ChartStore settings on first load and repeats the same validation failure after reload.",
+      "confidence": 98,
+      "evidence": {
+        "artifact_sha256": "2158374d653f5fd4e56bf96fa3489868a64b69c590fc0950dda1ac84c05f1105",
+        "exact_head_sha": "27bf4fe23d8c63dcf6691ae7cf3b5f34b672e89c",
+        "result_sha256": "f8eccc551a033af8fbe1417803240c7c9d63988f4bccb47d4aa8bc3f285e7a89",
+        "run_id": 29662910618,
+        "source_pr": 56
+      },
+      "id": "chartstore-required-fields-changed-form",
+      "observed_errors": [
+        "[ChartStore] settings.chart.timeToCloseLabel is a required field",
+        "settings.chart.style.lineSource is a required field",
+        "settings.chart.style.tpo is a required field"
+      ],
+      "regression_relation": "The January 2026 manual audit reported the same initialization-contract family with different missing ChartStore and IndicatorManager fields.",
+      "severity": "P2",
+      "status": "STILL_PRESENT_IN_CHANGED_FORM"
+    },
+    {
+      "claim": "When current ListQuotes requests are unavailable, the public chart remains fully visible and plausible while the only visible connection-state change is disappearance of a small green icon next to BYBIT; no textual offline, stale, delayed, disconnected, reconnecting, snapshot, or last-updated state appears.",
+      "confidence": 99,
+      "evidence": {
+        "cadence_aware_outage": {
+          "artifact_sha256": "2064e033deae3895e647ec11ba0541aecd2947d614ab03a07bf19089a132dafd",
+          "exact_head_sha": "fe17c3ddad4e4540d91cb30ba40456f2114dc997",
+          "result_sha256": "0625dcd4f97a161bc0610ff31735fb8c399082a718f6678fd8bb9c921af9c73f",
+          "rounds": [
+            {
+              "actual_outage_ms": 90402,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            },
+            {
+              "actual_outage_ms": 105462,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            },
+            {
+              "actual_outage_ms": 120513,
+              "quote_responses_during_outage": 0,
+              "recovery": "PASS"
+            }
+          ],
+          "run_id": 29665413400,
+          "source_pr": 63
+        },
+        "paired_quote_block": {
+          "artifact_sha256": "6900d32df4805706dc1ec8cc9d19f409e079c9ebbde6b907fce20d0534328838",
+          "exact_head_sha": "18d703929c31d53789814890a3565550283d5120",
+          "pairs": [
+            {
+              "baseline_quote_responses": 2,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 1,
+              "treatment_blocked_requests": 1
+            },
+            {
+              "baseline_quote_responses": 1,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 2,
+              "treatment_blocked_requests": 2
+            },
+            {
+              "baseline_quote_responses": 1,
+              "body_text_same": true,
+              "chart_visible": true,
+              "material_chart_changed_ratio": 0.0032142857142857142,
+              "pair": 3,
+              "treatment_blocked_requests": 2
+            }
+          ],
+          "raw_result_sha256": "cd57984cc134fd4ea99861e0640388fc712795eac4f86e637dd766fdbead0838",
+          "run_id": 29666238811,
+          "source_pr": 69,
+          "visual_difference": "The small green status icon disappears and the 1h control shifts left; candles, indicator lines, axes, price labels, and body text remain unchanged."
+        }
+      },
+      "id": "quote-connectivity-status-icon-only",
+      "limitations": [
+        "The public chart is not proven to consume the current quote payload.",
+        "The visible chart may be an intentionally historical or published snapshot.",
+        "The evidence does not establish authenticated workspace behavior or trading-decision impact.",
+        "The evidence does not establish numerical price inaccuracy or visible application rollback."
+      ],
+      "severity": "P2",
+      "status": "CONFIRMED_ICON_ONLY_STATE_LOSS"
+    }
+  ],
+  "generated_at": "2026-07-19T03:15:00.000+03:00",
+  "passed_checks": [
+    {
+      "claim": "The public page loaded BTC/USDT metadata, historical bars, and changing quote payloads.",
+      "evidence": {
+        "distinct_quote_bodies": 4,
+        "list_bars_requests": 3,
+        "list_quotes_requests": 5
+      },
+      "id": "public-quote-and-bars-bootstrap",
+      "result": "PASS"
+    },
+    {
+      "claim": "All three browser-level outages exceeded the configured 90, 105, and 120 second thresholds and received zero quote responses while offline.",
+      "id": "cadence-aware-network-outage",
+      "result": "PASS"
+    },
+    {
+      "claim": "A new non-empty quote response arrived and the visible chart remained available after networking was restored in all three rounds.",
+      "id": "three-round-recovery",
+      "result": "PASS"
+    },
+    {
+      "claim": "Blocking naturally initiated ListQuotes requests removed the same small green status icon in three paired runs while preserving the visible chart and all body text.",
+      "evidence": {
+        "baseline_chart_sha256": "72402381f037ca7afec422a9d8dcaa1cced117742811f8f63c195c289b9ffc79",
+        "difference_bbox": "x=148..193, y=8..27",
+        "pairs": 3,
+        "treatment_chart_sha256": "005ab2fd1bed42c57fcf678afa196dc38a71f203ed4609b8daf42450c5e0eaa1"
+      },
+      "id": "paired-quote-status-isolation",
+      "result": "PASS"
+    },
+    {
+      "claim": "Holding the second non-empty quote response for about 90 seconds produced no later non-empty response in three rounds, scoping natural steady-state polling as serialized while a request is pending.",
+      "evidence": {
+        "exact_head_sha": "d9d5e2d08c20bea2296f0c167565642121cd9874",
+        "rounds": 3,
+        "run_id": 29665870021
+      },
+      "id": "steady-state-polling-serialization",
+      "result": "PASS"
+    },
+    {
+      "claim": "The BTC chart reconstructed after reload, although ChartStore validation errors repeated.",
+      "id": "reload-reconstruction",
+      "result": "PASS_WITH_VALIDATION_WARNING"
+    }
+  ],
+  "recommended_human_actions": [
+    "Report the repeated ChartStore required-field initialization failure as a bounded P2 regression.",
+    "Report the icon-only quote-connectivity state as a separate bounded P2 user-control defect.",
+    "Add visible and accessible Live, Delayed, Offline, or Snapshot text with a last-updated timestamp tied to the displayed data source.",
+    "Document whether the published indicator chart is live, delayed, or a fixed historical snapshot.",
+    "Do not claim that a visible price was numerically inaccurate or rolled back without data-source and application-order evidence.",
+    "Keep authenticated workspace, alerts, orders, and trading-decision impact outside this public audit."
+  ],
+  "schema_version": "pythia-lotus-external-qa-judgment-v1",
+  "subject": {
+    "evidence_prs": [
+      56,
+      61,
+      63,
+      69
+    ],
+    "platform": "TakeProfit",
+    "scope": "public unauthenticated published-indicator chart, quote connectivity, freshness visibility, outage, and recovery behavior",
+    "source_repository": "https://github.com/safal207/LiminalQAengineer"
+  },
+  "unknowns": [
+    "The public chart is not proven to consume current quote payloads; its live, delayed, or snapshot contract remains unknown.",
+    "The retained visible price was not compared with an external market source, so numerical inaccuracy is not claimed.",
+    "The authenticated workspace may use a different quote transport, freshness threshold, and recovery policy.",
+    "Historical backfill, candle/indicator layer integrity, and duplicate or missing bars were not established.",
+    "Symbol and timeframe transition atomicity were not tested on an authorized interactive workspace.",
+    "Visible application rollback after older-response delivery remains unverified.",
+    "No user-visible trading-decision impact was established for either confirmed public finding."
+  ],
+  "verdict": "ESCALATE",
+  "verdict_meaning": "Present the two bounded P2 findings—ChartStore initialization regression and icon-only quote-connectivity state—to an authorized human owner; preserve the live, delayed, or snapshot ambiguity and do not claim numerical price inaccuracy, visible rollback, authenticated behavior, external submission, execution, or merge authority."
+}
