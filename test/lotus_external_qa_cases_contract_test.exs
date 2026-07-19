@@ -31,26 +31,40 @@ defmodule Pythia.LotusExternalQACasesContractTest do
     assert chartstore["status"] == "STILL_PRESENT_IN_CHANGED_FORM"
     assert chartstore["evidence"]["run_id"] == 29_662_910_618
 
-    freshness = by_id["public-chart-missing-freshness-boundary-during-outage"]
-    assert freshness["severity"] == "P2"
-    assert freshness["status"] == "CONFIRMED_REPEATED_OUTAGE"
-    assert freshness["evidence"]["run_id"] == 29_665_413_400
+    quote_status = by_id["quote-connectivity-status-icon-only"]
+    assert quote_status["severity"] == "P2"
+    assert quote_status["status"] == "CONFIRMED_ICON_ONLY_STATE_LOSS"
 
-    assert freshness["evidence"]["exact_head_sha"] ==
-             "fe17c3ddad4e4540d91cb30ba40456f2114dc997"
-
-    assert Enum.map(freshness["evidence"]["rounds"], & &1["quote_responses_during_outage"]) ==
-             [0, 0, 0]
+    paired = quote_status["evidence"]["paired_quote_block"]
+    assert paired["run_id"] == 29_666_238_811
+    assert paired["exact_head_sha"] == "18d703929c31d53789814890a3565550283d5120"
+    assert length(paired["pairs"]) == 3
+    assert Enum.all?(paired["pairs"], &(&1["chart_visible"] && &1["body_text_same"]))
   end
 
-  test "the superseded overlapping-response method cannot support freshness confirmation" do
+  test "quote-status evidence blocks stale-live and rollback overclaims" do
     packet = load!(@takeprofit)
     confirmed_text = packet["confirmed_findings"] |> Jason.encode!()
     unknowns = Enum.join(packet["unknowns"], " ")
 
     refute confirmed_text =~ "SUPPORTED_STALE_STATE_GAP"
+    refute confirmed_text =~ "stale current BTC price"
+    assert unknowns =~ "not proven to consume current quote payloads"
     assert unknowns =~ "Visible application rollback"
     assert packet["verdict_meaning"] =~ "do not claim numerical price inaccuracy"
+  end
+
+  test "paired quote block preserves state-visibility boundaries" do
+    packet = load!(@takeprofit)
+
+    quote_status =
+      Enum.find(packet["confirmed_findings"], &(&1["id"] == "quote-connectivity-status-icon-only"))
+
+    evidence = quote_status["evidence"]["paired_quote_block"]
+
+    assert evidence["visual_difference"] =~ "small green status icon disappears"
+    assert evidence["visual_difference"] =~ "body text remain unchanged"
+    assert quote_status["claim"] =~ "no textual offline"
   end
 
   test "unknown authenticated and trading impact stays explicit" do
@@ -60,5 +74,6 @@ defmodule Pythia.LotusExternalQACasesContractTest do
     assert unknowns =~ "authenticated workspace"
     assert unknowns =~ "trading-decision impact"
     assert unknowns =~ "external market source"
+    assert unknowns =~ "live, delayed, or snapshot"
   end
 end
