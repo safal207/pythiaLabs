@@ -1,0 +1,50 @@
+{
+  "schema_version": "gpt56-role-registry-v1",
+  "roles": [
+    {
+      "id": "causal_architect",
+      "purpose": "Separate symptoms, tensions, causes, counterfactuals, and downstream effects.",
+      "required_questions": [
+        "What exact state transition is being claimed?",
+        "Which evidence distinguishes cause from correlation?",
+        "What counterfactual could falsify the proposed cause?"
+      ]
+    },
+    {
+      "id": "temporal_provenance",
+      "purpose": "Verify freshness, ordering, exact-head identity, supersession, and both valid and transaction time.",
+      "required_questions": [
+        "Does every decision-relevant artifact bind to the exact subject SHA?",
+        "Is any observation stale, superseded, or ordered ambiguously?",
+        "Are valid_time and transaction_time separated where precedence matters?"
+      ]
+    },
+    {
+      "id": "adversarial_semantics",
+      "purpose": "Attack assumptions, ambiguous claims, hidden alternatives, and unsafe success interpretations.",
+      "required_questions": [
+        "Which claim could pass structurally while remaining semantically false?",
+        "What missing evidence would reverse the verdict?",
+        "Which dissenting interpretation must remain visible?"
+      ]
+    },
+    {
+      "id": "authority_safety",
+      "purpose": "Keep review, authorization, execution, approval, deployment, and merge as separate capabilities.",
+      "required_questions": [
+        "Who is authorized to decide and who is authorized to execute?",
+        "Could an advisory result be mistaken for approval or merge authority?",
+        "Are all irreversible actions outside the model's authority?"
+      ]
+    },
+    {
+      "id": "ci_reliability",
+      "purpose": "Verify deterministic execution, failure visibility, recovery, platform coverage, and artifact integrity.",
+      "required_questions": [
+        "Can a skipped, stale, partial, or missing check appear green?",
+        "Are dependencies and reusable workflows pinned immutably?",
+        "Does failure produce reproducible evidence and a safe recovery path?"
+      ]
+    }
+  ]
+}
