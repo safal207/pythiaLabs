@@ -1,0 +1,36 @@
+name: Lotus Family conformance
+
+on:
+  pull_request:
+    paths:
+      - "standards/lotus-family/**"
+      - ".github/workflows/lotus-family-conformance.yml"
+  push:
+    paths:
+      - "standards/lotus-family/**"
+      - ".github/workflows/lotus-family-conformance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Run Lotus Family conformance suite
+        run: |
+          python -m unittest discover \
+            -s standards/lotus-family/conformance \
+            -p 'test_*.py' \
+            -v
