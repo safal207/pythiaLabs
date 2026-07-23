@@ -36,6 +36,12 @@ It provides:
 
 It does **not** provide trusted time, remote attestation, protected key storage, revocation distribution, production enforcement, or certified incident-response guarantees.
 
+## Standards contribution
+
+The implementation-neutral candidate requirements and verification procedure for the OWASP AISVS AI Incident Response work are published in [`OWASP_AISVS_IR_PROPOSAL.md`](OWASP_AISVS_IR_PROPOSAL.md).
+
+The proposal treats CAEP only as a reference schema, offline verifier, and adversarial test corpus. It does not ask AISVS to adopt this repository, terminology, or implementation.
+
 ## Evidence levels and the two-validator rule
 
 - **F0** — unsupported claim.
@@ -55,6 +61,7 @@ For F3–F5, the presence of an `integrity_proof` object is **not verification**
 protocols/caep/
 ├── README.md
 ├── AISVS_MAPPING.md
+├── OWASP_AISVS_IR_PROPOSAL.md
 ├── requirements-crypto.txt
 ├── schema/caep.schema.json
 ├── examples/
