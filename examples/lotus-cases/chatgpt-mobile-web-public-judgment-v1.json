@@ -1,0 +1,107 @@
+{
+  "schema_version": "pythia-lotus-public-mobile-web-judgment-v1",
+  "case_id": "chatgpt-mobile-web-public-2026-07-21",
+  "source": {
+    "repository": "safal207/LiminalQAengineer",
+    "pull_request": 106,
+    "exact_head": "2407be212e19a393fcd0d8dd33d9fe444aea663b",
+    "result_path": "audits/chatgpt/mobile-web-public-result.json",
+    "diagnostic_path": "audits/chatgpt/mobile-web-diagnostics-result.json",
+    "baseline_run_id": 29783360123,
+    "diagnostic_run_id": 29783766882,
+    "baseline_artifact_sha256": "1be5ceda6b73ff4a92ff13fc793c22366a05c97069392ad2ac0ec4a3c5ae7316",
+    "diagnostic_artifact_sha256": "dc76eadf08f34a03273f95aee2ff3a7256b39c1a600af5cef91c0c0fd799056c"
+  },
+  "authority": {
+    "mode": "audit_only",
+    "ownership": false,
+    "approval": false,
+    "execution": false,
+    "account_access": false,
+    "prompt_submission": false,
+    "login_submission": false,
+    "private_conversation_access": false,
+    "external_submission": false,
+    "security_claim": false,
+    "deployment": false,
+    "delivery": false,
+    "merge": false
+  },
+  "verdict": "ALLOW_BOUNDED_DIAGNOSTIC",
+  "verdict_meaning": "Retain one repeated P3 public-login console diagnostic for first-party engineering review while preserving all user-impact, security, native-app and authenticated-chat claims as unproven.",
+  "confirmed_passes": [
+    "Five public home profiles returned HTTP 200.",
+    "No horizontal document overflow was detected.",
+    "The signed-out composer remained visible at 412x915 and 412x520.",
+    "Critical mobile controls exposed 44x44 CSS-pixel boxes in the tested state.",
+    "The mobile login layout retained provider, email and Continue choices.",
+    "Observed public-home CLS remained from 0 to 0.0004.",
+    "The mobile event POST endpoints returned HTTP 200 or 204."
+  ],
+  "allowed_observations": [
+    {
+      "id": "mobile-user-agent-variant",
+      "judgment": "CONFIRMED_ARCHITECTURE_NOT_DEFECT",
+      "claim": "The signed-out mobile user-agent selects a materially different public branch at the same viewport.",
+      "user_impact_established": false
+    },
+    {
+      "id": "mobile-login-console-error",
+      "judgment": "P3_DIAGNOSTIC",
+      "claim": "One first-party console.error repeated on the public mobile login page.",
+      "user_impact_established": false,
+      "security_impact_established": false,
+      "visible_login_failure": false,
+      "next_test": "Resolve the first-party minified stack through source maps, emit an explicit error code/message if intentional, and repeat the public console-cleanliness check."
+    }
+  ],
+  "rejected_signals": [
+    {
+      "id": "mobile-event-post-aborts",
+      "judgment": "REJECTED_FALSE_NETWORK_FAILURE",
+      "reason": "Successful HTTP 200 or 204 responses preceded the browser loading-aborted signal."
+    },
+    {
+      "id": "composer-overlap-detector",
+      "judgment": "REJECTED_FALSE_POSITIVE",
+      "reason": "Screenshot review showed an ancestor container rather than composer obstruction."
+    },
+    {
+      "id": "public-text-duplicate-heading-hypothesis",
+      "judgment": "REJECTED_BY_BROWSER_MATRIX",
+      "reason": "The controlled browser matrix found no duplicate visible heading."
+    },
+    {
+      "id": "small-target-detector",
+      "judgment": "INSUFFICIENT_FOR_ACCESSIBILITY_DEFECT",
+      "reason": "Critical icon controls met 44x44; remaining links and CTA need context and spacing review."
+    }
+  ],
+  "blocked_claims": [
+    "The public mobile login flow is broken.",
+    "Authentication is unavailable on mobile web.",
+    "The mobile event requests failed to reach the server.",
+    "Required analytics or user data was lost.",
+    "The mobile composer is obstructed.",
+    "The page has duplicate visible headings.",
+    "The audit established a touch-target accessibility violation.",
+    "The audit established a security vulnerability.",
+    "The native Android or iOS application has the same behaviour.",
+    "Authenticated long-chat, streaming, attachments, Search, Projects, Work, settings, billing or offline recovery were assessed."
+  ],
+  "unknowns": [
+    "Real virtual-keyboard and browser-chrome interaction.",
+    "Authenticated long-chat scrolling and return-to-latest behaviour.",
+    "Streaming interruption and reconnect recovery.",
+    "File, image, camera and attachment states.",
+    "Mobile Search sources, widgets, Projects, Work and plan-limit states.",
+    "TalkBack, browser zoom and external-keyboard behaviour.",
+    "The semantic cause of the opaque public-login Error object."
+  ],
+  "recommended_human_actions": [
+    "Treat the signed-out mobile baseline as a scoped pass, not a universal product pass.",
+    "Review the one P3 diagnostic with first-party source maps.",
+    "Keep the event-delivery, overlap and duplicate-heading signals rejected.",
+    "Authorise a separate signed-in mobile-web audit before making claims about the chat product after login."
+  ]
+}
