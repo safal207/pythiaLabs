@@ -1,0 +1,100 @@
+name: GitHub Gmail event sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Notification source
+        required: true
+        type: choice
+        options:
+          - file
+          - gmail
+        default: file
+      candidate_file:
+        description: JSONL candidate file used in file mode
+        required: false
+        default: data/github-gmail-event-candidates.example.jsonl
+      gmail_query:
+        description: Gmail search query used in gmail mode
+        required: false
+        default: newer_than:1d from:notifications@github.com
+      apply:
+        description: Append verified, non-duplicate events to the journal
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p 'test_sync_github_gmail_events.py' -v
+
+      - name: Validate Gmail secret configuration
+        if: inputs.source == 'gmail'
+        env:
+          GMAIL_ACCESS_TOKEN: ${{ secrets.GMAIL_ACCESS_TOKEN }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        run: |
+          if [[ -z "$GMAIL_ACCESS_TOKEN" && ( -z "$GMAIL_CLIENT_ID" || -z "$GMAIL_CLIENT_SECRET" || -z "$GMAIL_REFRESH_TOKEN" ) ]]; then
+            echo "Gmail mode needs GMAIL_ACCESS_TOKEN or GMAIL_CLIENT_ID/GMAIL_CLIENT_SECRET/GMAIL_REFRESH_TOKEN." >&2
+            exit 2
+          fi
+
+      - name: Build synchronized report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GMAIL_ACCESS_TOKEN: ${{ secrets.GMAIL_ACCESS_TOKEN }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+        run: |
+          args=(
+            --source "${{ inputs.source }}"
+            --candidate-file "${{ inputs.candidate_file }}"
+            --gmail-query "${{ inputs.gmail_query }}"
+            --journal data/github-gmail-event-journal.jsonl
+            --report-jsonl artifacts/sync-report.jsonl
+            --report-md artifacts/sync-report.md
+          )
+          if [[ "${{ inputs.apply }}" == "true" ]]; then
+            args+=(--apply)
+          fi
+          python scripts/sync_github_gmail_events.py "${args[@]}"
+
+      - name: Show report
+        run: cat artifacts/sync-report.md
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-gmail-sync-report
+          path: artifacts/
+
+      - name: Commit journal changes
+        if: inputs.apply == true
+        run: |
+          if git diff --quiet -- data/github-gmail-event-journal.jsonl; then
+            echo "No new journal entries."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/github-gmail-event-journal.jsonl
+          git commit -m "data: sync GitHub Gmail event journal"
+          git push
