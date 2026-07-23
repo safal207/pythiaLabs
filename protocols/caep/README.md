@@ -2,8 +2,6 @@
 
 CAEP is a small, vendor-neutral evidence format for consequence-bearing autonomous-agent actions.
 
-It treats one action as a single auditable episode:
-
 ```text
 intent → authorization → exact dispatch → observable outcome → containment/recovery
 ```
@@ -28,29 +26,28 @@ Version `0.1.0` is an executable protocol sketch associated with [RFC #242](http
 
 It provides:
 
-- a JSON Schema;
-- a low-level standard-library semantic validator;
-- a strict enforcement wrapper for causal hand-off, time ordering, and evidence honesty;
-- a synthetic incident packet showing `t− → t0 → t+ → recovery`;
-- negative fixtures for parameter drift, missing outcomes, and false recovery claims;
-- unit tests for fail-closed invariants.
+- JSON Schema 2020-12;
+- a standard-library semantic engine;
+- a strict causal and time-order enforcement wrapper;
+- optional Ed25519 verification for F3+ records;
+- a narrow deterministic signed-record canonicalization profile;
+- full-record digest-bound JSON Lines transport;
+- synthetic, negative, regression, and tamper tests.
 
-It does **not** provide production cryptography, trusted time, remote attestation, or a production enforcement point.
+It does **not** provide trusted time, remote attestation, protected key storage, revocation distribution, production enforcement, or certified incident-response guarantees.
 
-## Validator boundary
+## Evidence levels and the two-validator rule
 
-`validate_caep.py` is the low-level semantic engine used by the tests and extension modules.
+- **F0** — unsupported claim.
+- **F1** — local runtime log.
+- **F2** — structured trace with content hashes.
+- **F3** — independently verified integrity proofs on action records.
+- **F4** — bounded replay against exact artifacts.
+- **F5** — independent reproduction or external verification.
 
-External callers should use `validate_caep_strict.py`. The strict profile additionally requires:
+`validate_caep_strict.py` validates structure, exact causal hand-off, decision-time ordering, dispatch binding, outcome semantics, and recovery evidence. It is the recommended path for F0–F2.
 
-- authorization to reference the exact intent record;
-- dispatch to reference the authorization record;
-- outcome to reference dispatch;
-- recovery to reference outcome;
-- event and decision timestamps to remain causally ordered;
-- F3–F5 claims to fail unless a separate verifier has actually checked the proofs.
-
-An `integrity_proof` object is not evidence merely because it exists.
+For F3–F5, the presence of an `integrity_proof` object is **not verification**. Run `verify_caep_proofs.py` with a separately supplied public keyset. Unknown keys, wrong issuers or roles, unsupported schemes, malformed base64url, invalid signature lengths, modified records, and shared trust roots fail closed.
 
 ## Layout
 
@@ -58,23 +55,19 @@ An `integrity_proof` object is not evidence merely because it exists.
 protocols/caep/
 ├── README.md
 ├── AISVS_MAPPING.md
+├── requirements-crypto.txt
 ├── schema/caep.schema.json
 ├── examples/
-│   ├── hypothetical_sandbox_escape_episode.json
-│   ├── invalid_parameter_drift.json
-│   ├── invalid_missing_outcome.json
-│   └── invalid_false_recovery.json
 ├── tools/
 │   ├── validate_caep.py
-│   └── validate_caep_strict.py
+│   ├── validate_caep_strict.py
+│   ├── caep_canonical.py
+│   ├── verify_caep_proofs.py
+│   └── export_caep_jsonl.py
 └── tests/
-    ├── test_validate_caep.py
-    └── test_strict_validation.py
 ```
 
-## Run
-
-From the repository root:
+## Semantic and strict validation
 
 ```bash
 python3 protocols/caep/tools/validate_caep_strict.py \
@@ -88,61 +81,122 @@ python3 protocols/caep/tools/validate_caep_strict.py --json \
   protocols/caep/examples/hypothetical_sandbox_escape_episode.json
 ```
 
-Run the test suite:
+## F3 cryptographic verification
+
+Install the optional dependency:
+
+```bash
+python3 -m pip install -r protocols/caep/requirements-crypto.txt
+```
+
+Verify a signed packet:
+
+```bash
+python3 protocols/caep/tools/verify_caep_proofs.py \
+  signed-episode.json \
+  --keyset public-keyset.json
+```
+
+Keyset shape:
+
+```json
+{
+  "caep_keyset_version": "0.1.0",
+  "keys": [
+    {
+      "key_id": "pdp-key-2026-07",
+      "scheme": "Ed25519",
+      "issuer": "pdp:policy-engine-3",
+      "authority_role": "policy_decision_point",
+      "public_key": "<base64url raw 32-byte Ed25519 public key>"
+    }
+  ]
+}
+```
+
+Proof shape:
+
+```json
+{
+  "scheme": "Ed25519+caep-jcs-int-v1",
+  "key_id": "pdp-key-2026-07",
+  "value": "<base64url 64-byte Ed25519 signature>"
+}
+```
+
+The signature covers the complete record except the `integrity_proof` field itself.
+
+## Authority roles
+
+Each consequence-bearing stage has a distinct verification role:
+
+| Record | Required key role |
+|---|---|
+| authorization | `policy_decision_point` |
+| dispatch | `enforcement_point` |
+| outcome | `independent_observer` |
+| recovery | `incident_controller` |
+
+One public key cannot represent different issuers or authority roles.
+
+## Canonicalization
+
+Signed records use `caep-jcs-int-v1`, a deliberately narrow interoperable domain:
+
+- UTF-8 JSON values;
+- ASCII object member names;
+- compact deterministic key ordering;
+- strings, booleans, null, arrays, objects, and safe-range integers only;
+- floating-point and non-finite numbers rejected;
+- duplicate member names rejected;
+- invalid Unicode surrogates rejected.
+
+This avoids presenting a language-native serializer as a universal cryptographic contract.
+
+## JSON Lines transport
+
+Export a semantically valid packet:
+
+```bash
+python3 protocols/caep/tools/export_caep_jsonl.py export \
+  episode.json episode.jsonl
+```
+
+Verify record order and digests:
+
+```bash
+python3 protocols/caep/tools/export_caep_jsonl.py verify episode.jsonl
+```
+
+The first line is a header. Every subsequent line binds one complete record — including its proof envelope — to the episode reference, sequence, and SHA-256 digest. JSONL validation detects payload and signature-envelope mutation but does not replace Ed25519 verification.
+
+## Core invariants
+
+1. **Canonical episode identity** — `episode_ref` derives from the exact intent binding.
+2. **Exact dispatch binding** — target, parameters, boundary, credentials, and destination match authorization.
+3. **Unknown means stop** — unknown verdicts, conformance states, keys, schemes, or roles fail closed.
+4. **No orphan execution** — dispatch requires prior authorization and terminal outcome.
+5. **Causal continuity** — each authority stage references its immediate predecessor.
+6. **Time continuity** — valid, transaction, authorization, dispatch, outcome, and recovery time cannot move backwards.
+7. **Recovery is a result** — status agrees with objective achievement and residual effects.
+8. **Append-only correction** — supersession points backward and never rewrites evidence.
+9. **Evidence honesty** — semantic validation cannot promote a packet to F3.
+10. **Portable verification** — signatures and transport digests can be checked outside the agent runtime.
+
+## Run tests
 
 ```bash
 python3 -m unittest discover -s protocols/caep/tests -v
 ```
 
-## Core invariants
-
-1. **Canonical episode identity** — `episode_ref` is derived from the exact intent binding.
-2. **Exact binding** — authorization and dispatch preserve target, parameter hash, boundary, credential class, and permitted network destination.
-3. **Unknown means stop** — only `ALLOW`, `DENY`, `REQUIRE_APPROVAL`, and `REVISE` are accepted.
-4. **No orphan execution** — a dispatch requires one prior authorization and one terminal outcome.
-5. **Exact causal hand-off** — authorization, dispatch, outcome, and recovery each reference the immediately preceding authority record.
-6. **Time continuity** — event, valid, transaction, authorization, dispatch, outcome, and recovery time cannot move backwards.
-7. **Recovery is a result** — recovery status agrees with `objective_met`, residual effects, and unresolved dependencies.
-8. **Append-only correction** — a supersession record points backward; it cannot erase or mutate the prior record.
-9. **Evidence honesty** — semantic validation alone cannot establish F3, F4, or F5.
-
-## Canonical episode reference
-
-The validator derives `episode_ref` as:
-
-```text
-sha256(JCS-like canonical JSON({
-  actor_id,
-  agent_runtime_id,
-  action_type,
-  target_resource,
-  params_hash,
-  boundary_id,
-  requested_capabilities,
-  valid_time,
-  transaction_time
-}))
-```
-
-The prototype uses sorted compact UTF-8 JSON. The verified-evidence extension in stacked PR #244 introduces a strict signed-record canonicalization profile.
-
-## Evidence levels
-
-- **F0** — unsupported claim.
-- **F1** — local runtime log.
-- **F2** — structured trace with content hashes.
-- **F3** — independently verified integrity proofs on action records.
-- **F4** — bounded replay against exact artifacts.
-- **F5** — independent reproduction or external verification.
-
-The included example is deliberately marked **F2**. It is a synthetic protocol demonstration, not a forensic reconstruction of any real incident.
+The cryptographic tests are skipped when `cryptography` is unavailable. The dedicated GitHub Actions workflow installs the dependency and runs the complete suite.
 
 ## Integration boundary
 
-A real deployment should keep four authorities separate where practical:
+A real deployment should keep authorities separate:
 
 ```text
-agent/orchestrator ≠ policy decision point ≠ dispatcher/enforcement point ≠ observer/receipt issuer
+agent/orchestrator ≠ policy decision point ≠ enforcement point ≠ observer/incident controller
 ```
 
 The model must not be able to authorize, execute, and attest to the same action under one trust root.
