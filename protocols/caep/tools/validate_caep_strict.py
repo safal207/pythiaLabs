@@ -34,6 +34,13 @@ def _record(records: list[dict[str, Any]], kind: str) -> dict[str, Any] | None:
     return found[0] if len(found) == 1 else None
 
 
+def _sequence_key(record: dict[str, Any]) -> int:
+    value = record.get("sequence")
+    if isinstance(value, int) and not isinstance(value, bool) and value >= 1:
+        return value
+    return 10**12
+
+
 def _parent(child, parent, label: str, errors: list[str]) -> None:
     if not child or not parent:
         return
@@ -69,7 +76,7 @@ def validate_packet(
 
     previous = None
     previous_id = None
-    for item in sorted(records, key=lambda x: x.get("sequence", 10**12)):
+    for item in sorted(records, key=_sequence_key):
         current = _time(item.get("observed_at"))
         if previous is not None and current is not None and previous > current:
             errors.append(
