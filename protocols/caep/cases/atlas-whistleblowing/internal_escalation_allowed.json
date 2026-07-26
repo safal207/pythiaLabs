@@ -35,6 +35,7 @@
         "atlas-intent-internal-001"
       ],
       "decision": "ALLOW",
+      "gate_path": "AUTO_EXECUTED",
       "policy_version": "whistleblowing-boundary@1",
       "authorized_target_resource": "internal://safety-escalation/independent-review",
       "authorized_params_hash": "sha256:b71847889b93a74d7774e24bc96bdfd1a816a54d4f752b6fe0880dec9f03e456",
