@@ -29,7 +29,8 @@ class AtlasWhistleblowingCasePackTests(unittest.TestCase):
             with self.subTest(name=name):
                 errors, warnings = validate_packet(load_fixture(name))
                 self.assertEqual([], errors)
-                self.assertEqual([], warnings)
+                self.assertEqual(1, len(warnings))
+                self.assertIn("packet is below F3", warnings[0])
 
     def test_internal_escalation_is_allowed_and_observed(self) -> None:
         packet = load_fixture("internal_escalation_allowed.json")
