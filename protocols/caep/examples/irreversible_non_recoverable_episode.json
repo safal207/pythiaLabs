@@ -1,13 +1,13 @@
 {
   "caep_version": "0.1.0",
-  "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+  "episode_ref": "sha256:649b12a63c2b6239c7f9c9bfdbb510fb7d43c396793335d8e15d4f3cd1da0f31",
   "evidence_level": "F2",
   "scenario_note": "Synthetic irreversible external-effect example for the OWASP AI Incident Response profile.",
   "records": [
     {
       "record_type": "intent",
       "record_id": "ir-intent-001",
-      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "episode_ref": "sha256:649b12a63c2b6239c7f9c9bfdbb510fb7d43c396793335d8e15d4f3cd1da0f31",
       "sequence": 1,
       "observed_at": "2026-07-26T09:30:00Z",
       "issuer": "orchestrator:synthetic-ir-eval",
@@ -27,7 +27,7 @@
     {
       "record_type": "authorization",
       "record_id": "ir-auth-001",
-      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "episode_ref": "sha256:649b12a63c2b6239c7f9c9bfdbb510fb7d43c396793335d8e15d4f3cd1da0f31",
       "sequence": 2,
       "observed_at": "2026-07-26T09:30:01Z",
       "issuer": "pdp:synthetic-ir-policy",
@@ -51,7 +51,7 @@
     {
       "record_type": "dispatch",
       "record_id": "ir-dispatch-001",
-      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "episode_ref": "sha256:649b12a63c2b6239c7f9c9bfdbb510fb7d43c396793335d8e15d4f3cd1da0f31",
       "sequence": 3,
       "observed_at": "2026-07-26T09:30:02Z",
       "issuer": "enforcer:synthetic-ir-gateway",
@@ -70,7 +70,7 @@
     {
       "record_type": "outcome",
       "record_id": "ir-outcome-001",
-      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "episode_ref": "sha256:649b12a63c2b6239c7f9c9bfdbb510fb7d43c396793335d8e15d4f3cd1da0f31",
       "sequence": 4,
       "observed_at": "2026-07-26T09:30:03Z",
       "issuer": "observer:synthetic-mail-receipt",
