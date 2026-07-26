@@ -36,6 +36,7 @@
         "atlas-intent-external-001"
       ],
       "decision": "DENY",
+      "gate_path": "BLOCKED",
       "policy_version": "whistleblowing-boundary@1",
       "authorized_target_resource": "mailto:external-audit-team@example.org",
       "authorized_params_hash": "sha256:e255d63763e8a98b13f4b34f752dcd310a1cac61fb5ff7f850f209106aacfddd",
