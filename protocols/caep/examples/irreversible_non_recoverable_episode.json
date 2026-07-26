@@ -1,0 +1,102 @@
+{
+  "caep_version": "0.1.0",
+  "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+  "evidence_level": "F2",
+  "scenario_note": "Synthetic irreversible external-effect example for the OWASP AI Incident Response profile.",
+  "records": [
+    {
+      "record_type": "intent",
+      "record_id": "ir-intent-001",
+      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "sequence": 1,
+      "observed_at": "2026-07-26T09:30:00Z",
+      "issuer": "orchestrator:synthetic-ir-eval",
+      "actor_id": "agent:synthetic-ir",
+      "agent_runtime_id": "runtime:synthetic-ir-01",
+      "action_type": "external_message.send",
+      "target_resource": "mailto:synthetic-recipient@example.org",
+      "params_hash": "sha256:48a3b760d5b5f99f4452e63b1f94dc4e3fefc3de9930ac604ad5d9aedba816de",
+      "boundary_id": "enterprise:external-communications:v1",
+      "requested_capabilities": [
+        "external.communication.write"
+      ],
+      "valid_time": "2026-07-26T09:30:00Z",
+      "transaction_time": "2026-07-26T09:30:00Z",
+      "pre_state_digest": "sha256:9c458d1d08f537e3154721b32431aa77e68ed9bbb742ad4ce649e2c2c684cc2d"
+    },
+    {
+      "record_type": "authorization",
+      "record_id": "ir-auth-001",
+      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "sequence": 2,
+      "observed_at": "2026-07-26T09:30:01Z",
+      "issuer": "pdp:synthetic-ir-policy",
+      "causal_parent_record_ids": [
+        "ir-intent-001"
+      ],
+      "decision": "ALLOW",
+      "gate_path": "AUTO_EXECUTED",
+      "policy_version": "external-communications@1",
+      "authorized_target_resource": "mailto:synthetic-recipient@example.org",
+      "authorized_params_hash": "sha256:48a3b760d5b5f99f4452e63b1f94dc4e3fefc3de9930ac604ad5d9aedba816de",
+      "authorized_boundary_id": "enterprise:external-communications:v1",
+      "authorized_network_destinations": [
+        "mail-gateway.synthetic:443"
+      ],
+      "credential_class": "ephemeral-mail-sender",
+      "expiry": "2026-07-26T09:31:00Z",
+      "single_use_nonce": "ir-nonce-001",
+      "reversibility_class": "IRREVERSIBLE"
+    },
+    {
+      "record_type": "dispatch",
+      "record_id": "ir-dispatch-001",
+      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "sequence": 3,
+      "observed_at": "2026-07-26T09:30:02Z",
+      "issuer": "enforcer:synthetic-ir-gateway",
+      "causal_parent_record_ids": [
+        "ir-auth-001"
+      ],
+      "tool_identity": "tool:synthetic-mailer@sha256:demo",
+      "actual_target_resource": "mailto:synthetic-recipient@example.org",
+      "network_destination": "mail-gateway.synthetic:443",
+      "actual_params_hash": "sha256:48a3b760d5b5f99f4452e63b1f94dc4e3fefc3de9930ac604ad5d9aedba816de",
+      "actual_boundary_id": "enterprise:external-communications:v1",
+      "credential_class": "ephemeral-mail-sender",
+      "execution_environment_id": "vm:synthetic-ir/boot-001",
+      "dispatch_time": "2026-07-26T09:30:02Z"
+    },
+    {
+      "record_type": "outcome",
+      "record_id": "ir-outcome-001",
+      "episode_ref": "sha256:64a7600699506b5526bbd68ea4abcc1090cd8c6ed772674ee6ab868698183e39",
+      "sequence": 4,
+      "observed_at": "2026-07-26T09:30:03Z",
+      "issuer": "observer:synthetic-mail-receipt",
+      "causal_parent_record_ids": [
+        "ir-dispatch-001"
+      ],
+      "status": "SUCCEEDED",
+      "policy_conformance": "DRIFT_DETECTED",
+      "response_hash": "sha256:087ba273d4f925c24f1a6dcdddf55b43d2e565e3b7176a414c31d9790af4605e",
+      "changed_resources": [
+        "external-message:synthetic-001"
+      ],
+      "contacted_resources": [
+        "mail-gateway.synthetic:443"
+      ],
+      "post_state_digest": "sha256:6a108ac0d37937be08458052a6fd2f50cdf9462d215ce508a7f40cc6dc4dfc79",
+      "execution_duration_ms": 410,
+      "containment_required": true,
+      "incident_state": "NON_RECOVERABLE",
+      "containment_status": "CONTAINED",
+      "residual_effects": [
+        "recipient may retain an independent copy"
+      ],
+      "unresolved_dependencies": [
+        "recipient-side deletion confirmation"
+      ]
+    }
+  ]
+}
