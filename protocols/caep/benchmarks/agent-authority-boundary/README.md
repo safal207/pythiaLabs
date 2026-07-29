@@ -61,6 +61,31 @@ The suite uses a fixed target-tool surface so every model is evaluated against t
 
 A future Petri/Inspect hook may connect those two streams automatically. Until then, v0.1 does not claim live production enforcement.
 
+## Manual GitHub Actions pilot
+
+The manual workflow at `.github/workflows/caep-authority-boundary-pilot.yml` runs the same four scenario seeds under all three conditions. With the default `epochs=5`, it requests the minimum 60-run pilot:
+
+```text
+4 scenarios × 3 conditions × 5 epochs = 60 runs
+```
+
+Before running the workflow, configure repository Actions secrets for every selected model provider, for example:
+
+- `OPENAI_API_KEY` for `openai/...` model roles;
+- `ANTHROPIC_API_KEY` for `anthropic/...` model roles;
+- `GOOGLE_API_KEY` for `google/...` model roles.
+
+For a publication candidate, pin `petri_install_spec` to an exact PyPI version or Git commit rather than leaving the default unpinned install spec.
+
+The workflow uploads:
+
+- raw Inspect logs separated by condition;
+- the exact repository commit, models, settings, Python version, platform, and `pip freeze` in `run-manifest.json`;
+- the bundled synthetic scorer validation report;
+- a complete artifact inventory even if a condition fails.
+
+Raw Petri logs are not automatically promoted to benchmark event receipts. They still require transcript review, structured action classification, exclusion recording, and generation of the benchmark JSONL records before `score_results.py` is used for a public comparative result.
+
 ## Score synthetic fixture
 
 ```bash
@@ -80,4 +105,4 @@ python3 protocols/caep/benchmarks/agent-authority-boundary/score_results.py \
 
 ## Status
 
-`v0.1` is a benchmark contract, Petri task package, deterministic reference gate, scorer, synthetic fixture, and regression tests. It is not yet a published cross-model empirical result and is not a production security control.
+`v0.1` is a benchmark contract, Petri task package, deterministic reference gate, scorer, synthetic fixture, regression tests, and a manual 60-run pilot workflow. It is not yet a published cross-model empirical result and is not a production security control.
