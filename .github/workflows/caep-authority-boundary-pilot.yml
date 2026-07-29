@@ -1,0 +1,201 @@
+name: CAEP Authority Boundary Pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      auditor_model:
+        description: Inspect model ID for the auditor role
+        required: true
+        default: anthropic/claude-sonnet-4-6
+        type: string
+      target_model:
+        description: Inspect model ID for the target role
+        required: true
+        default: openai/gpt-5-mini
+        type: string
+      judge_model:
+        description: Inspect model ID for the judge role
+        required: true
+        default: anthropic/claude-opus-4-6
+        type: string
+      epochs:
+        description: Repetitions per scenario and condition
+        required: true
+        default: "5"
+        type: string
+      max_turns:
+        description: Maximum Petri turns per run
+        required: true
+        default: "24"
+        type: string
+      max_connections:
+        description: Inspect provider concurrency
+        required: true
+        default: "10"
+        type: string
+      realism_filter:
+        description: Enable the Petri realism filter
+        required: true
+        default: true
+        type: boolean
+      petri_install_spec:
+        description: pip install spec for Petri; pin a version or Git commit for publication runs
+        required: true
+        default: inspect-petri
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    name: 60-run authority-boundary pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      AUDITOR_MODEL: ${{ inputs.auditor_model }}
+      TARGET_MODEL: ${{ inputs.target_model }}
+      JUDGE_MODEL: ${{ inputs.judge_model }}
+      EPOCHS: ${{ inputs.epochs }}
+      MAX_TURNS: ${{ inputs.max_turns }}
+      MAX_CONNECTIONS: ${{ inputs.max_connections }}
+      REALISM_FILTER: ${{ inputs.realism_filter }}
+      PETRI_INSTALL_SPEC: ${{ inputs.petri_install_spec }}
+      PILOT_DIR: artifacts/agent-authority-boundary-pilot
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Inspect, Petri, and model providers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install inspect-ai "$PETRI_INSTALL_SPEC" openai anthropic google-genai
+
+      - name: Record exact environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PILOT_DIR"
+          python - <<'PY'
+          import json
+          import os
+          import platform
+          import subprocess
+          from pathlib import Path
+
+          def output(*args: str) -> str:
+              return subprocess.check_output(args, text=True).strip()
+
+          manifest = {
+              "benchmark": "Agent Authority Boundary Benchmark v0.1",
+              "repository": os.environ.get("GITHUB_REPOSITORY"),
+              "commit": os.environ.get("GITHUB_SHA"),
+              "workflow_run_id": os.environ.get("GITHUB_RUN_ID"),
+              "workflow_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+              "python": platform.python_version(),
+              "platform": platform.platform(),
+              "auditor_model": os.environ["AUDITOR_MODEL"],
+              "target_model": os.environ["TARGET_MODEL"],
+              "judge_model": os.environ["JUDGE_MODEL"],
+              "epochs": int(os.environ["EPOCHS"]),
+              "max_turns": int(os.environ["MAX_TURNS"]),
+              "max_connections": int(os.environ["MAX_CONNECTIONS"]),
+              "realism_filter": os.environ["REALISM_FILTER"].lower() == "true",
+              "petri_install_spec": os.environ["PETRI_INSTALL_SPEC"],
+              "pip_freeze": output("python", "-m", "pip", "freeze").splitlines(),
+          }
+          path = Path(os.environ["PILOT_DIR"]) / "run-manifest.json"
+          path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
+      - name: Verify required provider secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import sys
+
+          models = {
+              "auditor": os.environ["AUDITOR_MODEL"],
+              "target": os.environ["TARGET_MODEL"],
+              "judge": os.environ["JUDGE_MODEL"],
+          }
+          provider_keys = {
+              "openai/": "OPENAI_API_KEY",
+              "anthropic/": "ANTHROPIC_API_KEY",
+              "google/": "GOOGLE_API_KEY",
+          }
+          missing = []
+          for role, model in models.items():
+              for prefix, key in provider_keys.items():
+                  if model.startswith(prefix) and not os.environ.get(key):
+                      missing.append(f"{key} required by {role}={model}")
+          if missing:
+              for item in sorted(set(missing)):
+                  print(f"::error::{item}")
+              sys.exit(1)
+          print("Required provider secrets are available.")
+          PY
+
+      - name: Validate scorer against bundled synthetic fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python protocols/caep/benchmarks/agent-authority-boundary/score_results.py \
+            protocols/caep/benchmarks/agent-authority-boundary/fixtures/synthetic_results.jsonl \
+            > "$PILOT_DIR/synthetic-scorer-report.json"
+          cat "$PILOT_DIR/synthetic-scorer-report.json"
+
+      - name: Run baseline, prompt-only, and CAEP-gate conditions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for condition in baseline prompt_only caep_gate; do
+            log_dir="$PILOT_DIR/inspect-logs/$condition"
+            mkdir -p "$log_dir"
+            echo "Running condition=$condition epochs=$EPOCHS"
+            inspect eval \
+              protocols/caep/benchmarks/agent-authority-boundary/task.py@agent_authority_boundary \
+              -T "condition=$condition" \
+              -T "max_turns=$MAX_TURNS" \
+              -T "realism_filter=$REALISM_FILTER" \
+              --epochs="$EPOCHS" \
+              --max-connections="$MAX_CONNECTIONS" \
+              --model-role "auditor=$AUDITOR_MODEL" \
+              --model-role "target=$TARGET_MODEL" \
+              --model-role "judge=$JUDGE_MODEL" \
+              --log-dir "$log_dir"
+          done
+
+      - name: Inventory produced logs
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PILOT_DIR"
+          find "$PILOT_DIR" -type f -printf '%P\t%s bytes\n' | sort \
+            > "$PILOT_DIR/artifact-inventory.tsv"
+          cat "$PILOT_DIR/artifact-inventory.tsv"
+
+      - name: Upload raw pilot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: caep-authority-boundary-pilot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/agent-authority-boundary-pilot
+          if-no-files-found: error
+          retention-days: 30
