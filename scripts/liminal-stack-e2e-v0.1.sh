@@ -97,9 +97,9 @@ nc -z 127.0.0.1 8787
 
 # ---------------------------------------------------------------------------
 # 3. GardenLiminal: explicit orchestration handoff from the DAO decision.
-# The selected upstream becomes immutable workload evidence. The workload has
-# a fresh network namespace, while Garden's Store/LiminalDB adapter remains on
-# the host-supervisor side by the already-validated namespace boundary.
+# The selected upstream is injected as Seed environment and resolved by the
+# workload shell at runtime. This proves Garden applied the Seed env rather
+# than merely writing a host-expanded value into the command string.
 # ---------------------------------------------------------------------------
 ROOTFS="$EVIDENCE_DIR/rootfs"
 mkdir -p "$ROOTFS/bin"
@@ -116,7 +116,7 @@ meta:
 rootfs:
   path: $ROOTFS
 entrypoint:
-  cmd: ["/bin/busybox", "sh", "-c", "echo DAO_SELECTED_UPSTREAM=$SELECTED_UPSTREAM"]
+  cmd: ["/bin/busybox", "sh", "-c", "echo DAO_SELECTED_UPSTREAM=\$DAO_SELECTED_UPSTREAM"]
   env:
     - "DAO_SELECTED_UPSTREAM=$SELECTED_UPSTREAM"
   cwd: "/"
@@ -136,10 +136,17 @@ LIMINAL_URL=ws://127.0.0.1:8787 \
   sudo -E "$GARDEN_DIR/target/debug/gl" run -f "$SEED" --store liminal \
   > "$EVIDENCE_DIR/garden.log" 2>&1
 
-# Give the LiminalDB command loop a bounded moment to route frames already
-# accepted by its WebSocket server.
+# Runtime handoff assertion: the workload shell must resolve the value from the
+# Seed environment and render exactly the upstream selected by DAO.
+grep -Fq -- "DAO_SELECTED_UPSTREAM=$SELECTED_UPSTREAM" "$EVIDENCE_DIR/garden.log"
+
+# Give the LiminalDB command loop a bounded moment to route the required set of
+# lifecycle frames. Wait for the acceptance threshold itself, not only the
+# first record, to avoid a false timing failure while queued frames drain.
+LIFECYCLE_MATCHES=0
 for _ in $(seq 1 40); do
-  if grep -q 'garden.lifecycle.v1:' "$EVIDENCE_DIR/liminaldb.log"; then
+  LIFECYCLE_MATCHES="$(grep -c 'garden.lifecycle.v1:' "$EVIDENCE_DIR/liminaldb.log" || true)"
+  if (( LIFECYCLE_MATCHES >= 3 )); then
     break
   fi
   sleep 0.25
@@ -155,10 +162,8 @@ if grep -q 'ws command failed' "$EVIDENCE_DIR/liminaldb.log"; then
   grep 'ws command failed' "$EVIDENCE_DIR/liminaldb.log" >&2 || true
   exit 1
 fi
-grep -q 'garden.lifecycle.v1:' "$EVIDENCE_DIR/liminaldb.log"
 
 # We require multiple lifecycle records, not a one-frame connectivity probe.
-LIFECYCLE_MATCHES="$(grep -c 'garden.lifecycle.v1:' "$EVIDENCE_DIR/liminaldb.log" || true)"
 if (( LIFECYCLE_MATCHES < 3 )); then
   echo "expected >=3 accepted Garden lifecycle impulses, got $LIFECYCLE_MATCHES" >&2
   exit 1
@@ -187,6 +192,7 @@ summary={
   'handoff':{
     'mode':'explicit_orchestration',
     'selected_upstream_embedded_in_garden_workload':True,
+    'seed_environment_applied_at_workload_runtime':True,
   },
   'garden':{
     'workload_exit':0,
