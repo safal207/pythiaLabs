@@ -21,9 +21,11 @@ real WebSocket server + application impulse parser
 
 The workflow intentionally checks out exact revisions rather than floating `main`:
 
-- DAO_lim: `e3f9df40bc52d392ed5539b8be6a65f4909e6835`
-- GardenLiminal: `3a690f8abd79ebff435ce1e3171176f48bbc6924`
+- DAO_lim: `336d538fe203510a345445472d6ce90911b52e54`
+- GardenLiminal: `9d5f9c25f3a4d9635c583c9920de6084950a21d9`
 - LiminalDB: `0cd6e77d52787bb36a97b75ba1a37cb027268eb3`
+
+All three Rust application workspaces used by the E2E have committed lockfiles at the pinned revisions. DAO_lim and GardenLiminal were explicitly hardened to track `Cargo.lock` and require `--locked` in CI before these final revisions were selected.
 
 The evidence artifact also records the revisions observed with `git rev-parse HEAD` so checkout drift is visible.
 
@@ -95,6 +97,10 @@ This is deliberately stronger than merely proving a WebSocket frame was written:
 - `summary.json`
 
 `summary.json` reports PASS only after all three component boundaries have succeeded.
+
+## Post-merge evidence
+
+The workflow also runs on `main` pushes that change the E2E harness or reviewer evidence. A PR run is therefore not the final proof by itself; after the umbrella PR is merged, the corresponding `main` run must also pass on the merged umbrella SHA.
 
 ## Claim boundary
 
