@@ -4,9 +4,7 @@ Last updated: 2026-08-09
 
 ## Purpose
 
-This file is the mission-control view for the current NLnet grant portfolio.
-
-It tracks application codes, funds, repositories, reviewer-readiness status, and the next action for each proposal.
+Mission-control view for the current NLnet portfolio: application code, reviewer readiness, exact evidence entrypoint, and next action.
 
 ## Current portfolio
 
@@ -15,22 +13,18 @@ It tracks application codes, funds, repositories, reviewer-readiness status, and
 | 1 | 2026-08-00b | NGI TALER | ProofPath Agent Payment Guard | Submitted; reviewer-ready |
 | 2 | 2026-08-00c | NGI Fediversity | LiminalDB | Submitted; budget corrected; reviewer-ready |
 | 3 | 2026-06-133 | NGI Commons | PythiaLabs | Acknowledged; primary version; reviewer-ready |
-| 4 | 2026-06-0c5 | NGI Commons | LiminalQAengineer | Acknowledged; grant-specific reviewer path prepared |
-| 5 | 2026-06-087 | NGI Commons | Liminal Stack | Acknowledged; umbrella reviewer map prepared |
+| 4 | 2026-06-087 | NGI Commons | Liminal Stack | Acknowledged; **reviewer-ready + pinned 3-component E2E PASS** |
+| 5 | 2026-06-0c5 | NGI Commons | LiminalQAengineer | Acknowledged; grant-specific reviewer path prepared |
 | 6 | 2026-06-0fe | NGI Commons | PythiaLabs | Acknowledged; duplicate/older variant |
 
-## Reviewer-ready repositories
+## Primary reviewer-ready paths
 
-### ProofPath
+### ProofPath — 2026-08-00b
 
-```text
-Application: 2026-08-00b
-Fund: NGI TALER
-Repository: https://github.com/safal207/ProofPath
+Repository: `safal207/ProofPath`  
 Requested amount: EUR 50,000
-```
 
-Reviewer path:
+Reviewer entrypoints:
 
 - `docs/NGI_TALER_REVIEWER_PATH.md`
 - `docs/TALER_ALIGNMENT.md`
@@ -38,31 +32,14 @@ Reviewer path:
 - `docs/BUDGET_AND_MILESTONES.md`
 - `docs/GRANT_MILESTONE_TRACKER.md`
 
-Public milestone issues:
+Next action: wait for NLnet review; answer clarification from the existing evidence/milestone map rather than expanding scope.
 
-- `#159` — Signed intent envelope and threat model
-- `#160` — Core payment guard engine
-- `#161` — Evidence bundle and offline verifier
-- `#162` — CLI API and integration notes
-- `#163` — Documentation and community review
+### LiminalDB — 2026-08-00c
 
-Current next action:
-
-```text
-Wait for NLnet review response.
-If asked for clarification, answer from the TALER reviewer path and milestone tracker.
-```
-
-### LiminalDB
-
-```text
-Application: 2026-08-00c
-Fund: NGI Fediversity
-Repository: https://github.com/safal207/LiminalDB
+Repository: `safal207/LiminalDB`  
 Requested amount: EUR 50,000
-```
 
-Reviewer path:
+Reviewer entrypoints:
 
 - `docs/FEDIVERSITY_REVIEWER_PATH.md`
 - `docs/FEDERATED_EVENT_SOURCING_ALIGNMENT.md`
@@ -70,31 +47,14 @@ Reviewer path:
 - `docs/BUDGET_AND_MILESTONES_FEDIVERSITY.md`
 - `docs/GRANT_MILESTONE_TRACKER_FEDIVERSITY.md`
 
-Public milestone issues:
+Next action: wait for NLnet review; keep the reviewer path clean and avoid unrelated scope growth.
 
-- `#75` — Event envelope and local replay model
-- `#76` — Local-first persistence and audit path
-- `#77` — Federated replication design
-- `#78` — Protocol adapter notes
-- `#79` — Developer and reviewer experience
+### PythiaLabs — 2026-06-133
 
-Current next action:
-
-```text
-Wait for NLnet review response.
-Keep README clean, keep open PR count at zero, and only add changes that improve reviewer clarity.
-```
-
-### PythiaLabs
-
-```text
-Application: 2026-06-133
-Fund: NGI Zero Commons / Commons Fund
-Repository: https://github.com/safal207/pythiaLabs
+Repository: `safal207/pythiaLabs`  
 Requested amount: EUR 30,000
-```
 
-Reviewer path:
+Reviewer entrypoints:
 
 - `docs/NGI_COMMONS_REVIEWER_PATH.md`
 - `docs/REVIEWER_PATH.md`
@@ -102,132 +62,133 @@ Reviewer path:
 - `docs/BUDGET_AND_MILESTONES_COMMONS.md`
 - `docs/GRANT_MILESTONE_TRACKER_COMMONS.md`
 
-Public milestone issues:
+Next action: wait for NLnet review; use `2026-06-133` as the intended current PythiaLabs application.
 
-- `#190` — Evidence schema v0.1
-- `#191` — CLI and library path
-- `#192` — Demo case library
-- `#193` — GitHub Actions prototype
-- `#194` — Documentation and public reviewer report
+## Liminal Stack — 2026-06-087
 
-Current next action:
+Project: **Liminal Stack: Adaptive Routing, Reactive Storage and Secure Containers for Trustworthy AI Infrastructure**  
+Requested amount: EUR 50,000  
+Submitted duration: 12 months  
+Status: **reviewer-ready component baseline + pinned three-component E2E evidence**
 
-```text
-Wait for NLnet review response.
-If PythiaLabs receives reviewer interest, point to application 2026-06-133 as the current intended version.
-```
-
-## Other acknowledged applications with lightweight reviewer paths
-
-### LiminalQAengineer
-
-```text
-Application: 2026-06-0c5
-Project: LiminalQAengineer: Open Causality and Temporal Memory for QA Pipelines
-Repository: https://github.com/safal207/LiminalQAengineer
-Status: Acknowledged; grant-specific reviewer path prepared and merged
-```
-
-Reviewer path:
-
-- `docs/NLNET_COMMONS_REVIEWER_PATH_2026-06-0c5.md` in `safal207/LiminalQAengineer`
-- linked from `docs/REVIEWER_FIRST_SCREEN.md`
-
-Current next action:
-
-```text
-Wait for NLnet review response.
-Do not expand scope unless NLnet asks; use the grant-specific path to answer implementation-vs-grant-delta questions.
-```
-
-### Liminal Stack
-
-```text
-Application: 2026-06-087
-Project: Liminal Stack: Adaptive Routing, Reactive Storage and Secure Containers for Trustworthy AI Infrastructure
-Requested amount: EUR 50,000
-Submitted duration: 12 months
-Status: Acknowledged; umbrella reviewer map prepared
-```
-
-Umbrella reviewer path:
+Reviewer entrypoints:
 
 - [`NLNET_LIMINAL_STACK_REVIEWER_PATH_2026-06-087.md`](NLNET_LIMINAL_STACK_REVIEWER_PATH_2026-06-087.md)
+- [`LIMINAL_STACK_E2E_V0_1.md`](LIMINAL_STACK_E2E_V0_1.md)
+- `.github/workflows/liminal-stack-e2e.yml`
+- `scripts/liminal-stack-e2e-v0.1.sh`
 
-Canonical component repositories:
-
-- DAO_lim — https://github.com/safal207/DAO_lim
-- LiminalDB — https://github.com/safal207/LiminalDB
-- GardenLiminal — https://github.com/safal207/GardenLiminal
-
-Important boundary:
+Canonical pinned components:
 
 ```text
-Liminal Stack is an integration/hardening programme, not a fourth product.
-Current component evidence is stronger than current full-stack evidence.
-The canonical DAO → GardenLiminal → LiminalDB end-to-end demo remains a grant-funded deliverable.
+DAO_lim       336d538fe203510a345445472d6ce90911b52e54
+GardenLiminal 9d5f9c25f3a4d9635c583c9920de6084950a21d9
+LiminalDB     0cd6e77d52787bb36a97b75ba1a37cb027268eb3
 ```
 
-Current next action:
+First successful pinned E2E evidence:
 
 ```text
-Wait for NLnet review response.
+run       31316410242
+artifact  9038912459
+sha256    24770a809dd634e51bd4465881be92f497be33f7148e616f60977c5600ecffc2
+result    PASS
+```
+
+Artifact-verified path:
+
+```text
+DAO explain
+  route=api-v1
+  policy=resonant
+  intent=realtime
+  selected=api-backend-1
+        ↓ explicit orchestration handoff
+GardenLiminal workload
+  selected upstream embedded in workload
+  net namespace requested
+  store=liminal
+  exit=0
+        ↓
+real LiminalDB process
+  application-valid garden.lifecycle.v1 records = 10
+  impulse schema errors = 0
+```
+
+Completed since the earlier umbrella map:
+
+- Garden kernel capability enforcement + post-state evidence;
+- privileged `pivot_root` and seccomp postconditions;
+- host supervisor / workload namespace separation with Store outside the workload boundary;
+- bounded LiminalDB reconnect/replay outbox;
+- Garden lifecycle → real LiminalDB `Impulse` application adapter;
+- committed `Cargo.lock` + locked CI in DAO_lim and GardenLiminal;
+- canonical version-pinned DAO → Garden → LiminalDB E2E.
+
+Remaining honest grant/hardening delta:
+
+- broader routing failure/load/adversarial matrices;
+- optional bounded plugin/extension authority work;
+- LiminalDB adversarial soak and any future multi-node safety work;
+- **no production Raft/distributed-consensus claim yet**;
+- broader kernel/architecture/workload validation;
+- durable per-impulse acknowledgement would require a shared protocol extension;
+- **independent external security audit remains pending**.
+
+Next action:
+
+```text
 Do not create a new Liminal Stack repository.
-If clarification is requested, answer from the umbrella reviewer map and the three canonical component repositories.
+Do not add more architecture merely for appearance.
+Wait for NLnet review and answer from the pinned reviewer path + E2E artifact.
 ```
 
-### PythiaLabs duplicate / older variant
+## LiminalQAengineer — 2026-06-0c5
 
-```text
-Application: 2026-06-0fe
-Project: PythiaLabs: Open Evidence Gates for High-Risk Agentic Actions
-Status: Acknowledged; likely older or duplicate variant
-```
+Repository: `safal207/LiminalQAengineer`  
+Status: acknowledged; grant-specific reviewer path prepared and merged.
 
-Current next action:
+Reviewer entrypoint:
 
-```text
-Do not use this as the primary PythiaLabs code.
-Use 2026-06-133 as the main PythiaLabs application reference.
-```
+- `docs/NLNET_COMMONS_REVIEWER_PATH_2026-06-0c5.md`
 
-## NLnet communication notes
+Next action: wait for NLnet review; keep implementation-vs-grant-delta traceability explicit.
 
-- NLnet confirmed that the LiminalDB budget correction to EUR 50,000 was adjusted.
-- NLnet confirmed earlier that the latest PythiaLabs proposal is treated as the intended current version by default.
-- The acknowledgement for Liminal Stack `2026-06-087` says first-round review is expected to take roughly 12–15 weeks, with natural variation possible.
-- No selection/rejection status is inferred from the absence of a later message.
+## PythiaLabs older variant — 2026-06-0fe
+
+Status: acknowledged older/duplicate variant.
+
+Next action: do not use as the primary PythiaLabs application; use `2026-06-133`.
+
+## NLnet communication boundary
+
+- LiminalDB budget correction to EUR 50,000 was acknowledged.
+- The latest PythiaLabs proposal is the intended current version by default.
+- Liminal Stack `2026-06-087` was acknowledged; absence of a later email is not interpreted as selection or rejection.
 
 ## Response playbook
 
-If NLnet asks, answer with short, concrete, reviewer-friendly replies.
+If NLnet asks:
 
-Recommended order:
+1. confirm application code;
+2. link the exact reviewer path;
+3. state what is already implemented;
+4. point to exact revisions and runnable evidence;
+5. state what grant work remains;
+6. keep non-claims explicit;
+7. avoid creating extra repositories or widening scope unless the reviewer asks.
 
-1. Confirm the application code.
-2. Link the correct repository or umbrella reviewer map.
-3. State what is already implemented.
-4. State what the grant will fund.
-5. State non-claims clearly.
-6. Point to runnable evidence and exact revisions.
-7. Point to milestone issues when the application has explicit milestone tracking.
-
-## Current strategic focus
+## Strategic focus
 
 ```text
-Do not submit new grants immediately.
-Keep the primary reviewer-ready projects clean:
+Reviewer confidence > number of new projects.
 
+Keep clean:
 1. ProofPath
 2. LiminalDB
 3. PythiaLabs
+4. Liminal Stack
+5. LiminalQAengineer
 
-Maintain lightweight reviewer traceability for:
-
-4. LiminalQAengineer
-5. Liminal Stack
+Do not submit or invent additional work merely to increase activity.
 ```
-
-The goal is not more noise.
-
-The goal is reviewer confidence.
