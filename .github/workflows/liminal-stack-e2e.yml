@@ -1,0 +1,107 @@
+name: Liminal Stack E2E
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/liminal-stack-e2e-v0.1.sh'
+      - 'docs/NLNET_LIMINAL_STACK_REVIEWER_PATH_2026-06-087.md'
+      - 'docs/LIMINAL_STACK_E2E_V0_1.md'
+      - '.github/workflows/liminal-stack-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout umbrella evidence repo
+        uses: actions/checkout@v4
+        with:
+          path: umbrella
+          persist-credentials: false
+
+      - name: Checkout DAO_lim pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: safal207/DAO_lim
+          ref: e3f9df40bc52d392ed5539b8be6a65f4909e6835
+          path: components/dao
+          persist-credentials: false
+
+      - name: Checkout GardenLiminal pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: safal207/GardenLiminal
+          ref: 3a690f8abd79ebff435ce1e3171176f48bbc6924
+          path: components/garden
+          persist-credentials: false
+
+      - name: Checkout LiminalDB pinned revision
+        uses: actions/checkout@v4
+        with:
+          repository: safal207/LiminalDB
+          ref: 0cd6e77d52787bb36a97b75ba1a37cb027268eb3
+          path: components/liminaldb
+          persist-credentials: false
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libssl-dev busybox-static netcat-openbsd jq
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust builds
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            components/dao
+            components/garden
+            components/liminaldb/liminal-db
+
+      - name: Record E2E environment
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/liminal-stack-e2e"
+          {
+            echo "umbrella_source_sha=$SOURCE_SHA"
+            echo "workflow_sha=$GITHUB_SHA"
+            echo "runner_os=$RUNNER_OS"
+            uname -a
+            rustc --version
+            cargo --version
+            cat /etc/os-release
+          } | tee "$RUNNER_TEMP/liminal-stack-e2e/environment.txt"
+
+      - name: Build DAO_lim decision surface
+        working-directory: components/dao
+        run: cargo build --locked -p dao -p daoctl
+
+      - name: Build GardenLiminal runtime
+        working-directory: components/garden
+        run: cargo build --locked --bin gl
+
+      - name: Build LiminalDB server
+        working-directory: components/liminaldb/liminal-db
+        run: cargo build --locked -p liminal-cli
+
+      - name: Run pinned DAO → Garden → LiminalDB evidence path
+        env:
+          DAO_DIR: ${{ github.workspace }}/components/dao
+          GARDEN_DIR: ${{ github.workspace }}/components/garden
+          LIMINALDB_DIR: ${{ github.workspace }}/components/liminaldb
+          EVIDENCE_DIR: ${{ runner.temp }}/liminal-stack-e2e
+        run: bash umbrella/scripts/liminal-stack-e2e-v0.1.sh
+
+      - name: Upload Liminal Stack evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liminal-stack-e2e-${{ github.run_id }}
+          path: ${{ runner.temp }}/liminal-stack-e2e
+          if-no-files-found: warn
