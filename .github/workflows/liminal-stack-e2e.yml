@@ -78,9 +78,17 @@ jobs:
             cat /etc/os-release
           } | tee "$RUNNER_TEMP/liminal-stack-e2e/environment.txt"
 
-      - name: Build DAO_lim decision surface
+      # DAO_lim is an application workspace but the pinned revision predates a
+      # committed Cargo.lock. Bootstrap one deterministically for this evidence
+      # run, preserve it in the artifact, then build with --locked. The lockfile
+      # will be promoted back into DAO_lim before the final E2E revision is pinned.
+      - name: Bootstrap and build DAO_lim decision surface
         working-directory: components/dao
-        run: cargo build --locked -p dao -p daoctl
+        run: |
+          cargo generate-lockfile
+          cp Cargo.lock "$RUNNER_TEMP/liminal-stack-e2e/DAO-Cargo.lock"
+          sha256sum Cargo.lock | tee "$RUNNER_TEMP/liminal-stack-e2e/dao-cargo-lock.sha256"
+          cargo build --locked -p dao -p daoctl
 
       - name: Build GardenLiminal runtime
         working-directory: components/garden
