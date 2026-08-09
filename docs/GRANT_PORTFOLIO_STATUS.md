@@ -1,6 +1,6 @@
 # Grant Portfolio Status
 
-Last updated: 2026-06-03
+Last updated: 2026-08-09
 
 ## Purpose
 
@@ -12,11 +12,11 @@ It tracks application codes, funds, repositories, reviewer-readiness status, and
 
 | Priority | Code | Fund | Project | Status |
 |---:|---|---|---|---|
-| 1 | 2026-08-00b | NGI TALER | ProofPath Agent Payment Guard | Submitted |
-| 2 | 2026-08-00c | NGI Fediversity | LiminalDB | Submitted; budget corrected |
-| 3 | 2026-06-133 | NGI Commons | PythiaLabs | Acknowledged; primary version |
-| 4 | 2026-06-0c5 | NGI Commons | LiminalQAengineer | Acknowledged |
-| 5 | 2026-06-087 | NGI Commons | Liminal Stack | Acknowledged |
+| 1 | 2026-08-00b | NGI TALER | ProofPath Agent Payment Guard | Submitted; reviewer-ready |
+| 2 | 2026-08-00c | NGI Fediversity | LiminalDB | Submitted; budget corrected; reviewer-ready |
+| 3 | 2026-06-133 | NGI Commons | PythiaLabs | Acknowledged; primary version; reviewer-ready |
+| 4 | 2026-06-0c5 | NGI Commons | LiminalQAengineer | Acknowledged; grant-specific reviewer path prepared |
+| 5 | 2026-06-087 | NGI Commons | Liminal Stack | Acknowledged; umbrella reviewer map prepared |
 | 6 | 2026-06-0fe | NGI Commons | PythiaLabs | Acknowledged; duplicate/older variant |
 
 ## Reviewer-ready repositories
@@ -117,21 +117,27 @@ Wait for NLnet review response.
 If PythiaLabs receives reviewer interest, point to application 2026-06-133 as the current intended version.
 ```
 
-## Other acknowledged applications
+## Other acknowledged applications with lightweight reviewer paths
 
 ### LiminalQAengineer
 
 ```text
 Application: 2026-06-0c5
 Project: LiminalQAengineer: Open Causality and Temporal Memory for QA Pipelines
-Status: Acknowledged
+Repository: https://github.com/safal207/LiminalQAengineer
+Status: Acknowledged; grant-specific reviewer path prepared and merged
 ```
+
+Reviewer path:
+
+- `docs/NLNET_COMMONS_REVIEWER_PATH_2026-06-0c5.md` in `safal207/LiminalQAengineer`
+- linked from `docs/REVIEWER_FIRST_SCREEN.md`
 
 Current next action:
 
 ```text
-Do not expand unless NLnet asks for clarification.
-If needed, prepare a lightweight reviewer path later.
+Wait for NLnet review response.
+Do not expand scope unless NLnet asks; use the grant-specific path to answer implementation-vs-grant-delta questions.
 ```
 
 ### Liminal Stack
@@ -139,14 +145,35 @@ If needed, prepare a lightweight reviewer path later.
 ```text
 Application: 2026-06-087
 Project: Liminal Stack: Adaptive Routing, Reactive Storage and Secure Containers for Trustworthy AI Infrastructure
-Status: Acknowledged
+Requested amount: EUR 50,000
+Submitted duration: 12 months
+Status: Acknowledged; umbrella reviewer map prepared
+```
+
+Umbrella reviewer path:
+
+- [`NLNET_LIMINAL_STACK_REVIEWER_PATH_2026-06-087.md`](NLNET_LIMINAL_STACK_REVIEWER_PATH_2026-06-087.md)
+
+Canonical component repositories:
+
+- DAO_lim — https://github.com/safal207/DAO_lim
+- LiminalDB — https://github.com/safal207/LiminalDB
+- GardenLiminal — https://github.com/safal207/GardenLiminal
+
+Important boundary:
+
+```text
+Liminal Stack is an integration/hardening programme, not a fourth product.
+Current component evidence is stronger than current full-stack evidence.
+The canonical DAO → GardenLiminal → LiminalDB end-to-end demo remains a grant-funded deliverable.
 ```
 
 Current next action:
 
 ```text
-Do not expand unless NLnet asks for clarification.
-If needed, prepare a lightweight reviewer path later.
+Wait for NLnet review response.
+Do not create a new Liminal Stack repository.
+If clarification is requested, answer from the umbrella reviewer map and the three canonical component repositories.
 ```
 
 ### PythiaLabs duplicate / older variant
@@ -168,7 +195,8 @@ Use 2026-06-133 as the main PythiaLabs application reference.
 
 - NLnet confirmed that the LiminalDB budget correction to EUR 50,000 was adjusted.
 - NLnet confirmed earlier that the latest PythiaLabs proposal is treated as the intended current version by default.
-- Acknowledgement emails say the first round of review may take around 12 to 15 weeks, but this can vary by project and complexity.
+- The acknowledgement for Liminal Stack `2026-06-087` says first-round review is expected to take roughly 12–15 weeks, with natural variation possible.
+- No selection/rejection status is inferred from the absence of a later message.
 
 ## Response playbook
 
@@ -177,22 +205,27 @@ If NLnet asks, answer with short, concrete, reviewer-friendly replies.
 Recommended order:
 
 1. Confirm the application code.
-2. Link the correct repository.
-3. Link the reviewer path.
-4. State what is already implemented.
-5. State what the grant will fund.
-6. State non-claims clearly.
-7. Point to milestone issues.
+2. Link the correct repository or umbrella reviewer map.
+3. State what is already implemented.
+4. State what the grant will fund.
+5. State non-claims clearly.
+6. Point to runnable evidence and exact revisions.
+7. Point to milestone issues when the application has explicit milestone tracking.
 
 ## Current strategic focus
 
 ```text
 Do not submit new grants immediately.
-Focus on keeping the three reviewer-ready projects clean:
+Keep the primary reviewer-ready projects clean:
 
 1. ProofPath
 2. LiminalDB
 3. PythiaLabs
+
+Maintain lightweight reviewer traceability for:
+
+4. LiminalQAengineer
+5. Liminal Stack
 ```
 
 The goal is not more noise.
