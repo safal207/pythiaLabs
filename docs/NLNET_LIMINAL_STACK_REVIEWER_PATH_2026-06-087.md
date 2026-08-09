@@ -1,6 +1,6 @@
 # NLnet Commons Fund reviewer path — Liminal Stack 2026-06-087
 
-Status: umbrella reviewer map for the acknowledged NLnet Commons Fund proposal.
+Status: **reviewer-ready component baseline + pinned three-component E2E evidence**.
 
 Project: **Liminal Stack: Adaptive Routing, Reactive Storage and Secure Containers for Trustworthy AI Infrastructure**  
 Application code: **2026-06-087**  
@@ -8,46 +8,27 @@ Call: **Commons Fund**
 Requested amount: **EUR 50,000**  
 Submitted duration: **12 months**
 
-This is not a new repository or a fourth product. The proposal is an integration/hardening programme across three existing open-source components:
+This application is an integration/hardening programme across three existing open-source components, not a fourth product:
 
 1. **DAO_lim** — adaptive / intent-aware routing;
-2. **LiminalDB** — reactive, replayable storage and audit memory;
-3. **GardenLiminal** — Linux process/runtime isolation with structured lifecycle evidence.
+2. **GardenLiminal** — bounded Linux execution and lifecycle evidence;
+3. **LiminalDB** — reactive, replayable evidence memory.
 
-The current repositories are the source of truth. This map separates **implemented baseline**, **validation gaps**, and **grant-funded delta**.
+## Final pinned reviewer revisions
 
-## Canonical repositories
+| Component | Role | Pinned revision |
+| --- | --- | --- |
+| `safal207/DAO_lim` | routing decision + explainability | `336d538fe203510a345445472d6ce90911b52e54` |
+| `safal207/GardenLiminal` | isolated execution + lifecycle evidence | `9d5f9c25f3a4d9635c583c9920de6084950a21d9` |
+| `safal207/LiminalDB` | application-level lifecycle memory | `0cd6e77d52787bb36a97b75ba1a37cb027268eb3` |
 
-| Component | Repository | Role | Evidence snapshot used by this map |
-| --- | --- | --- | --- |
-| DAO_lim | https://github.com/safal207/DAO_lim | Adaptive AI traffic routing | `e3f9df40bc52d392ed5539b8be6a65f4909e6835` |
-| LiminalDB | https://github.com/safal207/LiminalDB | Durable/reactive evidence memory | `0cd6e77d52787bb36a97b75ba1a37cb027268eb3` |
-| GardenLiminal | https://github.com/safal207/GardenLiminal | Isolated execution and lifecycle evidence | `d2203fb7ee9a1724702a543f73a1623cd08f7a58` |
+DAO_lim and GardenLiminal now track `Cargo.lock` and require `--locked` in CI. LiminalDB already tracks its workspace lockfile.
 
-The April 2026 application linked LiminalDB using the historical repository name `LiminalBD`. The canonical repository is now `safal207/LiminalDB`.
-
-## Submitted stack thesis
-
-```text
-AI / backend request
-        ↓
-DAO_lim
-adaptive routing and backend selection
-        ↓
-GardenLiminal
-bounded execution / isolation controls
-        ↓
-LiminalDB
-replayable state, events and audit history
-```
-
-The component evidence is currently stronger than the **full-stack evidence**. A single deterministic DAO → GardenLiminal → LiminalDB demonstration remains a grant-funded integration deliverable.
+The April 2026 application used the historical repository name `LiminalBD`; the canonical project is `safal207/LiminalDB`.
 
 ## Five-minute reviewer path
 
-### DAO_lim
-
-Repository: https://github.com/safal207/DAO_lim
+### 1. DAO_lim
 
 Review:
 
@@ -55,21 +36,42 @@ Review:
 - `docs/START_HERE.md`
 - `docs/demo/FIVE_MINUTE_ROUTING_DEMO.md`
 - `docs/GRANT_EVIDENCE.md`
-- `docs/BENCHMARKS.md`
 
-Validation:
+Reproduce:
 
 ```bash
-cargo test
-cargo build --release
-./target/release/daoctl explain --host llm.myapp.com --path /v1/chat/completions --intent realtime
+cargo check --locked --workspace
+cargo test --locked --workspace --no-fail-fast
+cargo build --locked -p dao -p daoctl
 ```
 
-Current baseline includes intent-aware/resonant upstream selection, p95/error-rate inputs, hot reload, Prometheus metrics and route-choice explainability.
+Current evidence includes intent-aware/resonant routing, route explanations, circuit state, Prometheus/operator surfaces, and reproducible locked builds.
 
-### LiminalDB
+### 2. GardenLiminal
 
-Repository: https://github.com/safal207/LiminalDB
+Review:
+
+- `README.md`
+- `docs/ISOLATION_HARDENING_AUDIT_2026-08-09.md`
+- `docs/CAPABILITY_ENFORCEMENT.md`
+- `docs/ROOTFUL_ISOLATION_POSTCONDITIONS.md`
+- `docs/LIMINALDB_RECONNECT_EVIDENCE.md`
+- `docs/LIMINALDB_IMPULSE_ADAPTER.md`
+- merged PRs `#10`, `#11`, `#12`, `#14`, `#15`, `#16`
+
+Current verified boundaries:
+
+- kernel capability enforcement covers Effective / Permitted / Inheritable / Bounding / Ambient sets;
+- `CAPS_DROPPED` is emitted only after verified kernel post-state;
+- privileged CI proves a tested drop survives child `execve` with `NoNewPrivs=1`;
+- `pivot_root` has privileged post-condition evidence: new root visible, old root detached, host-only sentinel unreachable;
+- seccomp has privileged kernel evidence: filter mode active and a denied `socket(2)` receives `EPERM`;
+- host supervisor remains outside workload namespaces and owns the Store/LiminalDB connection;
+- workload namespace boundary includes PID 1 and a separate network namespace;
+- LiminalDB transport uses a bounded FIFO and ordered reconnect/replay rather than silent event loss;
+- Garden lifecycle records are encoded into the application-level LiminalDB `Impulse` schema with a required versioned `pattern`.
+
+### 3. LiminalDB
 
 Review:
 
@@ -79,180 +81,121 @@ Review:
 - `docs/BENCHMARKS.md`
 - `docs/START_HERE.md`
 
-Validation:
+Reproduce:
 
 ```bash
-cargo build --release -p liminal-cli
+cd liminal-db
+cargo build --locked -p liminal-cli
 cargo test --workspace --locked
-./target/release/liminal-cli --store ./data --ws-port 8787
 ```
 
-Current baseline includes adaptive runtime primitives, WAL/snapshots/replay, trustworthy-transition records, signed checkpoints, anti-rollback boundaries, CLI/WebSocket surfaces and Rust/TypeScript interfaces.
+Current baseline includes WAL/snapshot/replay primitives, trustworthy-transition records, signed checkpoints, anti-rollback boundaries, CLI/WebSocket surfaces, and the application-level `Impulse` parser used by the stack E2E.
 
-### GardenLiminal
+## Canonical full-stack evidence
 
-Repository: https://github.com/safal207/GardenLiminal
-
-Review:
-
-- `README.md`
-- `docs/ISOLATION_HARDENING_AUDIT_2026-08-09.md`
-- `docs/BENCHMARKS.md`
-- `examples/demo-liminaldb.sh`
-- Issue `#6` — host-supervisor / workload namespace lifecycle
-- Issue `#9` — kernel-enforced capability dropping
-
-Validation available in normal CI:
-
-```bash
-cargo check
-cargo test
-cargo build --release
-```
-
-Rootful isolation post-conditions require a supported Linux environment and must not be inferred from ordinary build/test CI or WSL control-plane benchmarks.
-
-## Original proposal → current evidence → grant delta
-
-| Submitted area | Current evidence | Current boundary | Grant-funded delta |
-| --- | --- | --- | --- |
-| Adaptive routing using p95 latency, errors and semantic intent | DAO_lim routing core, `daoctl explain`, benchmark/reviewer docs | Working component baseline | Harden under failure/load; expand reproducible benchmark matrix |
-| Hot reload, Prometheus and operator CLI | DAO_lim implementation/docs | Present baseline | Improve exact-revision operator evidence |
-| gRPC / circuit-breaker extensions | DAO_lim roadmap/current code direction | Not all proposed extensions are complete | Complete and test a bounded supported subset |
-| Safe WASM extension surface | DAO_lim WASM/wasmtime architecture | Broad marketplace/plugin story not complete | Define narrow plugin authority contract + adversarial tests |
-| Reactive storage / TRS | LiminalDB adaptive runtime | Implemented single-node/adaptive baseline | Benchmark stability under bounded adversarial load |
-| WAL / timeline / auditability | LiminalDB WAL, snapshots, replay, transition ledger, signed checkpoints | Strong current baseline | Expand replay/soak/exact-revision evidence |
-| Distributed Raft mode | LiminalDB explicitly does not claim production distributed consensus | Not production baseline | Multi-node work requires safety invariants, election/log-repair and split-brain evidence before production claims |
-| GardenLiminal namespace/cgroup/mount isolation | Runtime implementation + hardening audit | Implementation present; rootful evidence incomplete | Kernel-pinned rootful validation pack |
-| `pivot_root` isolation | `src/isolate/mount.rs` implements private mounts + bind mount + `pivot_root` + old-root detach | **Implementation exists**; canonical rootful post-condition pack missing | Validate mount propagation, old-root reachability and bootstrap failure behavior |
-| Seccomp BPF filtering | `src/isolate/seccomp.rs` builds/applies `strict`, `minimal`, `default` BPF allow-list profiles through `seccompiler` | **Implementation exists**; profile calibration/runtime evidence incomplete | Negative syscall fixtures, architecture/kernel evidence, profile contract documentation |
-| Unknown seccomp policy handling | GardenLiminal PR #7 | Unknown names now fail closed | Keep versioned profile semantics explicit |
-| Capability / privilege hardening | `no_new_privs` exists; requested `drop_caps` now fails closed rather than pretending success | **Kernel capability dropping not implemented** | Implement effective/permitted/inheritable/bounding/ambient policy + verified post-state; tracked in GardenLiminal Issue #9 |
-| Namespace lifecycle | Current supervisor calls namespace transition before fork | Supervisor currently joins non-PID workload namespaces | Redesign bootstrap while preserving PID namespace semantics; tracked in GardenLiminal Issue #6 |
-| GardenLiminal → LiminalDB audit path | WebSocket store adapter + demo script | Existing two-component path | Harden backpressure/reconnect/failure evidence |
-| DAO → GardenLiminal → LiminalDB | Components exist; Garden→DB path exists | No canonical version-pinned three-component evidence artifact | Publish deterministic end-to-end demo |
-| External security audit | Internal hardening/evidence work exists | No completed independent audit claimed | Commission review after supported isolation surface is frozen |
-| Stable v1.0 releases | Components have different maturity levels | Not complete | Define release criteria per component rather than forcing simultaneous versions |
-
-## Correction to the April 2026 wording
-
-The proposal captured intended architecture early. Current source state is more precise:
-
-- **GardenLiminal `pivot_root`:** implementation is present; rootful validation is pending.
-- **GardenLiminal seccomp:** real BPF profile implementation is present; calibration and negative runtime evidence are pending.
-- **GardenLiminal capabilities:** kernel-enforced dropping is **not** present. Non-empty requests now fail closed so they cannot create false `CAPS_DROPPED` evidence.
-- **GardenLiminal namespace lifecycle:** supervisor/workload namespace separation still needs redesign and exact evidence.
-- **LiminalDB:** do not claim production-grade Raft/distributed consensus.
-- **Full stack:** do not claim a proven DAO → GardenLiminal → LiminalDB integration until a version-pinned end-to-end fixture exists.
-- **Security:** do not claim an independent external audit until one is completed and verifiably documented.
-
-This is not a weakening of the grant case. It creates a falsifiable boundary between existing open-source evidence and work the grant would fund.
-
-## Grant acceptance map
-
-### A. DAO routing hardening
-
-A reviewer should be able to verify:
-
-- deterministic routing fixtures over p95/error/intent inputs;
-- explicit fallback/circuit behavior under backend failure;
-- bounded extension/plugin authority;
-- reproducible benchmark evidence tied to exact revisions;
-- operator-visible route explanations.
-
-### B. LiminalDB storage hardening
-
-A reviewer should be able to verify:
-
-- replay correctness from durable events/WAL;
-- deterministic snapshot/checkpoint validation;
-- adaptive-control behavior under bounded adversarial fixtures;
-- explicit safety invariants for any multi-node work;
-- no production distributed-consensus claim without election/split-brain/log-repair evidence.
-
-### C. GardenLiminal isolation hardening
-
-A reviewer should be able to verify on supported Linux:
-
-- bootstrap failures stop workload execution;
-- `pivot_root` post-conditions are demonstrated, not merely compiled;
-- `no_new_privs` is proven before seccomp installation;
-- supported seccomp profiles have positive and negative fixtures;
-- non-empty capability policies are either actually enforced + verified or fail closed;
-- host supervisor remains outside workload namespaces after Issue #6 is completed;
-- lifecycle evidence never claims a control that was not actually enforced.
-
-### D. Cross-component integration
-
-One canonical demo should prove:
+Umbrella workflow:
 
 ```text
-request
-→ DAO routing decision
-→ bounded GardenLiminal execution
-→ structured lifecycle/result events
-→ durable LiminalDB replay
+.github/workflows/liminal-stack-e2e.yml
+scripts/liminal-stack-e2e-v0.1.sh
 ```
 
-The evidence should include exact component SHAs, configuration/fixtures, environment/kernel metadata where relevant, expected event sequence, immutable output references and failure behavior when a component is unavailable.
+Evidence model:
 
-### E. External review
+```text
+real DAO `daoctl explain --json`
+        ↓
+explicit orchestration handoff of selected upstream
+        ↓
+real GardenLiminal Seed
+  + net.enable=true
+  + host-side Liminal Store
+        ↓
+application-valid `garden.lifecycle.v1:` write impulses
+        ↓
+real pinned LiminalDB process / application parser
+```
 
-Highest-value boundaries:
+Successful PR evidence run:
 
-- routing/plugin authority in DAO_lim;
-- WAL/checkpoint/replay integrity in LiminalDB;
-- namespace/mount/capability/seccomp ordering and post-conditions in GardenLiminal;
-- trust assumptions at component integration boundaries.
+- workflow run: **`31316410242`** (`Liminal Stack E2E` #4);
+- umbrella source SHA: `73e18ac593839738ae0b790cefd131e458acd434`;
+- artifact: **`liminal-stack-e2e-31316410242`**;
+- artifact ID: **`9038912459`**;
+- artifact digest: **`sha256:24770a809dd634e51bd4465881be92f497be33f7148e616f60977c5600ecffc2`**.
 
-## Budget traceability
+Artifact-verified result:
 
-Submitted EUR 50,000 budget:
+```text
+DAO route          = api-v1
+DAO policy         = resonant
+DAO intent         = realtime
+DAO candidates     = 2
+selected upstream  = api-backend-1
+Garden exit        = 0
+Garden net ns      = requested
+Garden store       = liminal
+LiminalDB process  = real
+LiminalDB ws port  = 8787
+accepted lifecycle pattern matches = 10
+application schema errors           = 0
+result                              = PASS
+```
 
-| Item | Amount | Reviewer interpretation |
-| --- | ---: | --- |
-| Developer/researcher salary, 12 months | EUR 36,000 | Implementation, tests, integration and documentation |
-| Compute/cloud infrastructure | EUR 6,000 | CI, benchmarks and reproducible demo infrastructure |
-| External security audit | EUR 5,000 | Independent review after supported surface is frozen |
-| Conference/community | EUR 2,000 | Open-source dissemination/community feedback |
-| Documentation tooling/subscriptions | EUR 1,000 | Reviewer/operator documentation and tooling |
+The generated Garden workload itself prints `DAO_SELECTED_UPSTREAM=api-backend-1`, proving that the actual DAO decision entered the bounded execution step rather than being replaced with a second hard-coded choice.
 
-No budget line is evidence that an expense has already occurred.
+## Original proposal → current evidence → remaining grant delta
 
-## Explicit non-claims
+| Submitted area | Current verified evidence | Remaining honest delta |
+| --- | --- | --- |
+| Adaptive / intent-aware routing | DAO routing core + explain JSON + locked CI + E2E decision | broader failure/load matrices and bounded extension/plugin authority |
+| Hot reload / operator visibility | DAO implementation/docs | production/operator hardening |
+| Reactive storage / audit memory | LiminalDB single-node durable/replay baseline | adversarial soak and any future multi-node safety work |
+| Distributed Raft mode | **not claimed as production baseline** | election/log-repair/split-brain invariants before any production consensus claim |
+| `pivot_root` | implemented + privileged post-condition evidence | broader supported-kernel compatibility matrix |
+| Seccomp BPF | implemented + negative privileged syscall evidence | profile calibration/versioning across supported architectures/workloads |
+| Capability dropping | implemented + all-five-set verification + execve evidence | broader capability/policy fixtures, external review |
+| Host/workload namespace separation | implemented in canonical Seed path + privileged boundary evidence | multi-container/Pod path remains a separate surface |
+| Garden → LiminalDB reliability | bounded FIFO + ordered reconnect/replay tests | durable per-impulse acknowledgement would require a shared protocol extension |
+| Garden → LiminalDB schema | real `Impulse` application adapter | future typed metadata/lifecycle command if desired |
+| DAO → Garden → LiminalDB | **pinned E2E PASS** | native orchestration coupling is optional future product work, not claimed today |
+| Independent security audit | internal evidence/review only | **still pending** |
 
-Do not currently represent the umbrella proposal as proving:
+## Claim boundary
 
-- production-grade container isolation;
-- production-grade distributed consensus;
-- universal routing optimality;
-- completed independent security audit;
-- full-stack production readiness;
-- stable v1.0 releases of all three components;
-- compatibility with every backend, Linux distribution or workload;
+The evidence now supports this statement:
+
+> At the pinned revisions above, Liminal Stack has a reproducible local integration path in which DAO_lim produces an explainable routing decision, that selected value is handed explicitly into a GardenLiminal isolated workload, and Garden lifecycle records are accepted by a real LiminalDB application parser.
+
+It does **not** establish:
+
+- production-grade container or distributed-system certification;
+- native DAO process-launch coupling to GardenLiminal;
+- a per-impulse durable LiminalDB commit acknowledgement;
+- production distributed consensus / Raft;
+- a completed independent external security audit;
+- compatibility with every Linux/kernel/backend/workload;
 - absence of sandbox escapes.
 
 ## Reviewer response playbook
 
 If NLnet asks about `2026-06-087`:
 
-1. Confirm application code and EUR 50,000 / 12-month scope.
-2. Link this umbrella map.
-3. Link the three canonical repositories.
-4. Explain `LiminalBD` as the historical LiminalDB link/name.
-5. State what is already implemented.
-6. Separate implementation from validation evidence.
-7. Name the concrete remaining work: capability enforcement, namespace lifecycle, rootful isolation evidence, multi-node storage work, canonical three-component demo, external audit.
-8. Offer exact revision evidence rather than broad architecture claims.
+1. identify the three canonical repos and exact pinned revisions above;
+2. link this reviewer path and `docs/LIMINAL_STACK_E2E_V0_1.md`;
+3. point to the E2E workflow/run/artifact;
+4. state that component builds are lockfile-pinned;
+5. distinguish verified current baseline from remaining grant-funded hardening;
+6. explicitly keep Raft, durable ACK, native orchestration and external-audit claims out of the current baseline.
 
 ## Bottom line
 
 ```text
-Liminal Stack is an integration and hardening programme across three existing Rust projects:
-
-DAO_lim        — choose where work should go
-GardenLiminal  — bound how work executes
-LiminalDB      — preserve what happened and replay it
+DAO_lim       — choose where work should go
+      ↓
+GardenLiminal — bound how selected work executes
+      ↓
+LiminalDB     — accept and preserve lifecycle evidence
 ```
 
-The strongest funding case is to turn these independently useful components into a **version-pinned, independently reviewed, end-to-end reproducible stack**, while keeping unfinished controls and validation gaps explicit.
+The earlier integration gap is now closed with version-pinned, reproducible local evidence. The highest-value remaining grant work is **hardening, broader validation, multi-node safety work if pursued, and independent external review** — not inventing a fourth repository or pretending unfinished controls are already certified.
