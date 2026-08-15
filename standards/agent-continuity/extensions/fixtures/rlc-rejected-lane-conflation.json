@@ -1,0 +1,91 @@
+{
+  "extension": {
+    "schema_version": "rlc/0.1",
+    "extension_id": "rlc-rejected-lane-conflation-001",
+    "vce_envelope_id": "vce-example-001",
+    "responsibility_lanes": [
+      {
+        "lane_id": "spec-authoring",
+        "owner_ref": "role:spec-author",
+        "objective": "Author the RFC and machine-readable continuation contracts.",
+        "mutation_scope": {
+          "allowed_refs": ["artifact-rfc", "artifact-schema"],
+          "denied_refs": ["capability:verify"]
+        },
+        "done_condition": ["RFC and schema artifacts exist and are ready for independent verification."],
+        "status": "complete",
+        "latest_ruling_ref": "evt-001",
+        "source_refs": [
+          "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md",
+          "conversation:current:user:lead-me"
+        ],
+        "depends_on": [],
+        "lane_digest": "sha256:af7cbbc2ca8afb650f8599c47591b0cd4a16cf0748dd0e0ebb47d1abd0a4afa0"
+      },
+      {
+        "lane_id": "verification",
+        "owner_ref": "role:verifier",
+        "objective": "Verify conformance without mutating the authored contract.",
+        "mutation_scope": {
+          "allowed_refs": ["capability:verify"],
+          "denied_refs": ["artifact-rfc", "artifact-schema"]
+        },
+        "done_condition": ["Reference conformance result is independently observed and recorded."],
+        "status": "active",
+        "latest_ruling_ref": "evt-001",
+        "source_refs": [
+          "standards/agent-continuity/conformance/test_vce_conformance.py",
+          "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md"
+        ],
+        "depends_on": ["spec-authoring"],
+        "lane_digest": "sha256:7942a8d1892635c5221268628b7a28766ec3e304bac34240b6fe18d301f488e5"
+      }
+    ],
+    "active_lane_id": "verification",
+    "next_action": {"lane_id": "verification", "effect_refs": ["capability:verify"]},
+    "event_bindings": [
+      {"event_id": "evt-003", "lane_id": "verification", "effect_refs": ["artifact-rfc", "artifact-schema"]},
+      {"event_id": "evt-004", "lane_id": "verification", "effect_refs": ["capability:verify"]}
+    ],
+    "restore_requirements": {
+      "required_lane_checks": [
+        {"check_id": "check-lane-spec", "lane_id": "spec-authoring", "method": "source_revalidation"},
+        {"check_id": "check-lane-verification", "lane_id": "verification", "method": "source_revalidation"}
+      ],
+      "fail_closed": true
+    },
+    "extension_digest": {
+      "algorithm": "sha256",
+      "canonicalization": "json-sort-keys-utf8-v1",
+      "value": "0b980fcd1366918e9a84e8552766b7ff1aa33cfa1d64914aed859311a4c90ab2"
+    }
+  },
+  "restore_results": {
+    "schema_version": "rlc-restore/0.1",
+    "extension_id": "rlc-example-001",
+    "lane_checks": [
+      {
+        "check_id": "check-lane-spec",
+        "lane_id": "spec-authoring",
+        "status": "passed",
+        "observed_lane_digest": "sha256:af7cbbc2ca8afb650f8599c47591b0cd4a16cf0748dd0e0ebb47d1abd0a4afa0",
+        "source_refs_checked": [
+          "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md",
+          "conversation:current:user:lead-me"
+        ],
+        "conflict_refs": []
+      },
+      {
+        "check_id": "check-lane-verification",
+        "lane_id": "verification",
+        "status": "passed",
+        "observed_lane_digest": "sha256:7942a8d1892635c5221268628b7a28766ec3e304bac34240b6fe18d301f488e5",
+        "source_refs_checked": [
+          "standards/agent-continuity/conformance/test_vce_conformance.py",
+          "standards/agent-continuity/RFC-001-VERIFIABLE-CONTINUATION-ENVELOPE.md"
+        ],
+        "conflict_refs": []
+      }
+    ]
+  }
+}
