@@ -1,12 +1,41 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Mapping
+
+from jsonschema import Draft202012Validator
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+STATE_SCHEMA = ROOT / "schema" / "coordination-state.schema.json"
+PROPOSAL_SCHEMA = ROOT / "schema" / "transition-proposal.schema.json"
+REACHABILITY_SCHEMA = ROOT / "schema" / "reachability-signal.schema.json"
+ACK_SCHEMA = ROOT / "schema" / "handoff-ack.schema.json"
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError("document root must be object")
+    return value
+
+
+def schema_errors(document: Mapping[str, Any], schema_path: Path) -> list[str]:
+    schema = load_json(schema_path)
+    Draft202012Validator.check_schema(schema)
+    validator = Draft202012Validator(schema)
+    return [error.message for error in validator.iter_errors(dict(document))]
 
 
 def evaluate_transition(
     state: Mapping[str, Any],
     proposal: Mapping[str, Any],
 ) -> tuple[str, dict[str, Any]]:
+    if schema_errors(state, STATE_SCHEMA):
+        return "BLOCKED_INVALID_STATE", {}
+    if schema_errors(proposal, PROPOSAL_SCHEMA):
+        return "BLOCKED_INVALID_PROPOSAL", {}
     if proposal.get("lane_id") != state.get("lane_id"):
         return "BLOCKED_LANE_MISMATCH", {}
     if proposal.get("writer_ref") != state.get("owner_ref"):
@@ -58,6 +87,8 @@ def evaluate_handoff(
         return "PENDING_REACHABILITY_UNCHECKED", {
             "target_owner_ref": target,
         }
+    if schema_errors(reachability, REACHABILITY_SCHEMA):
+        return "BLOCKED_INVALID_REACHABILITY_SIGNAL", {}
     if reachability.get("participant_ref") != target:
         return "BLOCKED_REACHABILITY_PARTICIPANT_MISMATCH", {}
     if reachability.get("surface_ref") != proposal.get("reachability_surface_ref"):
@@ -65,8 +96,6 @@ def evaluate_handoff(
 
     observed_at = reachability.get("observed_at_tick")
     valid_until = reachability.get("valid_until_tick")
-    if not isinstance(observed_at, int) or not isinstance(valid_until, int):
-        return "BLOCKED_INVALID_REACHABILITY_SIGNAL", {}
     if observed_at > now_tick:
         return "BLOCKED_FUTURE_REACHABILITY_SIGNAL", {}
     if now_tick > valid_until:
@@ -98,6 +127,8 @@ def evaluate_handoff_commit(
 
     if ack is None:
         return "PENDING_RECIPIENT_ACK", {}
+    if schema_errors(ack, ACK_SCHEMA):
+        return "BLOCKED_INVALID_ACK", {}
     if ack.get("lane_id") != state.get("lane_id"):
         return "BLOCKED_ACK_LANE_MISMATCH", {}
     if ack.get("recipient_ref") != proposal.get("target_owner_ref"):
