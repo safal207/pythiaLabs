@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safal207.github.io/pythiaLabs/schemas/acb-consumption-receipt-0.1.json",
+  "title": "ACB-001 ConsumptionReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "result", "reason", "decision_ref", "decision_event_id", "logical_operation_id", "execution_id", "execution_scope_digest", "consumption_ref"],
+  "properties": {
+    "schema_version": {"const": "acb-receipt/0.1"},
+    "result": {"enum": ["CONSUMED", "BLOCKED"]},
+    "reason": {"type": "string", "minLength": 1},
+    "decision_ref": {"type": ["string", "null"]},
+    "decision_event_id": {"type": ["string", "null"]},
+    "logical_operation_id": {"type": "string", "minLength": 1},
+    "execution_id": {"type": "string", "minLength": 1},
+    "execution_scope_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "consumption_ref": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}
