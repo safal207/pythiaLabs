@@ -1,0 +1,72 @@
+{
+  "stale_writer_after_handoff": {
+    "current_authority_state": {
+      "schema_version": "aci-state/0.1",
+      "resource_ref": "key:X",
+      "owner_ref": "worker:B",
+      "authority_epoch": 18,
+      "status": "active",
+      "scope": ["effect:update:key:X"],
+      "predecessor_digest": "sha256:3a8b90b7dc0cbb81f10039d83096e9948e430d66f22e3f1c194eff9c1d0613a9",
+      "authority_digest": {
+        "algorithm": "sha256",
+        "canonicalization": "json-sort-keys-utf8-v1",
+        "value": "b73c464e85f7914433d102b085c7ab372fc6d47585cbdfb93e8db808d096333c"
+      }
+    },
+    "stale_mutation": {
+      "schema_version": "aci-mutation/0.1",
+      "mutation_id": "mut-stale-001",
+      "actor_ref": "worker:A",
+      "resource_ref": "key:X",
+      "effect_ref": "effect:update:key:X",
+      "presented_authority_epoch": 17,
+      "presented_authority_digest": "sha256:3a8b90b7dc0cbb81f10039d83096e9948e430d66f22e3f1c194eff9c1d0613a9",
+      "expected_previous_state_digest": null,
+      "new_state_digest": null
+    },
+    "current_mutation": {
+      "schema_version": "aci-mutation/0.1",
+      "mutation_id": "mut-current-001",
+      "actor_ref": "worker:B",
+      "resource_ref": "key:X",
+      "effect_ref": "effect:update:key:X",
+      "presented_authority_epoch": 18,
+      "presented_authority_digest": "sha256:b73c464e85f7914433d102b085c7ab372fc6d47585cbdfb93e8db808d096333c",
+      "expected_previous_state_digest": null,
+      "new_state_digest": null
+    }
+  },
+  "split_authority": {
+    "authority_states": [
+      {
+        "schema_version": "aci-state/0.1",
+        "resource_ref": "key:X",
+        "owner_ref": "worker:A",
+        "authority_epoch": 7,
+        "status": "active",
+        "scope": ["effect:update:key:X"],
+        "predecessor_digest": null,
+        "authority_digest": {
+          "algorithm": "sha256",
+          "canonicalization": "json-sort-keys-utf8-v1",
+          "value": "c483f0a208c58266a7671c43623ed3416de9145d38fd87ddad766195650f8e14"
+        }
+      },
+      {
+        "schema_version": "aci-state/0.1",
+        "resource_ref": "key:X",
+        "owner_ref": "worker:B",
+        "authority_epoch": 7,
+        "status": "active",
+        "scope": ["effect:update:key:X"],
+        "predecessor_digest": null,
+        "authority_digest": {
+          "algorithm": "sha256",
+          "canonicalization": "json-sort-keys-utf8-v1",
+          "value": "74839ec0ead286c2d1ade150033c3fc63ec4946581fac026c53b91e5c445dac5"
+        }
+      }
+    ]
+  }
+}
