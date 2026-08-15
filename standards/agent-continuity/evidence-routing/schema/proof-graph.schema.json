@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/elr/proof-graph.schema.json",
+  "title": "ELR-001 Proof Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "graph_id", "nodes", "edges"],
+  "properties": {
+    "schema_version": {"const": "elr-graph/0.1"},
+    "graph_id": {"type": "string", "minLength": 1},
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["edge_id", "from", "to", "provides", "bindings", "cost"],
+        "properties": {
+          "edge_id": {"type": "string", "minLength": 1},
+          "from": {"type": "string", "minLength": 1},
+          "to": {"type": "string", "minLength": 1},
+          "provides": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "bindings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "action_scope_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "authority_epoch": {"type": "integer", "minimum": 0},
+              "policy_version": {"type": "string", "minLength": 1},
+              "state_version": {"type": "string", "minLength": 1},
+              "max_risk_tier": {"type": "integer", "minimum": 0, "maximum": 9},
+              "requires_reversible": {"type": "boolean"},
+              "valid_until_tick": {"type": "integer", "minimum": 0},
+              "evidence_observed_tick": {"type": "integer", "minimum": 0},
+              "max_evidence_age_ticks": {"type": "integer", "minimum": 0}
+            },
+            "dependentRequired": {
+              "max_evidence_age_ticks": ["evidence_observed_tick"]
+            }
+          },
+          "cost": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["latency", "compute", "coordination", "monetary"],
+            "properties": {
+              "latency": {"type": "integer", "minimum": 0},
+              "compute": {"type": "integer", "minimum": 0},
+              "coordination": {"type": "integer", "minimum": 0},
+              "monetary": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    }
+  }
+}
