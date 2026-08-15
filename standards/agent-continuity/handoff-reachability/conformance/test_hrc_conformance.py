@@ -1,9 +1,17 @@
 from __future__ import annotations
 
-import copy
 import unittest
 
-from hrc_reference import evaluate_handoff, evaluate_handoff_commit, evaluate_transition
+from hrc_reference import (
+    ACK_SCHEMA,
+    PROPOSAL_SCHEMA,
+    REACHABILITY_SCHEMA,
+    STATE_SCHEMA,
+    evaluate_handoff,
+    evaluate_handoff_commit,
+    evaluate_transition,
+    schema_errors,
+)
 
 
 class HRCConformanceTests(unittest.TestCase):
@@ -184,6 +192,23 @@ class HRCConformanceTests(unittest.TestCase):
         self.assertEqual(status, "HANDOFF_COMMIT_ALLOWED")
         self.assertEqual(detail["new_owner_ref"], "agent:B")
         self.assertEqual(detail["new_ownership_epoch"], 5)
+
+    def test_21_state_schema_accepts_reference_state(self):
+        self.assertEqual(schema_errors(self.state(), STATE_SCHEMA), [])
+
+    def test_22_proposal_schema_accepts_both_transition_profiles(self):
+        self.assertEqual(schema_errors(self.status_proposal(), PROPOSAL_SCHEMA), [])
+        self.assertEqual(schema_errors(self.handoff_proposal(), PROPOSAL_SCHEMA), [])
+
+    def test_23_reachability_schema_rejects_unknown_status(self):
+        r = self.reachability()
+        r["status"] = "MAYBE"
+        self.assertTrue(schema_errors(r, REACHABILITY_SCHEMA))
+
+    def test_24_ack_schema_requires_exact_binding_fields(self):
+        ack = self.ack()
+        del ack["accepted_handoff_event_id"]
+        self.assertTrue(schema_errors(ack, ACK_SCHEMA))
 
 
 if __name__ == "__main__":
