@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/hrc/handoff-ack.schema.json",
+  "title": "HRC-001 Handoff Acknowledgement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ack_id", "lane_id", "recipient_ref", "accepted_handoff_event_id", "accepted_ownership_epoch", "observed_predecessor_id"],
+  "properties": {
+    "schema_version": {"const": "hrc-ack/0.1"},
+    "ack_id": {"type": "string", "minLength": 1},
+    "lane_id": {"type": "string", "minLength": 1},
+    "recipient_ref": {"type": "string", "minLength": 1},
+    "accepted_handoff_event_id": {"type": "string", "minLength": 1},
+    "accepted_ownership_epoch": {"type": "integer", "minimum": 0},
+    "observed_predecessor_id": {"type": "string", "minLength": 1}
+  }
+}
