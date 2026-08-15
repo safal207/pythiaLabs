@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safal207.github.io/pythiaLabs/schemas/acb-proposed-execution-0.1.json",
+  "title": "ACB-001 ProposedExecution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "logical_operation_id", "execution_id", "tool_name", "normalized_args", "actor_ref", "policy_version", "authority_ref", "authority_epoch", "relevant_state_refs", "current_conditions", "cancelled", "superseded"],
+  "properties": {
+    "schema_version": {"const": "acb-execution/0.1"},
+    "logical_operation_id": {"type": "string", "minLength": 1},
+    "execution_id": {"type": "string", "minLength": 1},
+    "tool_name": {"type": "string", "minLength": 1},
+    "normalized_args": {"type": "object"},
+    "actor_ref": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "authority_ref": {"type": ["string", "null"]},
+    "authority_epoch": {"type": ["integer", "null"], "minimum": 0},
+    "relevant_state_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "current_conditions": {"type": "object", "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null"]}},
+    "cancelled": {"type": "boolean"},
+    "superseded": {"type": "boolean"}
+  }
+}
