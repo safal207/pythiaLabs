@@ -62,7 +62,7 @@
   },
   "restore_results": {
     "schema_version": "rlc-restore/0.1",
-    "extension_id": "rlc-example-001",
+    "extension_id": "rlc-rejected-lane-conflation-001",
     "lane_checks": [
       {
         "check_id": "check-lane-spec",
