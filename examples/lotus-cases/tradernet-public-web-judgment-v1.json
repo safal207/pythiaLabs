@@ -1,0 +1,116 @@
+{
+  "authority": {
+    "approval": false,
+    "delivery": false,
+    "execution": false,
+    "external_submission": false,
+    "merge": false,
+    "mode": "audit_only",
+    "ownership": false
+  },
+  "bounded_hypotheses": [
+    {
+      "claim": "The three mobile-specific findings may share a device-routing or responsive-resource branching cause.",
+      "confidence": 75,
+      "falsifier": "A code-level or controlled response experiment shows independent causes for route selection, hero scheduling, and terminal asset selection.",
+      "id": "mobile-branch-defect-cluster",
+      "status": "UNPROVEN_CLUSTER_CAUSE"
+    },
+    {
+      "claim": "A broad shared frontend runtime contributes recurring performance debt across Tradernet surfaces.",
+      "confidence": 90,
+      "id": "broad-shared-runtime",
+      "status": "SUPPORTED_NOT_ROOT_CAUSE_FOR_EVERY_FINDING"
+    }
+  ],
+  "case_id": "tradernet-public-web-2026-07-18",
+  "confirmed_findings": [
+    {
+      "claim": "The public chart route returns the Tradernet 404 experience for mobile user-agents regardless of viewport width.",
+      "confidence": 100,
+      "evidence": {
+        "artifact_sha256": "223d10431960d0ca5fe181fbf22fe238e408ff72188ddb8daaca2d7e67d71395",
+        "pr": 58,
+        "run_id": 29662815487
+      },
+      "id": "mobile-chart-user-agent-404",
+      "severity": "P1"
+    },
+    {
+      "claim": "Late discovery of the mobile hero image materially increases LCP; a browser-local preload improved median LCP by 3764 ms (33.13%) in three alternating rounds.",
+      "confidence": 97,
+      "evidence": {
+        "artifact_sha256": "1b13ec0135eacbf2ac622963e616f06b0cd608a4723fe5788bdb56bb1bc327ec",
+        "pr": 54,
+        "run_id": 29661704633
+      },
+      "id": "mobile-hero-late-discovery",
+      "severity": "P1-performance"
+    },
+    {
+      "claim": "The mobile terminal login page downloads a 346800-byte 2x onboarding image that renders at 0x0 and is not visible.",
+      "confidence": 100,
+      "evidence": {
+        "artifact_sha256": "7a5ff63a0b9a79ddbe37535046dbfbc6d581a9df9a1b7a54aef82b5521a194c1",
+        "pr": 60,
+        "run_id": 29663762367
+      },
+      "id": "terminal-hidden-mobile-asset",
+      "severity": "P2"
+    },
+    {
+      "claim": "Desktop and mobile terminal entry request a first-party onboarding.png asset that returns HTTP 404; no visible broken image was established.",
+      "confidence": 95,
+      "evidence": {
+        "artifact_sha256": "19fe1f0515fac24a2c45bb93ec39058d14fe14698478a417af507d1d9729b570",
+        "pr": 60,
+        "run_id": 29663675619
+      },
+      "id": "terminal-missing-onboarding-asset",
+      "severity": "P3"
+    }
+  ],
+  "generated_at": "2026-07-18T22:50:00.000Z",
+  "passed_checks": [
+    {
+      "claim": "For MICEXINDEXCF D1, 137 candles, timestamps, and volumes had zero detected OHLC, length, timestamp, or volume violations.",
+      "id": "daily-candle-integrity",
+      "result": "PASS"
+    },
+    {
+      "claim": "A trusted visible click changed D1/1440 to H1/60, loaded 698 hourly candles, and preserved zero detected data-integrity violations.",
+      "id": "d1-to-h1-transition",
+      "result": "PASS"
+    },
+    {
+      "claim": "The tested desktop profile already scheduled the exact hero resource early; an extra preload did not improve LCP.",
+      "id": "desktop-hero-preload",
+      "result": "NO_MATERIAL_EFFECT"
+    }
+  ],
+  "recommended_human_actions": [
+    "File the mobile chart 404 and mobile hero discovery as separate primary reports.",
+    "Attach the hidden mobile asset and missing asset as lower-severity terminal findings.",
+    "Keep the shared mobile-branch cause explicitly labeled as a hypothesis.",
+    "Run market-open quote freshness, reconnect, and cross-surface consistency experiments in a separate authorized scope."
+  ],
+  "schema_version": "pythia-lotus-external-qa-judgment-v1",
+  "subject": {
+    "evidence_prs": [
+      54,
+      58,
+      60
+    ],
+    "platform": "Tradernet",
+    "scope": "public unauthenticated web surfaces",
+    "source_repository": "https://github.com/safal207/LiminalQAengineer"
+  },
+  "unknowns": [
+    "Live quote liveness and reconnect behavior were not assessed during an open market session.",
+    "A single approximately 7.48-second chart-visibility observation is not a stable latency verdict.",
+    "The console message 'ERROR: No context for render' has no established user impact.",
+    "Minute interval label anomalies require a visible-menu confirmation."
+  ],
+  "verdict": "ESCALATE",
+  "verdict_meaning": "Present confirmed defects and bounded hypotheses to an authorized human owner; do not execute, publish externally, or claim a security vulnerability automatically."
+}
