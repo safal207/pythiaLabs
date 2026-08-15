@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/hrc/coordination-state.schema.json",
+  "title": "HRC-001 Coordination State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "lane_id", "owner_ref", "ownership_epoch", "head_event_id", "status"],
+  "properties": {
+    "schema_version": {"const": "hrc-state/0.1"},
+    "lane_id": {"type": "string", "minLength": 1},
+    "owner_ref": {"type": "string", "minLength": 1},
+    "ownership_epoch": {"type": "integer", "minimum": 0},
+    "head_event_id": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1}
+  }
+}

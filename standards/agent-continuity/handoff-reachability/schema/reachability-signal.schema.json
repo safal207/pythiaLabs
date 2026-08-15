@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/hrc/reachability-signal.schema.json",
+  "title": "HRC-001 Reachability Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "signal_id", "participant_ref", "surface_ref", "status", "observed_at_tick", "valid_until_tick"],
+  "properties": {
+    "schema_version": {"const": "hrc-reachability/0.1"},
+    "signal_id": {"type": "string", "minLength": 1},
+    "participant_ref": {"type": "string", "minLength": 1},
+    "surface_ref": {"type": "string", "minLength": 1},
+    "status": {"enum": ["READY", "UNAVAILABLE"]},
+    "observed_at_tick": {"type": "integer", "minimum": 0},
+    "valid_until_tick": {"type": "integer", "minimum": 0}
+  }
+}

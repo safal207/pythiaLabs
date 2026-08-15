@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/hrc/transition-proposal.schema.json",
+  "title": "HRC-001 Transition Proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "proposal_id", "lane_id", "transition_kind", "writer_ref", "writer_ownership_epoch", "observed_through_event_id", "expected_predecessor_id", "next_event_id"],
+  "properties": {
+    "schema_version": {"const": "hrc-proposal/0.1"},
+    "proposal_id": {"type": "string", "minLength": 1},
+    "lane_id": {"type": "string", "minLength": 1},
+    "transition_kind": {"enum": ["STATUS", "HANDOFF"]},
+    "writer_ref": {"type": "string", "minLength": 1},
+    "writer_ownership_epoch": {"type": "integer", "minimum": 0},
+    "observed_through_event_id": {"type": "string", "minLength": 1},
+    "expected_predecessor_id": {"type": "string", "minLength": 1},
+    "next_event_id": {"type": "string", "minLength": 1},
+    "next_status": {"type": "string", "minLength": 1},
+    "target_owner_ref": {"type": "string", "minLength": 1},
+    "target_ownership_epoch": {"type": "integer", "minimum": 0},
+    "reachability_surface_ref": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"transition_kind": {"const": "STATUS"}}},
+      "then": {"required": ["next_status"]}
+    },
+    {
+      "if": {"properties": {"transition_kind": {"const": "HANDOFF"}}},
+      "then": {"required": ["target_owner_ref", "target_ownership_epoch", "reachability_surface_ref"]}
+    }
+  ]
+}
