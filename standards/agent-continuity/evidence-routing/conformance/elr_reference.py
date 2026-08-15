@@ -176,6 +176,12 @@ def verify_receipt(
     request: Mapping[str, Any],
     graph: Mapping[str, Any],
 ) -> bool:
+    """Verify historical selection integrity at the receipt's issuance tick.
+
+    This intentionally does not answer whether the selected route remains
+    admissible at a later consumption/use time. Use revalidate_receipt_for_use
+    for that separate question.
+    """
     if schema_errors(receipt, RECEIPT_SCHEMA):
         return False
     if receipt.get("request_id") != request.get("request_id"):
@@ -222,3 +228,66 @@ def verify_receipt(
         receipt.get("selected_edge_ids") == selected.get("selected_edge_ids")
         and receipt.get("weighted_total_cost") == selected.get("weighted_total_cost")
     )
+
+
+def revalidate_receipt_for_use(
+    receipt: Mapping[str, Any],
+    request: Mapping[str, Any],
+    graph: Mapping[str, Any],
+    current_context: Mapping[str, Any],
+) -> tuple[str, dict[str, Any] | None]:
+    """Check whether a historically valid selected route is admissible now.
+
+    Historical selection integrity and current applicability are separate facts:
+    verify_receipt() proves the former at issuance time; this function first
+    requires that proof, then replays only the selected route's edge bindings
+    against a caller-supplied current context.
+
+    The function does not re-optimize the route. A route may remain admissible
+    even if a cheaper route exists now. If the selected route is no longer
+    admissible, callers may issue a fresh routing request and call select_route().
+    """
+    if not verify_receipt(receipt, request, graph):
+        return "INVALID_HISTORICAL_RECEIPT", None
+
+    current_request = dict(request)
+    current_request["context"] = dict(current_context)
+    if schema_errors(current_request, REQUEST_SCHEMA):
+        return "INVALID_CURRENT_CONTEXT", None
+
+    evaluated_at = receipt.get("evaluated_at_tick")
+    now_tick = current_context.get("now_tick")
+    if not isinstance(evaluated_at, int) or not isinstance(now_tick, int) or now_tick < evaluated_at:
+        return "INVALID_CURRENT_CONTEXT", {
+            "evaluated_at_tick": evaluated_at,
+            "checked_at_tick": now_tick,
+            "reason": "current_time_precedes_receipt_evaluation",
+        }
+
+    edge_by_id = {edge["edge_id"]: edge for edge in graph.get("edges", [])}
+    node = request.get("start_node")
+    proofs: set[str] = set()
+
+    for edge_id in receipt.get("selected_edge_ids", []):
+        edge = edge_by_id.get(edge_id)
+        if edge is None or edge["from"] != node:
+            return "INVALID_HISTORICAL_RECEIPT", None
+        if not edge_available(edge, current_context):
+            return "BLOCKED_ROUTE_STALE_OR_DRIFTED", {
+                "evaluated_at_tick": evaluated_at,
+                "checked_at_tick": now_tick,
+                "failed_edge_id": edge_id,
+            }
+        proofs.update(edge["provides"])
+        node = edge["to"]
+
+    required = set(request.get("required_proofs", []))
+    if node != request.get("target_node") or not required.issubset(proofs):
+        return "INVALID_HISTORICAL_RECEIPT", None
+
+    return "CURRENTLY_ADMISSIBLE", {
+        "evaluated_at_tick": evaluated_at,
+        "checked_at_tick": now_tick,
+        "selected_edge_ids": list(receipt.get("selected_edge_ids", [])),
+        "accumulated_proofs": sorted(proofs),
+    }
