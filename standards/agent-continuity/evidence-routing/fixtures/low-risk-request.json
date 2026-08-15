@@ -1,0 +1,22 @@
+{
+  "schema_version": "elr-request/0.1",
+  "request_id": "low-risk-read",
+  "start_node": "START",
+  "target_node": "EXECUTE",
+  "context": {
+    "action_scope_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "authority_epoch": 4,
+    "policy_version": "policy:v1",
+    "state_version": "state:19",
+    "now_tick": 100,
+    "risk_tier": 1,
+    "reversible": true
+  },
+  "required_proofs": ["authority_current", "scope_bound"],
+  "cost_weights": {
+    "latency": 1,
+    "compute": 1,
+    "coordination": 1,
+    "monetary": 1
+  }
+}
