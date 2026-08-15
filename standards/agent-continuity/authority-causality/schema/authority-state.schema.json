@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safal207.github.io/pythiaLabs/aci/authority-state.schema.json",
+  "title": "ACI Authority State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "resource_ref", "owner_ref", "authority_epoch", "status", "scope", "predecessor_digest", "authority_digest"],
+  "properties": {
+    "schema_version": {"const": "aci-state/0.1"},
+    "resource_ref": {"type": "string", "minLength": 1},
+    "owner_ref": {"type": "string", "minLength": 1},
+    "authority_epoch": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["active", "revoked", "expired"]},
+    "scope": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "predecessor_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "authority_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "canonicalization": {"const": "json-sort-keys-utf8-v1"},
+        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
