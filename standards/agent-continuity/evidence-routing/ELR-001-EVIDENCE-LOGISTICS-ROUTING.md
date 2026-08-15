@@ -177,7 +177,7 @@ For equal weighted cost, the reference implementation uses a deterministic lexic
 
 This is not claimed to be the only valid production tie-break. It exists so conformance output is reproducible.
 
-## 8. Route receipt
+## 8. Route receipt and two different verification questions
 
 A selected path produces a receipt that binds:
 
@@ -193,19 +193,66 @@ evaluated_at_tick
 receipt_digest
 ```
 
-The verifier recomputes:
+A route receipt creates two distinct verification questions.
+
+### 8.1 Historical selection integrity
+
+`verify_receipt(receipt, request, graph)` asks:
+
+> **Was this receipt correctly produced from this exact request and graph at the recorded evaluation tick?**
+
+It recomputes:
 
 1. request and graph digests;
 2. every selected edge and edge adjacency;
-3. each edge's current bindings;
+3. each edge binding against the **issuance context**;
 4. accumulated proofs;
 5. total weighted cost;
 6. target reachability;
 7. hard-obligation coverage;
-8. whether the selected route is still the reference optimum;
-9. the receipt digest.
+8. reference optimality at issuance time;
+9. receipt digest.
 
-A receipt therefore records **which route was selected from which graph for which contextual request**. It is not execution authority by itself.
+The strict equality:
+
+```text
+receipt.evaluated_at_tick == request.context.now_tick
+```
+
+is intentional for historical verification. Restamping the original request to a later time would change the object whose selection the receipt claims to prove.
+
+### 8.2 Current applicability at consumption/use time
+
+Historical correctness does not imply current applicability.
+
+`revalidate_receipt_for_use(receipt, request, graph, current_context)` asks the separate question:
+
+> **Does the already-selected route remain admissible under the current context now?**
+
+The function first requires the historical receipt to verify unchanged, then traverses the exact selected edges again using `current_context` for:
+
+```text
+valid_until_tick
+max_evidence_age_ticks
+authority_epoch
+policy_version
+state_version
+action_scope_digest
+risk_tier
+reversibility
+```
+
+If any selected edge is stale or drifted, use-time validation returns:
+
+```text
+BLOCKED_ROUTE_STALE_OR_DRIFTED
+```
+
+The caller may then issue a fresh routing request and run `select_route()` again.
+
+Use-time revalidation intentionally does **not** re-optimize the route. A historically selected route can remain safe and admissible even if another route has become cheaper. Current admissibility and current optimality are different questions.
+
+A receipt therefore records **which route was selected from which graph for which contextual request**. It is evidence about selection, not execution authority and not a timeless permission to use that path later.
 
 ## 9. Conformance invariants
 
@@ -237,9 +284,17 @@ A receipt therefore records **which route was selected from which graph for whic
 
 > A valid routing receipt proves a selection result under a bound request/graph snapshot. It does not prove that the tool executed or that current authority still exists later.
 
+### ELR-I8 — Historical verification != current applicability
+
+> A receipt that verifies at its issuance tick MUST NOT be treated as proof that the selected route remains admissible at a later consumption tick. Current use requires explicit revalidation against current context.
+
+This distinction is the temporal counterpart of ACB's separation between authorization occurrence and authorization consumption.
+
 ## 10. Conformance suite
 
-The v0.1 suite includes 24 tests covering:
+The v0.1 suite now includes **30 tests**.
+
+The original 24 cover:
 
 - published schema validation;
 - cheap sync selection for low-risk actions;
@@ -266,6 +321,15 @@ The v0.1 suite includes 24 tests covering:
 - no-route fail-closed behavior;
 - zero-cost cycle termination.
 
+Six additional use-time tests cover the counterexample raised against the first executable draft:
+
+- historical verification remains bound to the issuance tick;
+- a selected route remains usable before its declared expiry;
+- `valid_until_tick` is re-evaluated at use time;
+- `max_evidence_age_ticks` is re-evaluated at use time;
+- authority drift invalidates an old route before consumption;
+- a current-time context earlier than receipt issuance fails closed.
+
 ## 11. Non-claims
 
 ELR-001 does **not** claim:
@@ -273,15 +337,16 @@ ELR-001 does **not** claim:
 - that the supplied policy obligations are correct;
 - that the chosen cost model captures every production concern;
 - that Dijkstra is the right algorithm for every dynamic or probabilistic system;
-- that the selected path remains admissible after the bound context changes;
+- that a selected path remains admissible after the bound context changes without use-time revalidation;
 - that a routing receipt proves execution or settlement;
 - that all proof edges are equally trustworthy merely because they share a graph;
+- that use-time revalidation makes an external side effect transactionally atomic;
 - formal global safety or liveness;
 - adoption by CrewAI, AG2 or another framework.
 
 The narrow claim is testable:
 
-> Given a finite graph, a bounded contextual request, hard proof obligations and non-negative edge costs, the reference router selects the deterministic lowest-cost currently admissible proof path or fails closed when none exists.
+> Given a finite graph, a bounded contextual request, hard proof obligations and non-negative edge costs, the reference router selects the deterministic lowest-cost admissible proof path at evaluation time or fails closed; a later use of that receipt can be separately revalidated against the current context without falsifying the original historical receipt.
 
 ## 12. Relationship to the RESONANCE stack
 
@@ -292,13 +357,16 @@ Who may act now?
 ACB
 Which exact permission may this execution consume?
         ↓
-ELR
-Which admissible proof path should be used here and now?
+ELR selection
+Which admissible proof path should be chosen at T?
+        ↓
+ELR use-time revalidation
+Is that selected proof path still admissible at T+n?
 ```
 
 The separation is intentional.
 
-Authority, authorization consumption and evidence routing are different decisions. A production runtime may compose all three.
+Authority, authorization consumption, route selection and later route applicability are different decisions. A production runtime may compose all four.
 
 ## 13. Reader falsification
 
@@ -307,6 +375,8 @@ The originating article includes a live `Agree / Partially agree / Disagree` pol
 https://github.com/safal207/RESONANCE/issues/58
 
 Votes are reader judgment, not proof. A reproducible counterexample that breaks one of the invariants is stronger evidence than agreement.
+
+The first external falsification after publication identified exactly such a gap: `verify_receipt()` could prove issuance-time correctness but there was no API for asking whether the old route remained admissible at a later use tick. ELR-001 preserves that counterexample in the design by separating historical verification from use-time revalidation rather than weakening the original receipt binding.
 
 ## 14. Run the reference suite
 
