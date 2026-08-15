@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safal207.github.io/pythiaLabs/aci/mutation-request.schema.json",
+  "title": "ACI Mutation Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mutation_id", "actor_ref", "resource_ref", "effect_ref", "presented_authority_epoch", "presented_authority_digest", "expected_previous_state_digest", "new_state_digest"],
+  "properties": {
+    "schema_version": {"const": "aci-mutation/0.1"},
+    "mutation_id": {"type": "string", "minLength": 1},
+    "actor_ref": {"type": "string", "minLength": 1},
+    "resource_ref": {"type": "string", "minLength": 1},
+    "effect_ref": {"type": "string", "minLength": 1},
+    "presented_authority_epoch": {"type": "integer", "minimum": 0},
+    "presented_authority_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "expected_previous_state_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "new_state_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

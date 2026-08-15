@@ -1,0 +1,42 @@
+{
+  "previous_authority_state": {
+    "schema_version": "aci-state/0.1",
+    "resource_ref": "key:X",
+    "owner_ref": "worker:A",
+    "authority_epoch": 17,
+    "status": "active",
+    "scope": ["effect:update:key:X"],
+    "predecessor_digest": null,
+    "authority_digest": {
+      "algorithm": "sha256",
+      "canonicalization": "json-sort-keys-utf8-v1",
+      "value": "3a8b90b7dc0cbb81f10039d83096e9948e430d66f22e3f1c194eff9c1d0613a9"
+    }
+  },
+  "transition": {
+    "schema_version": "aci-transition/0.1",
+    "transition_id": "handoff-17-18",
+    "kind": "transfer",
+    "resource_ref": "key:X",
+    "expected_previous_authority_digest": "sha256:3a8b90b7dc0cbb81f10039d83096e9948e430d66f22e3f1c194eff9c1d0613a9",
+    "expected_previous_epoch": 17,
+    "from_owner_ref": "worker:A",
+    "to_owner_ref": "worker:B",
+    "new_epoch": 18,
+    "new_scope": ["effect:update:key:X"]
+  },
+  "expected_new_authority_state": {
+    "schema_version": "aci-state/0.1",
+    "resource_ref": "key:X",
+    "owner_ref": "worker:B",
+    "authority_epoch": 18,
+    "status": "active",
+    "scope": ["effect:update:key:X"],
+    "predecessor_digest": "sha256:3a8b90b7dc0cbb81f10039d83096e9948e430d66f22e3f1c194eff9c1d0613a9",
+    "authority_digest": {
+      "algorithm": "sha256",
+      "canonicalization": "json-sort-keys-utf8-v1",
+      "value": "b73c464e85f7914433d102b085c7ab372fc6d47585cbdfb93e8db808d096333c"
+    }
+  }
+}

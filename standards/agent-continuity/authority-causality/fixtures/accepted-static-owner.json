@@ -1,0 +1,27 @@
+{
+  "authority_state": {
+    "schema_version": "aci-state/0.1",
+    "resource_ref": "key:X",
+    "owner_ref": "worker:A",
+    "authority_epoch": 3,
+    "status": "active",
+    "scope": ["effect:update:key:X"],
+    "predecessor_digest": null,
+    "authority_digest": {
+      "algorithm": "sha256",
+      "canonicalization": "json-sort-keys-utf8-v1",
+      "value": "41109ab1637a23664ab8764c7a9b8066dcab28f88095fd91670b2490d4f4ca85"
+    }
+  },
+  "mutation": {
+    "schema_version": "aci-mutation/0.1",
+    "mutation_id": "mut-static-001",
+    "actor_ref": "worker:A",
+    "resource_ref": "key:X",
+    "effect_ref": "effect:update:key:X",
+    "presented_authority_epoch": 3,
+    "presented_authority_digest": "sha256:41109ab1637a23664ab8764c7a9b8066dcab28f88095fd91670b2490d4f4ca85",
+    "expected_previous_state_digest": null,
+    "new_state_digest": null
+  }
+}
