@@ -1,0 +1,126 @@
+name: GPT-5.6 Review Fabric v1
+
+on:
+  workflow_call:
+    inputs:
+      profile_path:
+        description: Repository-local profile path
+        required: false
+        type: string
+        default: .gpt56/review-profile.json
+
+permissions: {}
+
+concurrency:
+  group: gpt56-review-fabric-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-head-request:
+    name: GPT-5.6 Fabric / Exact-head request
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      CHANGE_NUMBER: ${{ github.event.pull_request.number || 0 }}
+
+    steps:
+      - name: Check out exact caller head
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY }}
+          ref: ${{ env.EXPECTED_SHA }}
+          path: subject
+          persist-credentials: false
+          show-progress: false
+
+      - name: Check out immutable standard source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: trusted-standard
+          persist-credentials: false
+          show-progress: false
+
+      - name: Compile and mutation-test trusted contract
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            trusted-standard/standards/gpt56-review-fabric/build_request.py \
+            trusted-standard/standards/gpt56-review-fabric/test_build_request.py
+          python3 trusted-standard/standards/gpt56-review-fabric/test_build_request.py
+
+      - name: Build deterministic exact-head request twice
+        run: |
+          set -euo pipefail
+          for output in evidence-one evidence-two; do
+            python3 trusted-standard/standards/gpt56-review-fabric/build_request.py \
+              --subject-root subject \
+              --profile "subject/${{ inputs.profile_path }}" \
+              --registry trusted-standard/standards/gpt56-review-fabric/roles.v1.json \
+              --adapter subject/.github/workflows/gpt56-review-fabric.yml \
+              --output-dir "${output}" \
+              --target-repository "${{ github.repository }}" \
+              --source-repository "${SOURCE_REPOSITORY}" \
+              --expected-sha "${EXPECTED_SHA}" \
+              --change-number "${CHANGE_NUMBER}" \
+              --workflow-repository "${{ job.workflow_repository }}" \
+              --workflow-sha "${{ job.workflow_sha }}"
+          done
+          diff -ru evidence-one evidence-two
+
+      - name: Verify evidence manifest bindings
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path("evidence-one")
+          manifest = json.loads((root / "evidence-manifest.json").read_text(encoding="utf-8"))
+          assert manifest["schema_version"] == "gpt56-ci-evidence-manifest-v1"
+          assert manifest["tested_sha"] == os.environ["EXPECTED_SHA"]
+          assert manifest["source_repository"] == os.environ["SOURCE_REPOSITORY"]
+          assert manifest["artifact_count"] == 2
+          for artifact in manifest["artifacts"]:
+              path = root / artifact["path"]
+              content = path.read_bytes()
+              assert len(content) == artifact["bytes"]
+              assert hashlib.sha256(content).hexdigest() == artifact["sha256"]
+          request = json.loads((root / "review-request.json").read_text(encoding="utf-8"))
+          assert request["authority"] == {
+              "can_approve": False,
+              "can_deploy": False,
+              "can_execute": False,
+              "can_merge": False,
+          }
+          assert request["trust_boundary"]["ai_output_authorizes_action"] is False
+          assert request["trust_boundary"]["ci_output_authorizes_merge"] is False
+          PY
+
+      - name: Upload immutable review request evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: gpt56-review-request-${{ github.event.pull_request.number || 0 }}-${{ env.EXPECTED_SHA }}
+          path: evidence-one/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish trust-boundary summary
+        run: |
+          {
+            echo "## GPT-5.6 Review Fabric v1"
+            echo
+            echo "- Subject: \`${{ github.repository }}@${EXPECTED_SHA}\`"
+            echo "- Roles: causal, temporal, adversarial, authority, CI reliability"
+            echo "- Claim taxonomy: fact / observation / hypothesis"
+            echo "- Output: deterministic exact-head review request plus SHA-256 manifest"
+            echo "- Authority: advisory only; no execution, approval, deployment, or merge"
+            echo "- Human maintainer decision remains mandatory"
+          } >> "${GITHUB_STEP_SUMMARY}"
