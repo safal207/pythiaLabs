@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/agent-continuity/extensions/schema/responsibility-lane-envelope.schema.json",
+  "title": "Responsibility Lane Continuity Extension",
+  "description": "Additive VCE extension that preserves responsibility/ownership lanes across compaction, restart, and handoff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "extension_id",
+    "vce_envelope_id",
+    "responsibility_lanes",
+    "active_lane_id",
+    "next_action",
+    "event_bindings",
+    "restore_requirements",
+    "extension_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "rlc/0.1"},
+    "extension_id": {"type": "string", "minLength": 1},
+    "vce_envelope_id": {"type": "string", "minLength": 1},
+    "responsibility_lanes": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/lane"}},
+    "active_lane_id": {"type": "string", "minLength": 1},
+    "next_action": {"$ref": "#/$defs/scopedAction"},
+    "event_bindings": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/eventBinding"}},
+    "restore_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_lane_checks", "fail_closed"],
+      "properties": {
+        "required_lane_checks": {"type": "array", "minItems": 1, "maxItems": 32, "items": {"$ref": "#/$defs/laneCheckRequirement"}},
+        "fail_closed": {"const": true}
+      }
+    },
+    "extension_digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonicalization", "value"],
+      "properties": {
+        "algorithm": {"const": "sha256"},
+        "canonicalization": {"const": "json-sort-keys-utf8-v1"},
+        "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  },
+  "$defs": {
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane_id", "owner_ref", "objective", "mutation_scope", "done_condition", "status", "latest_ruling_ref", "source_refs", "lane_digest"],
+      "properties": {
+        "lane_id": {"type": "string", "minLength": 1},
+        "owner_ref": {"type": "string", "minLength": 1},
+        "objective": {"type": "string", "minLength": 1},
+        "mutation_scope": {"$ref": "#/$defs/mutationScope"},
+        "done_condition": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "status": {"enum": ["active", "blocked", "complete", "superseded"]},
+        "latest_ruling_ref": {"type": "string", "minLength": 1},
+        "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "depends_on": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "lane_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "mutationScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_refs", "denied_refs"],
+      "properties": {
+        "allowed_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "denied_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "scopedAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane_id", "effect_refs"],
+      "properties": {
+        "lane_id": {"type": "string", "minLength": 1},
+        "effect_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "eventBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "lane_id", "effect_refs"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "lane_id": {"type": "string", "minLength": 1},
+        "effect_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "laneCheckRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "lane_id", "method"],
+      "properties": {
+        "check_id": {"type": "string", "minLength": 1},
+        "lane_id": {"type": "string", "minLength": 1},
+        "method": {"const": "source_revalidation"}
+      }
+    }
+  }
+}
