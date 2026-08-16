@@ -46,6 +46,17 @@ python -m unittest discover \
 - fail-closed restore behavior;
 - unresolved task verification remaining unresolved.
 
+## ELR-001 — Evidence Logistics Routing
+
+[`ELR-001 — Evidence Logistics Routing`](./evidence-routing/ELR-001-EVIDENCE-LOGISTICS-ROUTING.md)
+adds a contextual proof-path router above individual authorization mechanisms.
+
+Core rule:
+
+> First filter by hard proof obligations. Then choose the lowest-cost admissible route.
+
+The executable reference uses Dijkstra over `(graph node, accumulated proofs)` so a cheap path cannot compensate for missing mandatory evidence. The suite covers sync/async route choice, freshness, authority/state/policy drift, risk/reversibility constraints, deterministic tie-breaks and tamper-evident route receipts.
+
 ## Intended integrations
 
 The specification is implementation-neutral. Codex, Claude Code, IDE agents, CLI agents, and multi-agent runtimes may store or transport the envelope differently while preserving the same observable guarantees.
