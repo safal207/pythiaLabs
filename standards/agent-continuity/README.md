@@ -32,6 +32,20 @@ Core boundaries:
 
 The executable reference uses a two-phase handoff: a target can become `HANDOFF_DELIVERABLE` only after current surfaced reachability is checked, and ownership may advance only after the target acknowledges the exact handoff occurrence and ownership epoch.
 
+## ORC-001 — Orphan Cascade Revocation
+
+[`ORC-001 — Orphan Cascade Revocation`](./handoff-reachability/ORC-001-ORPHAN-CASCADE-REVOCATION.md)
+extends HRC ownership epochs into already-running parent/child execution trees.
+
+Core boundaries:
+
+```text
+RUNNING != AUTHORIZED
+KILL_REQUESTED != EXITED
+```
+
+When ownership advances, stale roots and descendants lose side-effect authority immediately through their inherited owner/epoch binding. Process-group cancellation remains a separate cleanup control, and quiescence is only reported after stale executions are observed non-running.
+
 ## Problem
 
 Coding agents may lose task continuity after compaction or handoff. They can repeat completed work, violate recent constraints, forget rejected approaches, or confidently reconstruct an execution history that is not supported by durable evidence.
@@ -47,7 +61,7 @@ Coding agents may lose task continuity after compaction or handoff. They can rep
 - example envelope and restore results;
 - reference validator;
 - executable conformance tests;
-- additive causal coordination contracts such as HRC-001.
+- additive causal coordination contracts such as HRC-001 and ORC-001.
 
 ## Quick validation
 
@@ -59,7 +73,7 @@ python -m unittest discover \
   -p 'test_*.py' -v
 ```
 
-HRC-001 can be run independently:
+HRC-001 and ORC-001 can be run independently:
 
 ```bash
 python -m pip install -r standards/agent-continuity/handoff-reachability/conformance/requirements.txt
@@ -81,7 +95,10 @@ python -m unittest discover \
 - ownership-epoch gating;
 - unread-predecessor versus CAS-conflict separation;
 - surfaced and time-bounded reachability;
-- exact recipient acknowledgement before handoff commit.
+- exact recipient acknowledgement before handoff commit;
+- stale-root and stale-descendant side-effect revocation;
+- inherited execution-authority lineage;
+- kill-request versus observed-quiescence separation.
 
 ## Intended integrations
 
