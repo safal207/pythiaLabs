@@ -143,6 +143,37 @@ class CiMemoryTest(unittest.TestCase):
         self.assertEqual(memory["learning"]["confirmed_cause_count"], 0)
         self.assertEqual(len(memory["proposals"]), 0)
 
+    def test_mixed_offsets_are_ordered_by_instant(self) -> None:
+        later = observation(
+            run_id="2",
+            commit="b" * 40,
+            observed_at="2026-07-18T10:00:00-05:00",
+            conclusion="success",
+        )
+        earlier = observation(
+            run_id="1",
+            commit="a" * 40,
+            observed_at="2026-07-18T14:30:00Z",
+            conclusion="success",
+        )
+
+        memory = aggregate_observations([later, earlier])
+
+        self.assertEqual(
+            memory["observation_ids"],
+            [earlier["observation_id"], later["observation_id"]],
+        )
+        self.assertEqual(
+            memory["temporal_edges"],
+            [
+                {
+                    "source": earlier["observation_id"],
+                    "target": later["observation_id"],
+                    "relation": "preceded_by",
+                }
+            ],
+        )
+
     def test_distinct_signatures_do_not_create_recurrence(self) -> None:
         first = observation(
             run_id="1",
