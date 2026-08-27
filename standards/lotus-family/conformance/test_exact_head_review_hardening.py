@@ -334,6 +334,41 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
 
         self._assert_blocked_config(result, "mix.exs")
 
+    def test_mix_keyword_pipeline_override_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                (
+                    "def project do\n"
+                    "  [app: :lotus_fixture, version: \"0.1.0\"]\n"
+                    "  |> Keyword.put(:test_paths, [\"ignored\"])\n"
+                    "end\n"
+                ),
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
+    def test_unproven_mix_project_construction_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: project_options()\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
     def test_exunit_selection_override_blocks_default_discovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)

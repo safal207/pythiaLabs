@@ -184,12 +184,21 @@ def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
                 blocked = True
                 break
 
+            uses = step.get("uses")
             run = step.get("run")
+            if uses is not None:
+                action = legacy.inline_scalar(uses[1][4])
+                if (
+                    run is not None
+                    or action is None
+                    or "${{" in action
+                    or action.startswith(("./", "../"))
+                ):
+                    blocked = True
+                    break
+                continue
             if run is None:
                 continue
-            if "uses" in step:
-                blocked = True
-                break
             shell = base._effective_entry(
                 step, job_defaults, workflow_defaults, "shell"
             )

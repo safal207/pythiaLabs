@@ -44,9 +44,16 @@ _DEDICATED_PYTEST_CONFIGS = {
 _MIX_CONFIG_PATHS = ("mix.exs", "test/test_helper.exs")
 
 
-_MIX_PROJECT_COLLECTION_SETTING = re.compile(
-    r"\b(?:test_paths|test_pattern)\s*:",
+_MIX_PROJECT_DEFINITION = re.compile(
+    r"(?m)^[ \t]*def[ \t]+project(?:[ \t]*\([ \t]*\))?[ \t]*"
+    r"(?:(?P<block>do)\b|,[ \t]*do:[ \t]*)",
 )
+
+
+_MIX_PROJECT_KEY = re.compile(r"([A-Za-z_][A-Za-z0-9_?!]*)\s*:")
+
+
+_MIX_COLLECTION_KEYS = {"test_paths", "test_pattern"}
 
 
 _EXUNIT_SELECTION_SETTING = re.compile(
@@ -186,10 +193,115 @@ def _audit_pytest_configuration(
     return observed, blockers
 
 
+def _skip_elixir_space_and_comments(text: str, start: int) -> int:
+    """Advance over whitespace and line comments outside an Elixir value."""
+    index = start
+    while index < len(text):
+        if text[index].isspace():
+            index += 1
+            continue
+        if text[index] == "#":
+            newline = text.find("\n", index)
+            index = len(text) if newline < 0 else newline + 1
+            continue
+        break
+    return index
+
+
+def _mix_keyword_entries(
+    text: str, start: int
+) -> tuple[list[str], int] | None:
+    """Split one literal top-level Elixir list without evaluating its values."""
+    stack = ["["]
+    matching = {")": "(", "]": "[", "}": "{"}
+    entries: list[str] = []
+    entry_start = start + 1
+    quote: str | None = None
+    escaped = False
+    comment = False
+
+    for index in range(start + 1, len(text)):
+        char = text[index]
+        if comment:
+            if char == "\n":
+                comment = False
+            continue
+        if quote is not None:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char == "#":
+            comment = True
+            continue
+        if char in {"'", '"'}:
+            if text[index : index + 3] == char * 3:
+                return None
+            quote = char
+            continue
+        if char in "([{":
+            stack.append(char)
+            continue
+        if char in ")]}" and matching[char] != stack[-1]:
+            return None
+        if char in ")]}" and len(stack) > 1:
+            stack.pop()
+            continue
+        if char == "]" and stack == ["["]:
+            entries.append(text[entry_start:index])
+            return entries, index + 1
+        if stack == ["["] and char == ",":
+            entries.append(text[entry_start:index])
+            entry_start = index + 1
+        elif stack == ["["] and char == "|":
+            return None
+    return None
+
+
+def _literal_mix_project_keys(text: str) -> set[str] | None:
+    """Prove that project/0 returns one visible literal keyword list."""
+    definitions = list(_MIX_PROJECT_DEFINITION.finditer(text))
+    if len(definitions) != 1:
+        return None
+    definition = definitions[0]
+    cursor = _skip_elixir_space_and_comments(text, definition.end())
+    if cursor >= len(text) or text[cursor] != "[":
+        return None
+    parsed = _mix_keyword_entries(text, cursor)
+    if parsed is None:
+        return None
+    entries, list_end = parsed
+
+    if definition.group("block") is not None:
+        tail = _skip_elixir_space_and_comments(text, list_end)
+        if not re.match(r"end\b", text[tail:]):
+            return None
+    else:
+        line_end = text.find("\n", list_end)
+        line_end = len(text) if line_end < 0 else line_end
+        if text[list_end:line_end].split("#", 1)[0].strip():
+            return None
+
+    keys: set[str] = set()
+    for entry in entries:
+        entry_start = _skip_elixir_space_and_comments(entry, 0)
+        if entry_start == len(entry):
+            continue
+        match = _MIX_PROJECT_KEY.match(entry, entry_start)
+        if match is None:
+            return None
+        keys.add(match.group(1))
+    return keys
+
+
 def _activates_mix_configuration(path: str, text: str) -> bool:
     """Detect Mix and ExUnit settings that can hide contract tests."""
     if path == "mix.exs":
-        return bool(_MIX_PROJECT_COLLECTION_SETTING.search(text))
+        project_keys = _literal_mix_project_keys(text)
+        return project_keys is None or bool(project_keys & _MIX_COLLECTION_KEYS)
     if path == "test/test_helper.exs":
         return bool(_EXUNIT_SELECTION_SETTING.search(text))
     return False

@@ -18,6 +18,10 @@ SAFE_MIX_FLAGS = {"--trace", "--color"}
 SAFE_MIX_PREFIXES = ("--seed=", "--max-failures=")
 CONTROL_TOKENS = {"&&", "||", ";", "|", "&", "(", ")", "{", "}"}
 CONTROL_WORDS = {"if", "then", "elif", "else", "fi", "for", "while", "until", "do", "done", "case", "esac", "select", "function"}
+UNRESOLVED_ENV_MAPPING = "__LOTUS_UNRESOLVED_ENV_MAPPING__"
+YAML_ANCHOR_ONLY = re.compile(r"&[A-Za-z_][A-Za-z0-9_-]*\Z")
+YAML_ALIAS_ONLY = re.compile(r"\*[A-Za-z_][A-Za-z0-9_-]*\Z")
+INLINE_ENV_KEY = re.compile(r"(?:^|[{,]\s*)['\"]?([A-Za-z_][A-Za-z0-9_]*)['\"]?\s*:")
 
 
 def strip_comment(line: str) -> str:
@@ -271,8 +275,17 @@ def yaml_env_names(text: str) -> set[str]:
         if not header or header[3] != "env":
             continue
         inline = strip_comment(header[4]).strip()
+        if YAML_ALIAS_ONLY.fullmatch(inline):
+            names.add(UNRESOLVED_ENV_MAPPING)
+            continue
+        if YAML_ANCHOR_ONLY.fullmatch(inline):
+            inline = ""
         if inline:
-            names.update(re.findall(r"\bPYTEST_[A-Za-z0-9_]*\b", inline)); continue
+            inline_names = set(INLINE_ENV_KEY.findall(inline))
+            if not inline_names and inline != "{}":
+                names.add(UNRESOLVED_ENV_MAPPING)
+            names.update(inline_names)
+            continue
         for row in range(index + 1, len(lines)):
             if row in body:
                 continue

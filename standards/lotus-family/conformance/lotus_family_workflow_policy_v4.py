@@ -73,7 +73,10 @@ def _ci_discovery_one(
     groups = execution._github_run_step_groups(workflow_text)
     scripts = [script for group in groups for script, _ in group]
     yaml_env_names = execution.legacy.yaml_env_names(workflow_text)
-    if any(name in _RUNNER_RESOLUTION_ENV_NAMES for name in yaml_env_names):
+    if (
+        execution.legacy.UNRESOLVED_ENV_MAPPING in yaml_env_names
+        or any(name in _RUNNER_RESOLUTION_ENV_NAMES for name in yaml_env_names)
+    ):
         return False, []
     if policy_v2._uses_pytest(discovery) and (
         any(name.startswith("PYTEST_") for name in yaml_env_names)

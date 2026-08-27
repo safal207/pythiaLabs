@@ -58,6 +58,15 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
         )
         self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
 
+    def test_local_action_blocks_later_test(self) -> None:
+        text = workflow_steps(
+            "      - name: Repository-controlled setup\n"
+            "        uses: ./fake-runner\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
     def test_direct_path_and_runner_alias_mutations_block_later_test(self) -> None:
         commands = (
             "export PATH=\"$PWD/bin:$PATH\"",
@@ -93,6 +102,18 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
                 "",
                 "",
                 "        env:\n          PATH: ./fake-bin:/usr/bin\n",
+            ),
+            (
+                "anchored workflow PATH",
+                "env: &runner_env\n  PATH: ./fake-bin:/usr/bin\n",
+                "",
+                "",
+            ),
+            (
+                "unresolved job env alias",
+                "x-runner-env: &runner_env\n  FOO: bar\n",
+                "    env: *runner_env\n",
+                "",
             ),
         )
         for name, workflow_env, job_env, step_env in cases:
