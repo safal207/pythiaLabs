@@ -74,6 +74,46 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
                 )
                 self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
 
+    def test_yaml_command_resolution_environment_is_rejected(self) -> None:
+        cases = (
+            (
+                "workflow PATH",
+                "env:\n  PATH: ./fake-bin:/usr/bin\n",
+                "",
+                "",
+            ),
+            (
+                "job PYTHONPATH",
+                "",
+                "    env:\n      PYTHONPATH: ./fake-modules\n",
+                "",
+            ),
+            (
+                "step PATH",
+                "",
+                "",
+                "        env:\n          PATH: ./fake-bin:/usr/bin\n",
+            ),
+        )
+        for name, workflow_env, job_env, step_env in cases:
+            with self.subTest(name=name):
+                text = (
+                    "name: CI\n"
+                    f"{workflow_env}"
+                    "jobs:\n"
+                    "  test:\n"
+                    "    runs-on: ubuntu-latest\n"
+                    f"{job_env}"
+                    "    steps:\n"
+                    "      - name: Contract test\n"
+                    f"{step_env}"
+                    "        run: python -m pytest\n"
+                )
+                self.assertEqual(
+                    ci_discovery(DISCOVERY, text),
+                    (False, []),
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

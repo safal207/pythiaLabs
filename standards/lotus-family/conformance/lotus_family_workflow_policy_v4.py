@@ -23,6 +23,19 @@ _SHELL_EXPANSION = re.compile(
 )
 
 
+_RUNNER_RESOLUTION_ENV_NAMES = {
+    "BASH_ENV",
+    "ENV",
+    "ERL_LIBS",
+    "MIX_ARCHIVES",
+    "MIX_HOME",
+    "MIX_PATH",
+    "PATH",
+    "PYTHONHOME",
+    "PYTHONPATH",
+}
+
+
 def _mutates_runner_state(script: str) -> bool:
     """Fail closed when setup can alter later command or environment meaning."""
     visible = "\n".join(
@@ -59,11 +72,11 @@ def _ci_discovery_one(
 
     groups = execution._github_run_step_groups(workflow_text)
     scripts = [script for group in groups for script, _ in group]
+    yaml_env_names = execution.legacy.yaml_env_names(workflow_text)
+    if any(name in _RUNNER_RESOLUTION_ENV_NAMES for name in yaml_env_names):
+        return False, []
     if policy_v2._uses_pytest(discovery) and (
-        any(
-            name.startswith("PYTEST_")
-            for name in execution.legacy.yaml_env_names(workflow_text)
-        )
+        any(name.startswith("PYTEST_") for name in yaml_env_names)
         or any(
             policy_v2._PYTEST_ENV_NAME.search(
                 "\n".join(

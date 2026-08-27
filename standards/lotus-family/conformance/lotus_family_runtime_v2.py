@@ -41,6 +41,20 @@ _DEDICATED_PYTEST_CONFIGS = {
 }
 
 
+_MIX_CONFIG_PATHS = ("mix.exs", "test/test_helper.exs")
+
+
+_MIX_PROJECT_COLLECTION_SETTING = re.compile(
+    r"\b(?:test_paths|test_pattern)\s*:",
+)
+
+
+_EXUNIT_SELECTION_SETTING = re.compile(
+    r"\bExUnit\.(?:start|configure)\s*\([^)]*\b(?:exclude|include)\s*:",
+    re.DOTALL,
+)
+
+
 def _has_meaningful_lines(text: str) -> bool:
     """Return true when a dedicated pytest config is not empty/comment-only."""
     return any(
@@ -78,6 +92,23 @@ def _requires_pytest_configuration_audit(
     candidates = discovery.get("contains_any")
     return isinstance(candidates, list) and any(
         _contains_python_test_reference(candidate) for candidate in candidates
+    )
+
+
+def _requires_mix_configuration_audit(
+    discovery: Mapping[str, Any],
+) -> bool:
+    """Identify discovery strategies affected by Mix test configuration."""
+    strategy = discovery.get("strategy")
+    if strategy == "mix_default_discovery":
+        return True
+    if strategy != "contains_any":
+        return False
+    candidates = discovery.get("contains_any")
+    return isinstance(candidates, list) and any(
+        isinstance(candidate, str)
+        and candidate.split("::", 1)[0].strip("'\"").lower().endswith(".exs")
+        for candidate in candidates
     )
 
 
@@ -155,6 +186,36 @@ def _audit_pytest_configuration(
     return observed, blockers
 
 
+def _activates_mix_configuration(path: str, text: str) -> bool:
+    """Detect Mix and ExUnit settings that can hide contract tests."""
+    if path == "mix.exs":
+        return bool(_MIX_PROJECT_COLLECTION_SETTING.search(text))
+    if path == "test/test_helper.exs":
+        return bool(_EXUNIT_SELECTION_SETTING.search(text))
+    return False
+
+
+def _audit_mix_configuration(
+    repository_root: Path,
+    files: list[dict[str, str]],
+) -> tuple[list[str], list[str]]:
+    """Hash known Mix configs and block collection-affecting settings."""
+    observed: list[str] = []
+    blockers: list[str] = []
+    for relative_path in _MIX_CONFIG_PATHS:
+        candidate = repository_root / relative_path
+        if not candidate.exists() and not candidate.is_symlink():
+            continue
+        observed.append(relative_path)
+        text, error = read_file(repository_root, relative_path, files)
+        if error is not None or text is None:
+            blockers.append(f"{relative_path}: {error or 'unreadable'}")
+            continue
+        if _activates_mix_configuration(relative_path, text):
+            blockers.append(relative_path)
+    return observed, blockers
+
+
 def _deduplicate_files(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     """Keep one evidence row per exact path and digest pair."""
     unique = {(row["path"], row["sha256"]): row for row in rows}
@@ -184,34 +245,66 @@ def audit_repository(
     if config is None:
         return audit
     discovery = config.get("ci_discovery", {})
-    if not isinstance(discovery, Mapping) or not _requires_pytest_configuration_audit(
-        discovery
-    ):
+    if not isinstance(discovery, Mapping):
         return audit
 
     repository_root = (
         snapshot_root.resolve() / str(config["snapshot_dir"])
     ).resolve()
     files = list(audit.get("files", []))
-    observed, blockers = _audit_pytest_configuration(repository_root, files)
-    check = {
-        "check_id": "pytest_configuration",
-        "outcome": DRIFT if blockers else PASS,
-        "paths": observed,
-        "blocked_paths": blockers,
-        "detail": (
-            "active, unreadable, or executable pytest configuration can alter test collection or selection"
-            if blockers
-            else "known pytest configuration and conftest files were absent or hashed without an active pytest scope"
-        ),
-    }
-    audit.setdefault("checks", []).append(check)
+    all_blockers: list[str] = []
+
+    if _requires_pytest_configuration_audit(discovery):
+        observed, blockers = _audit_pytest_configuration(
+            repository_root, files
+        )
+        check = {
+            "check_id": "pytest_configuration",
+            "outcome": DRIFT if blockers else PASS,
+            "paths": observed,
+            "blocked_paths": blockers,
+            "detail": (
+                "active, unreadable, or executable pytest configuration can "
+                "alter test collection or selection"
+                if blockers
+                else "known pytest configuration and conftest files were "
+                "absent or hashed without an active pytest scope"
+            ),
+        }
+        audit.setdefault("checks", []).append(check)
+        all_blockers.extend(blockers)
+
+    if _requires_mix_configuration_audit(discovery):
+        observed, blockers = _audit_mix_configuration(repository_root, files)
+        check = {
+            "check_id": "mix_configuration",
+            "outcome": DRIFT if blockers else PASS,
+            "paths": observed,
+            "blocked_paths": blockers,
+            "detail": (
+                "active, unreadable, or collection-changing Mix "
+                "configuration can alter test discovery or selection"
+                if blockers
+                else "known Mix project and test-helper configuration was "
+                "absent or hashed without collection-changing settings"
+            ),
+        }
+        audit.setdefault("checks", []).append(check)
+        all_blockers.extend(blockers)
+
     audit["files"] = _deduplicate_files(files)
 
-    if blockers:
+    if all_blockers:
         audit["outcome"] = DRIFT
         audit["reason_code"] = "LOTUS_CONTRACT_DRIFT"
-        audit["detail"] = "non-conforming checks: pytest_configuration"
+        failed_checks = [
+            row["check_id"]
+            for row in audit["checks"]
+            if row.get("outcome") == DRIFT
+        ]
+        audit["detail"] = "non-conforming checks: " + ", ".join(
+            sorted(set(failed_checks))
+        )
     return audit
 
 

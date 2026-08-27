@@ -71,6 +71,30 @@ def _materialize_cml(snapshot_root: Path, manifest: dict) -> Path:
     return repository_root
 
 
+def _materialize_pythia(snapshot_root: Path, manifest: dict) -> Path:
+    config = next(
+        row for row in manifest["repositories"] if row["id"] == "pythia"
+    )
+    repository_root = snapshot_root / config["snapshot_dir"]
+    terms_by_path: dict[str, list[str]] = {}
+    for check in config["file_checks"]:
+        terms_by_path.setdefault(check["path"], []).extend(
+            check["contains_all"]
+        )
+    for relative_path, terms in terms_by_path.items():
+        _write(
+            repository_root,
+            relative_path,
+            "\n".join(dict.fromkeys(terms)) + "\n",
+        )
+    _write(
+        repository_root,
+        config["ci_discovery"]["workflow_paths"][0],
+        _workflow().replace("python -m pytest", "mix test"),
+    )
+    return repository_root
+
+
 class WorkflowReviewHardeningTest(unittest.TestCase):
     """Protect workflow failure propagation and gating semantics."""
 
@@ -251,6 +275,107 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
         self.assertIn(
             "pyproject.toml",
             {row["path"] for row in result["files"]},
+        )
+
+
+class MixConfigurationReviewHardeningTest(unittest.TestCase):
+    """Bind Mix default discovery to hashed collection configuration."""
+
+    def setUp(self) -> None:
+        self.manifest = load_manifest(MANIFEST_PATH)
+
+    def _audit(self, snapshot_root: Path) -> dict:
+        return audit_repository(
+            self.manifest,
+            repository_id="pythia",
+            snapshot_root=snapshot_root,
+            repository_ref="refs/heads/main",
+            commit_sha=SHA,
+        )
+
+    def _assert_blocked_config(self, result: dict, path: str) -> None:
+        self.assertEqual(result["outcome"], DRIFT)
+        check = next(
+            row
+            for row in result["checks"]
+            if row["check_id"] == "mix_configuration"
+        )
+        self.assertEqual(check["outcome"], DRIFT)
+        self.assertIn(path, check["blocked_paths"])
+        self.assertIn(path, {row["path"] for row in result["files"]})
+
+    def test_mix_test_paths_override_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: [test_paths: [\"ignored\"]]\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
+    def test_mix_test_pattern_override_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: [test_pattern: \"*_other.exs\"]\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
+    def test_exunit_selection_override_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "test/test_helper.exs",
+                "ExUnit.start(exclude: [:lotus_contract])\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "test/test_helper.exs")
+
+    def test_plain_mix_configuration_is_hashed_and_keeps_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: [app: :lotus_fixture]\n",
+            )
+            _write(
+                repository_root,
+                "test/test_helper.exs",
+                "ExUnit.start()\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self.assertEqual(result["outcome"], PASS)
+        check = next(
+            row
+            for row in result["checks"]
+            if row["check_id"] == "mix_configuration"
+        )
+        self.assertEqual(check["outcome"], PASS)
+        self.assertEqual(
+            set(check["paths"]), {"mix.exs", "test/test_helper.exs"}
         )
 
 
