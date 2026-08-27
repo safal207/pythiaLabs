@@ -187,16 +187,11 @@ def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
             uses = step.get("uses")
             run = step.get("run")
             if uses is not None:
-                action = legacy.inline_scalar(uses[1][4])
-                if (
-                    run is not None
-                    or action is None
-                    or "${{" in action
-                    or action.startswith(("./", "../"))
-                ):
-                    blocked = True
-                    break
-                continue
+                # Action implementations are outside this local proof. Even a
+                # static external action can replace later command resolution
+                # through GITHUB_PATH, so no later test is proven reachable.
+                blocked = True
+                break
             if run is None:
                 continue
             shell = base._effective_entry(

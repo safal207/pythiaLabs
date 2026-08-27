@@ -33,6 +33,13 @@ _PYTEST_CONFIG_PATHS = (
 )
 
 
+_PYTEST_SHADOW_PATHS = (
+    "pytest.py",
+    "pytest/__init__.py",
+    "pytest/__main__.py",
+)
+
+
 _DEDICATED_PYTEST_CONFIGS = {
     "pytest.toml",
     ".pytest.toml",
@@ -121,6 +128,8 @@ def _requires_mix_configuration_audit(
 
 def _activates_pytest_configuration(path: str, text: str) -> bool:
     """Detect config scopes or hooks that can alter default pytest collection."""
+    if path in _PYTEST_SHADOW_PATHS:
+        return True
     if _is_conftest(path):
         return True
     if path in _DEDICATED_PYTEST_CONFIGS:
@@ -177,6 +186,7 @@ def _audit_pytest_configuration(
     blockers: list[str] = []
     candidate_paths = (
         *_PYTEST_CONFIG_PATHS,
+        *_PYTEST_SHADOW_PATHS,
         *_discover_conftest_paths(repository_root),
     )
     for relative_path in dict.fromkeys(candidate_paths):
@@ -267,6 +277,8 @@ def _literal_mix_project_keys(text: str) -> set[str] | None:
     if len(definitions) != 1:
         return None
     definition = definitions[0]
+    if _skip_elixir_space_and_comments(text, 0) != definition.start():
+        return None
     cursor = _skip_elixir_space_and_comments(text, definition.end())
     if cursor >= len(text) or text[cursor] != "[":
         return None
@@ -277,13 +289,19 @@ def _literal_mix_project_keys(text: str) -> set[str] | None:
 
     if definition.group("block") is not None:
         tail = _skip_elixir_space_and_comments(text, list_end)
-        if not re.match(r"end\b", text[tail:]):
+        end_match = re.match(r"end\b", text[tail:])
+        if end_match is None:
             return None
+        definition_end = tail + end_match.end()
     else:
         line_end = text.find("\n", list_end)
         line_end = len(text) if line_end < 0 else line_end
         if text[list_end:line_end].split("#", 1)[0].strip():
             return None
+        definition_end = list_end
+
+    if _skip_elixir_space_and_comments(text, definition_end) != len(text):
+        return None
 
     keys: set[str] = set()
     for entry in entries:

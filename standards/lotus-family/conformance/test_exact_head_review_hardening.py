@@ -254,6 +254,25 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
 
                 self._assert_blocked_config(result, relative_path)
 
+    def test_repository_pytest_shadows_block_default_discovery(self) -> None:
+        cases = (
+            "pytest.py",
+            "pytest/__init__.py",
+            "pytest/__main__.py",
+        )
+        for relative_path in cases:
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    _write(repository_root, relative_path, "raise SystemExit(0)\n")
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, relative_path)
+
     def test_non_pytest_pyproject_scope_is_hashed_and_keeps_pass(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
@@ -364,6 +383,24 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
                 repository_root,
                 "mix.exs",
                 "def project, do: project_options()\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
+    def test_executable_code_outside_mix_project_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                (
+                    "System.halt(0)\n"
+                    "def project, do: [app: :lotus_fixture]\n"
+                ),
             )
             result = self._audit(snapshot_root)
 

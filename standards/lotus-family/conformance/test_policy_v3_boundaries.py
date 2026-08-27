@@ -67,6 +67,15 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
         )
         self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
 
+    def test_external_action_blocks_later_test(self) -> None:
+        text = workflow_steps(
+            "      - name: Unproven external setup\n"
+            "        uses: attacker/fake-python@v1\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
     def test_direct_path_and_runner_alias_mutations_block_later_test(self) -> None:
         commands = (
             "export PATH=\"$PWD/bin:$PATH\"",
