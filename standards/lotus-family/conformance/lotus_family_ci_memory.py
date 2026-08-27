@@ -7,6 +7,7 @@ import hashlib
 import json
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -34,8 +35,11 @@ def _digest(parts: Iterable[object]) -> str:
 def _observation_sort_key(observation: Mapping[str, Any]) -> tuple[object, ...]:
     """Order observations by timestamp, run identity, and immutable ID."""
     temporal = observation["temporal"]
+    observed_at = datetime.fromisoformat(
+        str(temporal["observed_at"]).replace("Z", "+00:00")
+    ).astimezone(timezone.utc)
     return (
-        temporal["observed_at"],
+        observed_at,
         int(temporal["workflow_run_id"]),
         temporal["workflow_run_attempt"],
         observation["observation_id"],
