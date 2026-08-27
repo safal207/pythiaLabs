@@ -30,6 +30,16 @@ Until that verification exists, `PASS` means conformance of the supplied
 snapshot contents, not cryptographic proof that the snapshot came from the
 claimed remote commit.
 
+Workflow action prerequisites are accepted only when the repository adapter
+lists the exact `owner/repository@<40-hex-SHA>` identity. This is an explicit,
+immutable trust input for structural CI reachability, not local execution or a
+claim that the action cannot mutate runner state. Unlisted, local, expression-
+selected, tag-selected, or branch-selected actions fail closed. Earlier shell
+steps are limited to closed literal prerequisite forms. That allowlist is also
+a structural reachability assumption, not proof of side-effect freedom;
+arbitrary commands or direct writes to audited inputs never establish a later
+test gate.
+
 ## Causal spacetime testing model
 
 The test model has two compatible layers:

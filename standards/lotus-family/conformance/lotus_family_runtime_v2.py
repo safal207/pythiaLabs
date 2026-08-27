@@ -7,7 +7,7 @@ import json
 import os
 import re
 import tomllib
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 import lotus_family_runtime as previous
@@ -58,6 +58,19 @@ _MIX_PROJECT_DEFINITION = re.compile(
 
 
 _MIX_PROJECT_KEY = re.compile(r"([A-Za-z_][A-Za-z0-9_?!]*)\s*:")
+
+
+_MIX_REQUIRE_FILE = re.compile(
+    r'Code\.require_file\("(?P<path>[^"\\]+)",[ \t]*__DIR__\)'
+)
+
+
+_MIX_MODULE = re.compile(
+    r"defmodule[ \t]+[A-Z][A-Za-z0-9_.]*[ \t]+do\b"
+)
+
+
+_MIX_USE_PROJECT = re.compile(r"use[ \t]+Mix\.Project\b")
 
 
 _MIX_COLLECTION_KEYS = {"test_paths", "test_pattern"}
@@ -271,14 +284,61 @@ def _mix_keyword_entries(
     return None
 
 
-def _literal_mix_project_keys(text: str) -> set[str] | None:
-    """Prove that project/0 returns one visible literal keyword list."""
+def _mix_wrapper(
+    text: str,
+    definition_start: int,
+    definition_end: int,
+) -> list[str] | None:
+    """Accept a bare project/0 or one ordinary Mix.Project module wrapper."""
+    cursor = _skip_elixir_space_and_comments(text, 0)
+    required_files: list[str] = []
+    while match := _MIX_REQUIRE_FILE.match(text, cursor):
+        path = PurePosixPath(match.group("path"))
+        if (
+            path.is_absolute()
+            or path == PurePosixPath(".")
+            or ".." in path.parts
+            or path.suffix not in {".ex", ".exs"}
+        ):
+            return None
+        required_files.append(path.as_posix())
+        cursor = _skip_elixir_space_and_comments(text, match.end())
+
+    module = _MIX_MODULE.match(text, cursor)
+    if module is None:
+        if required_files:
+            return None
+        return (
+            []
+            if _skip_elixir_space_and_comments(text, 0) == definition_start
+            and _skip_elixir_space_and_comments(text, definition_end) == len(text)
+            else None
+        )
+
+    cursor = _skip_elixir_space_and_comments(text, module.end())
+    use_project = _MIX_USE_PROJECT.match(text, cursor)
+    if use_project is None:
+        return None
+    cursor = _skip_elixir_space_and_comments(text, use_project.end())
+    if cursor != _skip_elixir_space_and_comments(text, definition_start):
+        return None
+
+    suffix = text[definition_end:]
+    if not re.search(r"(?m)^\s*end\s*(?:#.*)?\s*\Z", suffix):
+        return None
+    if len(required_files) != len(set(required_files)):
+        return None
+    return required_files
+
+
+def _literal_mix_project(
+    text: str,
+) -> tuple[set[str], list[str]] | None:
+    """Prove one literal project/0 inside a bounded ordinary Mix wrapper."""
     definitions = list(_MIX_PROJECT_DEFINITION.finditer(text))
     if len(definitions) != 1:
         return None
     definition = definitions[0]
-    if _skip_elixir_space_and_comments(text, 0) != definition.start():
-        return None
     cursor = _skip_elixir_space_and_comments(text, definition.end())
     if cursor >= len(text) or text[cursor] != "[":
         return None
@@ -300,7 +360,12 @@ def _literal_mix_project_keys(text: str) -> set[str] | None:
             return None
         definition_end = list_end
 
-    if _skip_elixir_space_and_comments(text, definition_end) != len(text):
+    required_files = _mix_wrapper(
+        text,
+        definition.start(),
+        definition_end,
+    )
+    if required_files is None:
         return None
 
     keys: set[str] = set()
@@ -312,7 +377,13 @@ def _literal_mix_project_keys(text: str) -> set[str] | None:
         if match is None:
             return None
         keys.add(match.group(1))
-    return keys
+    return keys, required_files
+
+
+def _literal_mix_project_keys(text: str) -> set[str] | None:
+    """Return keys from one proven literal Mix project/0 definition."""
+    project = _literal_mix_project(text)
+    return None if project is None else project[0]
 
 
 def _activates_mix_configuration(path: str, text: str) -> bool:
@@ -332,6 +403,7 @@ def _audit_mix_configuration(
     """Hash known Mix configs and block collection-affecting settings."""
     observed: list[str] = []
     blockers: list[str] = []
+    required_files: list[str] = []
     for relative_path in _MIX_CONFIG_PATHS:
         candidate = repository_root / relative_path
         if not candidate.exists() and not candidate.is_symlink():
@@ -341,7 +413,21 @@ def _audit_mix_configuration(
         if error is not None or text is None:
             blockers.append(f"{relative_path}: {error or 'unreadable'}")
             continue
-        if _activates_mix_configuration(relative_path, text):
+        if relative_path == "mix.exs":
+            project = _literal_mix_project(text)
+            if project is None or project[0] & _MIX_COLLECTION_KEYS:
+                blockers.append(relative_path)
+            else:
+                required_files.extend(project[1])
+        elif _activates_mix_configuration(relative_path, text):
+            blockers.append(relative_path)
+    for relative_path in required_files:
+        observed.append(relative_path)
+        text, error = read_file(repository_root, relative_path, files)
+        if error is not None or text is None:
+            blockers.append(f"{relative_path}: {error or 'unreadable'}")
+            continue
+        if re.search(r"\b(?:test_paths|test_pattern)\b", text):
             blockers.append(relative_path)
     return observed, blockers
 

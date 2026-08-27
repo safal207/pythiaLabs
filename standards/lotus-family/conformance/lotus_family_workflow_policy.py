@@ -90,8 +90,17 @@ def _boolean_entry(
     return None
 
 
-def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
+def _github_run_step_groups(
+    text: str,
+    trusted_prerequisite_actions: tuple[str, ...] | list[str] = (),
+) -> list[list[tuple[str, bool | None]]]:
     """Extract ordered run-step groups from provably runnable jobs."""
+    if any(
+        not isinstance(action, str)
+        for action in trusted_prerequisite_actions
+    ):
+        return []
+    trusted_actions = set(trusted_prerequisite_actions)
     lines = text.splitlines()
     ranges = legacy.scalar_ranges(lines)
     scalar_body = {
@@ -187,11 +196,21 @@ def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
             uses = step.get("uses")
             run = step.get("run")
             if uses is not None:
-                # Action implementations are outside this local proof. Even a
-                # static external action can replace later command resolution
-                # through GITHUB_PATH, so no later test is proven reachable.
-                blocked = True
-                break
+                action = legacy.inline_scalar(uses[1][4])
+                action_failure = _boolean_entry(
+                    step.get("continue-on-error"), default=False
+                )
+                if (
+                    run is not None
+                    or action is None
+                    or action not in trusted_actions
+                    or action_failure is not False
+                ):
+                    blocked = True
+                    break
+                # The manifest may trust only immutable full-SHA action refs.
+                # This proves configured identity, not the action's behavior.
+                continue
             if run is None:
                 continue
             shell = base._effective_entry(

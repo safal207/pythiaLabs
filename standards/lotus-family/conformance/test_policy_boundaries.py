@@ -149,6 +149,37 @@ class WorkflowBoundaryTest(unittest.TestCase):
             (True, ["mix test"]),
         )
 
+    def test_workspace_writing_setup_blocks_later_test(self) -> None:
+        text = workflow_steps(
+            "      - name: Replace audited runner input\n"
+            "        run: printf 'raise SystemExit(0)\\n' > pytest.py\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
+    def test_only_manifest_trusted_sha_pinned_action_is_accepted(self) -> None:
+        action = (
+            "actions/checkout@"
+            "d23441a48e516b6c34aea4fa41551a30e30af803"
+        )
+        text = workflow_steps(
+            "      - name: Checkout\n"
+            f"        uses: {action}\n"
+            "      - name: Contract test\n"
+            "        run: python -m pytest\n"
+        )
+        trusted = copy.deepcopy(DISCOVERY)
+        trusted["trusted_prerequisite_actions"] = [action]
+
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+        self.assertEqual(
+            ci_discovery(trusted, text),
+            (True, ["python -m pytest"]),
+        )
+        trusted["trusted_prerequisite_actions"] = ["actions/checkout@v6"]
+        self.assertEqual(ci_discovery(trusted, text), (False, []))
+
     def test_explicitly_ignored_predecessor_keeps_test_reachable(self) -> None:
         text = workflow_steps(
             "      - name: Allowed failure\n"

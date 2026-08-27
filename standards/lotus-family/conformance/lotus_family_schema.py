@@ -8,6 +8,9 @@ from typing import Any, Mapping
 
 PASS, DRIFT, UNKNOWN = "PASS", "DRIFT", "UNKNOWN"
 COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+ACTION_SHA_REF = re.compile(
+    r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}$"
+)
 
 
 def load_json_object(path: Path) -> dict[str, Any]:
@@ -83,6 +86,27 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             raise ValueError(f"{prefix}.ci_discovery.workflow_paths must be a non-empty list")
         for wi, workflow in enumerate(workflows):
             relative_path(workflow, f"{prefix}.ci_discovery.workflow_paths[{wi}]")
+        trusted_actions = discovery.get("trusted_prerequisite_actions", [])
+        if not isinstance(trusted_actions, list):
+            raise ValueError(
+                f"{prefix}.ci_discovery.trusted_prerequisite_actions must be a list"
+            )
+        if any(not isinstance(action, str) for action in trusted_actions):
+            raise ValueError(
+                f"{prefix}.ci_discovery.trusted_prerequisite_actions must contain strings"
+            )
+        if len(trusted_actions) != len(set(trusted_actions)):
+            raise ValueError(
+                f"{prefix}.ci_discovery.trusted_prerequisite_actions must be unique"
+            )
+        for ai, action in enumerate(trusted_actions):
+            field = (
+                f"{prefix}.ci_discovery.trusted_prerequisite_actions[{ai}]"
+            )
+            if not ACTION_SHA_REF.fullmatch(action):
+                raise ValueError(
+                    f"{field} must be an owner/repository action pinned to a full SHA"
+                )
         strategy = discovery.get("strategy")
         if strategy == "contains_any":
             patterns = discovery.get("contains_any")

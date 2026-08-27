@@ -125,6 +125,25 @@ class WorkflowReviewHardeningTest(unittest.TestCase):
             (False, []),
         )
 
+    def test_configured_pythia_workflow_remains_discoverable(self) -> None:
+        manifest = load_manifest(MANIFEST_PATH)
+        config = next(
+            row
+            for row in manifest["repositories"]
+            if row["id"] == "pythia"
+        )
+        workflow_path = ROOT.parents[1] / config["ci_discovery"][
+            "workflow_paths"
+        ][0]
+
+        self.assertEqual(
+            ci_discovery(
+                config["ci_discovery"],
+                workflow_path.read_text(encoding="utf-8"),
+            ),
+            (True, ["mix test"]),
+        )
+
 
 class PytestConfigurationReviewHardeningTest(unittest.TestCase):
     """Bind default pytest discovery to hashed repository configuration."""
@@ -448,6 +467,40 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
         self.assertEqual(check["outcome"], PASS)
         self.assertEqual(
             set(check["paths"]), {"mix.exs", "test/test_helper.exs"}
+        )
+
+    def test_ordinary_mix_module_and_required_file_are_hashed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            source_root = ROOT.parents[1]
+            for relative_path in (
+                "mix.exs",
+                "mix/tasks/compile.rustler_fallback.ex",
+            ):
+                _write(
+                    repository_root,
+                    relative_path,
+                    (source_root / relative_path).read_text(encoding="utf-8"),
+                )
+            result = self._audit(snapshot_root)
+
+        self.assertEqual(result["outcome"], PASS)
+        check = next(
+            row
+            for row in result["checks"]
+            if row["check_id"] == "mix_configuration"
+        )
+        self.assertEqual(check["outcome"], PASS)
+        self.assertIn(
+            "mix/tasks/compile.rustler_fallback.ex",
+            set(check["paths"]),
+        )
+        self.assertIn(
+            "mix/tasks/compile.rustler_fallback.ex",
+            {row["path"] for row in result["files"]},
         )
 
 
