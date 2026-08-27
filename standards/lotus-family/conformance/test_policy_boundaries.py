@@ -184,6 +184,29 @@ class WorkflowBoundaryTest(unittest.TestCase):
             (False, []),
         )
 
+    def test_action_step_cannot_smuggle_a_run_command(self) -> None:
+        text = workflow_steps(
+            "      - name: Invalid hybrid step\n"
+            "        uses: actions/checkout@v4\n"
+            "        run: python -m pytest\n"
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, text), (False, []))
+
+    def test_implicit_shell_requires_a_posix_runner(self) -> None:
+        windows = workflow("python -m pytest").replace(
+            "runs-on: ubuntu-latest",
+            "runs-on: windows-latest",
+        )
+        explicit_bash = windows.replace(
+            "        run: |\n",
+            "        shell: bash\n        run: |\n",
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, windows), (False, []))
+        self.assertEqual(
+            ci_discovery(DISCOVERY, explicit_bash),
+            (True, ["python -m pytest"]),
+        )
+
     def test_dynamic_test_arguments_fail_closed(self) -> None:
         cases = (
             (

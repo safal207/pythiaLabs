@@ -30,13 +30,22 @@ def _supported_shell(value: str) -> bool:
     if len(parts) == 1:
         return True
     allowed = {
-        ("bash", "{0}"),
         ("bash", "-e", "{0}"),
         ("bash", "--noprofile", "--norc", "-e", "-o", "pipefail", "{0}"),
-        ("sh", "{0}"),
         ("sh", "-e", "{0}"),
     }
     return tuple(parts) in allowed
+
+
+def _default_shell_is_posix(runs_on_value: str) -> bool:
+    """Accept an implicit shell only when the literal runner is POSIX-based."""
+    scalar = legacy.inline_scalar(runs_on_value)
+    if scalar is None or "${{" in scalar:
+        return False
+    normalized = scalar.lower()
+    if "windows" in normalized:
+        return False
+    return any(label in normalized for label in ("ubuntu", "macos", "linux"))
 
 
 def _dependencies_proven(
@@ -117,6 +126,11 @@ def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
         runs_on = properties.get("runs-on")
         if runs_on is None or legacy.inline_scalar(runs_on[1][4]) is None:
             continue
+        job_continue_on_error = _boolean_entry(
+            properties.get("continue-on-error"), default=False
+        )
+        if job_continue_on_error is not False:
+            continue
         needs = properties.get("needs")
         dependencies = dependency_graph[job_name]
         if not _dependencies_proven(job_name, dependency_graph):
@@ -173,10 +187,17 @@ def _github_run_step_groups(text: str) -> list[list[tuple[str, bool | None]]]:
             run = step.get("run")
             if run is None:
                 continue
+            if "uses" in step:
+                blocked = True
+                break
             shell = base._effective_entry(
                 step, job_defaults, workflow_defaults, "shell"
             )
-            if shell is not None and not _supported_shell(shell[1][4]):
+            if shell is None:
+                if not _default_shell_is_posix(runs_on[1][4]):
+                    blocked = True
+                    break
+            elif not _supported_shell(shell[1][4]):
                 blocked = True
                 break
             working_directory = base._effective_entry(
