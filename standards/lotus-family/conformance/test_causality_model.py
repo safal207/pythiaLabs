@@ -9,9 +9,6 @@ import unittest
 from pathlib import Path
 
 from lotus_family_auditor import (
-    DRIFT,
-    PASS,
-    UNKNOWN,
     audit_repository,
     load_manifest,
 )
@@ -95,6 +92,15 @@ def _materialize(
             relative_path,
             "\n".join(dict.fromkeys(terms)) + "\n",
         )
+    for check in config["file_checks"]:
+        if "sha256" in check:
+            _write(
+                repository_root,
+                check["path"],
+                (ROOT.parents[1] / check["path"]).read_text(
+                    encoding="utf-8"
+                ),
+            )
     discovery = config["ci_discovery"]
     _write(
         repository_root,

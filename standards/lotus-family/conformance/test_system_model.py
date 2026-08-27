@@ -266,6 +266,15 @@ def materialize(
             "\n".join(dict.fromkeys(values)) + "\n",
             encoding="utf-8",
         )
+    for check in config["file_checks"]:
+        if "sha256" in check:
+            path = repository / check["path"]
+            path.write_text(
+                (ROOT.parents[1] / check["path"]).read_text(
+                    encoding="utf-8"
+                ),
+                encoding="utf-8",
+            )
     discovery = config["ci_discovery"]
     path = repository / discovery["workflow_paths"][0]
     path.parent.mkdir(parents=True, exist_ok=True)

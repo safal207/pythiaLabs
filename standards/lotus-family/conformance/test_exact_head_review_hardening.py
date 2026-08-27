@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from lotus_family_auditor import DRIFT, PASS, audit_repository, load_manifest
+from lotus_family_schema import validate_manifest
 from lotus_family_workflow import ci_discovery
 
 HERE = Path(__file__).resolve().parent
@@ -87,10 +88,24 @@ def _materialize_pythia(snapshot_root: Path, manifest: dict) -> Path:
             relative_path,
             "\n".join(dict.fromkeys(terms)) + "\n",
         )
+    for check in config["file_checks"]:
+        if "sha256" in check:
+            _write(
+                repository_root,
+                check["path"],
+                (ROOT.parents[1] / check["path"]).read_text(
+                    encoding="utf-8"
+                ),
+            )
+    discovery = config["ci_discovery"]
+    if discovery["strategy"] == "mix_default_discovery":
+        command = discovery["command"]
+    else:
+        command = discovery["contains_any"][0]
     _write(
         repository_root,
-        config["ci_discovery"]["workflow_paths"][0],
-        _workflow().replace("python -m pytest", "mix test"),
+        discovery["workflow_paths"][0],
+        _workflow().replace("python -m pytest", command),
     )
     return repository_root
 
@@ -175,6 +190,91 @@ class WorkflowReviewHardeningTest(unittest.TestCase):
             ci_discovery(config["ci_discovery"], workflow),
             (False, []),
         )
+
+
+class ManifestSourceBindingReviewHardeningTest(unittest.TestCase):
+    """Bind explicit CI discovery to one immutable checked test source."""
+
+    def setUp(self) -> None:
+        self.manifest = copy.deepcopy(load_manifest(MANIFEST_PATH))
+        self.config = next(
+            row
+            for row in self.manifest["repositories"]
+            if row["id"] == "pythia"
+        )
+
+    def test_contains_any_command_cannot_target_an_unchecked_test(self) -> None:
+        self.config["ci_discovery"]["contains_any"] = [
+            "elixir -e 'ExUnit.start()' test/unrelated_test.exs --"
+        ]
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "must target only ci_discovery.test_path",
+        ):
+            validate_manifest(self.manifest)
+
+    def test_direct_elixir_test_source_requires_a_pinned_digest(self) -> None:
+        for mutation in ("missing", "null"):
+            with self.subTest(mutation=mutation):
+                manifest = copy.deepcopy(self.manifest)
+                config = next(
+                    row
+                    for row in manifest["repositories"]
+                    if row["id"] == "pythia"
+                )
+                test_check = next(
+                    check
+                    for check in config["file_checks"]
+                    if check["path"]
+                    == "test/lotus_docs_contract_test.exs"
+                )
+                if mutation == "missing":
+                    del test_check["sha256"]
+                    error = "must pin sha256 for direct Elixir execution"
+                else:
+                    test_check["sha256"] = None
+                    error = "sha256 must be a lowercase SHA-256"
+
+                with self.assertRaisesRegex(ValueError, error):
+                    validate_manifest(manifest)
+
+    def test_self_disabling_direct_elixir_source_is_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root,
+                self.manifest,
+            )
+            _write(
+                repository_root,
+                "test/lotus_docs_contract_test.exs",
+                (
+                    "# PR evidence is bound to exact head and changed context\n"
+                    "# English and Russian contracts preserve the "
+                    "no-authority boundary\n"
+                    "# Lotus remains a limitation contract rather than a "
+                    "safety overclaim\n"
+                    "System.halt(0)\n"
+                ),
+            )
+            result = audit_repository(
+                self.manifest,
+                repository_id="pythia",
+                snapshot_root=snapshot_root,
+                repository_ref="refs/heads/main",
+                commit_sha=SHA,
+            )
+
+        self.assertEqual(result["outcome"], DRIFT)
+        check = next(
+            row
+            for row in result["checks"]
+            if row["check_id"] == "regression_protection"
+        )
+        self.assertEqual(check["outcome"], DRIFT)
+        self.assertEqual(check["missing_terms"], [])
+        self.assertIn("pinned source", check["detail"])
 
 
 class PytestConfigurationReviewHardeningTest(unittest.TestCase):

@@ -46,6 +46,7 @@
         {
           "id": "regression_protection",
           "path": "test/lotus_docs_contract_test.exs",
+          "sha256": "3bd2304e5aef290666adc6c58bdd731ca1194f77ab64ebbc19c04c7a263ceaaf",
           "contains_all": [
             "PR evidence is bound to exact head and changed context",
             "English and Russian contracts preserve the no-authority boundary",
@@ -64,6 +65,7 @@
           "actions/cache@caa296126883cff596d87d8935842f9db880ef25"
         ],
         "strategy": "contains_any",
+        "test_path": "test/lotus_docs_contract_test.exs",
         "contains_any": [
           "elixir -e 'ExUnit.start()' test/lotus_docs_contract_test.exs --"
         ]
@@ -155,6 +157,7 @@
           ".github/workflows/ci.yml"
         ],
         "strategy": "contains_any",
+        "test_path": "tests/test_lotus_docs_contract.py",
         "contains_any": [
           "tests/test_lotus_docs_contract.py"
         ]

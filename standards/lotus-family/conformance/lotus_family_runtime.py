@@ -142,18 +142,28 @@ def audit_repository(
 
         terms = [str(term) for term in check["contains_all"]]
         missing = [term for term in terms if term not in text]
-        check_outcome = PASS if not missing else DRIFT
+        expected_sha256 = check.get("sha256")
+        actual_sha256 = files[-1]["sha256"]
+        digest_matches = (
+            expected_sha256 is None
+            or expected_sha256 == actual_sha256
+        )
+        check_outcome = PASS if not missing and digest_matches else DRIFT
+        if missing:
+            check_detail = "required terms are missing"
+        elif not digest_matches:
+            check_detail = "file SHA-256 does not match the pinned source"
+        elif expected_sha256 is not None:
+            check_detail = "all required terms and pinned digest match"
+        else:
+            check_detail = "all required terms are present"
         checks.append(
             {
                 "check_id": check_id,
                 "outcome": check_outcome,
                 "path": name,
                 "missing_terms": missing,
-                "detail": (
-                    "all required terms are present"
-                    if check_outcome == PASS
-                    else "required terms are missing"
-                ),
+                "detail": check_detail,
             }
         )
         if check_outcome == DRIFT:

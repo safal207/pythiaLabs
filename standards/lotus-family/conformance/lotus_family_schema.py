@@ -3,11 +3,13 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shlex
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 PASS, DRIFT, UNKNOWN = "PASS", "DRIFT", "UNKNOWN"
 COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
 ACTION_SHA_REF = re.compile(
     r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}$"
 )
@@ -34,6 +36,22 @@ def relative_path(value: Any, field: str) -> str:
     if path.is_absolute() or path == PurePosixPath(".") or ".." in path.parts:
         raise ValueError(f"{field} must stay inside the repository snapshot")
     return path.as_posix()
+
+
+def command_test_paths(value: Any, field: str) -> tuple[list[str], set[str]]:
+    """Parse one contains-any pattern and return its test-file targets."""
+    text = non_empty(value, field)
+    try:
+        tokens = shlex.split(text)
+    except ValueError as exc:
+        raise ValueError(f"{field} must be valid shell words") from exc
+
+    targets: set[str] = set()
+    for token in tokens:
+        candidate = token.split("::", 1)[0]
+        if candidate.lower().endswith((".py", ".exs")):
+            targets.add(relative_path(candidate, field))
+    return tokens, targets
 
 
 def validate_manifest(manifest: Mapping[str, Any]) -> None:
@@ -64,6 +82,7 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             raise ValueError(f"{prefix}.file_checks must be a non-empty list")
         check_ids: set[str] = set()
         checked: set[str] = set()
+        checks_by_path: dict[str, list[Mapping[str, Any]]] = {}
         for ci, check in enumerate(checks):
             cp = f"{prefix}.file_checks[{ci}]"
             if not isinstance(check, Mapping):
@@ -72,7 +91,15 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             if check_id in check_ids:
                 raise ValueError(f"duplicate check id in {repo_id}: {check_id}")
             check_ids.add(check_id)
-            checked.add(relative_path(check.get("path"), f"{cp}.path"))
+            check_path = relative_path(check.get("path"), f"{cp}.path")
+            checked.add(check_path)
+            checks_by_path.setdefault(check_path, []).append(check)
+            expected_sha256 = check.get("sha256")
+            if "sha256" in check and (
+                not isinstance(expected_sha256, str)
+                or not SHA256.fullmatch(expected_sha256)
+            ):
+                raise ValueError(f"{cp}.sha256 must be a lowercase SHA-256")
             terms = check.get("contains_all")
             if not isinstance(terms, list) or not terms:
                 raise ValueError(f"{cp}.contains_all must be a non-empty list")
@@ -112,10 +139,36 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             patterns = discovery.get("contains_any")
             if not isinstance(patterns, list) or not patterns:
                 raise ValueError(f"{prefix}.ci_discovery.contains_any must be a non-empty list")
+            test_path = relative_path(
+                discovery.get("test_path"),
+                f"{prefix}.ci_discovery.test_path",
+            )
+            if not test_path.lower().endswith((".py", ".exs")):
+                raise ValueError(
+                    f"{prefix}.ci_discovery.test_path must be a test source"
+                )
+            if test_path not in checked:
+                raise ValueError(
+                    f"{prefix}.ci_discovery.test_path must also be a checked file"
+                )
+            direct_elixir = False
             for pi, pattern in enumerate(patterns):
-                text = non_empty(pattern, f"{prefix}.ci_discovery.contains_any[{pi}]")
-                if text.endswith((".py", ".exs")) and relative_path(text, f"{prefix}.ci_discovery.contains_any[{pi}]") not in checked:
-                    raise ValueError(f"{prefix}.ci_discovery pattern must also be a checked file")
+                field = f"{prefix}.ci_discovery.contains_any[{pi}]"
+                tokens, targets = command_test_paths(pattern, field)
+                if targets != {test_path}:
+                    raise ValueError(
+                        f"{field} must target only ci_discovery.test_path"
+                    )
+                direct_elixir = direct_elixir or (
+                    bool(tokens) and tokens[0] == "elixir"
+                )
+            if direct_elixir and not any(
+                "sha256" in check for check in checks_by_path[test_path]
+            ):
+                raise ValueError(
+                    f"{prefix}.ci_discovery.test_path must pin sha256 "
+                    "for direct Elixir execution"
+                )
         elif strategy in {"pytest_default_discovery", "mix_default_discovery"}:
             expected = "python -m pytest" if strategy.startswith("pytest") else "mix test"
             if non_empty(discovery.get("command"), f"{prefix}.ci_discovery.command") != expected:
