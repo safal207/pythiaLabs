@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 import shlex
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import lotus_family_workflow_policy as execution
 import lotus_family_workflow_policy_v2 as policy_v2
@@ -31,6 +32,10 @@ _RUNNER_RESOLUTION_ENV_NAMES = {
     "BASH_ENV",
     "ENV",
     "ERL_LIBS",
+    "ELIXIR_ERL_OPTIONS",
+    "ERL_AFLAGS",
+    "ERL_FLAGS",
+    "ERL_ZFLAGS",
     "MIX_ARCHIVES",
     "MIX_HOME",
     "MIX_PATH",
@@ -38,6 +43,25 @@ _RUNNER_RESOLUTION_ENV_NAMES = {
     "PYTHONHOME",
     "PYTHONPATH",
 }
+
+
+def _uses_direct_elixir(discovery: Mapping[str, Any]) -> bool:
+    """Return true when a configured literal command invokes Elixir directly."""
+    if discovery.get("strategy") != "contains_any":
+        return False
+    patterns = discovery.get("contains_any")
+    if not isinstance(patterns, list):
+        return False
+    for pattern in patterns:
+        if not isinstance(pattern, str):
+            continue
+        try:
+            parts = shlex.split(pattern)
+        except ValueError:
+            continue
+        if parts and parts[0] == "elixir":
+            return True
+    return False
 
 
 _TRUSTED_PREREQUISITE_COMMANDS = {
@@ -120,6 +144,13 @@ def _ci_discovery_one(
     if (
         execution.legacy.UNRESOLVED_ENV_MAPPING in yaml_env_names
         or any(name in _RUNNER_RESOLUTION_ENV_NAMES for name in yaml_env_names)
+        or (
+            _uses_direct_elixir(discovery)
+            and any(
+                name.startswith(("ERL_", "ELIXIR_"))
+                for name in yaml_env_names
+            )
+        )
     ):
         return False, []
     if policy_v2._uses_pytest(discovery) and (
@@ -197,7 +228,7 @@ mix_command = previous.mix_command
 __all__ = [
     "ci_discovery",
     "github_run_scripts",
-    "shell_commands",
-    "pytest_command",
     "mix_command",
+    "pytest_command",
+    "shell_commands",
 ]

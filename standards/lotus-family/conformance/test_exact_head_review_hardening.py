@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+import copy
 import tempfile
 import unittest
 from pathlib import Path
 
 from lotus_family_auditor import DRIFT, PASS, audit_repository, load_manifest
 from lotus_family_workflow import ci_discovery
-
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -141,7 +141,39 @@ class WorkflowReviewHardeningTest(unittest.TestCase):
                 config["ci_discovery"],
                 workflow_path.read_text(encoding="utf-8"),
             ),
-            (True, ["mix test"]),
+            (
+                True,
+                [
+                    (
+                        "elixir -e 'ExUnit.start()' "
+                        "test/lotus_docs_contract_test.exs --"
+                    )
+                ],
+            ),
+        )
+
+    def test_direct_elixir_vm_flag_environment_is_rejected(self) -> None:
+        manifest = load_manifest(MANIFEST_PATH)
+        config = next(
+            row
+            for row in manifest["repositories"]
+            if row["id"] == "pythia"
+        )
+        workflow = (
+            "name: CI\n"
+            "env:\n"
+            "  ERL_AFLAGS: -eval halt().\n"
+            "jobs:\n"
+            "  test:\n"
+            "    runs-on: ubuntu-latest\n"
+            "    steps:\n"
+            "      - run: elixir -e 'ExUnit.start()' "
+            "test/lotus_docs_contract_test.exs --\n"
+        )
+
+        self.assertEqual(
+            ci_discovery(config["ci_discovery"], workflow),
+            (False, []),
         )
 
 
@@ -320,7 +352,18 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
     """Bind Mix default discovery to hashed collection configuration."""
 
     def setUp(self) -> None:
-        self.manifest = load_manifest(MANIFEST_PATH)
+        self.manifest = copy.deepcopy(load_manifest(MANIFEST_PATH))
+        config = next(
+            row
+            for row in self.manifest["repositories"]
+            if row["id"] == "pythia"
+        )
+        config["ci_discovery"] = {
+            "workflow_paths": [".github/workflows/ci.yml"],
+            "strategy": "mix_default_discovery",
+            "command": "mix test",
+            "test_path": "test/lotus_docs_contract_test.exs",
+        }
 
     def _audit(self, snapshot_root: Path) -> dict:
         return audit_repository(
@@ -425,6 +468,41 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
 
         self._assert_blocked_config(result, "mix.exs")
 
+    def test_executable_mix_project_value_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: [app: :lotus_fixture, version: System.halt(0)]\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "mix.exs")
+
+    def test_executable_test_helper_blocks_default_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            snapshot_root = Path(directory)
+            repository_root = _materialize_pythia(
+                snapshot_root, self.manifest
+            )
+            _write(
+                repository_root,
+                "mix.exs",
+                "def project, do: [app: :lotus_fixture]\n",
+            )
+            _write(
+                repository_root,
+                "test/test_helper.exs",
+                "ExUnit.start()\nSystem.halt(0)\n",
+            )
+            result = self._audit(snapshot_root)
+
+        self._assert_blocked_config(result, "test/test_helper.exs")
+
     def test_exunit_selection_override_blocks_default_discovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
@@ -469,39 +547,36 @@ class MixConfigurationReviewHardeningTest(unittest.TestCase):
             set(check["paths"]), {"mix.exs", "test/test_helper.exs"}
         )
 
-    def test_ordinary_mix_module_and_required_file_are_hashed(self) -> None:
+    def test_required_mix_file_is_hashed_and_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             snapshot_root = Path(directory)
             repository_root = _materialize_pythia(
                 snapshot_root, self.manifest
             )
-            source_root = ROOT.parents[1]
-            for relative_path in (
+            _write(
+                repository_root,
                 "mix.exs",
-                "mix/tasks/compile.rustler_fallback.ex",
-            ):
-                _write(
-                    repository_root,
-                    relative_path,
-                    (source_root / relative_path).read_text(encoding="utf-8"),
-                )
+                (
+                    'Code.require_file("support.exs", __DIR__)\n'
+                    "defmodule Fixture.MixProject do\n"
+                    "  use Mix.Project\n"
+                    "  def project, do: [app: :lotus_fixture]\n"
+                    "end\n"
+                ),
+            )
+            _write(repository_root, "support.exs", "System.halt(0)\n")
             result = self._audit(snapshot_root)
 
-        self.assertEqual(result["outcome"], PASS)
+        self.assertEqual(result["outcome"], DRIFT)
         check = next(
             row
             for row in result["checks"]
             if row["check_id"] == "mix_configuration"
         )
-        self.assertEqual(check["outcome"], PASS)
-        self.assertIn(
-            "mix/tasks/compile.rustler_fallback.ex",
-            set(check["paths"]),
-        )
-        self.assertIn(
-            "mix/tasks/compile.rustler_fallback.ex",
-            {row["path"] for row in result["files"]},
-        )
+        self.assertEqual(check["outcome"], DRIFT)
+        self.assertIn("support.exs", set(check["paths"]))
+        self.assertIn("support.exs", set(check["blocked_paths"]))
+        self.assertIn("support.exs", {row["path"] for row in result["files"]})
 
 
 if __name__ == "__main__":

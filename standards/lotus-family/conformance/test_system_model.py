@@ -242,11 +242,11 @@ def valid_command(discovery: dict) -> str:
     if discovery["strategy"] == "mix_default_discovery":
         return "mix test"
     pattern = discovery["contains_any"][0]
-    return (
-        f"python -m pytest {pattern}"
-        if pattern.endswith(".py")
-        else f"mix test {pattern}"
-    )
+    if pattern.endswith(".py"):
+        return f"python -m pytest {pattern}"
+    if pattern.endswith(".exs"):
+        return f"mix test {pattern}"
+    return pattern
 
 
 def materialize(

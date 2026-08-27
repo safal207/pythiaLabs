@@ -6,11 +6,12 @@ import argparse
 import json
 import os
 import re
-import tomllib
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
-from typing import Any, Mapping
+from typing import Any
 
 import lotus_family_runtime as previous
+import tomllib
 from lotus_family_schema import (
     DRIFT,
     PASS,
@@ -20,7 +21,6 @@ from lotus_family_schema import (
     read_file,
     repository_config,
 )
-
 
 _PYTEST_CONFIG_PATHS = (
     "pytest.toml",
@@ -60,6 +60,17 @@ _MIX_PROJECT_DEFINITION = re.compile(
 _MIX_PROJECT_KEY = re.compile(r"([A-Za-z_][A-Za-z0-9_?!]*)\s*:")
 
 
+_MIX_SAFE_PROJECT_VALUE = re.compile(
+    r"(?:"
+    r":[A-Za-z_][A-Za-z0-9_?!@]*|"
+    r'"(?:\\.|[^"\\])*"|'
+    r"'(?:\\.|[^'\\])*'|"
+    r"-?[0-9]+(?:\.[0-9]+)?|"
+    r"true|false|nil"
+    r")\Z"
+)
+
+
 _MIX_REQUIRE_FILE = re.compile(
     r'Code\.require_file\("(?P<path>[^"\\]+)",[ \t]*__DIR__\)'
 )
@@ -76,10 +87,7 @@ _MIX_USE_PROJECT = re.compile(r"use[ \t]+Mix\.Project\b")
 _MIX_COLLECTION_KEYS = {"test_paths", "test_pattern"}
 
 
-_EXUNIT_SELECTION_SETTING = re.compile(
-    r"\bExUnit\.(?:start|configure)\s*\([^)]*\b(?:exclude|include)\s*:",
-    re.DOTALL,
-)
+_MIX_SAFE_TEST_HELPER = re.compile(r"ExUnit\.start\s*\(\s*\)")
 
 
 def _has_meaningful_lines(text: str) -> bool:
@@ -323,8 +331,14 @@ def _mix_wrapper(
     if cursor != _skip_elixir_space_and_comments(text, definition_start):
         return None
 
-    suffix = text[definition_end:]
-    if not re.search(r"(?m)^\s*end\s*(?:#.*)?\s*\Z", suffix):
+    cursor = _skip_elixir_space_and_comments(text, definition_end)
+    end_match = re.match(r"end\b", text[cursor:])
+    if end_match is None:
+        return None
+    cursor = _skip_elixir_space_and_comments(
+        text, cursor + end_match.end()
+    )
+    if cursor != len(text):
         return None
     if len(required_files) != len(set(required_files)):
         return None
@@ -376,7 +390,11 @@ def _literal_mix_project(
         match = _MIX_PROJECT_KEY.match(entry, entry_start)
         if match is None:
             return None
-        keys.add(match.group(1))
+        key = match.group(1)
+        value = entry[match.end():].strip()
+        if key in keys or _MIX_SAFE_PROJECT_VALUE.fullmatch(value) is None:
+            return None
+        keys.add(key)
     return keys, required_files
 
 
@@ -392,7 +410,11 @@ def _activates_mix_configuration(path: str, text: str) -> bool:
         project_keys = _literal_mix_project_keys(text)
         return project_keys is None or bool(project_keys & _MIX_COLLECTION_KEYS)
     if path == "test/test_helper.exs":
-        return bool(_EXUNIT_SELECTION_SETTING.search(text))
+        cursor = _skip_elixir_space_and_comments(text, 0)
+        match = _MIX_SAFE_TEST_HELPER.match(text, cursor)
+        if match is None:
+            return True
+        return _skip_elixir_space_and_comments(text, match.end()) != len(text)
     return False
 
 
@@ -427,8 +449,9 @@ def _audit_mix_configuration(
         if error is not None or text is None:
             blockers.append(f"{relative_path}: {error or 'unreadable'}")
             continue
-        if re.search(r"\b(?:test_paths|test_pattern)\b", text):
-            blockers.append(relative_path)
+        # Requiring an arbitrary Elixir file executes it while Mix loads the
+        # project. Hashing cannot prove that execution reaches the tests.
+        blockers.append(relative_path)
     return observed, blockers
 
 
