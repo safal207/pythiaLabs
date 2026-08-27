@@ -14,6 +14,9 @@ on:
 permissions:
   contents: read
 
+env:
+  LOTUS_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
 jobs:
   conformance:
     runs-on: ubuntu-latest
@@ -21,7 +24,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          ref: ${{ env.LOTUS_SOURCE_SHA }}
           persist-credentials: false
+
+      - name: Verify checked-out source identity
+        run: test "$(git rev-parse HEAD)" = "$LOTUS_SOURCE_SHA"
 
       - name: Set up Python
         id: python
@@ -40,7 +47,7 @@ jobs:
       - name: Emit immutable CI causal observation
         if: always()
         env:
-          LOTUS_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          LOTUS_COMMIT_SHA: ${{ env.LOTUS_SOURCE_SHA }}
           LOTUS_REF: ${{ github.head_ref || github.ref }}
           LOTUS_CONCLUSION: ${{ steps.conformance.outcome }}
           LOTUS_RUNNER_OS: ${{ runner.os }}
