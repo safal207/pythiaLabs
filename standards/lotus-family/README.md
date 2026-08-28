@@ -40,6 +40,12 @@ a structural reachability assumption, not proof of side-effect freedom;
 arbitrary commands or direct writes to audited inputs never establish a later
 test gate.
 
+The configured Python and Elixir contract-test sources must match pinned
+SHA-256 values, so retaining required phrases in a replacement no-op test cannot
+produce `PASS`. Pytest discovery also fails closed on repository-local source,
+sourceless bytecode, native-extension, or Python-startup shadows that could
+preempt the installed runner before contract collection.
+
 ## Causal spacetime testing model
 
 The test model has two compatible layers:

@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from lotus_family_auditor import DRIFT, PASS, UNKNOWN, audit_repository, load_manifest
+from lotus_family_test_sources import pinned_test_source
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -48,8 +49,10 @@ def _materialize_repository(snapshot_root: Path, config: dict) -> Path:
             _write(
                 repository_root,
                 check["path"],
-                (ROOT.parents[1] / check["path"]).read_text(
-                    encoding="utf-8"
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
                 ),
             )
     discovery = config["ci_discovery"]

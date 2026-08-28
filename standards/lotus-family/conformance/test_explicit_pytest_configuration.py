@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from lotus_family_auditor import DRIFT, audit_repository, load_manifest
+from lotus_family_test_sources import pinned_test_source
 
 
 HERE = Path(__file__).resolve().parent
@@ -37,6 +38,17 @@ def _materialize_ls(snapshot_root: Path, manifest: dict) -> Path:
             relative_path,
             "\n".join(dict.fromkeys(terms)) + "\n",
         )
+    for check in config["file_checks"]:
+        if "sha256" in check:
+            _write(
+                repository_root,
+                check["path"],
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
+                ),
+            )
     _write(
         repository_root,
         config["ci_discovery"]["workflow_paths"][0],

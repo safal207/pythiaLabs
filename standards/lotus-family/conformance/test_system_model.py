@@ -21,6 +21,7 @@ from lotus_family_system_model import (
     validate_graph,
     validate_routes,
 )
+from lotus_family_test_sources import pinned_test_source
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -270,8 +271,10 @@ def materialize(
         if "sha256" in check:
             path = repository / check["path"]
             path.write_text(
-                (ROOT.parents[1] / check["path"]).read_text(
-                    encoding="utf-8"
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
                 ),
                 encoding="utf-8",
             )

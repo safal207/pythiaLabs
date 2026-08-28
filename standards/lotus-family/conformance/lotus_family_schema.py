@@ -151,24 +151,13 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
                 raise ValueError(
                     f"{prefix}.ci_discovery.test_path must also be a checked file"
                 )
-            direct_elixir = False
             for pi, pattern in enumerate(patterns):
                 field = f"{prefix}.ci_discovery.contains_any[{pi}]"
-                tokens, targets = command_test_paths(pattern, field)
+                _, targets = command_test_paths(pattern, field)
                 if targets != {test_path}:
                     raise ValueError(
                         f"{field} must target only ci_discovery.test_path"
                     )
-                direct_elixir = direct_elixir or (
-                    bool(tokens) and tokens[0] == "elixir"
-                )
-            if direct_elixir and not any(
-                "sha256" in check for check in checks_by_path[test_path]
-            ):
-                raise ValueError(
-                    f"{prefix}.ci_discovery.test_path must pin sha256 "
-                    "for direct Elixir execution"
-                )
         elif strategy in {"pytest_default_discovery", "mix_default_discovery"}:
             expected = "python -m pytest" if strategy.startswith("pytest") else "mix test"
             if non_empty(discovery.get("command"), f"{prefix}.ci_discovery.command") != expected:
@@ -183,6 +172,13 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
                 raise ValueError(f"{prefix}.ci_discovery.test_path must also be a checked file")
         else:
             raise ValueError(f"{prefix}.ci_discovery.strategy is unsupported: {strategy}")
+        if not any(
+            "sha256" in check for check in checks_by_path[test_path]
+        ):
+            raise ValueError(
+                f"{prefix}.ci_discovery.test_path must pin sha256 "
+                "for executed test source"
+            )
 
 
 def load_manifest(path: Path) -> dict[str, Any]:
@@ -214,8 +210,8 @@ def read_file(root: Path, name: str, files: list[dict[str, str]]) -> tuple[str |
         return None, f"required file is missing: {name}"
     try:
         data = path.read_bytes()
-        text = data.decode("utf-8")
         files.append({"path": name, "sha256": hashlib.sha256(data).hexdigest()})
+        text = data.decode("utf-8")
         return text, None
     except (OSError, UnicodeError) as exc:
         return None, f"cannot read {name}: {exc.__class__.__name__}"

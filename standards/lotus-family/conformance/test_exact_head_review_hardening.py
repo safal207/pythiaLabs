@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import copy
+import py_compile
 import tempfile
 import unittest
 from pathlib import Path
 
 from lotus_family_auditor import DRIFT, PASS, audit_repository, load_manifest
 from lotus_family_schema import validate_manifest
+from lotus_family_test_sources import pinned_test_source
 from lotus_family_workflow import ci_discovery
 
 HERE = Path(__file__).resolve().parent
@@ -48,9 +50,30 @@ def _write(root: Path, relative_path: str, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def _materialize_cml(snapshot_root: Path, manifest: dict) -> Path:
+def _write_bytes(root: Path, relative_path: str, content: bytes) -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+
+
+def _compile_sourceless(root: Path, relative_path: str) -> None:
+    target = root / relative_path
+    source = target.with_name(f"{target.stem}.source.py")
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("raise SystemExit(0)\n", encoding="utf-8")
+    py_compile.compile(str(source), cfile=str(target), doraise=True)
+    source.unlink()
+
+
+def _materialize_python_repository(
+    snapshot_root: Path,
+    manifest: dict,
+    repository_id: str,
+) -> Path:
     config = next(
-        row for row in manifest["repositories"] if row["id"] == "cml"
+        row
+        for row in manifest["repositories"]
+        if row["id"] == repository_id
     )
     repository_root = snapshot_root / config["snapshot_dir"]
     terms_by_path: dict[str, list[str]] = {}
@@ -64,12 +87,37 @@ def _materialize_cml(snapshot_root: Path, manifest: dict) -> Path:
             relative_path,
             "\n".join(dict.fromkeys(terms)) + "\n",
         )
+    for check in config["file_checks"]:
+        if "sha256" in check:
+            _write(
+                repository_root,
+                check["path"],
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
+                ),
+            )
+    discovery = config["ci_discovery"]
+    command = (
+        discovery["command"]
+        if discovery["strategy"] == "pytest_default_discovery"
+        else f"python -m pytest {discovery['test_path']}"
+    )
     _write(
         repository_root,
-        config["ci_discovery"]["workflow_paths"][0],
-        _workflow(),
+        discovery["workflow_paths"][0],
+        _workflow().replace("python -m pytest", command),
     )
     return repository_root
+
+
+def _materialize_cml(snapshot_root: Path, manifest: dict) -> Path:
+    return _materialize_python_repository(
+        snapshot_root,
+        manifest,
+        "cml",
+    )
 
 
 def _materialize_pythia(snapshot_root: Path, manifest: dict) -> Path:
@@ -93,8 +141,10 @@ def _materialize_pythia(snapshot_root: Path, manifest: dict) -> Path:
             _write(
                 repository_root,
                 check["path"],
-                (ROOT.parents[1] / check["path"]).read_text(
-                    encoding="utf-8"
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
                 ),
             )
     discovery = config["ci_discovery"]
@@ -231,13 +281,83 @@ class ManifestSourceBindingReviewHardeningTest(unittest.TestCase):
                 )
                 if mutation == "missing":
                     del test_check["sha256"]
-                    error = "must pin sha256 for direct Elixir execution"
+                    error = "must pin sha256 for executed test source"
                 else:
                     test_check["sha256"] = None
                     error = "sha256 must be a lowercase SHA-256"
 
                 with self.assertRaisesRegex(ValueError, error):
                     validate_manifest(manifest)
+
+    def test_pytest_test_sources_require_pinned_digests(self) -> None:
+        for repository_id in ("cml", "ls"):
+            with self.subTest(repository_id=repository_id):
+                manifest = copy.deepcopy(self.manifest)
+                config = next(
+                    row
+                    for row in manifest["repositories"]
+                    if row["id"] == repository_id
+                )
+                test_check = next(
+                    check
+                    for check in config["file_checks"]
+                    if check["path"] == config["ci_discovery"]["test_path"]
+                )
+                del test_check["sha256"]
+
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "must pin sha256 for executed test source",
+                ):
+                    validate_manifest(manifest)
+
+    def test_phrase_preserving_pytest_source_replacement_is_drift(self) -> None:
+        for repository_id in ("cml", "ls"):
+            with self.subTest(repository_id=repository_id):
+                manifest = copy.deepcopy(self.manifest)
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_python_repository(
+                        snapshot_root,
+                        manifest,
+                        repository_id,
+                    )
+                    config = next(
+                        row
+                        for row in manifest["repositories"]
+                        if row["id"] == repository_id
+                    )
+                    test_check = next(
+                        check
+                        for check in config["file_checks"]
+                        if check["path"]
+                        == config["ci_discovery"]["test_path"]
+                    )
+                    _write(
+                        repository_root,
+                        test_check["path"],
+                        "\n".join(
+                            f"# {term}"
+                            for term in test_check["contains_all"]
+                        )
+                        + "\n\ndef test_trivial_pass() -> None:\n    pass\n",
+                    )
+                    result = audit_repository(
+                        manifest,
+                        repository_id=repository_id,
+                        snapshot_root=snapshot_root,
+                        repository_ref="refs/heads/main",
+                        commit_sha=SHA,
+                    )
+
+                self.assertEqual(result["outcome"], DRIFT)
+                check = next(
+                    row
+                    for row in result["checks"]
+                    if row["check_id"] == "regression_protection"
+                )
+                self.assertEqual(check["missing_terms"], [])
+                self.assertIn("pinned source", check["detail"])
 
     def test_self_disabling_direct_elixir_source_is_drift(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -420,6 +540,68 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
                         self.manifest,
                     )
                     _write(repository_root, relative_path, "raise SystemExit(0)\n")
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, relative_path)
+
+    def test_sourceless_pytest_bytecode_shadows_block_discovery(self) -> None:
+        cases = (
+            "pytest.pyc",
+            "pytest/__init__.pyc",
+            "pytest/__main__.pyc",
+        )
+        for relative_path in cases:
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    _compile_sourceless(repository_root, relative_path)
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, relative_path)
+
+    def test_native_pytest_extension_shadows_block_discovery(self) -> None:
+        cases = (
+            "pytest.cpython-312-x86_64-linux-gnu.so",
+            "pytest/__main__.pyd",
+        )
+        for relative_path in cases:
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    _write_bytes(repository_root, relative_path, b"\xffshadow")
+                    result = self._audit(snapshot_root)
+
+                self._assert_blocked_config(result, relative_path)
+
+    def test_python_startup_shadows_block_pytest_discovery(self) -> None:
+        cases = (
+            "sitecustomize.pyc",
+            "usercustomize.cpython-312-x86_64-linux-gnu.so",
+        )
+        for relative_path in cases:
+            with self.subTest(relative_path=relative_path):
+                with tempfile.TemporaryDirectory() as directory:
+                    snapshot_root = Path(directory)
+                    repository_root = _materialize_cml(
+                        snapshot_root,
+                        self.manifest,
+                    )
+                    if relative_path.endswith(".pyc"):
+                        _compile_sourceless(repository_root, relative_path)
+                    else:
+                        _write_bytes(
+                            repository_root,
+                            relative_path,
+                            b"\xffshadow",
+                        )
                     result = self._audit(snapshot_root)
 
                 self._assert_blocked_config(result, relative_path)

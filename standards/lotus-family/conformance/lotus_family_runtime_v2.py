@@ -34,9 +34,21 @@ _PYTEST_CONFIG_PATHS = (
 
 
 _PYTEST_SHADOW_PATHS = (
+    "pytest",
     "pytest.py",
+    "pytest.pyc",
     "pytest/__init__.py",
+    "pytest/__init__.pyc",
     "pytest/__main__.py",
+    "pytest/__main__.pyc",
+)
+
+
+_PYTHON_STARTUP_SHADOW_PATHS = (
+    "sitecustomize.py",
+    "sitecustomize.pyc",
+    "usercustomize.py",
+    "usercustomize.pyc",
 )
 
 
@@ -88,6 +100,62 @@ _MIX_COLLECTION_KEYS = {"test_paths", "test_pattern"}
 
 
 _MIX_SAFE_TEST_HELPER = re.compile(r"ExUnit\.start\s*\(\s*\)")
+
+
+def _looks_like_import_shadow(name: str, stems: tuple[str, ...]) -> bool:
+    """Recognize sourceless bytecode and native extension module names."""
+    return any(
+        name.startswith(f"{stem}.")
+        and name.lower().endswith((".pyc", ".so", ".pyd"))
+        for stem in stems
+    )
+
+
+def _discover_import_shadow_paths(repository_root: Path) -> list[str]:
+    """Find interpreter-specific module shadows without following symlinks."""
+    discovered: list[str] = []
+    try:
+        root_entries = list(repository_root.iterdir())
+    except OSError:
+        return discovered
+    for candidate in root_entries:
+        if _looks_like_import_shadow(
+            candidate.name,
+            ("pytest", "sitecustomize", "usercustomize"),
+        ):
+            discovered.append(candidate.name)
+
+    package = repository_root / "pytest"
+    if package.is_dir() and not package.is_symlink():
+        try:
+            package_entries = list(package.iterdir())
+        except OSError:
+            package_entries = []
+        for candidate in package_entries:
+            if _looks_like_import_shadow(
+                candidate.name,
+                ("__init__", "__main__"),
+            ):
+                discovered.append(f"pytest/{candidate.name}")
+    return sorted(set(discovered))
+
+
+def _is_import_shadow_path(path: str) -> bool:
+    """Return true for repository files that can preempt pytest execution."""
+    if path in {*_PYTEST_SHADOW_PATHS, *_PYTHON_STARTUP_SHADOW_PATHS}:
+        return True
+    candidate = PurePosixPath(path)
+    if candidate.parent == PurePosixPath("."):
+        return _looks_like_import_shadow(
+            candidate.name,
+            ("pytest", "sitecustomize", "usercustomize"),
+        )
+    return candidate.parent == PurePosixPath("pytest") and (
+        _looks_like_import_shadow(
+            candidate.name,
+            ("__init__", "__main__"),
+        )
+    )
 
 
 def _has_meaningful_lines(text: str) -> bool:
@@ -149,7 +217,7 @@ def _requires_mix_configuration_audit(
 
 def _activates_pytest_configuration(path: str, text: str) -> bool:
     """Detect config scopes or hooks that can alter default pytest collection."""
-    if path in _PYTEST_SHADOW_PATHS:
+    if _is_import_shadow_path(path):
         return True
     if _is_conftest(path):
         return True
@@ -208,6 +276,8 @@ def _audit_pytest_configuration(
     candidate_paths = (
         *_PYTEST_CONFIG_PATHS,
         *_PYTEST_SHADOW_PATHS,
+        *_PYTHON_STARTUP_SHADOW_PATHS,
+        *_discover_import_shadow_paths(repository_root),
         *_discover_conftest_paths(repository_root),
     )
     for relative_path in dict.fromkeys(candidate_paths):
@@ -216,6 +286,9 @@ def _audit_pytest_configuration(
             continue
         observed.append(relative_path)
         text, error = read_file(repository_root, relative_path, files)
+        if _is_import_shadow_path(relative_path):
+            blockers.append(relative_path)
+            continue
         if error is not None or text is None:
             blockers.append(f"{relative_path}: {error or 'unreadable'}")
             continue

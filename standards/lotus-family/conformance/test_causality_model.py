@@ -12,6 +12,7 @@ from lotus_family_auditor import (
     audit_repository,
     load_manifest,
 )
+from lotus_family_test_sources import pinned_test_source
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -97,8 +98,10 @@ def _materialize(
             _write(
                 repository_root,
                 check["path"],
-                (ROOT.parents[1] / check["path"]).read_text(
-                    encoding="utf-8"
+                pinned_test_source(
+                    config["id"],
+                    check["path"],
+                    check["sha256"],
                 ),
             )
     discovery = config["ci_discovery"]

@@ -99,6 +99,7 @@
         {
           "id": "regression_protection",
           "path": "tests/test_lotus_docs_contract.py",
+          "sha256": "69de6a265928685d814d7bd1d77719a090a45ed4e9eecee9677c2d2e8259e5df",
           "contains_all": [
             "test_english_and_russian_contracts_keep_the_no_authority_boundary",
             "has no ownership, approval, execution, delivery, or merge authority",
@@ -145,6 +146,7 @@
         {
           "id": "regression_protection",
           "path": "tests/test_lotus_docs_contract.py",
+          "sha256": "86662af527b02e0d950feaba66819ddfdd3dcccbb8b10b125bf8085e259d4589",
           "contains_all": [
             "test_pr_evidence_is_bound_to_exact_head",
             "test_lotus_preserves_human_authority_in_both_languages",
