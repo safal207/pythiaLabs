@@ -1,0 +1,169 @@
+{
+  "schema_version": "pythia.lotus_family_manifest.v0.1",
+  "authority": "audit_only",
+  "outcomes": [
+    "PASS",
+    "DRIFT",
+    "UNKNOWN"
+  ],
+  "repositories": [
+    {
+      "id": "pythia",
+      "repository": "safal207/pythiaLabs",
+      "snapshot_dir": "safal207__pythiaLabs",
+      "file_checks": [
+        {
+          "id": "bilingual_contract",
+          "path": "LOTUS.md",
+          "contains_all": [
+            "Evidence before verdict",
+            "Judgment without execution",
+            "Human challengeability",
+            "Доказательства до вердикта",
+            "Суждение без исполнения",
+            "Право человека оспорить"
+          ]
+        },
+        {
+          "id": "authority_firewall",
+          "path": "LOTUS.md",
+          "contains_all": [
+            "has no ownership, credential, execution, delivery, or merge authority",
+            "не имеет права собственности",
+            "права на исполнение",
+            "доставку или merge"
+          ]
+        },
+        {
+          "id": "exact_head_and_supersession",
+          "path": ".github/pull_request_template.md",
+          "contains_all": [
+            "Exact PR head SHA validated",
+            "Validation was run or rerun after the most recent PR head change",
+            "Evidence becomes stale"
+          ]
+        },
+        {
+          "id": "regression_protection",
+          "path": "test/lotus_docs_contract_test.exs",
+          "sha256": "3bd2304e5aef290666adc6c58bdd731ca1194f77ab64ebbc19c04c7a263ceaaf",
+          "contains_all": [
+            "PR evidence is bound to exact head and changed context",
+            "English and Russian contracts preserve the no-authority boundary",
+            "Lotus remains a limitation contract rather than a safety overclaim"
+          ]
+        }
+      ],
+      "ci_discovery": {
+        "workflow_paths": [
+          ".github/workflows/ci.yml"
+        ],
+        "trusted_prerequisite_actions": [
+          "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124",
+          "dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c",
+          "actions/cache@caa296126883cff596d87d8935842f9db880ef25"
+        ],
+        "strategy": "contains_any",
+        "test_path": "test/lotus_docs_contract_test.exs",
+        "contains_any": [
+          "elixir -e 'ExUnit.start()' test/lotus_docs_contract_test.exs --"
+        ]
+      }
+    },
+    {
+      "id": "cml",
+      "repository": "safal207/Causal-Memory-Layer",
+      "snapshot_dir": "safal207__Causal-Memory-Layer",
+      "file_checks": [
+        {
+          "id": "bilingual_contract",
+          "path": "docs/LOTUS.md",
+          "contains_all": [
+            "Memory without authority",
+            "Память без власти",
+            "has no ownership, approval, execution, delivery, or merge authority",
+            "не имеет права собственности",
+            "доставки или merge"
+          ]
+        },
+        {
+          "id": "exact_head_and_supersession",
+          "path": ".github/pull_request_template.md",
+          "contains_all": [
+            "Exact PR head SHA validated",
+            "Validation was run or rerun after the most recent head change",
+            "Evidence becomes stale"
+          ]
+        },
+        {
+          "id": "regression_protection",
+          "path": "tests/test_lotus_docs_contract.py",
+          "sha256": "69de6a265928685d814d7bd1d77719a090a45ed4e9eecee9677c2d2e8259e5df",
+          "contains_all": [
+            "test_english_and_russian_contracts_keep_the_no_authority_boundary",
+            "has no ownership, approval, execution, delivery, or merge authority",
+            "не имеет права собственности"
+          ]
+        }
+      ],
+      "ci_discovery": {
+        "workflow_paths": [
+          ".github/workflows/ci.yml"
+        ],
+        "strategy": "pytest_default_discovery",
+        "command": "python -m pytest",
+        "test_path": "tests/test_lotus_docs_contract.py"
+      }
+    },
+    {
+      "id": "ls",
+      "repository": "safal207/LS",
+      "snapshot_dir": "safal207__LS",
+      "file_checks": [
+        {
+          "id": "bilingual_contract",
+          "path": "LOTUS.md",
+          "contains_all": [
+            "Clarity from complexity",
+            "Human authorship at the center",
+            "Ясность из сложности",
+            "Человек остаётся автором",
+            "has no ownership, approval, execution, delivery, or merge authority",
+            "не имеет права собственности",
+            "доставки или merge"
+          ]
+        },
+        {
+          "id": "exact_head_and_supersession",
+          "path": ".github/pull_request_template.md",
+          "contains_all": [
+            "Exact PR head SHA validated",
+            "Validation was run or rerun after the most recent PR head change",
+            "Evidence becomes stale"
+          ]
+        },
+        {
+          "id": "regression_protection",
+          "path": "tests/test_lotus_docs_contract.py",
+          "sha256": "86662af527b02e0d950feaba66819ddfdd3dcccbb8b10b125bf8085e259d4589",
+          "contains_all": [
+            "test_pr_evidence_is_bound_to_exact_head",
+            "test_lotus_preserves_human_authority_in_both_languages",
+            "test_english_and_russian_contracts_keep_the_seven_core_petals"
+          ]
+        }
+      ],
+      "ci_discovery": {
+        "workflow_paths": [
+          ".github/workflows/ci.yml"
+        ],
+        "strategy": "contains_any",
+        "test_path": "tests/test_lotus_docs_contract.py",
+        "contains_any": [
+          "tests/test_lotus_docs_contract.py"
+        ]
+      }
+    }
+  ]
+}
