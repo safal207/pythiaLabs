@@ -1,0 +1,85 @@
+{
+  "schema_version": "pythia.ci_operational_checkpoint.v0.1",
+  "trajectory_id": "trajectory:pythiaLabs:issue-218",
+  "checkpoint_id": "checkpoint:issue-218:initial",
+  "parent_checkpoint_id": null,
+  "sequence": 0,
+  "created_at": "2026-07-02T09:30:00Z",
+  "authority": "context_only",
+  "source": {
+    "agent_id": "agent:pythia-ci-continuity",
+    "session_id": "session:issue-218"
+  },
+  "workspace_state": {
+    "repository": "safal207/pythiaLabs",
+    "working_directory": "/workspace/pythiaLabs",
+    "base_ref": "main",
+    "head_sha": "bcebae58976189994dec5d8dfc3e6547c03d84a3",
+    "dirty_state_digest": null
+  },
+  "objective": {
+    "goal": "Define a machine-readable CI operational checkpoint and deterministic resume contract.",
+    "acceptance_criteria": [
+      "Checkpoint context cannot grant merge or deploy authority.",
+      "Workspace drift is detected before consequential work resumes.",
+      "Completed verification is supported by durable evidence references."
+    ]
+  },
+  "phase": "checkpoint",
+  "constraints": {
+    "must": [
+      "Fail closed on missing lineage or unverified completion.",
+      "Re-evaluate authority before merge or deploy."
+    ],
+    "must_not": [
+      "Treat remembered CI success as current evidence.",
+      "Carry an earlier Action Envelope ALLOW decision across a changed target."
+    ]
+  },
+  "rejected_approaches": [
+    {
+      "approach_id": "approach:narrative-only-summary",
+      "description": "Resume from a free-form conversation summary.",
+      "reason": "Narrative memory cannot prove workspace state or verification completion.",
+      "status": "rejected"
+    }
+  ],
+  "touched_resources": [
+    {
+      "resource_ref": "github://safal207/pythiaLabs/issues/218",
+      "change_type": "observed"
+    }
+  ],
+  "verification": {
+    "required": [
+      "verification:schema",
+      "verification:conformance"
+    ],
+    "completed": [
+      {
+        "verification_id": "verification:schema",
+        "target": "CI operational checkpoint JSON Schema",
+        "evidence_refs": [
+          "git://safal207/pythiaLabs@0b11b697300d00ab210dbc48a857e3aa4a963937/standards/agent-continuity/schema/ci-operational-checkpoint-v0.1.schema.json"
+        ]
+      }
+    ],
+    "pending": [
+      {
+        "verification_id": "verification:conformance",
+        "target": "CI operational checkpoint conformance suite",
+        "status": "pending"
+      }
+    ]
+  },
+  "next_action": {
+    "description": "Implement and run the deterministic checkpoint conformance suite.",
+    "action_class": "test",
+    "requires_fresh_authority": false
+  },
+  "checkpoint_digest": {
+    "algorithm": "sha256",
+    "canonicalization": "json-sort-keys-utf8-v1",
+    "value": "a54e8cc08bec0ddc86347f66dcd11f0dfb671127197d6f7ea5ab9463b4a05867"
+  }
+}
