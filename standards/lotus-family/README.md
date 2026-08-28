@@ -42,9 +42,9 @@ test gate.
 
 The configured Python and Elixir contract-test sources must match pinned
 SHA-256 values, so retaining required phrases in a replacement no-op test cannot
-produce `PASS`. Pytest discovery also fails closed on repository-local source,
-sourceless bytecode, native-extension, or Python-startup shadows that could
-preempt the installed runner before contract collection.
+produce `PASS`. Pytest discovery also fails closed on repository-local pytest,
+pytest-dependency, sourceless-bytecode, native-extension, or Python-startup
+shadows that could preempt the installed runner before contract collection.
 
 ## Causal spacetime testing model
 

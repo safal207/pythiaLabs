@@ -530,6 +530,14 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
             "pytest.py",
             "pytest/__init__.py",
             "pytest/__main__.py",
+            "pluggy.py",
+            "iniconfig.py",
+            "_pytest/__init__.py",
+            "packaging.py",
+            "pygments.py",
+            "colorama.py",
+            "tomli.py",
+            "exceptiongroup.py",
         )
         for relative_path in cases:
             with self.subTest(relative_path=relative_path):
@@ -549,6 +557,9 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
             "pytest.pyc",
             "pytest/__init__.pyc",
             "pytest/__main__.pyc",
+            "pluggy.pyc",
+            "iniconfig/__init__.pyc",
+            "_pytest/__init__.pyc",
         )
         for relative_path in cases:
             with self.subTest(relative_path=relative_path):
@@ -567,6 +578,8 @@ class PytestConfigurationReviewHardeningTest(unittest.TestCase):
         cases = (
             "pytest.cpython-312-x86_64-linux-gnu.so",
             "pytest/__main__.pyd",
+            "pluggy.cpython-312-x86_64-linux-gnu.so",
+            "_pytest/__init__.pyd",
         )
         for relative_path in cases:
             with self.subTest(relative_path=relative_path):

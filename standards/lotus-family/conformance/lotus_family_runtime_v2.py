@@ -33,12 +33,37 @@ _PYTEST_CONFIG_PATHS = (
 )
 
 
-_PYTEST_SHADOW_PATHS = (
+_PYTEST_IMPORT_MODULES = (
     "pytest",
-    "pytest.py",
-    "pytest.pyc",
-    "pytest/__init__.py",
-    "pytest/__init__.pyc",
+    "_pytest",
+    "pluggy",
+    "iniconfig",
+    "packaging",
+    "pygments",
+    "colorama",
+    "tomli",
+    "exceptiongroup",
+)
+
+
+_PYTEST_PACKAGE_ENTRY_STEMS = {
+    module: ("__init__",)
+    for module in _PYTEST_IMPORT_MODULES
+}
+_PYTEST_PACKAGE_ENTRY_STEMS["pytest"] = ("__init__", "__main__")
+
+
+_PYTEST_SHADOW_PATHS = tuple(
+    path
+    for module in _PYTEST_IMPORT_MODULES
+    for path in (
+        module,
+        f"{module}.py",
+        f"{module}.pyc",
+        f"{module}/__init__.py",
+        f"{module}/__init__.pyc",
+    )
+) + (
     "pytest/__main__.py",
     "pytest/__main__.pyc",
 )
@@ -121,12 +146,14 @@ def _discover_import_shadow_paths(repository_root: Path) -> list[str]:
     for candidate in root_entries:
         if _looks_like_import_shadow(
             candidate.name,
-            ("pytest", "sitecustomize", "usercustomize"),
+            (*_PYTEST_IMPORT_MODULES, "sitecustomize", "usercustomize"),
         ):
             discovered.append(candidate.name)
 
-    package = repository_root / "pytest"
-    if package.is_dir() and not package.is_symlink():
+    for package_name, entry_stems in _PYTEST_PACKAGE_ENTRY_STEMS.items():
+        package = repository_root / package_name
+        if not package.is_dir() or package.is_symlink():
+            continue
         try:
             package_entries = list(package.iterdir())
         except OSError:
@@ -134,9 +161,9 @@ def _discover_import_shadow_paths(repository_root: Path) -> list[str]:
         for candidate in package_entries:
             if _looks_like_import_shadow(
                 candidate.name,
-                ("__init__", "__main__"),
+                entry_stems,
             ):
-                discovered.append(f"pytest/{candidate.name}")
+                discovered.append(f"{package_name}/{candidate.name}")
     return sorted(set(discovered))
 
 
@@ -148,13 +175,12 @@ def _is_import_shadow_path(path: str) -> bool:
     if candidate.parent == PurePosixPath("."):
         return _looks_like_import_shadow(
             candidate.name,
-            ("pytest", "sitecustomize", "usercustomize"),
+            (*_PYTEST_IMPORT_MODULES, "sitecustomize", "usercustomize"),
         )
-    return candidate.parent == PurePosixPath("pytest") and (
-        _looks_like_import_shadow(
-            candidate.name,
-            ("__init__", "__main__"),
-        )
+    entry_stems = _PYTEST_PACKAGE_ENTRY_STEMS.get(str(candidate.parent))
+    return entry_stems is not None and _looks_like_import_shadow(
+        candidate.name,
+        entry_stems,
     )
 
 
