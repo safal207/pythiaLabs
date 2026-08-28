@@ -43,6 +43,7 @@ _PYTEST_IMPORT_MODULES = (
     "colorama",
     "tomli",
     "exceptiongroup",
+    "py",
 )
 
 
