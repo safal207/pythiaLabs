@@ -53,6 +53,7 @@ def workflow(
     )
     return (
         "name: CI\n"
+        "on: push\n"
         f"{workflow_extra}"
         "jobs:\n"
         f"{prefix_jobs}"
@@ -70,6 +71,7 @@ def workflow(
 SCENARIOS = {
     "ci-nonrun-001": (
         "name: CI\n"
+        "on: push\n"
         "env:\n"
         "  NOTE: python -m pytest\n"
         "jobs: {}\n"
@@ -84,6 +86,7 @@ SCENARIOS = {
     ),
     "ci-no-runner-001": (
         "name: CI\n"
+        "on: push\n"
         "jobs:\n"
         "  test:\n"
         "    steps:\n"
@@ -111,6 +114,7 @@ SCENARIOS = {
     ),
     "ci-fake-steps-001": (
         "name: CI\n"
+        "on: push\n"
         "metadata:\n"
         "  fake:\n"
         "    steps:\n"

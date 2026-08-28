@@ -17,6 +17,7 @@ def workflow(command: str, *, env: str = "") -> str:
     )
     return (
         "name: CI\n"
+        "on: push\n"
         f"{env_block}"
         "jobs:\n"
         "  test:\n"
@@ -32,6 +33,7 @@ def workflow_steps(steps: str) -> str:
     """Build one workflow from already indented step-list entries."""
     return (
         "name: CI\n"
+        "on: push\n"
         "jobs:\n"
         "  test:\n"
         "    runs-on: ubuntu-latest\n"
@@ -80,6 +82,7 @@ class WorkflowBoundaryTest(unittest.TestCase):
     def test_anchored_pytest_env_mapping_blocks_discovery(self) -> None:
         text = (
             "name: CI\n"
+            "on: push\n"
             "env: &pytest_env\n"
             "  PYTEST_ADDOPTS: "
             "--ignore=tests/test_lotus_docs_contract.py\n"
@@ -95,6 +98,7 @@ class WorkflowBoundaryTest(unittest.TestCase):
     def test_aliased_env_mapping_fails_closed(self) -> None:
         text = (
             "name: CI\n"
+            "on: push\n"
             "pytest-env: &pytest_env\n"
             "  SAFE_VALUE: true\n"
             "env: *pytest_env\n"

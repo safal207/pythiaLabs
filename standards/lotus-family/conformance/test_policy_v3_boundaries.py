@@ -17,6 +17,7 @@ def workflow_steps(steps: str) -> str:
     """Build one runnable workflow from indented step-list entries."""
     return (
         "name: CI\n"
+        "on: push\n"
         "jobs:\n"
         "  test:\n"
         "    runs-on: ubuntu-latest\n"
@@ -129,6 +130,7 @@ class WorkflowPolicyV3BoundaryTest(unittest.TestCase):
             with self.subTest(name=name):
                 text = (
                     "name: CI\n"
+                    "on: push\n"
                     f"{workflow_env}"
                     "jobs:\n"
                     "  test:\n"

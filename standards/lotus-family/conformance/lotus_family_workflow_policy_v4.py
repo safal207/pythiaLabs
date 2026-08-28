@@ -26,6 +26,7 @@ _SHELL_EXPANSION = re.compile(
 _PINNED_ACTION = re.compile(
     r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{40}$"
 )
+_AUTOMATIC_SOURCE_EVENTS = {"merge_group", "pull_request", "push"}
 
 
 _RUNNER_RESOLUTION_ENV_NAMES = {
@@ -60,6 +61,74 @@ def _uses_direct_elixir(discovery: Mapping[str, Any]) -> bool:
         except ValueError:
             continue
         if parts and parts[0] == "elixir":
+            return True
+    return False
+
+
+def _workflow_tree(
+    text: str,
+) -> tuple[
+    list[str],
+    set[int],
+    dict[str, tuple[int, tuple[int, bool, int, str, str]]],
+]:
+    """Return the direct workflow mapping without resolving YAML aliases."""
+    lines = text.splitlines()
+    ranges = execution.legacy.scalar_ranges(lines)
+    scalar_body = {
+        row
+        for start, (end, _) in ranges.items()
+        for row in range(start + 1, end)
+    }
+    top = execution.base._properties(lines, 0, len(lines), -1, scalar_body)
+    return lines, scalar_body, top
+
+
+def _has_automatic_source_trigger(text: str) -> bool:
+    """Require a literal source-change event, not manual-only dispatch."""
+    lines, scalar_body, top = _workflow_tree(text)
+    trigger = top.get("on")
+    if trigger is None:
+        return False
+
+    scalar = execution.legacy.inline_scalar(trigger[1][4])
+    if scalar is not None:
+        value = scalar.strip()
+        if value.startswith("[") and value.endswith("]"):
+            decoded = {
+                execution.legacy.decode_key(item.strip())
+                for item in value[1:-1].split(",")
+                if item.strip()
+            }
+        else:
+            decoded = {execution.legacy.decode_key(value)}
+        return bool(_AUTOMATIC_SOURCE_EVENTS & decoded)
+
+    children = execution.base._mapping_children(lines, trigger, scalar_body)
+    return children is not None and bool(
+        _AUTOMATIC_SOURCE_EVENTS & set(children)
+    )
+
+
+def _has_job_container(text: str) -> bool:
+    """Reject unproven job containers that can replace tool executables."""
+    lines, scalar_body, top = _workflow_tree(text)
+    jobs = top.get("jobs")
+    if jobs is None:
+        return False
+    children = execution.base._mapping_children(lines, jobs, scalar_body)
+    if children is None:
+        return False
+    for job_row, job_header in children.values():
+        job_end = execution.legacy.block_end(lines, job_row, job_header[2])
+        properties = execution.base._properties(
+            lines,
+            job_row + 1,
+            job_end,
+            job_header[2],
+            scalar_body,
+        )
+        if "container" in properties:
             return True
     return False
 
@@ -119,6 +188,10 @@ def _ci_discovery_one(
     discovery: Mapping[str, Any], workflow_text: str
 ) -> tuple[bool, list[str]]:
     """Find a gating test while failing closed on dynamic runner state."""
+    if not _has_automatic_source_trigger(workflow_text):
+        return False, []
+    if _has_job_container(workflow_text):
+        return False, []
     if not policy_v2._workflow_execution_is_gating(workflow_text):
         return False, []
     if policy_v2._uses_pytest(discovery) and policy_v2._has_unproven_pytest_env(

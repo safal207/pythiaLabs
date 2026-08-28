@@ -8,7 +8,7 @@ def workflow(command, env="", shell=""):
     env_block = "env:\n" + "\n".join(f"  {x}" for x in env.splitlines()) + "\n" if env else ""
     shell_line = f"        shell: {shell}\n" if shell else ""
     body = "\n".join(f"          {x}" if x else "" for x in command.splitlines())
-    return ("name: CI\n" + env_block + "jobs:\n  test:\n    runs-on: ubuntu-latest\n"
+    return ("name: CI\non: push\n" + env_block + "jobs:\n  test:\n    runs-on: ubuntu-latest\n"
             "    steps:\n      - name: Run tests\n" + shell_line + "        run: |\n" + body + "\n")
 
 
@@ -50,19 +50,19 @@ def bare(self):
 
 
 def workflow_env_text(self):
-    self.assert_ci_drift("cml", "name: CI\nenv:\n  NOTE: |\n    python -m pytest\n"
+    self.assert_ci_drift("cml", "name: CI\non: push\nenv:\n  NOTE: |\n    python -m pytest\n"
                          "jobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n"
                          "      - uses: actions/checkout@v4\n", raw=True)
 
 
 def step_env_text(self):
-    self.assert_ci_drift("cml", "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
+    self.assert_ci_drift("cml", "name: CI\non: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n"
                          "    steps:\n      - name: Metadata only\n        env:\n"
                          "          NOTE: python -m pytest\n        uses: actions/checkout@v4\n", raw=True)
 
 
 def fake_steps_in_metadata(self):
-    self.assert_ci_drift("cml", "name: CI\nmetadata:\n  fake-job:\n    steps:\n"
+    self.assert_ci_drift("cml", "name: CI\non: push\nmetadata:\n  fake-job:\n    steps:\n"
                          "      - run: python -m pytest\njobs: {}\n", raw=True)
 
 

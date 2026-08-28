@@ -47,6 +47,7 @@ def _workflow(command: str) -> str:
     )
     return (
         "name: CI\n"
+        "on: push\n"
         "jobs:\n"
         "  test:\n"
         "    runs-on: ubuntu-latest\n"

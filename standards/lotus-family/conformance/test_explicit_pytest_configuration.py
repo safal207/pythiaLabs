@@ -54,6 +54,7 @@ def _materialize_ls(snapshot_root: Path, manifest: dict) -> Path:
         config["ci_discovery"]["workflow_paths"][0],
         (
             "name: CI\n"
+            "on: push\n"
             "jobs:\n"
             "  test:\n"
             "    runs-on: ubuntu-latest\n"

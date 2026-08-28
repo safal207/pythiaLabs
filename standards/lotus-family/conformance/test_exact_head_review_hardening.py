@@ -33,6 +33,7 @@ def _workflow(*, shell: str | None = None, job_continue: str | None = None) -> s
     )
     return (
         "name: CI\n"
+        "on: push\n"
         "jobs:\n"
         "  test:\n"
         "    runs-on: ubuntu-latest\n"
@@ -163,6 +164,21 @@ def _materialize_pythia(snapshot_root: Path, manifest: dict) -> Path:
 class WorkflowReviewHardeningTest(unittest.TestCase):
     """Protect workflow failure propagation and gating semantics."""
 
+    def test_manual_only_workflow_is_not_ci_evidence(self) -> None:
+        manual_only = _workflow().replace(
+            "on: push\n", "on: workflow_dispatch\n", 1
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, manual_only), (False, []))
+
+    def test_job_container_is_not_ci_evidence(self) -> None:
+        containerized = _workflow().replace(
+            "    runs-on: ubuntu-latest\n",
+            "    runs-on: ubuntu-latest\n"
+            "    container: attacker.example/fake-python:latest\n",
+            1,
+        )
+        self.assertEqual(ci_discovery(DISCOVERY, containerized), (False, []))
+
     def test_custom_shell_without_fail_fast_is_rejected(self) -> None:
         self.assertEqual(
             ci_discovery(DISCOVERY, _workflow(shell="bash {0}")),
@@ -226,6 +242,7 @@ class WorkflowReviewHardeningTest(unittest.TestCase):
         )
         workflow = (
             "name: CI\n"
+            "on: push\n"
             "env:\n"
             "  ERL_AFLAGS: -eval halt().\n"
             "jobs:\n"
