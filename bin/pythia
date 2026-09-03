@@ -3,6 +3,7 @@
 #
 # Usage:
 #   pythia eval [--file path.json | -f path.json]    # reads stdin if no --file
+#   pythia evidence [--file path.json | -f path.json] # advisory CGQA/LiminalQA intake
 #   pythia --help
 #
 # Repo location is resolved as:
@@ -27,6 +28,11 @@ Usage:
   pythia gates
       List supported gate ids, one per line.
 
+  pythia evidence [--file PATH | -f PATH]
+      Validate CGQA/LiminalQA evidence as advisory context. A valid artifact
+      returns ESCALATE; this command never returns ALLOW. Reads stdin when
+      --file is omitted.
+
   pythia describe GATE
       Print the JSON Schema for the given gate id (from schemas/mcp/).
 
@@ -40,6 +46,7 @@ Environment:
 Examples:
   echo '{"gate":"agent_infra_action", ...}' | pythia eval
   pythia eval --file proposal.json
+  pythia evidence --file cgqa-evidence.json
   pythia describe banking_risk_action | jq .properties.action.required
 
 Gates: agent_infra_action, banking_risk_action, web3_treasury_action.
@@ -96,6 +103,40 @@ cmd_gates() {
   printf '%s\n' "${SUPPORTED_GATES[@]}"
 }
 
+cmd_evidence() {
+  local file=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --file|-f)
+        [[ $# -ge 2 ]] || { echo "pythia: --file needs a path" >&2; exit 64; }
+        file=$2
+        shift 2
+        ;;
+      -h|--help)
+        print_usage
+        return 0
+        ;;
+      *)
+        echo "pythia: unknown argument: $1" >&2
+        echo "Try: pythia --help" >&2
+        exit 64
+        ;;
+    esac
+  done
+
+  local root
+  root=$(resolve_repo_root)
+  if [[ ! -f "$root/mix.exs" ]]; then
+    echo "pythia: no mix.exs found at '$root' — set PYTHIA_REPO_ROOT" >&2
+    exit 66
+  fi
+  if [[ -n "$file" ]]; then
+    (cd "$root" && exec mix pythia.eval_external_evidence --file "$file")
+  else
+    (cd "$root" && exec mix pythia.eval_external_evidence)
+  fi
+}
+
 cmd_describe() {
   if [[ $# -ne 1 ]]; then
     echo "pythia: describe needs exactly one gate id" >&2
@@ -135,6 +176,10 @@ main() {
     gates)
       shift
       cmd_gates "$@"
+      ;;
+    evidence)
+      shift
+      cmd_evidence "$@"
       ;;
     describe)
       shift

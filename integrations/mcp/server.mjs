@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Minimal MCP server (stdio) — forwards tool calls to `mix pythia.eval_json`.
+ * Minimal MCP server (stdio) — forwards tool calls to local Pythia Mix tasks.
  *
  * Env:
  *   PYTHIA_REPO_ROOT — absolute path to PythiaLabs clone (default: parent of integrations/mcp)
@@ -26,10 +26,27 @@ const SUPPORTED_GATES = [
 
 const SERVER_INFO = {
   name: "pythialabs",
-  version: "0.3.0",
+  version: "0.4.0",
 };
 
 const TOOLS = [
+  {
+    name: "pythia_evaluate_external_evidence",
+    description:
+      "Validate a raw ContractGraph-QA bounded-evidence or LiminalQA candidate-export JSON string as advisory context. Valid input returns ESCALATE/current_authorization_required, never ALLOW.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        input_json: {
+          type: "string",
+          description:
+            "Raw producer JSON. Keeping it as a string lets the downstream boundary detect duplicate object keys.",
+        },
+      },
+      required: ["input_json"],
+      additionalProperties: false,
+    },
+  },
   {
     name: "pythia_evaluate",
     description:
@@ -106,9 +123,9 @@ function send(msg) {
   process.stdout.write(JSON.stringify(msg) + "\n");
 }
 
-function runMixEvalJson(jsonBody) {
+function runMixTask(task, jsonBody) {
   return new Promise((resolve, reject) => {
-    const child = spawn("mix", ["pythia.eval_json"], {
+    const child = spawn("mix", [task], {
       cwd: repoRoot,
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env },
@@ -223,7 +240,10 @@ for await (const line of rl) {
                   server: SERVER_INFO.name,
                   version: SERVER_INFO.version,
                   repoRoot,
-                  mixTask: "mix pythia.eval_json",
+                  mixTasks: [
+                    "mix pythia.eval_json",
+                    "mix pythia.eval_external_evidence",
+                  ],
                   supportedGates: SUPPORTED_GATES,
                   schemasDir: "schemas/mcp",
                   docs: "integrations/mcp/README.md",
@@ -238,7 +258,11 @@ for await (const line of rl) {
       continue;
     }
 
-    if (name === "pythia_evaluate" || name === "pythia_evaluate_agent_infra") {
+    if (
+      name === "pythia_evaluate" ||
+      name === "pythia_evaluate_agent_infra" ||
+      name === "pythia_evaluate_external_evidence"
+    ) {
       const input = args.input_json;
       if (typeof input !== "string" || !input.trim()) {
         send({
@@ -250,7 +274,11 @@ for await (const line of rl) {
       }
 
       try {
-        const { code, out, err } = await runMixEvalJson(input);
+        const task =
+          name === "pythia_evaluate_external_evidence"
+            ? "pythia.eval_external_evidence"
+            : "pythia.eval_json";
+        const { code, out, err } = await runMixTask(task, input);
         const payload = {
           exitCode: code,
           stdout: out,

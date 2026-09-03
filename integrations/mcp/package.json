@@ -1,8 +1,8 @@
 {
   "name": "pythialabs-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "MCP stdio server that bridges Cursor to mix pythia.eval_json",
+  "description": "MCP stdio bridge for Pythia action gates and advisory external evidence",
   "type": "module",
   "bin": {
     "pythialabs-mcp": "./server.mjs"

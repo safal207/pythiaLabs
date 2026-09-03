@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/safal207/pythiaLabs/main/schemas/interop/pythialabs-external-evidence-assessment-v0.1.schema.json",
+  "title": "PythiaLabs external evidence advisory assessment v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "assessmentId",
+    "source",
+    "subject",
+    "identity",
+    "outcome",
+    "status",
+    "stopReason",
+    "mayAuthorizeAction",
+    "sideEffectExecuted",
+    "requiredNextChecks",
+    "claimBoundary"
+  ],
+  "properties": {
+    "schema": { "const": "org.pythialabs.external-evidence-assessment.v0.1" },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^pythia-external-evidence-[0-9a-f]{24}$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["schema", "schemaSha256", "exportId", "sha256", "semantics"],
+      "properties": {
+        "schema": {
+          "enum": [
+            "org.contractgraph-qa.liminalqa-evidence.v0.1",
+            "org.liminalqa.cgqa-candidates.v0.1"
+          ]
+        },
+        "schemaSha256": { "$ref": "#/$defs/sha256" },
+        "exportId": { "$ref": "#/$defs/safeId" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "semantics": { "enum": ["bounded_evidence", "non_authoritative_seed"] }
+      },
+      "additionalProperties": false
+    },
+    "subject": { "$ref": "#/$defs/subject" },
+    "identity": { "$ref": "#/$defs/identity" },
+    "outcome": { "const": "ESCALATE" },
+    "status": { "const": "advisory_only" },
+    "stopReason": { "const": "current_authorization_required" },
+    "mayAuthorizeAction": { "const": false },
+    "sideEffectExecuted": { "const": false },
+    "requiredNextChecks": {
+      "const": [
+        "current_authorization",
+        "credential_scope",
+        "environment_state",
+        "recovery_readiness"
+      ]
+    },
+    "claimBoundary": {
+      "const": "External evidence can inform a Pythia decision but cannot independently authorize an action."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonBlank": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+    "safeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "subject": {
+      "type": "object",
+      "required": ["repository", "commitSha", "contract", "network", "scopeId"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/nonBlank" },
+        "commitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "contract": { "$ref": "#/$defs/nonBlank" },
+        "network": { "$ref": "#/$defs/nonBlank" },
+        "scopeId": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["traceId", "operationId", "attemptId"],
+      "properties": {
+        "traceId": { "$ref": "#/$defs/safeId" },
+        "operationId": { "$ref": "#/$defs/safeId" },
+        "attemptId": { "$ref": "#/$defs/safeId" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

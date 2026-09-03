@@ -31,6 +31,7 @@ the most important docs whether you are a new contributor, reviewer, or grantmak
 - [Glossary](glossary.md) — concise definitions for core decision terms such as ALLOW, BLOCK, ESCALATE, evidence artifact, stop reason, and replayable trace.
 - [Liminal Evidence Stack](LIMINAL_EVIDENCE_STACK.md) — portfolio-level reviewer map connecting PythiaLabs, LTP, CML, DMP, and LRI as one tagged evidence stack.
 - [Liminal Audit Bridge](LIMINAL_AUDIT_BRIDGE.md) — Petri-like behavioral audit transcript -> T-Trace JSONL -> causal/risk checks -> reviewer-facing report.
+- [External Evidence Interoperability](EXTERNAL_EVIDENCE_INTEROP.md) — CGQA/LiminalQA artifacts enter Pythia only as non-authorizing advisory context.
 - [Database Architecture](database_architecture.md) — Postgres, TimescaleDB, and LiminalDB as three kinds of truth.
 - [Persistent Reasoning Memory](persistent_reasoning_memory.md) — append-only reasoning memory roadmap.
 - [Agent Memory vs. Action Gates](agent_memory_vs_action_gate.md) — why PythiaLabs is not an organizational memory product.

@@ -7,7 +7,7 @@
  *  - tools/list
  *  - pythia_list_gates
  *  - pythia_describe_gate (valid + invalid)
- *  - pythia_evaluate (against a fake `mix` on $PATH)
+ *  - pythia_evaluate + pythia_evaluate_external_evidence (against fake `mix`)
  *  - pythia_mcp_info
  *
  * No Elixir runtime needed: a tiny stub `mix` is dropped into a temp dir and
@@ -37,11 +37,14 @@ function assert(cond, msg) {
 
 function setupStubMix() {
   const dir = mkdtempSync(path.join(tmpdir(), "pythia-mcp-smoke-"));
-  // Stub `mix` that echoes a deterministic JSON line regardless of stdin —
-  // good enough for the evaluate-path round-trip.
+  // Stub `mix` emits task-specific deterministic JSON after consuming stdin.
   const stub = `#!/usr/bin/env bash
 cat >/dev/null
-echo '{"ok":true,"outcome":"ALLOW","status":"accepted","stop_reason":null}'
+if [[ "\${1:-}" == "pythia.eval_external_evidence" ]]; then
+  echo '{"outcome":"ESCALATE","status":"advisory_only","mayAuthorizeAction":false}'
+else
+  echo '{"ok":true,"outcome":"ALLOW","status":"accepted","stop_reason":null}'
+fi
 `;
   const stubPath = path.join(dir, "mix");
   writeFileSync(stubPath, stub);
@@ -114,6 +117,10 @@ async function main() {
   const tools = await call("tools/list", {});
   const names = (tools?.result?.tools ?? []).map((t) => t.name);
   assert(names.includes("pythia_evaluate"), "tools/list contains pythia_evaluate");
+  assert(
+    names.includes("pythia_evaluate_external_evidence"),
+    "tools/list contains pythia_evaluate_external_evidence",
+  );
   assert(names.includes("pythia_describe_gate"), "tools/list contains pythia_describe_gate");
   assert(names.includes("pythia_list_gates"), "tools/list contains pythia_list_gates");
   assert(names.includes("pythia_mcp_info"), "tools/list contains pythia_mcp_info");
@@ -149,6 +156,17 @@ async function main() {
   const evalStruct = evalCall?.result?.structuredContent;
   assert(evalStruct?.exitCode === 0, "evaluate exits 0 against stub mix");
   assert(typeof evalStruct?.stdout === "string" && evalStruct.stdout.includes("ALLOW"), "evaluate forwards stub stdout");
+
+  const evidenceCall = await call("tools/call", {
+    name: "pythia_evaluate_external_evidence",
+    arguments: { input_json: '{"schema":"org.contractgraph-qa.liminalqa-evidence.v0.1"}' },
+  });
+  const evidenceStruct = evidenceCall?.result?.structuredContent;
+  assert(evidenceStruct?.exitCode === 0, "external evidence adapter exits 0 against stub mix");
+  assert(
+    typeof evidenceStruct?.stdout === "string" && evidenceStruct.stdout.includes("ESCALATE"),
+    "external evidence adapter forwards ESCALATE and not ALLOW",
+  );
 
   const info = await call("tools/call", { name: "pythia_mcp_info", arguments: {} });
   const infoText = info?.result?.content?.[0]?.text ?? "";

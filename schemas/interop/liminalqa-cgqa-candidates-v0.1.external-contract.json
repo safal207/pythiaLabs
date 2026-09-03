@@ -1,0 +1,11 @@
+{
+  "schema": "org.pythialabs.external-schema-pin.v0.1",
+  "consumer": "pythia-external-evidence",
+  "producerRepository": "https://github.com/safal207/LiminalQAengineer",
+  "producerCommit": "db9c85f678aafd6e28487e0679a9fb6c3ebfb0c3",
+  "producerSchemaPath": "schemas/interop/liminalqa-cgqa-candidates-v0.1.schema.json",
+  "producerSchema": "org.liminalqa.cgqa-candidates.v0.1",
+  "producerProfile": "org.liminalqa.non-authoritative-candidate-seeds.v0.1",
+  "schemaSha256": "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60",
+  "compatibility": "exact-version-only"
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "org.pythialabs.external-schema-pin.v0.1",
+  "consumer": "pythia-external-evidence",
+  "producerRepository": "https://github.com/safal207/ContractGraph-QA",
+  "producerCommit": "bdf7ced074e3a7baf57cf89ac68be9674bd76a02",
+  "producerSchemaPath": "contractgraph_qa/schemas/cgqa-liminalqa-evidence-v0.1.schema.json",
+  "producerSchema": "org.contractgraph-qa.liminalqa-evidence.v0.1",
+  "producerProfile": "org.contractgraph-qa.bounded-invariant-evidence.v0.1",
+  "schemaSha256": "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184",
+  "compatibility": "exact-version-only"
+}

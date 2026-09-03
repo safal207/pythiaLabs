@@ -1,0 +1,74 @@
+{
+  "schema": "org.liminalqa.cgqa-candidates.v0.1",
+  "profile": "org.liminalqa.non-authoritative-candidate-seeds.v0.1",
+  "exportId": "liminal-candidates-2595f78d88288151b948a1da",
+  "producer": {
+    "name": "liminalqa",
+    "version": "0.1.0"
+  },
+  "sourceEvidence": {
+    "schema": "org.contractgraph-qa.liminalqa-evidence.v0.1",
+    "exportId": "cgqa-liminalqa-8bbf2e1385e7e321788766d4",
+    "sha256": "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce"
+  },
+  "subject": {
+    "repository": "https://github.com/safal207/ContractGraph-QA",
+    "commitSha": "a10862f40e2d4d59c122a61119fbb3c9c1ff6cab",
+    "contract": "AdapterFixtureMachine",
+    "network": "local-foundry-engagement",
+    "scopeId": "local-v1.3-engagement-fixture"
+  },
+  "identity": {
+    "traceId": "trace-CGQA-E-001",
+    "operationId": "liminal-candidate-derivation-001",
+    "attemptId": "attempt-001"
+  },
+  "derivedAt": "2026-09-03T10:03:00Z",
+  "authority": {
+    "classification": "non_authoritative_seed",
+    "mayAuthorizeAction": false,
+    "requiresCgqaVerification": true
+  },
+  "candidates": [
+    {
+      "candidateId": "liminal-candidate-7ab5731bafda6ff275addf49",
+      "invariantId": "terminal-state-bound",
+      "sourceStatus": "violated",
+      "kind": "replay_regression",
+      "priority": "medium",
+      "reason": "The repository-local fixture reaches the modeled terminal state through the shortest three-step advance path.",
+      "requiredChecks": [
+        "exact_subject",
+        "independent_cgqa_replay",
+        "failing_path_integrity"
+      ]
+    },
+    {
+      "candidateId": "liminal-candidate-497f6be066795a9547ec2e24",
+      "invariantId": "budget-sensitive-branch",
+      "sourceStatus": "inconclusive",
+      "kind": "verification_debt",
+      "priority": "low",
+      "reason": "The local evaluator intentionally returns inconclusive so unresolved evidence is not presented as a clean check.",
+      "requiredChecks": [
+        "exact_subject",
+        "reviewed_bound_change",
+        "independent_cgqa_replay"
+      ]
+    }
+  ],
+  "causalParents": [
+    "cgqa-liminalqa-8bbf2e1385e7e321788766d4"
+  ],
+  "limitations": [
+    "Candidates are hypotheses derived from bounded evidence, not verified findings.",
+    "ContractGraph-QA must independently replay each candidate against the exact commit.",
+    "Candidate export cannot authorize an action or compute an LTP continuity verdict."
+  ],
+  "verificationDebt": [
+    {
+      "invariantId": "budget-sensitive-branch",
+      "reason": "The local evaluator intentionally returns inconclusive so unresolved evidence is not presented as a clean check."
+    }
+  ]
+}

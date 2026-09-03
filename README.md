@@ -172,6 +172,21 @@ from outside the repository.
 
 Setup steps and `mcp.json` snippet: [`integrations/mcp/README.md`](integrations/mcp/README.md).
 
+## ContractGraph-QA / LiminalQA evidence adapter
+
+The file-first [external evidence adapter](docs/EXTERNAL_EVIDENCE_INTEROP.md)
+accepts bounded CGQA evidence and non-authoritative LiminalQA candidates as
+advisory context. A valid artifact returns `ESCALATE` and requires a fresh
+Pythia authorization gate; it can never produce `ALLOW` by itself.
+
+```bash
+mix pythia.eval_external_evidence --file cgqa-evidence.json
+cat cgqa-evidence.json | ./bin/pythia evidence
+```
+
+The Node stdio MCP bridge also exposes `pythia_evaluate_external_evidence` for
+Cursor and other compatible hosts.
+
 ## What PythiaLabs is not yet
 
 PythiaLabs currently does not claim:
