@@ -1,0 +1,112 @@
+{
+  "adapter": {
+    "digest": {
+      "algorithm": "sha256",
+      "value": "b9c805a0c37fb2dbe75af45e4649cfd2a9bd5d57e2be0f4402628d0bc7a052eb"
+    },
+    "id": "engagement-fixture-v1.3",
+    "version": "1.3.0"
+  },
+  "artifacts": [
+    {
+      "artifactId": "engagement-json",
+      "bytes": 1615,
+      "mediaType": "application/json",
+      "sha256": "d9ff43c6cc0232c0fc27548fa174f4f0f3d9997386eac7838304b3f8a0cbdf18"
+    }
+  ],
+  "assessment": {
+    "continuityVerdict": "not_computed",
+    "counts": {
+      "inconclusive": 1,
+      "not_found_within_bound": 1,
+      "violated": 1
+    },
+    "kind": "bounded_invariant_search",
+    "statusVocabulary": [
+      "violated",
+      "not_found_within_bound",
+      "inconclusive"
+    ]
+  },
+  "authority": {
+    "actionAuthorization": "not_evaluated",
+    "classification": "evidence_only",
+    "continuityVerdictOwner": "ltp",
+    "mayAuthorizeAction": false
+  },
+  "bound": {
+    "exploredCandidates": 22,
+    "maxDepth": 4,
+    "replay": "forge test --match-test test_CaptureMultiInvariantEngagementResult -vvv",
+    "searchRunId": "local-engagement-search-001"
+  },
+  "causalParents": [
+    "manifest-engagement-fixture"
+  ],
+  "checks": [
+    {
+      "exploredCandidates": 6,
+      "findingId": "CGQA-E-001-F01",
+      "invariantId": "terminal-state-bound",
+      "notes": "The repository-local fixture reaches the modeled terminal state through the shortest three-step advance path.",
+      "pathLength": 3,
+      "severity": "medium",
+      "status": "violated",
+      "title": "Terminal phase remains below the modeled violation threshold"
+    },
+    {
+      "exploredCandidates": 8,
+      "invariantId": "phase-nonnegative",
+      "notes": "No negative phase was found within the declared local action corpus and maxDepth=4 bounded model.",
+      "severity": "low",
+      "status": "not_found_within_bound",
+      "title": "Phase never becomes negative"
+    },
+    {
+      "exploredCandidates": 8,
+      "invariantId": "budget-sensitive-branch",
+      "notes": "The local evaluator intentionally returns inconclusive so unresolved evidence is not presented as a clean check.",
+      "severity": "info",
+      "status": "inconclusive",
+      "title": "Budget-sensitive branch remains unresolved"
+    }
+  ],
+  "exportId": "cgqa-liminalqa-8bbf2e1385e7e321788766d4",
+  "identity": {
+    "attemptId": "attempt-001",
+    "operationId": "bounded-search-CGQA-E-001",
+    "traceId": "trace-CGQA-E-001"
+  },
+  "limitations": [
+    "A bounded search result is not proof that no violation exists outside the declared bound.",
+    "The evidence is bound only to the exact repository commit and subject declared here.",
+    "No request/outcome continuity verdict was computed; LTP remains the continuity verdict owner.",
+    "This artifact is evidence only and does not authorize an action."
+  ],
+  "producer": {
+    "name": "contractgraph-qa",
+    "version": "1.9.0"
+  },
+  "profile": "org.contractgraph-qa.bounded-invariant-evidence.v0.1",
+  "schema": "org.contractgraph-qa.liminalqa-evidence.v0.1",
+  "subject": {
+    "commitSha": "a10862f40e2d4d59c122a61119fbb3c9c1ff6cab",
+    "contract": "AdapterFixtureMachine",
+    "network": "local-foundry-engagement",
+    "repository": "https://github.com/safal207/ContractGraph-QA",
+    "scopeId": "local-v1.3-engagement-fixture"
+  },
+  "times": {
+    "observedAt": "2026-09-03T10:01:00Z",
+    "recordedAt": "2026-09-03T10:02:00Z",
+    "validAt": "2026-09-03T10:00:00Z"
+  },
+  "verificationDebt": [
+    {
+      "invariantId": "budget-sensitive-branch",
+      "reason": "The local evaluator intentionally returns inconclusive so unresolved evidence is not presented as a clean check.",
+      "status": "inconclusive"
+    }
+  ]
+}

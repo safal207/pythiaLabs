@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/safal207/ContractGraph-QA/main/contractgraph_qa/conformance/liminalqa-v0.1/result.schema.json",
+  "title": "ContractGraph-QA and LiminalQA interop conformance result v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "reportId",
+    "suiteId",
+    "suiteVersion",
+    "suiteSha256",
+    "implementation",
+    "status",
+    "counts",
+    "contractPins",
+    "results",
+    "authority",
+    "claimBoundary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "org.contractgraph-qa.liminalqa-interop-conformance-result.v0.1"
+    },
+    "reportId": {
+      "$ref": "#/$defs/safeId"
+    },
+    "suiteId": {
+      "const": "cgqa-liminalqa-v0.1"
+    },
+    "suiteVersion": {
+      "const": "0.1.0"
+    },
+    "suiteSha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "implementation": {
+      "type": "object",
+      "required": ["name", "version", "language"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "version": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "language": {
+          "$ref": "#/$defs/nonBlank"
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "enum": ["PASS", "FAIL"]
+    },
+    "counts": {
+      "type": "object",
+      "required": ["total", "passed", "failed"],
+      "properties": {
+        "total": {
+          "const": 14
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14
+        }
+      },
+      "additionalProperties": false
+    },
+    "contractPins": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/contractPin"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "artifactSchema": {
+                "const": "org.contractgraph-qa.liminalqa-evidence.v0.1"
+              }
+            },
+            "required": ["artifactSchema"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "artifactSchema": {
+                "const": "org.liminalqa.cgqa-candidates.v0.1"
+              }
+            },
+            "required": ["artifactSchema"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "results": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "$ref": "#/$defs/caseResult"
+      }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["classification", "mayAuthorizeAction"],
+      "properties": {
+        "classification": {
+          "const": "conformance_evidence_only"
+        },
+        "mayAuthorizeAction": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "claimBoundary": {
+      "const": "Synthetic conformance verifies adapter behavior only for these pinned fixtures and mutations. It does not verify a production system, prove security or completeness, authorize an action, or replace independent replay against the exact subject."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PASS"
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "passed": {
+                "const": 14
+              },
+              "failed": {
+                "const": 0
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "counts": {
+            "properties": {
+              "passed": {
+                "maximum": 13
+              },
+              "failed": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    },
+    "safeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "commitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "contractPin": {
+      "type": "object",
+      "required": [
+        "id",
+        "artifactSchema",
+        "artifactProfile",
+        "ownerRepository",
+        "producerCommit",
+        "schemaSha256",
+        "fixtureSha256"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/safeId"
+        },
+        "artifactSchema": {
+          "enum": [
+            "org.contractgraph-qa.liminalqa-evidence.v0.1",
+            "org.liminalqa.cgqa-candidates.v0.1"
+          ]
+        },
+        "artifactProfile": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "ownerRepository": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "producerCommit": {
+          "$ref": "#/$defs/commitSha"
+        },
+        "schemaSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "fixtureSha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "artifactSchema": {
+                "const": "org.contractgraph-qa.liminalqa-evidence.v0.1"
+              }
+            },
+            "required": ["artifactSchema"]
+          },
+          "then": {
+            "properties": {
+              "id": {
+                "const": "cgqa-evidence"
+              },
+              "artifactProfile": {
+                "const": "org.contractgraph-qa.bounded-invariant-evidence.v0.1"
+              },
+              "ownerRepository": {
+                "const": "safal207/ContractGraph-QA"
+              },
+              "producerCommit": {
+                "const": "bdf7ced074e3a7baf57cf89ac68be9674bd76a02"
+              },
+              "schemaSha256": {
+                "const": "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184"
+              },
+              "fixtureSha256": {
+                "const": "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "id": {
+                "const": "liminal-candidates"
+              },
+              "artifactProfile": {
+                "const": "org.liminalqa.non-authoritative-candidate-seeds.v0.1"
+              },
+              "ownerRepository": {
+                "const": "safal207/LiminalQAengineer"
+              },
+              "producerCommit": {
+                "const": "db9c85f678aafd6e28487e0679a9fb6c3ebfb0c3"
+              },
+              "schemaSha256": {
+                "const": "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60"
+              },
+              "fixtureSha256": {
+                "const": "60b794934959c30f9957d0e54de83d7760ac38b618b0676603d721daa8ef11d3"
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "caseResult": {
+      "type": "object",
+      "required": [
+        "id",
+        "contract",
+        "category",
+        "status",
+        "expectedSemantics",
+        "observedSemantics",
+        "inputSha256",
+        "diagnostic",
+        "sideEffectExecuted"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/safeId"
+        },
+        "contract": {
+          "$ref": "#/$defs/safeId"
+        },
+        "category": {
+          "enum": [
+            "golden",
+            "authority_escalation",
+            "semantic_mismatch",
+            "temporal_inversion",
+            "unknown_field",
+            "ambiguous_json",
+            "verification_weakening",
+            "unsafe_identifier"
+          ]
+        },
+        "status": {
+          "enum": ["PASS", "FAIL"]
+        },
+        "expectedSemantics": {
+          "enum": ["VALID_NON_AUTHORIZING", "INVALID_BLOCKED"]
+        },
+        "observedSemantics": {
+          "enum": ["VALID_NON_AUTHORIZING", "INVALID_BLOCKED", "UNSAFE_ACCEPTED"]
+        },
+        "inputSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "diagnostic": {
+          "$ref": "#/$defs/nonBlank"
+        },
+        "sideEffectExecuted": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

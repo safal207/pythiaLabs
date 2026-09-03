@@ -1,6 +1,8 @@
 # PythiaLabs MCP (Cursor & compatible hosts)
 
-stdio MCP server that forwards tool calls to `mix pythia.eval_json` in this repository so deterministic showcase gates run locally (no hosted service).
+stdio MCP server that forwards tool calls to local Pythia Mix tasks so
+deterministic showcase gates and advisory external-evidence intake run locally
+(no hosted service).
 
 ## Prerequisites
 
@@ -37,6 +39,7 @@ If the repo is not next to `integrations/mcp` relative to the script, set:
    | Tool                            | Purpose                                                          |
    | ------------------------------- | ---------------------------------------------------------------- |
    | `pythia_evaluate`               | Run a gate (`input_json` → ALLOW/BLOCK + evidence).              |
+   | `pythia_evaluate_external_evidence` | Validate raw CGQA/LiminalQA JSON → ESCALATE/BLOCK, never ALLOW. |
    | `pythia_evaluate_agent_infra`   | Backward-compat alias of `pythia_evaluate`.                      |
    | `pythia_describe_gate`          | Return the JSON Schema for a gate so the agent can self-correct. |
    | `pythia_list_gates`             | List supported gate ids.                                         |
@@ -45,6 +48,15 @@ If the repo is not next to `integrations/mcp` relative to the script, set:
 ## Tool: `pythia_evaluate`
 
 Pass **`input_json`** — one JSON object (string) for `mix pythia.eval_json`.
+
+## Tool: `pythia_evaluate_external_evidence`
+
+Pass the raw producer artifact as the `input_json` string. Keeping JSON as a
+string preserves duplicate keys until the Elixir boundary can reject them. The
+tool accepts `org.contractgraph-qa.liminalqa-evidence.v0.1` and
+`org.liminalqa.cgqa-candidates.v0.1`. Valid input returns
+`ESCALATE/current_authorization_required`; malformed input returns `BLOCK`.
+This tool cannot return `ALLOW`.
 
 ### `gate` values
 

@@ -1,5 +1,7 @@
 # PythiaLabs
 
+Documentation: [English](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/docs/i18n/en/GETTING_STARTED.md) · [简体中文](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/docs/i18n/zh-CN/GETTING_STARTED.md) · [हिन्दी](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/docs/i18n/hi/GETTING_STARTED.md) · [Español](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/docs/i18n/es/GETTING_STARTED.md) · [العربية](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/docs/i18n/ar/GETTING_STARTED.md)
+
 Deterministic evidence gates for high-risk agentic actions.
 
 PythiaLabs evaluates whether an AI/agent action should be allowed, blocked, or escalated under current evidence, authorization, environment, credential, and recovery context — producing replayable traces, stable stop reasons, and tamper-checkable evidence artifacts.
@@ -171,6 +173,27 @@ evaluator. Set `PYTHIA_REPO_ROOT` if you symlink the script into your `$PATH`
 from outside the repository.
 
 Setup steps and `mcp.json` snippet: [`integrations/mcp/README.md`](integrations/mcp/README.md).
+
+## ContractGraph-QA / LiminalQA evidence adapter
+
+The file-first [external evidence adapter](docs/EXTERNAL_EVIDENCE_INTEROP.md)
+accepts bounded CGQA evidence and non-authoritative LiminalQA candidates as
+advisory context. A valid artifact returns `ESCALATE` and requires a fresh
+Pythia authorization gate; it can never produce `ALLOW` by itself.
+Run the same 14 pinned cross-language vectors natively with
+`mix pythia.cgqa_conformance`.
+Validate the resulting evidence from TypeScript/JavaScript, Go, Java/JVM, or
+.NET with the shared [consumer SDKs](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/sdks/README.md).
+They add application-language convenience without bypassing Pythia's required
+fresh authorization gate.
+
+```bash
+mix pythia.eval_external_evidence --file cgqa-evidence.json
+cat cgqa-evidence.json | ./bin/pythia evidence
+```
+
+The Node stdio MCP bridge also exposes `pythia_evaluate_external_evidence` for
+Cursor and other compatible hosts.
 
 ## What PythiaLabs is not yet
 

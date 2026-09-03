@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/safal207/LiminalQAengineer/main/schemas/interop/liminalqa-cgqa-candidates-v0.1.schema.json",
+  "title": "LiminalQA to ContractGraph-QA non-authoritative candidates v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "profile",
+    "exportId",
+    "producer",
+    "sourceEvidence",
+    "subject",
+    "identity",
+    "derivedAt",
+    "authority",
+    "candidates",
+    "causalParents",
+    "limitations",
+    "verificationDebt"
+  ],
+  "properties": {
+    "schema": { "const": "org.liminalqa.cgqa-candidates.v0.1" },
+    "profile": { "const": "org.liminalqa.non-authoritative-candidate-seeds.v0.1" },
+    "exportId": { "$ref": "#/$defs/safeId" },
+    "producer": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "liminalqa" },
+        "version": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "sourceEvidence": {
+      "type": "object",
+      "required": ["schema", "exportId", "sha256"],
+      "properties": {
+        "schema": { "const": "org.contractgraph-qa.liminalqa-evidence.v0.1" },
+        "exportId": { "$ref": "#/$defs/safeId" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "subject": { "$ref": "#/$defs/subject" },
+    "identity": { "$ref": "#/$defs/identity" },
+    "derivedAt": { "type": "string", "format": "date-time" },
+    "authority": {
+      "type": "object",
+      "required": ["classification", "mayAuthorizeAction", "requiresCgqaVerification"],
+      "properties": {
+        "classification": { "const": "non_authoritative_seed" },
+        "mayAuthorizeAction": { "const": false },
+        "requiresCgqaVerification": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "candidateId",
+          "invariantId",
+          "sourceStatus",
+          "kind",
+          "priority",
+          "reason",
+          "requiredChecks"
+        ],
+        "properties": {
+          "candidateId": { "$ref": "#/$defs/safeId" },
+          "invariantId": { "$ref": "#/$defs/safeId" },
+          "sourceStatus": { "enum": ["violated", "inconclusive"] },
+          "kind": { "enum": ["replay_regression", "verification_debt"] },
+          "priority": { "enum": ["critical", "high", "medium", "low"] },
+          "reason": { "$ref": "#/$defs/nonBlank" },
+          "requiredChecks": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/nonBlank" }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": { "sourceStatus": { "const": "violated" } },
+              "required": ["sourceStatus"]
+            },
+            "then": { "properties": { "kind": { "const": "replay_regression" } } },
+            "else": { "properties": { "kind": { "const": "verification_debt" } } }
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "causalParents": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/safeId" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonBlank" }
+    },
+    "verificationDebt": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["invariantId", "reason"],
+        "properties": {
+          "invariantId": { "$ref": "#/$defs/safeId" },
+          "reason": { "$ref": "#/$defs/nonBlank" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonBlank": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+    "safeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "subject": {
+      "type": "object",
+      "required": ["repository", "commitSha", "contract", "network", "scopeId"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/nonBlank" },
+        "commitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "contract": { "$ref": "#/$defs/nonBlank" },
+        "network": { "$ref": "#/$defs/nonBlank" },
+        "scopeId": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["traceId", "operationId", "attemptId"],
+      "properties": {
+        "traceId": { "$ref": "#/$defs/safeId" },
+        "operationId": { "$ref": "#/$defs/safeId" },
+        "attemptId": { "$ref": "#/$defs/safeId" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
