@@ -19,9 +19,11 @@ defmodule Pythia.Interop.ExternalEvidenceTest do
     assert assessment.mayAuthorizeAction == false
     assert assessment.sideEffectExecuted == false
     assert assessment.source.semantics == "bounded_evidence"
+
     assert assessment.source.schemaSha256 ==
              "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184"
-    assert assessment.source.sha256 == (:crypto.hash(:sha256, raw) |> Base.encode16(case: :lower))
+
+    assert assessment.source.sha256 == :crypto.hash(:sha256, raw) |> Base.encode16(case: :lower)
   end
 
   test "attempt to turn external evidence into authorization is blocked" do
@@ -71,8 +73,10 @@ defmodule Pythia.Interop.ExternalEvidenceTest do
 
     assert assessment.outcome == "ESCALATE"
     assert assessment.source.semantics == "non_authoritative_seed"
+
     assert assessment.source.schemaSha256 ==
              "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60"
+
     assert assessment.mayAuthorizeAction == false
   end
 
@@ -132,10 +136,12 @@ defmodule Pythia.Interop.ExternalEvidenceTest do
       |> Jason.decode!()
 
     assert cgqa["producerCommit"] == "bdf7ced074e3a7baf57cf89ac68be9674bd76a02"
+
     assert cgqa["schemaSha256"] ==
              "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184"
 
     assert liminal["producerCommit"] == "db9c85f678aafd6e28487e0679a9fb6c3ebfb0c3"
+
     assert liminal["schemaSha256"] ==
              "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60"
   end

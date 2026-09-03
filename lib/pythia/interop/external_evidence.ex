@@ -58,7 +58,9 @@ defmodule Pythia.Interop.ExternalEvidence do
     keys = Enum.map(pairs, &elem(&1, 0))
 
     if length(keys) != MapSet.size(MapSet.new(keys)) do
-      duplicate = keys |> Enum.frequencies() |> Enum.find(fn {_key, count} -> count > 1 end) |> elem(0)
+      duplicate =
+        keys |> Enum.frequencies() |> Enum.find(fn {_key, count} -> count > 1 end) |> elem(0)
+
       {:error, error("duplicate_json_key", "duplicate JSON object key: #{duplicate}")}
     else
       Enum.reduce_while(pairs, {:ok, %{}}, fn {key, value}, {:ok, result} ->
@@ -177,7 +179,8 @@ defmodule Pythia.Interop.ExternalEvidence do
   defp identity(_, field), do: {:error, error("invalid_profile", "#{field} must be an object")}
 
   defp evidence_times(value) when is_map(value) do
-    with :ok <- exact_keys(value, MapSet.new(~w(validAt observedAt recordedAt)), "evidence.times"),
+    with :ok <-
+           exact_keys(value, MapSet.new(~w(validAt observedAt recordedAt)), "evidence.times"),
          {:ok, valid_at} <- timestamp(value["validAt"], "evidence.times.validAt"),
          {:ok, observed_at} <- timestamp(value["observedAt"], "evidence.times.observedAt"),
          {:ok, recorded_at} <- timestamp(value["recordedAt"], "evidence.times.recordedAt"),
@@ -232,7 +235,8 @@ defmodule Pythia.Interop.ExternalEvidence do
              MapSet.new(~w(kind statusVocabulary counts continuityVerdict)),
              "evidence.assessment"
            ),
-         :ok <- equals(assessment["kind"], "bounded_invariant_search", "evidence.assessment.kind"),
+         :ok <-
+           equals(assessment["kind"], "bounded_invariant_search", "evidence.assessment.kind"),
          :ok <-
            equals(
              assessment["statusVocabulary"],
@@ -259,7 +263,9 @@ defmodule Pythia.Interop.ExternalEvidence do
     do: {:error, error("invalid_profile", "evidence.checks must be non-empty")}
 
   defp invariant_checks(checks) do
-    initial = {:ok, %{"violated" => 0, "not_found_within_bound" => 0, "inconclusive" => 0}, 0, MapSet.new()}
+    initial =
+      {:ok, %{"violated" => 0, "not_found_within_bound" => 0, "inconclusive" => 0}, 0,
+       MapSet.new()}
 
     Enum.reduce_while(checks, initial, fn check, {:ok, counts, explored, seen} ->
       case invariant_check(check, seen) do
@@ -279,15 +285,33 @@ defmodule Pythia.Interop.ExternalEvidence do
   defp invariant_check(check, seen) when is_map(check) do
     status = check["status"]
     common = MapSet.new(~w(invariantId title severity status exploredCandidates notes))
-    expected = if status == "violated", do: MapSet.union(common, MapSet.new(~w(findingId pathLength))), else: common
+
+    expected =
+      if status == "violated",
+        do: MapSet.union(common, MapSet.new(~w(findingId pathLength))),
+        else: common
 
     with :ok <- exact_keys(check, expected, "evidence.checks[]"),
          :ok <- safe_id(check["invariantId"], "evidence.checks[].invariantId"),
          :ok <- unique_id(check["invariantId"], seen, "evidence.checks[].invariantId"),
-         :ok <- member(status, ~w(violated not_found_within_bound inconclusive), "evidence.checks[].status"),
+         :ok <-
+           member(
+             status,
+             ~w(violated not_found_within_bound inconclusive),
+             "evidence.checks[].status"
+           ),
          :ok <- non_blank(check["title"], "evidence.checks[].title"),
-         :ok <- member(check["severity"], ~w(critical high medium low info), "evidence.checks[].severity"),
-         :ok <- non_negative_integer(check["exploredCandidates"], "evidence.checks[].exploredCandidates"),
+         :ok <-
+           member(
+             check["severity"],
+             ~w(critical high medium low info),
+             "evidence.checks[].severity"
+           ),
+         :ok <-
+           non_negative_integer(
+             check["exploredCandidates"],
+             "evidence.checks[].exploredCandidates"
+           ),
          :ok <- non_blank(check["notes"], "evidence.checks[].notes"),
          :ok <- violation_fields(check, status) do
       {:ok, status, check["exploredCandidates"], MapSet.put(seen, check["invariantId"])}
@@ -307,7 +331,12 @@ defmodule Pythia.Interop.ExternalEvidence do
   defp violation_fields(_, _), do: :ok
 
   defp count_map(value, actual) when is_map(value) do
-    with :ok <- exact_keys(value, MapSet.new(~w(violated not_found_within_bound inconclusive)), "evidence.assessment.counts"),
+    with :ok <-
+           exact_keys(
+             value,
+             MapSet.new(~w(violated not_found_within_bound inconclusive)),
+             "evidence.assessment.counts"
+           ),
          :ok <- equals(value, actual, "evidence.assessment.counts") do
       :ok
     end
@@ -317,10 +346,16 @@ defmodule Pythia.Interop.ExternalEvidence do
     do: {:error, error("invalid_profile", "evidence.assessment.counts must be an object")}
 
   defp search_bound(value, explored) do
-    with :ok <- exact_keys(value, MapSet.new(~w(searchRunId maxDepth exploredCandidates replay)), "evidence.bound"),
+    with :ok <-
+           exact_keys(
+             value,
+             MapSet.new(~w(searchRunId maxDepth exploredCandidates replay)),
+             "evidence.bound"
+           ),
          :ok <- safe_id(value["searchRunId"], "evidence.bound.searchRunId"),
          :ok <- positive_integer(value["maxDepth"], "evidence.bound.maxDepth"),
-         :ok <- equals(value["exploredCandidates"], explored, "evidence.bound.exploredCandidates"),
+         :ok <-
+           equals(value["exploredCandidates"], explored, "evidence.bound.exploredCandidates"),
          :ok <- non_blank(value["replay"], "evidence.bound.replay") do
       :ok
     end
@@ -333,7 +368,12 @@ defmodule Pythia.Interop.ExternalEvidence do
     Enum.reduce_while(artifacts, {:ok, MapSet.new()}, fn artifact, {:ok, seen} ->
       result =
         with true <- is_map(artifact),
-             :ok <- exact_keys(artifact, MapSet.new(~w(artifactId mediaType sha256 bytes)), "evidence.artifacts[]"),
+             :ok <-
+               exact_keys(
+                 artifact,
+                 MapSet.new(~w(artifactId mediaType sha256 bytes)),
+                 "evidence.artifacts[]"
+               ),
              :ok <- safe_id(artifact["artifactId"], "evidence.artifacts[].artifactId"),
              :ok <- unique_id(artifact["artifactId"], seen, "evidence.artifacts[].artifactId"),
              :ok <- non_blank(artifact["mediaType"], "evidence.artifacts[].mediaType"),
@@ -363,13 +403,27 @@ defmodule Pythia.Interop.ExternalEvidence do
     with :ok <-
            exact_keys(
              value,
-             MapSet.new(~w(classification mayAuthorizeAction actionAuthorization continuityVerdictOwner)),
+             MapSet.new(
+               ~w(classification mayAuthorizeAction actionAuthorization continuityVerdictOwner)
+             ),
              "evidence.authority"
            ),
-         :ok <- equals(value["classification"], "evidence_only", "evidence.authority.classification"),
-         :ok <- equals(value["mayAuthorizeAction"], false, "evidence.authority.mayAuthorizeAction"),
-         :ok <- equals(value["actionAuthorization"], "not_evaluated", "evidence.authority.actionAuthorization"),
-         :ok <- equals(value["continuityVerdictOwner"], "ltp", "evidence.authority.continuityVerdictOwner") do
+         :ok <-
+           equals(value["classification"], "evidence_only", "evidence.authority.classification"),
+         :ok <-
+           equals(value["mayAuthorizeAction"], false, "evidence.authority.mayAuthorizeAction"),
+         :ok <-
+           equals(
+             value["actionAuthorization"],
+             "not_evaluated",
+             "evidence.authority.actionAuthorization"
+           ),
+         :ok <-
+           equals(
+             value["continuityVerdictOwner"],
+             "ltp",
+             "evidence.authority.continuityVerdictOwner"
+           ) do
       :ok
     end
   end
@@ -378,7 +432,12 @@ defmodule Pythia.Interop.ExternalEvidence do
     do: {:error, error("invalid_profile", "evidence.authority must be an object")}
 
   defp source_evidence(value) when is_map(value) do
-    with :ok <- exact_keys(value, MapSet.new(~w(schema exportId sha256)), "candidateExport.sourceEvidence"),
+    with :ok <-
+           exact_keys(
+             value,
+             MapSet.new(~w(schema exportId sha256)),
+             "candidateExport.sourceEvidence"
+           ),
          :ok <- equals(value["schema"], @cgqa_schema, "candidateExport.sourceEvidence.schema"),
          :ok <- safe_id(value["exportId"], "candidateExport.sourceEvidence.exportId"),
          :ok <- matches(value["sha256"], @sha256, "candidateExport.sourceEvidence.sha256") do
@@ -396,9 +455,24 @@ defmodule Pythia.Interop.ExternalEvidence do
              MapSet.new(~w(classification mayAuthorizeAction requiresCgqaVerification)),
              "candidateExport.authority"
            ),
-         :ok <- equals(value["classification"], "non_authoritative_seed", "candidateExport.authority.classification"),
-         :ok <- equals(value["mayAuthorizeAction"], false, "candidateExport.authority.mayAuthorizeAction"),
-         :ok <- equals(value["requiresCgqaVerification"], true, "candidateExport.authority.requiresCgqaVerification") do
+         :ok <-
+           equals(
+             value["classification"],
+             "non_authoritative_seed",
+             "candidateExport.authority.classification"
+           ),
+         :ok <-
+           equals(
+             value["mayAuthorizeAction"],
+             false,
+             "candidateExport.authority.mayAuthorizeAction"
+           ),
+         :ok <-
+           equals(
+             value["requiresCgqaVerification"],
+             true,
+             "candidateExport.authority.requiresCgqaVerification"
+           ) do
       :ok
     end
   end
@@ -407,16 +481,22 @@ defmodule Pythia.Interop.ExternalEvidence do
     do: {:error, error("invalid_profile", "candidateExport.authority must be an object")}
 
   defp candidates(values) when is_list(values) do
-    expected = MapSet.new(~w(candidateId invariantId sourceStatus kind priority reason requiredChecks))
+    expected =
+      MapSet.new(~w(candidateId invariantId sourceStatus kind priority reason requiredChecks))
 
     Enum.reduce_while(values, {:ok, MapSet.new(), MapSet.new()}, fn candidate,
-                                                                   {:ok, seen_ids,
-                                                                    seen_invariants} ->
+                                                                    {:ok, seen_ids,
+                                                                     seen_invariants} ->
       result =
         with true <- is_map(candidate),
              :ok <- exact_keys(candidate, expected, "candidateExport.candidates[]"),
              :ok <- safe_id(candidate["candidateId"], "candidateExport.candidates[].candidateId"),
-             :ok <- unique_id(candidate["candidateId"], seen_ids, "candidateExport.candidates[].candidateId"),
+             :ok <-
+               unique_id(
+                 candidate["candidateId"],
+                 seen_ids,
+                 "candidateExport.candidates[].candidateId"
+               ),
              :ok <- safe_id(candidate["invariantId"], "candidateExport.candidates[].invariantId"),
              :ok <-
                unique_id(
@@ -424,24 +504,43 @@ defmodule Pythia.Interop.ExternalEvidence do
                  seen_invariants,
                  "candidateExport.candidates[].invariantId"
                ),
-             :ok <- member(candidate["sourceStatus"], ~w(violated inconclusive), "candidateExport.candidates[].sourceStatus"),
-             :ok <- member(candidate["kind"], ~w(replay_regression verification_debt), "candidateExport.candidates[].kind"),
+             :ok <-
+               member(
+                 candidate["sourceStatus"],
+                 ~w(violated inconclusive),
+                 "candidateExport.candidates[].sourceStatus"
+               ),
+             :ok <-
+               member(
+                 candidate["kind"],
+                 ~w(replay_regression verification_debt),
+                 "candidateExport.candidates[].kind"
+               ),
              :ok <- candidate_kind(candidate["sourceStatus"], candidate["kind"]),
-             :ok <- member(candidate["priority"], ~w(critical high medium low), "candidateExport.candidates[].priority"),
+             :ok <-
+               member(
+                 candidate["priority"],
+                 ~w(critical high medium low),
+                 "candidateExport.candidates[].priority"
+               ),
              :ok <- non_blank(candidate["reason"], "candidateExport.candidates[].reason"),
              :ok <- required_candidate_checks(candidate) do
           {:ok, MapSet.put(seen_ids, candidate["candidateId"]),
            MapSet.put(seen_invariants, candidate["invariantId"])}
         else
-          false -> {:error, error("invalid_profile", "candidateExport.candidates[] must be an object")}
-          {:error, _} = failure -> failure
+          false ->
+            {:error, error("invalid_profile", "candidateExport.candidates[] must be an object")}
+
+          {:error, _} = failure ->
+            failure
         end
 
       case result do
         {:ok, next_ids, next_invariants} ->
           {:cont, {:ok, next_ids, next_invariants}}
 
-        {:error, _} = failure -> {:halt, failure}
+        {:error, _} = failure ->
+          {:halt, failure}
       end
     end)
     |> case do
@@ -540,9 +639,7 @@ defmodule Pythia.Interop.ExternalEvidence do
   end
 
   defp candidate_debt(_, _),
-    do:
-      {:error,
-       error("invalid_profile", "candidateExport.verificationDebt must be an array")}
+    do: {:error, error("invalid_profile", "candidateExport.verificationDebt must be an array")}
 
   defp debt_rows(values, with_status, field) do
     expected =
@@ -581,8 +678,12 @@ defmodule Pythia.Interop.ExternalEvidence do
          true <- expected in values do
       :ok
     else
-      false -> {:error, error("invalid_profile", "candidateExport.causalParents must include source exportId")}
-      {:error, _} = failure -> failure
+      false ->
+        {:error,
+         error("invalid_profile", "candidateExport.causalParents must include source exportId")}
+
+      {:error, _} = failure ->
+        failure
     end
   end
 
@@ -591,6 +692,7 @@ defmodule Pythia.Interop.ExternalEvidence do
 
   defp assessment(source, raw) do
     source_sha = :crypto.hash(:sha256, raw) |> Base.encode16(case: :lower)
+
     assessment_id =
       :crypto.hash(:sha256, source.schema <> ":" <> source.export_id <> ":" <> source_sha)
       |> Base.encode16(case: :lower)
@@ -686,8 +788,7 @@ defmodule Pythia.Interop.ExternalEvidence do
       :ok
     else
       false ->
-        {:error,
-         error("invalid_profile", "#{field} must contain unique safe identifiers")}
+        {:error, error("invalid_profile", "#{field} must contain unique safe identifiers")}
     end
   end
 

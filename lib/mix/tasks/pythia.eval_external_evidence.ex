@@ -32,7 +32,8 @@ defmodule Mix.Tasks.Pythia.EvalExternalEvidence do
 
   defp evaluate_file(path) do
     case File.read(path) do
-      {:ok, body} -> evaluate_body(body)
+      {:ok, body} ->
+        evaluate_body(body)
 
       {:error, reason} ->
         emit_error("could not read input: #{:file.format_error(reason)}")
