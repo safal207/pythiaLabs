@@ -178,6 +178,8 @@ The file-first [external evidence adapter](docs/EXTERNAL_EVIDENCE_INTEROP.md)
 accepts bounded CGQA evidence and non-authoritative LiminalQA candidates as
 advisory context. A valid artifact returns `ESCALATE` and requires a fresh
 Pythia authorization gate; it can never produce `ALLOW` by itself.
+Run the same 14 pinned cross-language vectors natively with
+`mix pythia.cgqa_conformance`.
 
 ```bash
 mix pythia.eval_external_evidence --file cgqa-evidence.json

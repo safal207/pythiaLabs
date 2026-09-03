@@ -1,0 +1,216 @@
+{
+  "schema": "org.contractgraph-qa.liminalqa-interop-conformance-suite.v0.1",
+  "suiteId": "cgqa-liminalqa-v0.1",
+  "version": "0.1.0",
+  "suiteSchema": {
+    "path": "suite.schema.json",
+    "sha256": "34acfc677802683c6c452a728ed533e92803a74d989b397d2d0fe549b1da93f9"
+  },
+  "resultSchema": {
+    "path": "result.schema.json",
+    "sha256": "388d0aadbb8d30fb5aee223a89f29884b89a1b3303ac88dae8b21e91ab11b423"
+  },
+  "contracts": [
+    {
+      "id": "cgqa-evidence",
+      "artifactSchema": "org.contractgraph-qa.liminalqa-evidence.v0.1",
+      "artifactProfile": "org.contractgraph-qa.bounded-invariant-evidence.v0.1",
+      "ownerRepository": "safal207/ContractGraph-QA",
+      "producerCommit": "bdf7ced074e3a7baf57cf89ac68be9674bd76a02",
+      "schemaPath": "schemas/cgqa-liminalqa-evidence-v0.1.schema.json",
+      "schemaSha256": "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184",
+      "fixturePath": "fixtures/cgqa-liminalqa-evidence-v0.1.json",
+      "fixtureSha256": "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce"
+    },
+    {
+      "id": "liminal-candidates",
+      "artifactSchema": "org.liminalqa.cgqa-candidates.v0.1",
+      "artifactProfile": "org.liminalqa.non-authoritative-candidate-seeds.v0.1",
+      "ownerRepository": "safal207/LiminalQAengineer",
+      "producerCommit": "db9c85f678aafd6e28487e0679a9fb6c3ebfb0c3",
+      "schemaPath": "schemas/liminalqa-cgqa-candidates-v0.1.schema.json",
+      "schemaSha256": "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60",
+      "fixturePath": "fixtures/liminalqa-cgqa-candidates-v0.1.json",
+      "fixtureSha256": "60b794934959c30f9957d0e54de83d7760ac38b618b0676603d721daa8ef11d3"
+    }
+  ],
+  "cases": [
+    {
+      "id": "cgqa-evidence-golden",
+      "contract": "cgqa-evidence",
+      "category": "golden",
+      "description": "Accept the pinned CGQA evidence fixture only as non-authorizing evidence.",
+      "operation": {
+        "kind": "identity"
+      },
+      "expectedInputSha256": "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce",
+      "expectedSemantics": "VALID_NON_AUTHORIZING"
+    },
+    {
+      "id": "cgqa-evidence-authority-escalation",
+      "contract": "cgqa-evidence",
+      "category": "authority_escalation",
+      "description": "Block evidence that claims action authority.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/authority/mayAuthorizeAction",
+        "value": true
+      },
+      "expectedInputSha256": "33eb3122738032c3ebc1043f5058bc7a9cc469c6ecff8ad0a602aaa3a80067ce",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "cgqa-evidence-count-mismatch",
+      "contract": "cgqa-evidence",
+      "category": "semantic_mismatch",
+      "description": "Block evidence whose declared finding counts disagree with its checks.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/assessment/counts/violated",
+        "value": 0
+      },
+      "expectedInputSha256": "3f348306ba20fdb780b662ec3aadbdf8d1a805a1d81cb2eb66103824e9f8b95f",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "cgqa-evidence-temporal-inversion",
+      "contract": "cgqa-evidence",
+      "category": "temporal_inversion",
+      "description": "Block evidence whose observation time precedes its valid time.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/times/observedAt",
+        "value": "2026-09-03T09:59:00Z"
+      },
+      "expectedInputSha256": "dbc7d64eda4aeb497bf360e10335896b3f9b4316973306e37a8a21134cc85ba8",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "cgqa-evidence-unknown-authority-field",
+      "contract": "cgqa-evidence",
+      "category": "unknown_field",
+      "description": "Block evidence with an undeclared root authorization field.",
+      "operation": {
+        "kind": "add",
+        "pointer": "/authorization",
+        "value": "ALLOW"
+      },
+      "expectedInputSha256": "49d7eab11be2a4fc5b90776a9822156573ef5753bff25e674629fdb8e742edea",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "cgqa-evidence-unsafe-causal-parent",
+      "contract": "cgqa-evidence",
+      "category": "unsafe_identifier",
+      "description": "Block path-like evidence identifiers that could be reinterpreted as traversal.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/causalParents/0",
+        "value": "../unsafe"
+      },
+      "expectedInputSha256": "e50dfe383bbd2577b72dba043bbe129b6370b81ec8226d6fa9ed206bf6bf51af",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "cgqa-evidence-duplicate-schema-key",
+      "contract": "cgqa-evidence",
+      "category": "ambiguous_json",
+      "description": "Block ambiguous JSON containing a duplicate root schema key.",
+      "operation": {
+        "kind": "duplicate_root_key",
+        "key": "schema",
+        "value": "ambiguous"
+      },
+      "expectedInputSha256": "6ff810788c268a93af16daa7a814cfe84616542951de92be8dbe79aabf3d41c9",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-golden",
+      "contract": "liminal-candidates",
+      "category": "golden",
+      "description": "Accept the pinned LiminalQA candidates only as non-authoritative CGQA seeds.",
+      "operation": {
+        "kind": "identity"
+      },
+      "expectedInputSha256": "60b794934959c30f9957d0e54de83d7760ac38b618b0676603d721daa8ef11d3",
+      "expectedSemantics": "VALID_NON_AUTHORIZING"
+    },
+    {
+      "id": "liminal-candidates-authority-escalation",
+      "contract": "liminal-candidates",
+      "category": "authority_escalation",
+      "description": "Block candidate seeds that claim action authority.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/authority/mayAuthorizeAction",
+        "value": true
+      },
+      "expectedInputSha256": "261570efc9e6c13d46686a6f5941ee7d39db620c4603cf30a64e0f0baae3abff",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-unknown-authority-field",
+      "contract": "liminal-candidates",
+      "category": "unknown_field",
+      "description": "Block candidates with an undeclared root authorization field.",
+      "operation": {
+        "kind": "add",
+        "pointer": "/authorization",
+        "value": "ALLOW"
+      },
+      "expectedInputSha256": "1a3841322a8dae89e793f92cedcf341c5fafa4a70e308426d76f674434291941",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-missing-independent-replay",
+      "contract": "liminal-candidates",
+      "category": "verification_weakening",
+      "description": "Block a candidate that omits the mandatory independent CGQA replay check.",
+      "operation": {
+        "kind": "remove",
+        "pointer": "/candidates/0/requiredChecks/1"
+      },
+      "expectedInputSha256": "8030649160511f62065f4ba33d703fb4dcbf96bc25480d8fa9c7d4e85d715423",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-debt-mismatch",
+      "contract": "liminal-candidates",
+      "category": "semantic_mismatch",
+      "description": "Block candidates whose verification debt omits an inconclusive invariant.",
+      "operation": {
+        "kind": "remove",
+        "pointer": "/verificationDebt/0"
+      },
+      "expectedInputSha256": "172a1567897dc4a78deaf2c9f50bc6634e59d2d671ab23d414ca8b4a089f8185",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-unsafe-causal-parent",
+      "contract": "liminal-candidates",
+      "category": "unsafe_identifier",
+      "description": "Block path-like causal identifiers that could be reinterpreted as traversal.",
+      "operation": {
+        "kind": "replace",
+        "pointer": "/causalParents/0",
+        "value": "../unsafe"
+      },
+      "expectedInputSha256": "61b8e74f52248e50fc90e0765b6cc0449ea5b588cb6aa525d148dcb9ac447960",
+      "expectedSemantics": "INVALID_BLOCKED"
+    },
+    {
+      "id": "liminal-candidates-duplicate-schema-key",
+      "contract": "liminal-candidates",
+      "category": "ambiguous_json",
+      "description": "Block ambiguous JSON containing a duplicate root schema key.",
+      "operation": {
+        "kind": "duplicate_root_key",
+        "key": "schema",
+        "value": "ambiguous"
+      },
+      "expectedInputSha256": "9bf53f54b15a2eb09731c28dfffc5ba39f7c04b0d5fa4d076f300f8107ae2d40",
+      "expectedSemantics": "INVALID_BLOCKED"
+    }
+  ],
+  "claimBoundary": "Synthetic conformance verifies adapter behavior only for these pinned fixtures and mutations. It does not verify a production system, prove security or completeness, authorize an action, or replace independent replay against the exact subject."
+}

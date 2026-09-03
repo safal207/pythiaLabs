@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/safal207/ContractGraph-QA/main/contractgraph_qa/schemas/cgqa-liminalqa-evidence-v0.1.schema.json",
+  "title": "ContractGraph-QA to LiminalQA bounded evidence v0.1",
+  "type": "object",
+  "required": [
+    "schema",
+    "profile",
+    "exportId",
+    "producer",
+    "subject",
+    "identity",
+    "times",
+    "adapter",
+    "bound",
+    "assessment",
+    "checks",
+    "artifacts",
+    "causalParents",
+    "verificationDebt",
+    "limitations",
+    "authority"
+  ],
+  "properties": {
+    "schema": { "const": "org.contractgraph-qa.liminalqa-evidence.v0.1" },
+    "profile": { "const": "org.contractgraph-qa.bounded-invariant-evidence.v0.1" },
+    "exportId": { "$ref": "#/$defs/safeId" },
+    "producer": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "contractgraph-qa" },
+        "version": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "subject": { "$ref": "#/$defs/subject" },
+    "identity": { "$ref": "#/$defs/identity" },
+    "times": {
+      "type": "object",
+      "required": ["validAt", "observedAt", "recordedAt"],
+      "properties": {
+        "validAt": { "type": "string", "format": "date-time" },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "recordedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "adapter": {
+      "type": "object",
+      "required": ["id", "version", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonBlank" },
+        "version": { "$ref": "#/$defs/nonBlank" },
+        "digest": {
+          "type": "object",
+          "required": ["algorithm", "value"],
+          "properties": {
+            "algorithm": { "const": "sha256" },
+            "value": { "$ref": "#/$defs/sha256" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "bound": {
+      "type": "object",
+      "required": ["searchRunId", "maxDepth", "exploredCandidates", "replay"],
+      "properties": {
+        "searchRunId": { "$ref": "#/$defs/safeId" },
+        "maxDepth": { "type": "integer", "minimum": 1 },
+        "exploredCandidates": { "type": "integer", "minimum": 0 },
+        "replay": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["kind", "statusVocabulary", "counts", "continuityVerdict"],
+      "properties": {
+        "kind": { "const": "bounded_invariant_search" },
+        "statusVocabulary": {
+          "const": ["violated", "not_found_within_bound", "inconclusive"]
+        },
+        "counts": {
+          "type": "object",
+          "required": ["violated", "not_found_within_bound", "inconclusive"],
+          "properties": {
+            "violated": { "type": "integer", "minimum": 0 },
+            "not_found_within_bound": { "type": "integer", "minimum": 0 },
+            "inconclusive": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "continuityVerdict": { "const": "not_computed" }
+      },
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["artifactId", "mediaType", "sha256", "bytes"],
+        "properties": {
+          "artifactId": { "$ref": "#/$defs/safeId" },
+          "mediaType": { "$ref": "#/$defs/nonBlank" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "bytes": { "type": "integer", "minimum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "causalParents": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/safeId" }
+    },
+    "verificationDebt": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["invariantId", "status", "reason"],
+        "properties": {
+          "invariantId": { "$ref": "#/$defs/safeId" },
+          "status": { "const": "inconclusive" },
+          "reason": { "$ref": "#/$defs/nonBlank" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nonBlank" }
+    },
+    "authority": {
+      "type": "object",
+      "required": [
+        "classification",
+        "mayAuthorizeAction",
+        "actionAuthorization",
+        "continuityVerdictOwner"
+      ],
+      "properties": {
+        "classification": { "const": "evidence_only" },
+        "mayAuthorizeAction": { "const": false },
+        "actionAuthorization": { "const": "not_evaluated" },
+        "continuityVerdictOwner": { "const": "ltp" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonBlank": { "type": "string", "minLength": 1, "pattern": ".*\\S.*" },
+    "safeId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "subject": {
+      "type": "object",
+      "required": ["repository", "commitSha", "contract", "network", "scopeId"],
+      "properties": {
+        "repository": { "$ref": "#/$defs/nonBlank" },
+        "commitSha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "contract": { "$ref": "#/$defs/nonBlank" },
+        "network": { "$ref": "#/$defs/nonBlank" },
+        "scopeId": { "$ref": "#/$defs/nonBlank" }
+      },
+      "additionalProperties": false
+    },
+    "identity": {
+      "type": "object",
+      "required": ["traceId", "operationId", "attemptId"],
+      "properties": {
+        "traceId": { "$ref": "#/$defs/safeId" },
+        "operationId": { "$ref": "#/$defs/safeId" },
+        "attemptId": { "$ref": "#/$defs/safeId" }
+      },
+      "additionalProperties": false
+    },
+    "check": {
+      "type": "object",
+      "required": ["invariantId", "title", "severity", "status", "exploredCandidates", "notes"],
+      "properties": {
+        "invariantId": { "$ref": "#/$defs/safeId" },
+        "title": { "$ref": "#/$defs/nonBlank" },
+        "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+        "status": { "enum": ["violated", "not_found_within_bound", "inconclusive"] },
+        "exploredCandidates": { "type": "integer", "minimum": 0 },
+        "notes": { "$ref": "#/$defs/nonBlank" },
+        "findingId": { "$ref": "#/$defs/safeId" },
+        "pathLength": { "type": "integer", "minimum": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "violated" } }, "required": ["status"] },
+          "then": { "required": ["findingId", "pathLength"] },
+          "else": { "not": { "anyOf": [{ "required": ["findingId"] }, { "required": ["pathLength"] }] } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

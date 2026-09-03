@@ -45,3 +45,26 @@ The Node stdio MCP adapter exposes the same boundary as
 `pythia_evaluate_external_evidence`; it forwards the raw JSON string to the
 canonical Elixir validator so duplicate-key handling and verdict semantics stay
 in one implementation.
+
+## Portable CGQA/LiminalQA conformance
+
+Pythia also vendors the language-neutral `cgqa-liminalqa-v0.1` suite
+byte-for-byte and runs it through the native Elixir boundary:
+
+```bash
+mix pythia.cgqa_conformance
+mix pythia.cgqa_conformance \
+  --suite conformance/cgqa-liminalqa-v0.1/suite.json
+```
+
+The suite SHA-256 is
+`562e2f9ae699f001b9ccf1b2b9f6dd30c435d53d668b5fd9a04ca15ca1e4faac`.
+The runner verifies that manifest, both schemas, both fixtures, every generated
+case input, and their declared hashes before the adapter evaluates a vector.
+Its report is deterministic, non-authorizing evidence only, and records
+`sideEffectExecuted=false` for all 14 vectors.
+
+Passing this synthetic corpus establishes compatibility only for the pinned
+fixtures and mutations. It does not validate a production system, prove
+security or completeness, authorize an action, or replace independent replay
+against the exact subject.
