@@ -64,7 +64,7 @@ case input, and their declared hashes before the adapter evaluates a vector.
 Its report is deterministic, non-authorizing evidence only, and records
 `sideEffectExecuted=false` for all 14 vectors.
 
-Shared [TypeScript/JavaScript, Go, JVM, and .NET report adapters](https://github.com/safal207/ContractGraph-QA/blob/main/sdks/README.md)
+Shared [TypeScript/JavaScript, Go, JVM, and .NET report adapters](https://github.com/safal207/ContractGraph-QA/blob/3ff86db99ecb0eeae7fa4b517ac7c8a157a2441a/sdks/README.md)
 let application teams consume that report without reimplementing Pythia,
 LiminalQA, or CGQA verdict logic. A successful SDK validation still returns
 `mayAuthorizeAction=false`; only a fresh Pythia/operator gate may authorize a
