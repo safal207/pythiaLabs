@@ -1,0 +1,213 @@
+name: "Evidence: Ota adoption matrix (non-blocking)"
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ota-adoption-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  declaration:
+    name: Ota declaration and discovery
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Ota from contract source
+        uses: ota-run/setup@493cba84bf7f7c11c9e8e996d832d93a89c62184 # v1.0.8
+        with:
+          source: contract
+
+      - name: Create pressure artifact directory
+        run: mkdir -p .ota/pressure
+
+      - name: Validate proposed contract
+        run: |
+          set +e
+          ota validate . --json > .ota/pressure/validate.json
+          printf '%s\n' "$?" > .ota/pressure/validate.exit
+          exit 0
+
+      - name: Inspect declared task posture
+        run: |
+          set +e
+          ota tasks --json > .ota/pressure/tasks.json
+          printf '%s\n' "$?" > .ota/pressure/tasks.exit
+          exit 0
+
+      - name: Diagnose repository readiness
+        run: |
+          set +e
+          ota doctor --json > .ota/pressure/doctor.json
+          printf '%s\n' "$?" > .ota/pressure/doctor.exit
+          exit 0
+
+      - name: Re-run conservative discovery
+        run: |
+          set +e
+          ota detect --candidate-out .ota/pressure/detect-candidate.json --json . > .ota/pressure/detect.json
+          printf '%s\n' "$?" > .ota/pressure/detect.exit
+          exit 0
+
+      - name: Require the expected declaration gates
+        run: |
+          test "$(cat .ota/pressure/validate.exit)" -eq 0
+          test "$(cat .ota/pressure/tasks.exit)" -eq 0
+          test "$(cat .ota/pressure/detect.exit)" -eq 0
+
+      - name: Retain Ota pressure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ota-adoption-${{ github.run_id }}
+          path: .ota/pressure
+          if-no-files-found: warn
+
+  native:
+    name: Ota native execution (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu
+            os: ubuntu-latest
+          - name: macos
+            os: macos-latest
+          - name: windows
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Ota from contract source
+        uses: ota-run/setup@493cba84bf7f7c11c9e8e996d832d93a89c62184 # v1.0.8
+        with:
+          source: contract
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.16"
+          otp-version: "26"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create pressure artifact directory
+        shell: bash
+        run: mkdir -p .ota/pressure/native
+
+      - name: Observe declared workflow crossing previews
+        shell: bash
+        run: |
+          set +e
+          for workflow in core mcp worker site; do
+            ota up --workflow "$workflow" --dry-run --json > ".ota/pressure/native/workflow-${workflow}.json"
+            printf '%s\n' "$?" > ".ota/pressure/native/workflow-${workflow}.exit"
+          done
+          exit 0
+
+      - name: Run declared non-credentialed lanes
+        shell: bash
+        run: |
+          set +e
+          run_lane() {
+            local lane="$1"
+            ota run "$lane" > ".ota/pressure/native/${lane//:/-}.log" 2>&1
+            printf '%s\n' "$?" > ".ota/pressure/native/${lane//:/-}.exit"
+          }
+          run_lane verify:elixir-format
+          run_lane verify:elixir-test
+          run_lane verify:mcp-smoke
+          run_lane verify:worker-build
+          run_lane verify:worker-test
+          run_lane verify:site-build
+          run_lane verify:site-format
+          run_lane verify:action-envelope-conformance
+          run_lane verify:vce-conformance
+          run_lane verify:aci-conformance
+          run_lane verify:caep-evidence
+          exit 0
+
+      - name: Require every selected execution lane to pass
+        shell: bash
+        run: |
+          for result in .ota/pressure/native/verify-*.exit; do
+            test "$(cat "$result")" -eq 0
+          done
+
+      - name: Retain Ota native-pressure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ota-adoption-native-${{ matrix.name }}-${{ github.run_id }}
+          path: .ota/pressure/native
+          if-no-files-found: warn
+
+  container:
+    name: Ota Linux container verification
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Ota from contract source
+        uses: ota-run/setup@493cba84bf7f7c11c9e8e996d832d93a89c62184 # v1.0.8
+        with:
+          source: contract
+
+      - name: Create pressure artifact directory
+        shell: bash
+        run: mkdir -p .ota/pressure/container
+
+      - name: Record container engine posture
+        shell: bash
+        run: docker version --format '{{json .}}' > .ota/pressure/container/docker-version.json
+
+      - name: Run declared portable container lanes
+        shell: bash
+        run: |
+          set +e
+          run_lane() {
+            local lane="$1"
+            ota run "$lane" --mode container --stream > ".ota/pressure/container/${lane//:/-}.log" 2>&1
+            printf '%s\n' "$?" > ".ota/pressure/container/${lane//:/-}.exit"
+          }
+          run_lane verify:mcp-smoke
+          run_lane verify:site-build
+          docker image inspect 'node:20-bookworm@sha256:cacf10e99285cbbc891452e31249c1b5ec3ba225f40028fae946b75aeaf1b66a' \
+            > .ota/pressure/container/node-image.json 2>&1
+          exit 0
+
+      - name: Require every selected container lane to pass
+        shell: bash
+        run: |
+          for result in .ota/pressure/container/verify-*.exit; do
+            test "$(cat "$result")" -eq 0
+          done
+
+      - name: Retain Ota container-pressure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ota-adoption-container-${{ github.run_id }}
+          path: .ota/pressure/container
+          if-no-files-found: warn
