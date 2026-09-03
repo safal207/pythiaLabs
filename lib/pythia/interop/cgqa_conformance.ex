@@ -49,11 +49,9 @@ defmodule Pythia.Interop.CgqaConformance do
       "ownerRepository" => "safal207/ContractGraph-QA",
       "producerCommit" => "bdf7ced074e3a7baf57cf89ac68be9674bd76a02",
       "schemaPath" => "schemas/cgqa-liminalqa-evidence-v0.1.schema.json",
-      "schemaSha256" =>
-        "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184",
+      "schemaSha256" => "53b0b4a0b1f4d77de26b8be9dbb90006ea0bd30c5cd3960a2f3e7d44d9664184",
       "fixturePath" => "fixtures/cgqa-liminalqa-evidence-v0.1.json",
-      "fixtureSha256" =>
-        "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce"
+      "fixtureSha256" => "e1d5a14c5c1b75e2cfffaf87bf526fd61e141a0c5b7828de4f275e9792fda3ce"
     },
     %{
       "id" => "liminal-candidates",
@@ -62,11 +60,9 @@ defmodule Pythia.Interop.CgqaConformance do
       "ownerRepository" => "safal207/LiminalQAengineer",
       "producerCommit" => "db9c85f678aafd6e28487e0679a9fb6c3ebfb0c3",
       "schemaPath" => "schemas/liminalqa-cgqa-candidates-v0.1.schema.json",
-      "schemaSha256" =>
-        "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60",
+      "schemaSha256" => "896e32921d41925a976fef5d0ba561a08bd1f2265a08bc9ccf5065a3238a4f60",
       "fixturePath" => "fixtures/liminalqa-cgqa-candidates-v0.1.json",
-      "fixtureSha256" =>
-        "60b794934959c30f9957d0e54de83d7760ac38b618b0676603d721daa8ef11d3"
+      "fixtureSha256" => "60b794934959c30f9957d0e54de83d7760ac38b618b0676603d721daa8ef11d3"
     }
   ]
 
@@ -80,7 +76,8 @@ defmodule Pythia.Interop.CgqaConformance do
   @spec run(nil | binary()) :: {:ok, map()} | {:error, binary()}
   def run(suite_path \\ nil) do
     with {:ok, source, suite_raw} <- load_suite_source(suite_path),
-         :ok <- ensure(sha256(suite_raw) == @suite_sha256, "suite digest does not match the v0.1 pin"),
+         :ok <-
+           ensure(sha256(suite_raw) == @suite_sha256, "suite digest does not match the v0.1 pin"),
          {:ok, suite} <- strict_decode(suite_raw, "suite"),
          :ok <- validate_suite(suite),
          {:ok, assets} <- verify_assets(source, suite),
@@ -93,7 +90,11 @@ defmodule Pythia.Interop.CgqaConformance do
   defp load_suite_source(nil), do: {:ok, :embedded, Map.fetch!(@embedded_assets, "suite.json")}
 
   defp load_suite_source(path) when is_binary(path) do
-    with :ok <- ensure(not Enum.member?(Path.split(path), ".."), "suite path must not contain parent traversal"),
+    with :ok <-
+           ensure(
+             not Enum.member?(Path.split(path), ".."),
+             "suite path must not contain parent traversal"
+           ),
          {:ok, %File.Stat{type: :regular}} <- regular_file(path, "suite"),
          resolved = Path.expand(path),
          {:ok, raw} <- read_file(resolved, "suite") do
@@ -110,7 +111,11 @@ defmodule Pythia.Interop.CgqaConformance do
          :ok <- ensure(suite["schema"] == @suite_schema, "suite schema is unsupported"),
          :ok <- ensure(suite["suiteId"] == @suite_id, "suite id is unsupported"),
          :ok <- ensure(suite["version"] == @suite_version, "suite version is unsupported"),
-         :ok <- ensure(suite["claimBoundary"] == @claim_boundary, "suite claim boundary is unsupported"),
+         :ok <-
+           ensure(
+             suite["claimBoundary"] == @claim_boundary,
+             "suite claim boundary is unsupported"
+           ),
          :ok <-
            ensure(
              suite["suiteSchema"] == %{
@@ -127,7 +132,8 @@ defmodule Pythia.Interop.CgqaConformance do
              },
              "result schema pin is unsupported"
            ),
-         :ok <- ensure(suite["contracts"] == @expected_contracts, "contract pins are unsupported"),
+         :ok <-
+           ensure(suite["contracts"] == @expected_contracts, "contract pins are unsupported"),
          :ok <- validate_cases(cases) do
       :ok
     end
@@ -173,8 +179,10 @@ defmodule Pythia.Interop.CgqaConformance do
   defp valid_operation?(%{"kind" => "remove", "pointer" => pointer} = operation),
     do: map_size(operation) == 2 and valid_pointer?(pointer)
 
-  defp valid_operation?(%{"kind" => "duplicate_root_key", "key" => key, "value" => _} = operation),
-    do: map_size(operation) == 3 and is_binary(key) and String.trim(key) != ""
+  defp valid_operation?(
+         %{"kind" => "duplicate_root_key", "key" => key, "value" => _} = operation
+       ),
+       do: map_size(operation) == 3 and is_binary(key) and String.trim(key) != ""
 
   defp valid_operation?(_), do: false
 
@@ -232,7 +240,8 @@ defmodule Pythia.Interop.CgqaConformance do
   defp read_asset({:external, root}, relative) do
     with :ok <- safe_relative_json_path(relative),
          candidate = Path.expand(Path.join(root, relative)),
-         :ok <- ensure(String.starts_with?(candidate, root <> "/"), "suite asset escapes suite root"),
+         :ok <-
+           ensure(String.starts_with?(candidate, root <> "/"), "suite asset escapes suite root"),
          {:ok, %File.Stat{type: :regular}} <- regular_file(candidate, "suite asset #{relative}"),
          {:ok, raw} <- read_file(candidate, "suite asset #{relative}") do
       {:ok, raw}
@@ -311,7 +320,8 @@ defmodule Pythia.Interop.CgqaConformance do
          "value" => value
        }) do
     with {:ok, base} <- strict_decode(base_raw, "case fixture"),
-         :ok <- ensure(Map.has_key?(base, key), "duplicate_root_key target does not exist: #{key}"),
+         :ok <-
+           ensure(Map.has_key?(base, key), "duplicate_root_key target does not exist: #{key}"),
          <<"{", rest::binary>> <- String.trim_leading(base_raw) do
       {:ok, "{" <> canonical_json(key) <> ":" <> canonical_json(value) <> "," <> rest}
     else
@@ -338,7 +348,9 @@ defmodule Pythia.Interop.CgqaConformance do
         pointer
         |> String.split("/", trim: false)
         |> tl()
-        |> Enum.map(fn token -> token |> String.replace("~1", "/") |> String.replace("~0", "~") end)
+        |> Enum.map(fn token ->
+          token |> String.replace("~1", "/") |> String.replace("~0", "~")
+        end)
 
       {:ok, tokens}
     end
@@ -371,7 +383,8 @@ defmodule Pythia.Interop.CgqaConformance do
 
   defp mutate(container, [token | rest], kind, value) when is_list(container) do
     with {:ok, index} <- list_index(token),
-         :ok <- ensure(index < length(container), "operation list index is out of range: #{index}"),
+         :ok <-
+           ensure(index < length(container), "operation list index is out of range: #{index}"),
          {:ok, mutated} <- mutate(Enum.at(container, index), rest, kind, value) do
       {:ok, List.replace_at(container, index, mutated)}
     end
@@ -386,13 +399,15 @@ defmodule Pythia.Interop.CgqaConformance do
   end
 
   defp mutate_map(container, token, "replace", value) do
-    with :ok <- ensure(Map.has_key?(container, token), "operation target does not exist: #{token}") do
+    with :ok <-
+           ensure(Map.has_key?(container, token), "operation target does not exist: #{token}") do
       {:ok, Map.put(container, token, value)}
     end
   end
 
   defp mutate_map(container, token, "remove", _) do
-    with :ok <- ensure(Map.has_key?(container, token), "operation target does not exist: #{token}") do
+    with :ok <-
+           ensure(Map.has_key?(container, token), "operation target does not exist: #{token}") do
       {:ok, Map.delete(container, token)}
     end
   end
@@ -402,19 +417,28 @@ defmodule Pythia.Interop.CgqaConformance do
       case kind do
         "add" ->
           with :ok <-
-                 ensure(index <= length(container), "operation list index is out of range: #{index}") do
+                 ensure(
+                   index <= length(container),
+                   "operation list index is out of range: #{index}"
+                 ) do
             {:ok, List.insert_at(container, index, value)}
           end
 
         "replace" ->
           with :ok <-
-                 ensure(index < length(container), "operation list index is out of range: #{index}") do
+                 ensure(
+                   index < length(container),
+                   "operation list index is out of range: #{index}"
+                 ) do
             {:ok, List.replace_at(container, index, value)}
           end
 
         "remove" ->
           with :ok <-
-                 ensure(index < length(container), "operation list index is out of range: #{index}") do
+                 ensure(
+                   index < length(container),
+                   "operation list index is out of range: #{index}"
+                 ) do
             {:ok, List.delete_at(container, index)}
           end
       end
@@ -535,7 +559,9 @@ defmodule Pythia.Interop.CgqaConformance do
       "claimBoundary" => suite["claimBoundary"]
     }
 
-    report_id = "pythialabs-interop-conformance-" <> String.slice(sha256(canonical_json(report)), 0, 24)
+    report_id =
+      "pythialabs-interop-conformance-" <> String.slice(sha256(canonical_json(report)), 0, 24)
+
     {:ok, Map.put(report, "reportId", report_id)}
   end
 
@@ -592,11 +618,16 @@ defmodule Pythia.Interop.CgqaConformance do
   defp canonical_json(value), do: Jason.encode!(value)
 
   defp exact_keys(value, expected, label) do
-    ensure(MapSet.new(Map.keys(value)) == MapSet.new(expected), "#{label} has missing or unexpected fields")
+    ensure(
+      MapSet.new(Map.keys(value)) == MapSet.new(expected),
+      "#{label} has missing or unexpected fields"
+    )
   end
 
   defp field(map, atom_key) do
-    if Map.has_key?(map, atom_key), do: Map.get(map, atom_key), else: Map.get(map, Atom.to_string(atom_key))
+    if Map.has_key?(map, atom_key),
+      do: Map.get(map, atom_key),
+      else: Map.get(map, Atom.to_string(atom_key))
   end
 
   defp diagnostic(value, fallback) do
