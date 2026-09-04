@@ -1,0 +1,138 @@
+name: "Evidence: Windows exact-head proof (#265/#266)"
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-exact-head-proof-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-265-mcp:
+    name: "#265 Windows MCP at 70d4a98"
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout exact #265 head
+        uses: actions/checkout@v6
+        with:
+          ref: 70d4a98a4801884b1c75df0166154e2d6d28853b
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Verify identity and Windows MCP branch
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $expected = "70d4a98a4801884b1c75df0166154e2d6d28853b"
+          New-Item -ItemType Directory -Force windows-evidence | Out-Null
+          $actualBefore = (git rev-parse HEAD).Trim()
+          $actualBefore | Set-Content windows-evidence/head-before.txt
+          $expected | Set-Content windows-evidence/expected-head.txt
+          $env:RUNNER_OS | Set-Content windows-evidence/runner-os.txt
+          "node integrations/mcp/smoke.mjs" | Set-Content windows-evidence/command.txt
+          if ($env:RUNNER_OS -ne "Windows") { throw "Expected Windows runner, got $env:RUNNER_OS" }
+          if ($actualBefore -ne $expected) { throw "Initial HEAD mismatch: $actualBefore" }
+
+          node --check integrations/mcp/server.mjs
+          if ($LASTEXITCODE -ne 0) { throw "server.mjs syntax check failed" }
+          node --check integrations/mcp/smoke.mjs
+          if ($LASTEXITCODE -ne 0) { throw "smoke.mjs syntax check failed" }
+
+          node integrations/mcp/smoke.mjs 2>&1 |
+            Tee-Object -FilePath windows-evidence/mcp-smoke.log
+          $exitCode = $LASTEXITCODE
+          $exitCode | Set-Content windows-evidence/result.exit
+
+          $actualAfter = (git rev-parse HEAD).Trim()
+          $actualAfter | Set-Content windows-evidence/head-after.txt
+          if ($actualAfter -ne $expected) { throw "Final HEAD mismatch: $actualAfter" }
+          if ($exitCode -ne 0) { throw "MCP smoke failed with exit $exitCode" }
+
+      - name: Upload #265 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-265-windows-exact-head
+          path: windows-evidence
+          if-no-files-found: error
+          retention-days: 7
+
+  pr-266-worker:
+    name: "#266 Windows worker at e62820c"
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout exact #266 head
+        uses: actions/checkout@v6
+        with:
+          ref: e62820c8f3a22ec6f26b027805e2a0ff1a73f509
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.16"
+          otp-version: "26"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Hydrate reviewed dependencies
+        shell: pwsh
+        run: |
+          mix local.hex --force
+          if ($LASTEXITCODE -ne 0) { throw "mix local.hex failed" }
+          mix local.rebar --force
+          if ($LASTEXITCODE -ne 0) { throw "mix local.rebar failed" }
+          mix deps.get
+          if ($LASTEXITCODE -ne 0) { throw "mix deps.get failed" }
+
+      - name: Verify identity and Windows worker branch
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $expected = "e62820c8f3a22ec6f26b027805e2a0ff1a73f509"
+          New-Item -ItemType Directory -Force windows-evidence | Out-Null
+          $actualBefore = (git rev-parse HEAD).Trim()
+          $actualBefore | Set-Content windows-evidence/head-before.txt
+          $expected | Set-Content windows-evidence/expected-head.txt
+          $env:RUNNER_OS | Set-Content windows-evidence/runner-os.txt
+          "mix test test/port_worker_test.exs" | Set-Content windows-evidence/command.txt
+          if ($env:RUNNER_OS -ne "Windows") { throw "Expected Windows runner, got $env:RUNNER_OS" }
+          if ($actualBefore -ne $expected) { throw "Initial HEAD mismatch: $actualBefore" }
+
+          cargo build --release --manifest-path workers/solver_port/Cargo.toml 2>&1 |
+            Tee-Object -FilePath windows-evidence/cargo-build.log
+          if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
+          if (-not (Test-Path workers/solver_port/target/release/solver_port.exe)) {
+            throw "Windows worker executable was not produced"
+          }
+
+          mix test test/port_worker_test.exs 2>&1 |
+            Tee-Object -FilePath windows-evidence/port-worker-test.log
+          $exitCode = $LASTEXITCODE
+          $exitCode | Set-Content windows-evidence/result.exit
+
+          $actualAfter = (git rev-parse HEAD).Trim()
+          $actualAfter | Set-Content windows-evidence/head-after.txt
+          if ($actualAfter -ne $expected) { throw "Final HEAD mismatch: $actualAfter" }
+          if ($exitCode -ne 0) { throw "Port worker test failed with exit $exitCode" }
+
+      - name: Upload #266 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-266-windows-exact-head
+          path: windows-evidence
+          if-no-files-found: error
+          retention-days: 7
