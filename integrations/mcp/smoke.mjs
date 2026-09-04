@@ -49,6 +49,14 @@ fi
   const stubPath = path.join(dir, "mix");
   writeFileSync(stubPath, stub);
   chmodSync(stubPath, 0o755);
+
+  // Windows resolves command names through PATHEXT. Keep the smoke stub in
+  // that executable form as well, so the server's normal `spawn("mix", ...)`
+  // path is exercised on both platforms.
+  writeFileSync(
+    path.join(dir, "mix.cmd"),
+    "@echo off\r\nmore > nul\r\necho {\"ok\":true,\"outcome\":\"ALLOW\",\"status\":\"accepted\",\"stop_reason\":null}\r\n",
+  );
   return dir;
 }
 
@@ -103,7 +111,7 @@ function rpcDriver(child) {
 async function main() {
   const stubDir = setupStubMix();
   const child = spawnServer({
-    PATH: `${stubDir}:${process.env.PATH ?? ""}`,
+    PATH: `${stubDir}${path.delimiter}${process.env.PATH ?? ""}`,
     PYTHIA_REPO_ROOT: repoRoot,
   });
   const { call } = rpcDriver(child);
