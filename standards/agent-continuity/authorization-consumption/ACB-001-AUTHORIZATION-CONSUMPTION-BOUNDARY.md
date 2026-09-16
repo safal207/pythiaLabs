@@ -198,6 +198,43 @@ ACB(current consent) == CONSUMED
 
 before a consequential effect is released.
 
+## Conformance result classification
+
+Cross-implementation conformance reports MUST keep request-binding claims separate from stateful consumption claims. A provider or adapter that does not own a particular claim boundary MUST NOT be reported as passing that boundary merely because a neighboring layer does.
+
+Use these three result classes:
+
+```text
+PASS
+FAIL
+UNSUPPORTED_DIFFERENT_BOUNDARY
+```
+
+Their meanings are:
+
+- `PASS` — the implementation claims or owns the tested boundary and the falsification vector succeeds.
+- `FAIL` — the implementation claims or owns the tested boundary and the falsification vector violates the invariant.
+- `UNSUPPORTED_DIFFERENT_BOUNDARY` — the implementation does not claim or own the tested boundary, so the vector cannot establish either success or failure for that layer.
+
+`UNSUPPORTED_DIFFERENT_BOUNDARY` is not a weakened `PASS`. It is an explicit claim ceiling.
+
+For example, an otherwise valid stateless pre-tool provider may correctly bind an `ALLOW` to exact request content while lacking durable single-use consumption. In that case:
+
+```text
+mutated tool / args / actor / policy -> PASS if the old ALLOW is rejected
+replay of the same ALLOW             -> UNSUPPORTED_DIFFERENT_BOUNDARY
+```
+
+unless an explicit stateful consumption layer is enabled and included in the tested system boundary.
+
+This classification preserves the distinction:
+
+```text
+request binding != authorization occurrence != execution consumption
+```
+
+and prevents a request-binding success from being rounded up into a global replay-safety claim.
+
 ## Required falsification cases
 
 The executable suite covers at least:
