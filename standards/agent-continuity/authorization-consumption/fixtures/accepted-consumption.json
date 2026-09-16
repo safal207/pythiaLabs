@@ -1,0 +1,40 @@
+{
+  "authorization": {
+    "schema_version": "acb-authorization/0.1",
+    "decision_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "decision_event_id": "event:E1",
+    "status": "resolved_allow",
+    "issuer_ref": "human:42",
+    "policy_version": "policy:v17",
+    "logical_operation_id": "op:L1",
+    "execution_scope_digest": "sha256:03048ca7902a12aadefe701b4ba1d3a1678f4ff3da4614156ea03f3479573181",
+    "revalidate_if": ["authority_epoch", "recipient_binding", "account_snapshot"],
+    "bound_conditions": {
+      "authority_epoch": 17,
+      "recipient_binding": "wallet:B",
+      "account_snapshot": "acct:v7"
+    },
+    "usage_policy": {"mode": "one_shot", "max_uses": 1},
+    "use_count": 0,
+    "consumed_by_execution_ids": []
+  },
+  "execution": {
+    "schema_version": "acb-execution/0.1",
+    "logical_operation_id": "op:L1",
+    "execution_id": "exec:X1",
+    "tool_name": "send_payment",
+    "normalized_args": {"amount": 100, "currency": "USDC", "recipient": "wallet:B"},
+    "actor_ref": "agent:A",
+    "policy_version": "policy:v17",
+    "authority_ref": "authority:wallet:primary",
+    "authority_epoch": 17,
+    "relevant_state_refs": ["state:wallet:v41", "state:policy:v17"],
+    "current_conditions": {
+      "authority_epoch": 17,
+      "recipient_binding": "wallet:B",
+      "account_snapshot": "acct:v7"
+    },
+    "cancelled": false,
+    "superseded": false
+  }
+}

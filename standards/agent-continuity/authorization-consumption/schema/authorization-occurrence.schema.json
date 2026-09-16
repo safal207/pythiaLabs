@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safal207.github.io/pythiaLabs/schemas/acb-authorization-occurrence-0.1.json",
+  "title": "ACB-001 AuthorizationOccurrence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_ref",
+    "decision_event_id",
+    "status",
+    "issuer_ref",
+    "policy_version",
+    "logical_operation_id",
+    "execution_scope_digest",
+    "revalidate_if",
+    "bound_conditions",
+    "usage_policy",
+    "use_count",
+    "consumed_by_execution_ids"
+  ],
+  "properties": {
+    "schema_version": {"const": "acb-authorization/0.1"},
+    "decision_ref": {"type": "string", "minLength": 1},
+    "decision_event_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["deferred", "resolved_allow", "denied", "expired", "stale", "revoked", "superseded", "cancelled", "consumed"]},
+    "issuer_ref": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "logical_operation_id": {"type": "string", "minLength": 1},
+    "execution_scope_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "revalidate_if": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "bound_conditions": {"type": "object", "additionalProperties": {"type": ["string", "number", "integer", "boolean", "null"]}},
+    "usage_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "max_uses"],
+      "properties": {
+        "mode": {"enum": ["one_shot", "reusable"]},
+        "max_uses": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "use_count": {"type": "integer", "minimum": 0},
+    "consumed_by_execution_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+  }
+}

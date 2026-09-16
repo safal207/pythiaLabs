@@ -1,0 +1,10 @@
+{
+  "cases": [
+    {"id": "args-mutated", "mutation": "normalized_args.amount=1000", "expected": "BLOCKED:execution_scope_mismatch"},
+    {"id": "authority-epoch-changed", "mutation": "authority_epoch=18", "expected": "BLOCKED:execution_scope_mismatch"},
+    {"id": "freshness-changed", "mutation": "current_conditions.account_snapshot=acct:v8", "expected": "BLOCKED:freshness_changed:account_snapshot"},
+    {"id": "cancelled", "mutation": "cancelled=true", "expected": "BLOCKED:execution_cancelled"},
+    {"id": "one-shot-reuse", "mutation": "retry after first consumption", "expected": "BLOCKED:authorization_status_consumed"},
+    {"id": "semantic-collision", "mutation": "two event ids share decision_ref", "expected": "OCCURRENCE_AMBIGUOUS without exact event id"}
+  ]
+}
