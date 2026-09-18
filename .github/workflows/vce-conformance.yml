@@ -39,3 +39,10 @@ jobs:
             -s standards/agent-continuity/conformance \
             -p 'test_*.py' \
             -v
+
+      - name: Run responsibility-lane continuity suite
+        run: |
+          python -m unittest discover \
+            -s standards/agent-continuity/extensions/conformance \
+            -p 'test_*.py' \
+            -v
