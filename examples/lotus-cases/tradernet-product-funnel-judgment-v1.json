@@ -1,0 +1,157 @@
+{
+  "schema_version": "pythia-lotus-product-judgment-v1",
+  "case_id": "tradernet-product-funnel-2026-07-21",
+  "source": {
+    "repository": "safal207/LiminalQAengineer",
+    "pull_request": 102,
+    "exact_head": "d14d0e0cf434000c10609dc8627c288df5306df6",
+    "packet_path": "audits/tradernet/product-funnel-audit-v1.json"
+  },
+  "authority": {
+    "mode": "audit_only",
+    "ownership": false,
+    "approval": false,
+    "execution": false,
+    "account_access": false,
+    "order_execution": false,
+    "external_submission": false,
+    "experiment_launch": false,
+    "deployment": false,
+    "merge": false
+  },
+  "verdict": "ESCALATE",
+  "verdict_meaning": "Present the evidence-separated product audit to an authorised human owner. Do not convert recommendations into confirmed defects or execute external actions automatically.",
+  "confirmed_for_human_reporting": [
+    {
+      "id": "mobile-chart-user-agent-404",
+      "severity": "P1",
+      "status": "CONFIRMED",
+      "source_pr": 58
+    },
+    {
+      "id": "mobile-hero-late-discovery",
+      "severity": "P1-performance",
+      "status": "CONFIRMED",
+      "source_pr": 54
+    },
+    {
+      "id": "terminal-hidden-mobile-asset",
+      "severity": "P2",
+      "status": "CONFIRMED",
+      "source_pr": 60
+    },
+    {
+      "id": "terminal-missing-onboarding-asset",
+      "severity": "P3",
+      "status": "CONFIRMED",
+      "source_pr": 60
+    }
+  ],
+  "recommendations_allowed": [
+    {
+      "id": "persistent-system-state",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "complete-order-preview",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "marketable-limit-explanation",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "explicit-cancellation-state",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "position-protection-in-context",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "mobile-task-cards",
+      "source_status": "HYPOTHESIS",
+      "judgment": "TESTABLE_RECOMMENDATION"
+    },
+    {
+      "id": "safe-mobile-draft-recovery",
+      "source_status": "NEEDS_AUTHENTICATED_EVIDENCE",
+      "judgment": "VALIDATE_BEFORE_DEFECT_CLAIM"
+    },
+    {
+      "id": "intent-segmented-entry",
+      "source_status": "HYPOTHESIS",
+      "judgment": "BOUNDED_EXPERIMENT"
+    },
+    {
+      "id": "demo-first-activation",
+      "source_status": "HYPOTHESIS",
+      "judgment": "BOUNDED_EXPERIMENT"
+    }
+  ],
+  "blocked_claims": [
+    "The authenticated Tradernet order form currently hides fees or consequences.",
+    "Stop Loss or Take Profit is currently unusable.",
+    "Tradernet mobile web necessarily compresses desktop tables.",
+    "Tradernet users currently confuse real and demo accounts.",
+    "The proposed funnel will increase conversion.",
+    "One shared mobile root cause explains every public defect.",
+    "The evidence establishes a security vulnerability."
+  ],
+  "lotus_product_lens": [
+    {
+      "petal": "intent_before_conversion",
+      "judgment": "TESTABLE_RECOMMENDATION"
+    },
+    {
+      "petal": "continuity_before_friction",
+      "judgment": "NEEDS_EVIDENCE"
+    },
+    {
+      "petal": "complementary_value_before_upsell",
+      "judgment": "GUARDRAIL"
+    },
+    {
+      "petal": "one_click_without_hidden_commitment",
+      "judgment": "NEEDS_AUTHENTICATED_EVIDENCE"
+    },
+    {
+      "petal": "recovery_before_pressure",
+      "judgment": "GUARDRAIL"
+    },
+    {
+      "petal": "evidence_before_growth_claims",
+      "judgment": "MEASUREMENT_READY"
+    },
+    {
+      "petal": "human_freedom_at_every_stage",
+      "judgment": "GUARDRAIL"
+    }
+  ],
+  "clickfunnels_boundary": {
+    "role": "pattern_reference_only",
+    "vendor_claims_are_tradernet_evidence": false,
+    "false_urgency_allowed": false,
+    "pressure_to_trade_allowed": false,
+    "preselected_paid_or_risk_increasing_option_allowed": false
+  },
+  "recommended_human_actions": [
+    "Review the four confirmed public findings as separate repair items.",
+    "Run the authorised authenticated validation matrix before filing order, cancellation, protection or recovery defects.",
+    "Use qualified activation and harm guardrails for funnel experiments.",
+    "Invalidate stale conclusions when the tested build, account state or environment changes."
+  ],
+  "unknowns": [
+    "Authenticated order-entry state and consequence visibility.",
+    "KYC and funding recovery behaviour.",
+    "Current Stop Loss and Take Profit discoverability on desktop and mobile web.",
+    "Mobile order-management layout and horizontal-scroll behaviour.",
+    "Draft recovery and stale-preview invalidation.",
+    "Market-open quote freshness and reconnect consistency."
+  ]
+}
