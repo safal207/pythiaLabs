@@ -10,6 +10,28 @@ defines a bounded, structured envelope that carries the active operational tail 
 
 A separate restore-results document records which required reads and evidence checks were actually completed. The envelope declares the gate; restore results satisfy it.
 
+## HRC-001 — Handoff Reachability & Causal Basis
+
+[`HRC-001 — Handoff Reachability & Causal Basis`](./handoff-reachability/HRC-001-HANDOFF-REACHABILITY-CAUSALITY.md)
+separates four facts that multi-agent coordination often conflates:
+
+```text
+ownership epoch
+causal read basis
+recipient reachability
+predecessor CAS
+```
+
+Core boundaries:
+
+> Ownership does not imply reachability.
+
+> A diagnostic that exists but is not surfaced to the sender is not an operational signal.
+
+> Unread predecessor and CAS conflict are different failure classes.
+
+The executable reference uses a two-phase handoff: a target can become `HANDOFF_DELIVERABLE` only after current surfaced reachability is checked, and ownership may advance only after the target acknowledges the exact handoff occurrence and ownership epoch.
+
 ## Problem
 
 Coding agents may lose task continuity after compaction or handoff. They can repeat completed work, violate recent constraints, forget rejected approaches, or confidently reconstruct an execution history that is not supported by durable evidence.
@@ -24,7 +46,8 @@ Coding agents may lose task continuity after compaction or handoff. They can rep
 - JSON Schemas for the envelope and restore results;
 - example envelope and restore results;
 - reference validator;
-- executable conformance tests.
+- executable conformance tests;
+- additive causal coordination contracts such as HRC-001.
 
 ## Quick validation
 
@@ -36,6 +59,16 @@ python -m unittest discover \
   -p 'test_*.py' -v
 ```
 
+HRC-001 can be run independently:
+
+```bash
+python -m pip install -r standards/agent-continuity/handoff-reachability/conformance/requirements.txt
+
+python -m unittest discover \
+  -s standards/agent-continuity/handoff-reachability/conformance \
+  -p 'test_*.py' -v
+```
+
 ## What the suite verifies
 
 - published JSON Schema enforcement;
@@ -44,7 +77,11 @@ python -m unittest discover \
 - independent digest/receipt evidence checks;
 - required-read completion;
 - fail-closed restore behavior;
-- unresolved task verification remaining unresolved.
+- unresolved task verification remaining unresolved;
+- ownership-epoch gating;
+- unread-predecessor versus CAS-conflict separation;
+- surfaced and time-bounded reachability;
+- exact recipient acknowledgement before handoff commit.
 
 ## Intended integrations
 
