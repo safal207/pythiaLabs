@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/safal207/pythiaLabs/standards/gpt56-review-fabric/repository-profile.schema.json",
+  "title": "GPT-5.6 Review Fabric repository profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository",
+    "profile_id",
+    "required_roles",
+    "required_claim_kinds",
+    "focus",
+    "authority"
+  ],
+  "properties": {
+    "schema_version": {"const": "gpt56-review-profile-v1"},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "profile_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"},
+    "required_roles": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "causal_architect"},
+        {"const": "temporal_provenance"},
+        {"const": "adversarial_semantics"},
+        {"const": "authority_safety"},
+        {"const": "ci_reliability"}
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "required_claim_kinds": {
+      "const": ["fact", "observation", "hypothesis"]
+    },
+    "focus": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 3, "maxLength": 240}
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["can_execute", "can_approve", "can_merge", "can_deploy"],
+      "properties": {
+        "can_execute": {"const": false},
+        "can_approve": {"const": false},
+        "can_merge": {"const": false},
+        "can_deploy": {"const": false}
+      }
+    }
+  }
+}
