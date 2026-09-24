@@ -1,0 +1,103 @@
+{
+  "schema_version": "elr-graph/0.1",
+  "graph_id": "reference-proof-network",
+  "nodes": [
+    "START",
+    "SYNC",
+    "CACHE",
+    "VERIFY",
+    "HUMAN",
+    "EXECUTE"
+  ],
+  "edges": [
+    {
+      "edge_id": "sync-check",
+      "from": "START",
+      "to": "SYNC",
+      "provides": ["authority_current", "scope_bound"],
+      "bindings": {
+        "action_scope_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "authority_epoch": 4,
+        "policy_version": "policy:v1",
+        "state_version": "state:19",
+        "max_risk_tier": 2
+      },
+      "cost": {"latency": 1, "compute": 1, "coordination": 0, "monetary": 0}
+    },
+    {
+      "edge_id": "sync-execute",
+      "from": "SYNC",
+      "to": "EXECUTE",
+      "provides": [],
+      "bindings": {},
+      "cost": {"latency": 1, "compute": 0, "coordination": 0, "monetary": 0}
+    },
+    {
+      "edge_id": "cached-evidence",
+      "from": "START",
+      "to": "CACHE",
+      "provides": ["authority_current", "scope_bound", "fresh_evidence"],
+      "bindings": {
+        "action_scope_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "authority_epoch": 4,
+        "policy_version": "policy:v1",
+        "state_version": "state:19",
+        "evidence_observed_tick": 95,
+        "max_evidence_age_ticks": 10,
+        "max_risk_tier": 5
+      },
+      "cost": {"latency": 2, "compute": 1, "coordination": 0, "monetary": 0}
+    },
+    {
+      "edge_id": "cache-execute",
+      "from": "CACHE",
+      "to": "EXECUTE",
+      "provides": [],
+      "bindings": {},
+      "cost": {"latency": 1, "compute": 0, "coordination": 0, "monetary": 0}
+    },
+    {
+      "edge_id": "independent-verifier",
+      "from": "START",
+      "to": "VERIFY",
+      "provides": ["authority_current", "scope_bound", "fresh_evidence", "independent_verifier"],
+      "bindings": {
+        "action_scope_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "authority_epoch": 4,
+        "policy_version": "policy:v1",
+        "state_version": "state:19",
+        "valid_until_tick": 200
+      },
+      "cost": {"latency": 5, "compute": 3, "coordination": 1, "monetary": 1}
+    },
+    {
+      "edge_id": "verified-execute",
+      "from": "VERIFY",
+      "to": "EXECUTE",
+      "provides": [],
+      "bindings": {"requires_reversible": true, "max_risk_tier": 3},
+      "cost": {"latency": 1, "compute": 0, "coordination": 0, "monetary": 0}
+    },
+    {
+      "edge_id": "human-defer-resolve",
+      "from": "VERIFY",
+      "to": "HUMAN",
+      "provides": ["human_approval", "exact_occurrence_binding"],
+      "bindings": {
+        "action_scope_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "authority_epoch": 4,
+        "policy_version": "policy:v1",
+        "state_version": "state:19"
+      },
+      "cost": {"latency": 20, "compute": 1, "coordination": 5, "monetary": 0}
+    },
+    {
+      "edge_id": "consume-and-execute",
+      "from": "HUMAN",
+      "to": "EXECUTE",
+      "provides": ["one_shot_consumption"],
+      "bindings": {},
+      "cost": {"latency": 1, "compute": 0, "coordination": 0, "monetary": 0}
+    }
+  ]
+}

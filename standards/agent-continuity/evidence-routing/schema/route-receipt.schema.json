@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/elr/route-receipt.schema.json",
+  "title": "ELR-001 Route Selection Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "request_digest",
+    "graph_digest",
+    "selected_edge_ids",
+    "accumulated_proofs",
+    "required_proofs",
+    "weighted_total_cost",
+    "evaluated_at_tick",
+    "route_status",
+    "receipt_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "elr-receipt/0.1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "request_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "graph_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "selected_edge_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "accumulated_proofs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "required_proofs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "weighted_total_cost": {"type": "integer", "minimum": 0},
+    "evaluated_at_tick": {"type": "integer", "minimum": 0},
+    "route_status": {"const": "ADMISSIBLE"},
+    "receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

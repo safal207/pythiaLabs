@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resonance.example/elr/routing-request.schema.json",
+  "title": "ELR-001 Routing Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "request_id",
+    "start_node",
+    "target_node",
+    "context",
+    "required_proofs",
+    "cost_weights"
+  ],
+  "properties": {
+    "schema_version": {"const": "elr-request/0.1"},
+    "request_id": {"type": "string", "minLength": 1},
+    "start_node": {"type": "string", "minLength": 1},
+    "target_node": {"type": "string", "minLength": 1},
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_scope_digest",
+        "authority_epoch",
+        "policy_version",
+        "state_version",
+        "now_tick",
+        "risk_tier",
+        "reversible"
+      ],
+      "properties": {
+        "action_scope_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "authority_epoch": {"type": "integer", "minimum": 0},
+        "policy_version": {"type": "string", "minLength": 1},
+        "state_version": {"type": "string", "minLength": 1},
+        "now_tick": {"type": "integer", "minimum": 0},
+        "risk_tier": {"type": "integer", "minimum": 0, "maximum": 9},
+        "reversible": {"type": "boolean"}
+      }
+    },
+    "required_proofs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "cost_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latency", "compute", "coordination", "monetary"],
+      "properties": {
+        "latency": {"type": "integer", "minimum": 0},
+        "compute": {"type": "integer", "minimum": 0},
+        "coordination": {"type": "integer", "minimum": 0},
+        "monetary": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}
