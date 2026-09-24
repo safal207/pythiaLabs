@@ -1,0 +1,125 @@
+{
+  "schema_version": "pythia.lotus_causal_test_paths.v0.1",
+  "graph": "lotus-family-causality-v0.1.json",
+  "routes": [
+    {
+      "id": "CML-PASS-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "valid"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_straight_line", "control.contract_test_selected", "evidence.same_bytes_hashed", "outcome.pass", "authority.advisory_only"],
+      "expected": {"outcome": "PASS", "reason_code": "LOTUS_CONTRACT_CONFORMANT"}
+    },
+    {
+      "id": "LS-PASS-001",
+      "repository_id": "ls",
+      "scenario": {"kind": "valid"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_straight_line", "control.contract_test_selected", "evidence.same_bytes_hashed", "outcome.pass", "authority.advisory_only"],
+      "expected": {"outcome": "PASS", "reason_code": "LOTUS_CONTRACT_CONFORMANT"}
+    },
+    {
+      "id": "PYTHIA-PASS-001",
+      "repository_id": "pythia",
+      "scenario": {"kind": "valid"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_straight_line", "control.contract_test_selected", "evidence.same_bytes_hashed", "outcome.pass", "authority.advisory_only"],
+      "expected": {"outcome": "PASS", "reason_code": "LOTUS_CONTRACT_CONFORMANT"}
+    },
+    {
+      "id": "CI-NONRUN-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\nenv:\n  NOTE: |\n    python -m pytest\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.non_run_text", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-STEP-SKIP-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Run tests\n        if: ${{ false }}\n        run: |\n          python -m pytest\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_skipped", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-JOB-SKIP-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n    if: ${{ false }}\n    steps:\n      - name: Run tests\n        run: |\n          python -m pytest\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_not_runnable", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-NO-RUNNER-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    steps:\n      - name: Run tests\n        run: |\n          python -m pytest\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_not_runnable", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-QUOTED-ENV-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\nenv:\n  \"PYTEST_ADDOPTS\": \"--ignore=tests/test_lotus_docs_contract.py\"\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: python -m pytest\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_override", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-SHELL-CONTROL-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Run tests\n        run: |\n          if false; then\n            python -m pytest\n          fi\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_control_flow", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CML-SUBSET-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Run tests\n        run: |\n          python -m pytest tests/test_other.py\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_straight_line", "control.contract_test_excluded", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "PYTHIA-SUBSET-001",
+      "repository_id": "pythia",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Run tests\n        run: |\n          mix test test/unrelated_test.exs\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_runnable", "control.step_enabled", "control.direct_run", "control.test_env_clean", "control.shell_straight_line", "control.contract_test_excluded", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "CI-FAKE-STEPS-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "workflow", "workflow": "name: CI\nmetadata:\n  fake-job:\n    steps:\n      - run: python -m pytest\njobs: {}\n"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_present", "control.workflow_job_not_runnable", "risk.false_ci_pass", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "IDENTITY-INVALID-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "invalid_commit", "commit_sha": "main"},
+      "path": ["input.snapshot_present", "input.identity_claims_invalid", "outcome.unknown"],
+      "expected": {"outcome": "UNKNOWN", "reason_code": "COMMIT_SHA_INVALID"}
+    },
+    {
+      "id": "SNAPSHOT-MISSING-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "missing_snapshot"},
+      "path": ["input.snapshot_missing", "outcome.unknown"],
+      "expected": {"outcome": "UNKNOWN", "reason_code": "SNAPSHOT_UNAVAILABLE"}
+    },
+    {
+      "id": "CONTRACT-DRIFT-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "missing_term"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "control.manifest_valid", "control.contract_terms_missing", "outcome.drift"],
+      "expected": {"outcome": "DRIFT", "reason_code": "LOTUS_CONTRACT_DRIFT"}
+    },
+    {
+      "id": "IDENTITY-LIMIT-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "valid", "assert_identity_mode": "caller_claim_only"},
+      "path": ["input.snapshot_present", "input.identity_claims_well_formed", "limitation.identity_unverified", "risk.identity_overclaim", "authority.advisory_only"],
+      "expected": {"outcome": "PASS", "reason_code": "LOTUS_CONTRACT_CONFORMANT"}
+    },
+    {
+      "id": "MANIFEST-INVALID-001",
+      "repository_id": "cml",
+      "scenario": {"kind": "invalid_manifest"},
+      "path": ["control.manifest_invalid", "outcome.unknown"],
+      "expected": {"outcome": "UNKNOWN", "reason_code": "MANIFEST_INVALID"}
+    }
+  ]
+}
