@@ -1,0 +1,80 @@
+{
+  "excludes": [
+    "manifest.json"
+  ],
+  "files": {
+    "baseline-control.txt": {
+      "bytes": 832,
+      "sha256": "dd5aa4d81346343e783dd320a3beaa98ac2359e9cc983e847f5cdabb040807c7"
+    },
+    "baseline-control.xml": {
+      "bytes": 1870,
+      "sha256": "92b15dd4081ed76cf15ceb4b1a449d390e6c07ebc52a79bd419ccb38a0ff8bfe"
+    },
+    "details-rotation-baseline.txt": {
+      "bytes": 832,
+      "sha256": "1903c04a27b18c587ff7a61515960f22ec184a84763dc2422a44666f8a4349e7"
+    },
+    "details-rotation-baseline.xml": {
+      "bytes": 1870,
+      "sha256": "d47d2ce2bbfe0933cc5a9a17c94c557a663a8c1645cf1dcd09cf76e2f2526050"
+    },
+    "details-rotation-strengthened.txt": {
+      "bytes": 3214,
+      "sha256": "5bd905a8d26641a9a1c7a72816599ec97add455edaa5464c0eaa0ed2db171197"
+    },
+    "details-rotation-strengthened.xml": {
+      "bytes": 3225,
+      "sha256": "5c319e4cd6e80403e5fcfc301add68c80d20c408cf6d749eb652b22f11378eb1"
+    },
+    "details-rotation.patch": {
+      "bytes": 748,
+      "sha256": "ecd35a680f9193cc75381f6dbad28b28fd04f51e187bf3fc68a993815d80e3dd"
+    },
+    "environment.txt": {
+      "bytes": 309,
+      "sha256": "a591f1be50b080370491c4defa2ae84125b4593249aa123f93b7188cfcc6a7c4"
+    },
+    "report.json": {
+      "bytes": 110973,
+      "sha256": "e37eea47cb07a623b7b009b866df4f9dfe183cb7716f84a690ee58794df203e8"
+    },
+    "restored-production-strengthened-suite.txt": {
+      "bytes": 1416,
+      "sha256": "8fee583e6905e16687dea1966ffa70d6f86aca9de9990ac1234b21f800e5af50"
+    },
+    "restored-production-strengthened-suite.xml": {
+      "bytes": 80770,
+      "sha256": "0ea510a152c9994ef4823af421d4ef28f0da9ffc3bd4ae870f24b62bcf62f5bc"
+    },
+    "risks-rotation-baseline.txt": {
+      "bytes": 832,
+      "sha256": "dd5aa4d81346343e783dd320a3beaa98ac2359e9cc983e847f5cdabb040807c7"
+    },
+    "risks-rotation-baseline.xml": {
+      "bytes": 1870,
+      "sha256": "21991537eae170eb379b5f88b0f8c5f733b9386a0559b9b6c011c8ebecbfe081"
+    },
+    "risks-rotation-strengthened.txt": {
+      "bytes": 3222,
+      "sha256": "92e5c4a0f23ece8db1bdba35645779e926131d139bd115f21e5255c789a26956"
+    },
+    "risks-rotation-strengthened.xml": {
+      "bytes": 3327,
+      "sha256": "8b3037da2d2c84455081fc6158be5f80d75d1ebe2135971949d97865d3ed5b33"
+    },
+    "risks-rotation.patch": {
+      "bytes": 665,
+      "sha256": "c55a3515490ad520e448dbcce8824368a798b505f5f322307c47e4d9fdf203e4"
+    },
+    "strengthened-control.txt": {
+      "bytes": 832,
+      "sha256": "38c0d4761fa2ea2738ceb52e41645af06ce19f2069393c3bdcf62e9591b410dc"
+    },
+    "strengthened-control.xml": {
+      "bytes": 1870,
+      "sha256": "db2f69b36903881ae9f15c80b74d91985a161eb4f4dd043724ef29bf6823e559"
+    }
+  },
+  "schema": "sha256-closed-files-v1"
+}

@@ -1,0 +1,14 @@
+--- a/openhands-sdk/openhands/sdk/agent/agent.py
++++ b/openhands-sdk/openhands/sdk/agent/agent.py
+@@ -1180,7 +1180,10 @@
+         event = SecurityAnalysisEvent(
+             analyzer=state.security_analyzer.__class__.__name__,
+             policy=state.confirmation_policy.__class__.__name__,
+-            risks={action.id: analysis.risk for action, analysis in analyses},
++            risks={
++                action.id: analyses[(index + 1) % len(analyses)][1].risk
++                for index, (action, _) in enumerate(analyses)
++            },
+             details={
+                 action.id: analysis.details
+                 for action, analysis in analyses

@@ -1,0 +1,16 @@
+..................xxxxx................................................. [ 14%]
+........x............................................................... [ 28%]
+..............................xx....xx.................................. [ 42%]
+........................................................................ [ 56%]
+........................................................................ [ 70%]
+........................................................................ [ 85%]
+...................................................s...sss..........sss. [ 99%]
+....                                                                     [100%]
+=============================== warnings summary ===============================
+tests/sdk/agent/test_security_analysis_event.py: 10 warnings
+  /workspace/scratch/5b0f6da052fa/openhands-4259-20261011/source/openhands-sdk/openhands/sdk/llm/utils/telemetry.py:395: UserWarning: Cost calculation failed: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=test-model
+   Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+    warnings.warn(f"Cost calculation failed: {e}")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+491 passed, 7 skipped, 10 xfailed, 10 warnings in 2.48s
