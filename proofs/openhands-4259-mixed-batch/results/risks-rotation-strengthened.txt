@@ -1,0 +1,36 @@
+...F.......                                                              [100%]
+=================================== FAILURES ===================================
+_________________ test_one_event_per_batch_keyed_by_action_id __________________
+tests/sdk/agent/test_security_analysis_event.py:274: in test_one_event_per_batch_keyed_by_action_id
+    assert analyses[0].risks == {
+E   AssertionError: assert {'0d880698-e9...UM: 'MEDIUM'>} == {'0d880698-e9...HIGH: 'HIGH'>}
+E     
+E     Differing items:
+E     {'0d880698-e9f3-41f3-9b0f-919d28af21ad': <SecurityRisk.LOW: 'LOW'>} != {'0d880698-e9f3-41f3-9b0f-919d28af21ad': <SecurityRisk.MEDIUM: 'MEDIUM'>}
+E     {'fe0e919e-7658-49c7-8878-012281d3f4f5': <SecurityRisk.MEDIUM: 'MEDIUM'>} != {'fe0e919e-7658-49c7-8878-012281d3f4f5': <SecurityRisk.HIGH: 'HIGH'>}
+E     {'38dff16f-a16c-44b1-aa38-547a49aaa24f': <SecurityRisk.HIGH: 'HIGH'>} != {'38dff16f-a16c-44b1-aa38-547a49aaa24f': <SecurityRisk.LOW: 'LOW'>}
+E     Use -v to get more diff
+----------------------------- Captured stderr call -----------------------------
+[10/11/26 03:00:55] WARNING  No persistence_dir provided; falling   state.py:515
+                             back to InMemoryFileStore. EventLog                
+                             data will not persist across requests.             
+[10/11/26 03:00:55] INFO     Created new conversation               state.py:592
+                             d2147467-30af-4024-ab43-0319d47085c2               
+[10/11/26 03:00:55] INFO     Confirmation policy set  local_conversation.py:2621
+                             to: kind='NeverConfirm'                            
+[10/11/26 03:00:55] INFO     Loaded 1 tools from spec                base.py:596
+------------------------------ Captured log call -------------------------------
+WARNING  openhands.sdk.conversation.state:state.py:515 No persistence_dir provided; falling back to InMemoryFileStore. EventLog data will not persist across requests.
+INFO     openhands.sdk.conversation.state:state.py:592 Created new conversation d2147467-30af-4024-ab43-0319d47085c2
+INFO     openhands.sdk.conversation.impl.local_conversation:local_conversation.py:2621 Confirmation policy set to: kind='NeverConfirm'
+INFO     openhands.sdk.agent.base:base.py:596 Loaded 1 tools from spec
+=============================== warnings summary ===============================
+tests/sdk/agent/test_security_analysis_event.py: 10 warnings
+  /workspace/scratch/5b0f6da052fa/openhands-4259-20261011/source/openhands-sdk/openhands/sdk/llm/utils/telemetry.py:395: UserWarning: Cost calculation failed: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=test-model
+   Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+    warnings.warn(f"Cost calculation failed: {e}")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/sdk/agent/test_security_analysis_event.py::test_one_event_per_batch_keyed_by_action_id
+1 failed, 10 passed, 10 warnings in 0.29s

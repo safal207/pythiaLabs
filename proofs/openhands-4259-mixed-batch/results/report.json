@@ -1,0 +1,2604 @@
+{
+  "claim": "Controlled test sensitivity only; no observed production defect.",
+  "environment": {
+    "agent_module": "/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/source/openhands-sdk/openhands/sdk/agent/agent.py",
+    "executable": "/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/source/.venv/bin/python",
+    "pytest": "9.0.3",
+    "python": "3.13.16 (main, Oct  3 2026, 01:06:22) [Clang 22.1.3 ]"
+  },
+  "environment_command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+    "run",
+    "--frozen",
+    "python",
+    "-B",
+    "-c",
+    "import json,sys,importlib.metadata; import openhands.sdk.agent.agent as m; print(json.dumps({'python':sys.version,'executable':sys.executable,'agent_module':m.__file__,'pytest':importlib.metadata.version('pytest')}))"
+  ],
+  "environment_overrides": {
+    "LITELLM_LOCAL_MODEL_COST_MAP": "true",
+    "OPENHANDS_SUPPRESS_BANNER": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1"
+  },
+  "final_suite_test_variant": "strengthened",
+  "hashes": {
+    "baseline_test": "7d9649a3135988545c77084f21dad4d957c80cdd67ece6aa3ca3c25a52605cda",
+    "driver": "17bdfabb81de16e13a550f4d2021a83d9c272cd083b217c1e0d9b653dc781160",
+    "native_patch": "95cd9f3f02183964ff8cabbd939f8d0d23c1c3c78bf2588cd63f61193d41efcf",
+    "production": "0fe8c703580ae6a6ae2dba97a0bc1966811950d224b4672a3d6af33001d30c92",
+    "strengthened_test": "d065099dcf1def8acbcd5294ad694826c285e11d4c09ad559cbff138eb0e5375",
+    "uv_lock": "38e1d063a2d6580e6d23afbbcb64ddadb85feeab3a669486ddf3435cfe17d196"
+  },
+  "input_test_variant": "strengthened",
+  "output": "/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results",
+  "restoration": {
+    "openhands-sdk/openhands/sdk/agent/agent.py": true,
+    "tests/sdk/agent/test_security_analysis_event.py": true,
+    "uv.lock": true
+  },
+  "runs": [
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/baseline-control.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 0,
+        "passed": 11,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 9.491,
+      "failures": [],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "baseline-control",
+      "log": "baseline-control.txt",
+      "production_sha256": "0fe8c703580ae6a6ae2dba97a0bc1966811950d224b4672a3d6af33001d30c92",
+      "returncode": 0,
+      "test_sha256": "7d9649a3135988545c77084f21dad4d957c80cdd67ece6aa3ca3c25a52605cda",
+      "xml": "baseline-control.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/strengthened-control.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 0,
+        "passed": 11,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 9.446,
+      "failures": [],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "strengthened-control",
+      "log": "strengthened-control.txt",
+      "production_sha256": "0fe8c703580ae6a6ae2dba97a0bc1966811950d224b4672a3d6af33001d30c92",
+      "returncode": 0,
+      "test_sha256": "d065099dcf1def8acbcd5294ad694826c285e11d4c09ad559cbff138eb0e5375",
+      "xml": "strengthened-control.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/risks-rotation-baseline.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 0,
+        "passed": 11,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 8.891,
+      "failures": [],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "risks-rotation-baseline",
+      "log": "risks-rotation-baseline.txt",
+      "production_sha256": "5b6b56b61a9c178da92f6cbac185809e6e030aa17f696d6d69307f128eacf85f",
+      "returncode": 0,
+      "test_sha256": "7d9649a3135988545c77084f21dad4d957c80cdd67ece6aa3ca3c25a52605cda",
+      "xml": "risks-rotation-baseline.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/risks-rotation-strengthened.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 1,
+        "passed": 10,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 9.04,
+      "failures": [
+        {
+          "assertion_failure": true,
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "message": "AssertionError: assert {'0d880698-e9...UM: 'MEDIUM'>} == {'0d880698-e9...HIGH: 'HIGH'>}\n  \n  Differing items:\n  {'0d880698-e9f3-41f3-9b0f-919d28af21ad': <SecurityRisk.LOW: 'LOW'>} != {'0d880698-e9f3-41f3-9b0f-919d28af21ad': <SecurityRisk.MEDIUM: 'MEDIUM'>}\n  {'fe0e919e-7658-49c7-8878-012281d3f4f5': <SecurityRisk.MEDIUM: 'MEDIUM'>} != {'fe0e919e-7658-49c7-8878-012281d3f4f5': <SecurityRisk.HIGH: 'HIGH'>}\n  {'38dff16f-a16c-44b1-aa38-547a49aaa24f': <SecurityRisk.HIGH: 'HIGH'>} != {'38dff16f-a16c-44b1-aa38-547a49aaa24f': <SecurityRisk.LOW: 'LOW'>}\n  Use -v to get more diff",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        }
+      ],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "risks-rotation-strengthened",
+      "log": "risks-rotation-strengthened.txt",
+      "production_sha256": "5b6b56b61a9c178da92f6cbac185809e6e030aa17f696d6d69307f128eacf85f",
+      "returncode": 1,
+      "test_sha256": "d065099dcf1def8acbcd5294ad694826c285e11d4c09ad559cbff138eb0e5375",
+      "xml": "risks-rotation-strengthened.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/details-rotation-baseline.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 0,
+        "passed": 11,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 9.14,
+      "failures": [],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "details-rotation-baseline",
+      "log": "details-rotation-baseline.txt",
+      "production_sha256": "eca1c7160c4fff76d3553599517e9dede9d0e10be152e4838f12614f3e29071f",
+      "returncode": 0,
+      "test_sha256": "7d9649a3135988545c77084f21dad4d957c80cdd67ece6aa3ca3c25a52605cda",
+      "xml": "details-rotation-baseline.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/details-rotation-strengthened.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 11,
+        "errors": 0,
+        "failures": 1,
+        "passed": 10,
+        "skipped": 0,
+        "xfailed": 0
+      },
+      "duration_seconds": 9.341,
+      "failures": [
+        {
+          "assertion_failure": true,
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "message": "AssertionError: assert {'65ab91b6-73...d': 'call_2'}} == {'65ab91b6-73...d': 'call_1'}}\n  \n  Differing items:\n  {'f056992e-8c00-48eb-b397-da7b2c13a5dd': {'tool_call_id': 'call_2'}} != {'f056992e-8c00-48eb-b397-da7b2c13a5dd': {'tool_call_id': 'call_1'}}\n  {'65ab91b6-7396-482c-8334-07177704c5f9': {'tool_call_id': 'call_0'}} != {'65ab91b6-7396-482c-8334-07177704c5f9': {'tool_call_id': 'call_2'}}\n  {'c7cd84f5-5fcd-4b42-a1d7-b20714afc5b2': {'tool_call_id': 'call_1'}} != {'c7cd84f5-5fcd-4b42-a1d7-b20714afc5b2': {'tool_call_id': 'call_0'}}\n  Use -v to get more diff",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        }
+      ],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        }
+      ],
+      "label": "details-rotation-strengthened",
+      "log": "details-rotation-strengthened.txt",
+      "production_sha256": "eca1c7160c4fff76d3553599517e9dede9d0e10be152e4838f12614f3e29071f",
+      "returncode": 1,
+      "test_sha256": "d065099dcf1def8acbcd5294ad694826c285e11d4c09ad559cbff138eb0e5375",
+      "xml": "details-rotation-strengthened.xml"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/uv",
+        "run",
+        "--frozen",
+        "python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/sdk/agent/test_security_analysis_event.py",
+        "tests/sdk/agent/test_async_secret_masking.py",
+        "tests/sdk/security",
+        "--junitxml=/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/owned/proofs/openhands-4259-mixed-batch/results/restored-production-strengthened-suite.xml",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=-q --tb=short"
+      ],
+      "counts": {
+        "collected": 508,
+        "errors": 0,
+        "failures": 0,
+        "passed": 491,
+        "skipped": 7,
+        "xfailed": 10
+      },
+      "duration_seconds": 11.649,
+      "failures": [],
+      "identities": [
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_no_analyzer_emits_no_security_analysis_event"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_verdict_is_recorded_even_when_policy_never_confirms"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_precedes_confirmation_wait_and_carries_analyzer_details"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_one_event_per_batch_keyed_by_action_id"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyzer_error_defaults_to_high_with_error_detail"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_event_round_trips_through_the_event_union"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analyze_pending_actions_keeps_its_risk_only_shape"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_legacy_batch_verdict_controls_confirmation_and_audit[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_security_analysis_event",
+          "name": "test_analysis_secrets_masked_in_callbacks_and_persistence[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_async_secret_masking",
+          "name": "test_async_response_masks_loopback_lookup_secret_without_blocking[False]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_async_secret_masking",
+          "name": "test_async_response_masks_loopback_lookup_secret_without_blocking[True]"
+        },
+        {
+          "classname": "tests.sdk.agent.test_async_secret_masking",
+          "name": "test_async_tool_thought_matches_sync_behavior"
+        },
+        {
+          "classname": "tests.sdk.agent.test_async_secret_masking",
+          "name": "test_async_response_masks_secrets_registered_during_lookup"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestTDDRedGreen",
+          "name": "test_json_recursion_bomb_handled"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestTDDRedGreen",
+          "name": "test_word_joiner_evasion_detected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestTDDRedGreen",
+          "name": "test_fetch_to_exec_does_not_cross_fields"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestDesignBoundaries",
+          "name": "test_cyrillic_homoglyph_evasion"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestDesignBoundaries",
+          "name": "test_combining_character_evasion"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestDesignBoundaries",
+          "name": "test_payload_past_hard_cap"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestDesignBoundaries",
+          "name": "test_payload_in_thinking_blocks"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestDesignBoundaries",
+          "name": "test_fetch_pipe_to_node"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[null byte evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[ZWS evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[ZWNJ evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[ZWJ evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[BOM evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[RLO evasion]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[interleaved ZWS]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[math bold rm]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[empty command]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_normalization_stress[whitespace only]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[uppercase RM -RF]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[newline between tokens]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[chained dangerous calls]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[evaluate is not eval]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[getoutput not in patterns]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[bare 777 no chmod]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_pattern_boundary_garbage[semicolon then rm -rf]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_ensemble_unknown_dilution[LOW-UNKNOWN dilution preserves LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_ensemble_unknown_dilution[MEDIUM-UNKNOWN dilution preserves MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_adversarial.TestAdversarialGarbage",
+          "name": "test_ensemble_unknown_dilution[HIGH-UNKNOWN dilution preserves HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_max_severity_low_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_max_severity_low_high"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_max_severity_medium_high"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_fail_closed_on_exception"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_unknown_plus_high"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_unknown_plus_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_all_unknown_propagated"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_single_analyzer"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestEnsemble",
+          "name": "test_empty_analyzers_rejected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestPropagateUnknown",
+          "name": "test_default_false_unknown_plus_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestPropagateUnknown",
+          "name": "test_propagate_unknown_plus_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestPropagateUnknown",
+          "name": "test_propagate_unknown_plus_high"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestPropagateUnknown",
+          "name": "test_all_unknown_both_modes"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_ensemble.TestPropagateUnknown",
+          "name": "test_no_unknown_both_modes_agree"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_arguments_is_first_segment"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_oversized_non_argument_fields_do_not_starve_arguments[oversized_tool_name]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_oversized_non_argument_fields_do_not_starve_arguments[oversized_tool_call_name]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_oversized_non_argument_fields_do_not_starve_arguments[both_oversized]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_summary_is_first_text_segment"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_oversized_text_fields_do_not_starve_summary[three_oversized_thoughts]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestPrimaryFirstOrdering",
+          "name": "test_oversized_text_fields_do_not_starve_summary[oversized_reasoning_content]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[start]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[early]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[head_boundary]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[just_before_mid]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[middle]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[tail_boundary]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestArgumentsFullRangeVisibility",
+          "name": "test_payload_visible_at_any_position_up_to_total_cap[near_end]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestSizeAccounting",
+          "name": "test_total_cap_still_honored"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestSizeAccounting",
+          "name": "test_small_fields_unaffected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestSizeAccounting",
+          "name": "test_oversized_arguments_leaves_no_budget_for_other_fields"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestEndToEnd",
+          "name": "test_malicious_arguments_detected_despite_oversized_fields[oversized_tool_name]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestEndToEnd",
+          "name": "test_malicious_arguments_detected_despite_oversized_fields[both_fields_oversized]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestComposedPathGuarantee",
+          "name": "test_summary_visible_in_all_content_when_exec_is_full"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestComposedPathGuarantee",
+          "name": "test_injection_in_summary_detected_when_exec_is_full"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestComposedPathGuarantee",
+          "name": "test_exec_still_visible_in_all_content_when_text_is_large"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestComposedPathGuarantee",
+          "name": "test_composed_content_length_actually_bounded"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_field_cap.TestResidualLimitations",
+          "name": "test_payload_past_total_cap_in_arguments_invisible"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_whitelisted_fields_included"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_json_arguments_parsed"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_raw_fallback_on_parse_failure"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_hard_cap_truncation"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_empty_content"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_multiple_thoughts"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestExtraction",
+          "name": "test_exec_content_excludes_reasoning"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_fullwidth_ascii"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_zero_width_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_bidi_controls_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_c0_controls_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_tab_newline_preserved_then_collapsed"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_del_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_whitespace_collapsed"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_bom_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_soft_hyphen_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_c1_controls_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_variation_selector_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_tag_block_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_format_chars_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_null_byte_stripped_explicitly"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_idempotent"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_word_joiner_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestNormalization",
+          "name": "test_mongolian_fvs_stripped"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestTwoCorpus",
+          "name": "test_reasoning_text_does_not_trip_shell_patterns"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestTwoCorpus",
+          "name": "test_reasoning_sudo_rm_does_not_trip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern.TestTwoCorpus",
+          "name": "test_reasoning_injection_still_detected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[rm -rf]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[rm -fr]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[rm -r -f]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[rm --recursive --force]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[sudo rm]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[mkfs]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[dd raw disk if= first]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[dd raw disk of= first]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[dd raw disk bs= first]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[prompt injection]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[prompt injection variant]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[dynamic code evaluation]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[dynamic code execution]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[os-level command execution]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[subprocess]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[curl pipe bash]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_high[wget pipe sh]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_medium[curl alone]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_medium[wget alone]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_medium[mode switching]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_medium[identity manipulation]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_low[ls]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_low[echo]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_low[cat]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_low[pwd]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_low[git status]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_boundary_not_high[rm without -rf is not HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_pattern_boundary_not_high[safe permissions not HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_fullwidth_evasion_detected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_bidi_evasion_detected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_pattern",
+          "name": "test_zero_width_evasion_detected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_safe_command_passes"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_fetch_to_curl_pipe_bash"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_fetch_alone_passes"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_raw_disk_dd"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_raw_disk_dd_reversed_operands"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_raw_disk_dd_with_extra_operands"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_raw_disk_mkfs"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_catastrophic_delete_root"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRails",
+          "name": "test_catastrophic_delete_home"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRailAnalyzer",
+          "name": "test_fetch_to_curl_returns_high"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRailAnalyzer",
+          "name": "test_safe_command_returns_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_policy_rails.TestPolicyRailAnalyzer",
+          "name": "test_reasoning_does_not_trip_rails"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPatternSerializationRoundTrip",
+          "name": "test_direct_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPatternSerializationRoundTrip",
+          "name": "test_polymorphic_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPatternSerializationRoundTrip",
+          "name": "test_roundtrip_then_detect"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPolicyRailSerializationRoundTrip",
+          "name": "test_direct_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPolicyRailSerializationRoundTrip",
+          "name": "test_polymorphic_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPolicyRailSerializationRoundTrip",
+          "name": "test_roundtrip_then_detect"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestEnsembleSerializationRoundTrip",
+          "name": "test_direct_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestEnsembleSerializationRoundTrip",
+          "name": "test_polymorphic_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestEnsembleSerializationRoundTrip",
+          "name": "test_nested_polymorphic_children"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestEnsembleSerializationRoundTrip",
+          "name": "test_roundtrip_then_detect"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestEnsembleSerializationRoundTrip",
+          "name": "test_propagate_unknown_survives_roundtrip"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestContainerField",
+          "name": "test_container_with_pattern"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestContainerField",
+          "name": "test_container_with_ensemble"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestConfigDefaults",
+          "name": "test_pattern_defaults_non_empty"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestConfigDefaults",
+          "name": "test_ensemble_empty_analyzers_rejected"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestKindDiscriminators",
+          "name": "test_pattern_kind"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestKindDiscriminators",
+          "name": "test_policy_rail_kind"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestKindDiscriminators",
+          "name": "test_ensemble_kind"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestPublicAPISurface",
+          "name": "test_all_analyzers_importable_from_security"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestStableIDs",
+          "name": "test_rail_ids"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestStableIDs",
+          "name": "test_rail_id_values"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestStableIDs",
+          "name": "test_pattern_detector_id_constants"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_serialization.TestStableIDs",
+          "name": "test_pattern_tuples_reference_constants"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_command_substitution_is_high[dollar_paren]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_command_substitution_is_high[backtick]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_quoted_segment_is_high[double_quoted_concat]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_quoted_segment_is_high[empty_single_concat]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_quoted_segment_is_high[fully_quoted]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_quoted_segment_is_high[quoted_long_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_ansi_c_quoting_is_high[hex_escape]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_ansi_c_quoting_is_high[octal_escape]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_path_qualified_is_high[bin_rm]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_path_qualified_is_high[usr_bin_rm]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_path_qualified_is_high[path_quoted_basename]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_path_qualified_is_high[fully_quoted_path]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_path_qualified_is_high[path_long_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_nested_command_string_is_high[bash_c_single]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_nested_command_string_is_high[sh_c_single]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_nested_command_string_is_high[bash_c_double]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_nested_command_string_is_high[nested_quoted_verb]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses",
+          "name": "test_nested_command_string_is_high[nested_long_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_script_flag_in_option_group_is_high[combined_group_flag_last]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_script_flag_in_option_group_is_high[combined_group_flag_first]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_script_flag_in_option_group_is_high[option_with_argument_before_flag]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_script_flag_in_option_group_is_high[escaped_flag_word]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_non_option_flag_word_does_not_descend[flag_after_end_of_options]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestRunnerArgvOptionParsing",
+          "name": "test_non_option_flag_word_does_not_descend[flag_after_script_operand]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestEscapedVerb",
+          "name": "test_escaped_verb_is_high[escaped_verb_short_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestEscapedVerb",
+          "name": "test_escaped_verb_is_high[escaped_verb_long_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestEscapedVerb",
+          "name": "test_escaped_verb_is_high[escaped_verb_path_qualified]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestEscapedVerb",
+          "name": "test_double_quoted_backslash_is_retained"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[fully_quoted_short_group]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[concatenated_short_flag]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[single_quoted_short_group]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[quoted_middle_flag_char]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[separately_quoted_short_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[backslash_escaped_flag_char]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[quoted_long_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[concatenated_long_flag]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[path_qualified_verb_quoted_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_quoted_option_words_are_high[quoted_verb_and_quoted_flags]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_end_of_options_makes_flags_operands[quoted_end_of_options]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_end_of_options_makes_flags_operands[bare_end_of_options]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_unresolved_or_incomplete_flags_stay_low[dynamic_flag_word]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_unresolved_or_incomplete_flags_stay_low[braced_expansion_flag_word]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_unresolved_or_incomplete_flags_stay_low[recursive_without_force]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_parser_bypasses.TestQuotedOptionWords",
+          "name": "test_unresolved_or_incomplete_flags_stay_low[force_without_recursive]"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestDetectorIdentity",
+          "name": "test_match_reports_callers_detector_id"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestDetectorIdentity",
+          "name": "test_no_match_reports_no_detector_id"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestNestingDepthBound",
+          "name": "test_depth_bound_hit_is_uncertain_not_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestNestingDepthBound",
+          "name": "test_depth_bound_hit_maps_to_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestNestingDepthBound",
+          "name": "test_payload_at_bound_still_matches"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestNestingDepthBound",
+          "name": "test_benign_nesting_within_bound_stays_low"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestParseErrorFailSafe",
+          "name": "test_destructive_shape_with_parse_error_is_uncertain"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestParseErrorFailSafe",
+          "name": "test_destructive_shape_with_parse_error_maps_to_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestParseErrorFailSafe",
+          "name": "test_broken_runner_argv_is_uncertain"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestParseErrorFailSafe",
+          "name": "test_match_wins_over_adjacent_parse_error"
+        },
+        {
+          "classname": "tests.sdk.security.defense_in_depth.test_shell_semantics.TestParseErrorFailSafe",
+          "name": "test_benign_broken_command_stays_low"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_without_api_key_logs_warning"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_api_key_from_env"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_api_key_param"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_default_policy_id"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_policy_id_from_env"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_custom_thresholds"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_invalid_threshold_order_raises_error"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerInit",
+          "name": "test_init_with_equal_thresholds_raises_error"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerViolationMapping",
+          "name": "test_map_low_violation"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerViolationMapping",
+          "name": "test_map_medium_violation"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerViolationMapping",
+          "name": "test_map_high_violation"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerViolationMapping",
+          "name": "test_map_boundary_low_threshold"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerViolationMapping",
+          "name": "test_map_boundary_medium_threshold"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_success_low_risk"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_success_high_risk"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_ipi_detection_escalates_to_high"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_error_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_timeout_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_without_api_key_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerAPICall",
+          "name": "test_api_call_missing_violation_field_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerSecurityRisk",
+          "name": "test_security_risk_without_api_key"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerSecurityRisk",
+          "name": "test_security_risk_with_events"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerSecurityRisk",
+          "name": "test_security_risk_respects_history_limit"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerSecurityRisk",
+          "name": "test_security_risk_preserves_leading_system_prompt_when_window_drops_it"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerSetEvents",
+          "name": "test_set_events"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerClose",
+          "name": "test_close_cleans_up_client"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerClose",
+          "name": "test_close_handles_no_client"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerHTTPClientLifecycle",
+          "name": "test_client_creation_and_reuse"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerHTTPClientLifecycle",
+          "name": "test_client_recreated_after_close"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_analyzer.TestGraySwanAnalyzerHTTPClientLifecycle",
+          "name": "test_client_handles_json_decode_error"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_empty_events"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_system_prompt_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_user_message_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_agent_message_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_action_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_action_event_removes_security_risk_from_arguments"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_observation_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_agent_error_event"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_user_reject_observation"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_full_conversation"
+        },
+        {
+          "classname": "tests.sdk.security.grayswan.test_grayswan_utils.TestConvertEventsToOpenAIMessages",
+          "name": "test_multiple_tool_calls_in_sequence"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestConfirmationPolicyBase",
+          "name": "test_cannot_instantiate_base_class"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestConfirmationPolicyBase",
+          "name": "test_confirmation_policy_container_serialization[AlwaysConfirm]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestConfirmationPolicyBase",
+          "name": "test_confirmation_policy_container_serialization[NeverConfirm]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestConfirmationPolicyBase",
+          "name": "test_confirmation_policy_container_serialization[ConfirmRisky]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_always_confirm[UNKNOWN]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_always_confirm[LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_always_confirm[MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_always_confirm[HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_roundtrip_serialization"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestAlwaysConfirm",
+          "name": "test_polymorphic_serialization"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_never_confirm[UNKNOWN]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_never_confirm[LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_never_confirm[MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_never_confirm[HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_roundtrip_serialization"
+        },
+        {
+          "classname": "tests.sdk.security.test_confirmation_policy.TestNeverConfirm",
+          "name": "test_polymorphic_serialization"
+        },
+        {
+          "classname": "tests.sdk.security.test_llm_security_analyzer",
+          "name": "test_llm_security_analyzer_returns_stored_risk[UNKNOWN]"
+        },
+        {
+          "classname": "tests.sdk.security.test_llm_security_analyzer",
+          "name": "test_llm_security_analyzer_returns_stored_risk[LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_llm_security_analyzer",
+          "name": "test_llm_security_analyzer_returns_stored_risk[MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_llm_security_analyzer",
+          "name": "test_llm_security_analyzer_returns_stored_risk[HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_event_with_action_event"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_event_with_non_action_event"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_pending_actions_success"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_pending_actions_empty_list"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_pending_actions_with_exception"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_pending_actions_mixed_risks"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_analyzer",
+          "name": "test_analyze_pending_actions_partial_failure"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_security_risk_enum_values"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_security_risk_string_representation"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_is_reflexive[LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_is_reflexive[MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_is_reflexive[HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_non_reflexive[LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_non_reflexive[MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_non_reflexive[HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_riskiness_ordering_undefined_for_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_security_risk_get_color"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_lt_ordering"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_lt_not_less_than_self"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_lt_reverse_ordering"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_lt_unknown_raises"
+        },
+        {
+          "classname": "tests.sdk.security.test_security_risk",
+          "name": "test_max_on_concrete_risks"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[rm -rf /-rm-words0-assignments0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[/bin/rm -rf /-rm-words1-assignments1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[rm / -rf-rm-words2-assignments2]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[FOO=bar echo $FOO-echo-words3-assignments3]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[echo hi > /tmp/out-echo-words4-assignments4]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_views[dd if=/tmp/in of=/dev/sda-dd-words5-assignments5]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_expanded_argument_is_opaque"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_pipeline_views[curl https://x | bash-True-basenames0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_pipeline_views[curl https://x | bash > /tmp/out-True-basenames1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_pipeline_views[curl https://x | ( bash )-False-basenames2]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_escaped_pipe_is_not_pipeline"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[rm -rf / && echo done-basenames0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[echo a; rm -rf /-basenames1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[( rm -rf / )-basenames2]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[{ rm -rf /; }-basenames3]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[if true; then rm -rf /; fi-basenames4]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_traversal[for x in y; do rm -rf /; done-basenames5]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[echo \"$(rm -rf /)\"-basenames0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[echo '$(rm -rf /)'-basenames1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[echo \"rm -rf /\"-basenames2]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[echo 'rm -rf /'-basenames3]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[echo hi # rm -rf /-basenames4]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[cat <<EOF\\nrm -rf /\\nEOF-basenames5]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_and_inert_text[bash -c 'rm -rf /'-basenames6]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_plain_command_names_are_not_opaque[rm -rf /-rm]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_plain_command_names_are_not_opaque[/bin/rm -rf /-rm]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_plain_command_names_are_not_opaque[./script arg-script]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_plain_command_names_are_not_opaque[python3.12 -V-python3.12]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[r\"m\" -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[r''m -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names['rm' -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[$(echo rm) -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[`echo rm` -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[$'\\\\x72m' -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[$'\\\\162\\\\155' -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[$CMD -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[${CMD} -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[rm${IFS}-rf${IFS}/]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[r\\\\m -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_opaque_command_names[r* -rf /]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_command_substitution_name_still_exposes_nested_command"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_parse_error_is_preserved_on_program"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_missing_node_is_preserved_on_program"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_missing_descendant_marks_command_has_error"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[-rf-flags0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[-r-flags1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[-f-flags2]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[--force-flags3]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[--flags4]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[-flags5]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_short_flags[/-flags6]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_is_long_flag[--force-force-True]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_is_long_flag[--recursive-recursive-True]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_is_long_flag[--force-recursive-False]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_is_long_flag[-f-force-False]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_is_long_flag[-force-False]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_key_value_word[dd of=/dev/sda-key_value0]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_key_value_word[dd if=/tmp/in-key_value1]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_split_key_value_word[dd of=$TARGET-None]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_view_shell_program_rejects_byte_length_mismatch"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_node_text_uses_byte_offsets"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_ast",
+          "name": "test_tree_sitter_objects_are_excluded_from_repr_and_equality"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseSuccessShape",
+          "name": "test_returns_parse_result"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseSuccessShape",
+          "name": "test_root_node_is_walkable"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseSuccessShape",
+          "name": "test_has_error_false_on_valid_input"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseErrorRecovery",
+          "name": "test_malformed_input_does_not_raise[double_quote]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseErrorRecovery",
+          "name": "test_malformed_input_does_not_raise[single_quote]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseErrorRecovery",
+          "name": "test_malformed_input_does_not_raise[heredoc]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseErrorRecovery",
+          "name": "test_malformed_input_does_not_raise[backtick]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseErrorRecovery",
+          "name": "test_has_error_true_on_malformed_input"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseEdgeCases",
+          "name": "test_empty_string_parses"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseEdgeCases",
+          "name": "test_utf8_input_parses"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseResultIsImmutable",
+          "name": "test_frozen"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseAdversarialBytes",
+          "name": "test_emoji_argument_parses"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseAdversarialBytes",
+          "name": "test_embedded_null_byte_parses_with_error_flag"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseAdversarialBytes",
+          "name": "test_lone_surrogate_raises_unicode_encode_error"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseByteSemantics",
+          "name": "test_root_node_spans_full_input"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseByteSemantics",
+          "name": "test_root_node_spans_multibyte_input"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseDeterminism",
+          "name": "test_repeated_parse_has_equal_error_flag"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser.TestParseDeterminism",
+          "name": "test_repeated_parse_of_malformed_input_is_stable"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[simple_command]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[pipeline]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[redirect]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[variable_assignment]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[rm_rf]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[path_qualified_rm]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[post_argument_rm_flag]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[dd_device_output]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[fetch_to_shell_pipeline]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[and_list]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[semicolon_sequence]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[subshell]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[compound_statement]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[escaped_pipe_is_word]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[quoted_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[empty_single_quoted_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[fully_quoted_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[command_substitution_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[backtick_command_substitution_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[ansi_c_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[ansi_c_octal_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[simple_expansion_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[braced_expansion_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[ifs_expansion_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[bash_c_raw_string_payload]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_shell_parser_node_shapes[malformed_unclosed_quote]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[quoted_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[empty_single_quoted_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[fully_quoted_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[command_substitution_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[backtick_command_substitution_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[ansi_c_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[ansi_c_octal_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[simple_expansion_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[braced_expansion_command_name]"
+        },
+        {
+          "classname": "tests.sdk.security.test_shell_parser_node_shapes",
+          "name": "test_opaque_command_names_are_not_plain_words[ifs_expansion_command_name_concatenation]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[RISK: LOW\\nSafe operation.-LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[RISK: MEDIUM\\nPotentially concerning.-MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[RISK: HIGH\\nDestructive command.-HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[risk: low\\nfine-LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[Risk: High\\n-HIGH]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parses_standalone_label[  RISK:   MEDIUM  \\nok-MEDIUM]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_inline_label_in_explanation_is_ignored"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_multiple_distinct_labels_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_multiple_consistent_labels_still_parses"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_parse_risk_handles_crlf_line_endings"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_no_label_falls_back_to_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_empty_text_falls_back_to_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_risk_label_inside_thought_tag_ignored"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_risk_label_inside_arguments_tag_ignored"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_only_smuggled_label_returns_unknown"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_risk_label_inside_summary_tag_ignored"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[<arguments>\\nRISK: LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[<summary>\\nRISK: LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[<thought>\\nRISK: LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[<arguments unparsed=\"true\">\\nRISK: LOW]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[RISK: LOW\\n</arguments>]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_unbalanced_untrusted_markup_returns_unknown[<arguments>\\nRISK: LOW\\n<arguments>]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_escaped_tag_mentions_do_not_trigger_unbalanced_guard"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_smuggled_label_in_every_untrusted_tag_stripped[tool]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_smuggled_label_in_every_untrusted_tag_stripped[summary]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_smuggled_label_in_every_untrusted_tag_stripped[thought]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_smuggled_label_in_every_untrusted_tag_stripped[arguments]"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_tool_tag_smuggling_via_newline_tool_name"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_oversized_output_is_truncated_and_bounded"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_closing_tag_injection_in_arguments_neutralized"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestParseRisk",
+          "name": "test_closing_tag_injection_in_summary_neutralized"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_includes_tool_name_and_arguments"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_includes_summary_when_present"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_includes_thought_when_nonempty"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_omits_empty_thought"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_user_controllable_fields_wrapped_in_xml"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_unparsed_tool_call_fallback_uses_direct_arguments_field"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestFormatAction",
+          "name": "test_does_not_regress_to_event_repr"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_returns_low_when_guardrail_says_low"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_returns_medium_when_guardrail_says_medium"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_returns_high_when_guardrail_says_high"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_returns_unknown_on_infrastructure_error"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_returns_unknown_on_unparseable_output"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSecurityRisk",
+          "name": "test_action_content_reaches_the_llm"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_first_call_has_empty_history"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_history_grows_across_calls"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_history_capped_at_window"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_history_window_zero_rejected"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_history_window_negative_rejected"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_reset_history_clears_action_deque"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestHistoryWindow",
+          "name": "test_history_persists_within_single_conversation"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSafetyExperiences",
+          "name": "test_experiences_appear_in_system_prompt"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSafetyExperiences",
+          "name": "test_empty_experiences_shows_placeholder"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSafetyExperiences",
+          "name": "test_default_is_bare_guardrail"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestSafetyExperiences",
+          "name": "test_opt_in_to_default_seed"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_require_toolshield_raises_helpful_error_when_missing"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_detect_active_mcp_tools_always_includes_terminal"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_experience_name_from_server_name"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_auto_detect_loads_experiences_for_detected_server"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_auto_detect_falls_back_to_default_seed_when_nothing_detected"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_auto_detect_handles_already_inside_event_loop"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_detect_inside_running_loop_returns_early"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_auto_detect_without_toolshield_no_fallback_returns_empty"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_auto_detect_without_toolshield_with_fallback_raises"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_detect_active_mcp_tools_does_not_write_to_stdout"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_maps_server_names"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_empty_config_returns_always_active"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_drops_unsafe_server_names"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_covers_explicit_sdk_tools"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_accepts_camelcase_aliases"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_mcp_tools_from_config_dedupes_tool_and_server_surface"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_safety_experiences_for_mcp_config_accepts_tool_names"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_safety_experiences_for_mcp_config_loads_bundled"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestToolShieldHelpers",
+          "name": "test_safety_experiences_for_mcp_config_skips_unbundled"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestConfirmRiskyIntegration",
+          "name": "test_high_pauses_conversation"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestConfirmRiskyIntegration",
+          "name": "test_low_does_not_pause"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestConfirmRiskyIntegration",
+          "name": "test_medium_does_not_pause_at_default_high_threshold"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestConfirmRiskyIntegration",
+          "name": "test_unknown_pauses_when_confirm_unknown_true"
+        },
+        {
+          "classname": "tests.sdk.security.test_toolshield_llm_analyzer.TestConfirmRiskyIntegration",
+          "name": "test_unknown_does_not_pause_when_confirm_unknown_false"
+        }
+      ],
+      "label": "restored-production-strengthened-suite",
+      "log": "restored-production-strengthened-suite.txt",
+      "production_sha256": "0fe8c703580ae6a6ae2dba97a0bc1966811950d224b4672a3d6af33001d30c92",
+      "returncode": 0,
+      "test_sha256": "d065099dcf1def8acbcd5294ad694826c285e11d4c09ad559cbff138eb0e5375",
+      "xml": "restored-production-strengthened-suite.xml"
+    }
+  ],
+  "schema": "openhands-4259-mixed-batch-v1",
+  "source": "/workspace/scratch/5b0f6da052fa/openhands-4259-20261011/source",
+  "source_head": "4cc058275c5a08d845bd846576aafc80e5dd7d0d",
+  "status": "PASS",
+  "uv_version": "uv 0.12.23 (x86_64-unknown-linux-gnu)"
+}

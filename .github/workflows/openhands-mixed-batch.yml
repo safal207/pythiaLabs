@@ -1,0 +1,65 @@
+name: OpenHands mixed-batch replay
+
+on:
+  pull_request:
+    paths:
+      - "proofs/openhands-4259-mixed-batch/**"
+      - "docs/integrations/OPENHANDS_EVIDENCE_GATE_DECISION_EVENT.md"
+      - ".github/workflows/openhands-mixed-batch.yml"
+  push:
+    branches: [main, master]
+    paths:
+      - "proofs/openhands-4259-mixed-batch/**"
+      - "docs/integrations/OPENHANDS_EVIDENCE_GATE_DECISION_EVENT.md"
+      - ".github/workflows/openhands-mixed-batch.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENHANDS_SUPPRESS_BANNER: "1"
+      LITELLM_LOCAL_MODEL_COST_MAP: "true"
+    steps:
+      - name: Check out this proof packet
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Check out the pinned native SDK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: OpenHands/software-agent-sdk
+          ref: 4cc058275c5a08d845bd846576aafc80e5dd7d0d
+          path: native-openhands
+          persist-credentials: false
+
+      - name: Set up the pinned Python runtime and uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "0.12.23"
+          python-version: "3.13.16"
+
+      - name: Install the native locked development environment
+        working-directory: native-openhands
+        run: uv sync --frozen --group dev
+
+      - name: Replay baseline, patch, and isolated mutations
+        run: >-
+          uv run --no-project --python 3.13.16 python
+          proofs/openhands-4259-mixed-batch/replay.py
+          --source "$GITHUB_WORKSPACE/native-openhands"
+          --output "$RUNNER_TEMP/openhands-mixed-batch-results"
+
+      - name: Show the bounded replay result
+        if: always()
+        run: |
+          result="$RUNNER_TEMP/openhands-mixed-batch-results/report.json"
+          if [ -f "$result" ]; then
+            cat "$result"
+          fi

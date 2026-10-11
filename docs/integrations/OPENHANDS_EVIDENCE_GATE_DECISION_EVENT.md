@@ -111,7 +111,7 @@ The receipt gives a reviewer one compact path:
 ```text
 final diff / report / observation
 -> verification event
--> executed action
+-> action event
 -> pre-action decision
 -> matched policy and checked evidence
 ```
@@ -138,13 +138,37 @@ Schema:
 | `tool_call_id` | `ActionEvent.tool_call_id` |
 | `tool_name` | `ActionEvent.tool_name` |
 | `action_summary` | `ActionEvent.summary` |
-| `security_assessment.risk` | `ActionEvent.security_risk` |
+| `security_assessment.risk` | `SecurityAnalysisEvent.risks[ActionEvent.id]` from the configured analyzer; retain `ActionEvent.security_risk` separately as the model-provided action label or `UNKNOWN`. |
 | `matched_rules[].rule_id` | stable policy-rail ID, hook rule ID, external policy ID, or evidence-check ID |
 | `observation_event_id` | `ObservationEvent.id` or a rejection observation ID |
 | verification observation link | `ObservationEvent.action_id` plus `tool_call_id` |
 | runtime denial | `UserRejectObservation`, including hook or user rejection source |
 | `runtime_interaction` | confirmation-policy or hook interaction result |
 | final artifact reference | diff, log, report, or other exported artifact produced by the workflow |
+
+### Native SDK mapping checked on 2026-10-11
+
+At SDK revision
+[`4cc058275c5a08d845bd846576aafc80e5dd7d0d`](https://github.com/OpenHands/software-agent-sdk/tree/4cc058275c5a08d845bd846576aafc80e5dd7d0d),
+[`SecurityAnalysisEvent`](https://github.com/OpenHands/software-agent-sdk/blob/4cc058275c5a08d845bd846576aafc80e5dd7d0d/openhands-sdk/openhands/sdk/event/security.py)
+records analyzer risks and optional details keyed by `ActionEvent.id`. Join by
+that exact ID, rather than tool name or batch position. Missing analysis stays
+unknown; the acting model's action label is not a substitute analyzer verdict.
+
+The analyzer record supplies evidence for a separately captured gate decision.
+Its risk, analyzer name, and confirmation-policy name do not establish
+`ALLOW`, `BLOCK`, `ESCALATE`, or authorization by themselves.
+[`Agent`](https://github.com/OpenHands/software-agent-sdk/blob/4cc058275c5a08d845bd846576aafc80e5dd7d0d/openhands-sdk/openhands/sdk/agent/agent.py)
+can register a proposed `ActionEvent` before the analysis event. In this note,
+"pre-action" means before tool dispatch, not before action-event registration.
+An action event alone does not establish dispatch, execution, confirmation, or
+successful verification.
+
+[Upstream PR #5182](https://github.com/OpenHands/software-agent-sdk/pull/5182)
+added the native analyzer record. The
+[mixed-batch test proposal and replay](../../proofs/openhands-4259-mixed-batch/README.md)
+check the ID-to-risk/details association at this pinned revision. These checks
+do not implement this receipt protocol or establish OpenHands endorsement.
 
 ## Example records
 

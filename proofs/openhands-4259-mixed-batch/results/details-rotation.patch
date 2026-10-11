@@ -1,0 +1,15 @@
+--- a/openhands-sdk/openhands/sdk/agent/agent.py
++++ b/openhands-sdk/openhands/sdk/agent/agent.py
+@@ -1182,9 +1182,9 @@
+             policy=state.confirmation_policy.__class__.__name__,
+             risks={action.id: analysis.risk for action, analysis in analyses},
+             details={
+-                action.id: analysis.details
+-                for action, analysis in analyses
+-                if analysis.details is not None
++                action.id: analyses[(index + 1) % len(analyses)][1].details
++                for index, (action, _) in enumerate(analyses)
++                if analyses[(index + 1) % len(analyses)][1].details is not None
+             },
+         )
+         return [analysis.risk for _, analysis in analyses], event
