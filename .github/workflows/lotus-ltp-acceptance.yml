@@ -1,0 +1,92 @@
+name: Lotus LTP Verified Negative Acceptance
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/lotus-ltp-acceptance.yml
+      - tools/lotus_ltp_acceptance.py
+      - test/lotus_ltp_acceptance_test.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lotus-ltp-negative-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Run fail-closed adapter tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/lotus_ltp_acceptance.py test/lotus_ltp_acceptance_test.py
+          python3 -m unittest test/lotus_ltp_acceptance_test.py -v 2>&1 | tee test-lotus-ltp.log
+
+      - name: Emit deterministic example artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          PYTHIA_SHA="$(git rev-parse HEAD)" python3 - <<'PY'
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+
+          def load(name, path):
+              spec = importlib.util.spec_from_file_location(name, path)
+              module = importlib.util.module_from_spec(spec)
+              assert spec and spec.loader
+              spec.loader.exec_module(module)
+              return module
+
+          adapter = load('adapter', Path('tools/lotus_ltp_acceptance.py'))
+          tests = load('fixtures', Path('test/lotus_ltp_acceptance_test.py'))
+          packet, authorization, observation = tests.fixture()
+          packet_hash = adapter.sha256_hex(packet)
+          validated = adapter.validate_packet(packet, authorization, observation)
+          generated_at = '2026-07-19T23:40:00+03:00'
+          judgment = adapter.build_judgment(validated, packet_hash, generated_at)
+          event = adapter.build_event(
+              judgment,
+              'safal207/LiminalQAengineer',
+              'agent/garden-dns-live-ci-v0-1',
+              'c7af3e210d007026fedc57eb9435069a958fac6f',
+              os.environ['PYTHIA_SHA'],
+              packet_hash,
+              generated_at,
+          )
+          Path('reports/lotus-ltp-judgment.json').write_text(json.dumps(judgment, indent=2, sort_keys=True) + '\n')
+          Path('reports/liminaldb-negative-memory.jsonl').write_text(json.dumps(event, sort_keys=True) + '\n')
+          PY
+          jq -e '
+            .verdict == "ALLOW" and
+            .result_class == "VERIFIED_NEGATIVE_OBSERVATION" and
+            .memory_candidate.durable_memory == false and
+            .authority.external_submission == false and
+            .authority.durable_memory_write == false
+          ' reports/lotus-ltp-judgment.json >/dev/null
+          jq -e '
+            .actor == "pythia-lotus" and
+            .action == "lotus.verified_negative.observed" and
+            .details.judgment.durable_memory == false and
+            .details.adapter.write_mode == "artifact_only"
+          ' reports/liminaldb-negative-memory.jsonl >/dev/null
+          sha256sum reports/* test-lotus-ltp.log > reports/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pythia-lotus-ltp-negative-${{ github.run_id }}
+          path: reports/
+          if-no-files-found: error
+          retention-days: 14
