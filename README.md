@@ -19,6 +19,7 @@ Web3 treasury is one high-risk demo scenario, not the product category.
 For a concise reviewer-facing overview, see:
 
 - **NGI Commons reviewer path:** [`docs/NGI_COMMONS_REVIEWER_PATH.md`](docs/NGI_COMMONS_REVIEWER_PATH.md)
+- **External research one-pager (proposal only, not new submission):** [`docs/EXTERNAL_AGENT_EVAL_ONE_PAGER_2026.md`](docs/EXTERNAL_AGENT_EVAL_ONE_PAGER_2026.md)
 - **NGI Commons budget and milestones:** [`docs/BUDGET_AND_MILESTONES_COMMONS.md`](docs/BUDGET_AND_MILESTONES_COMMONS.md)
 - **NGI Commons milestone tracker:** [`docs/GRANT_MILESTONE_TRACKER_COMMONS.md`](docs/GRANT_MILESTONE_TRACKER_COMMONS.md)
 - **Reviewer path:** [`docs/REVIEWER_PATH.md`](docs/REVIEWER_PATH.md)
