@@ -2,7 +2,8 @@ defmodule Pythia.PortWorkerTest do
   use ExUnit.Case, async: false
 
   @worker_dir Path.expand("../workers/solver_port", __DIR__)
-  @binary Path.join([@worker_dir, "target", "release", "solver_port"])
+  @worker_binary if match?({:win32, _}, :os.type()), do: "solver_port.exe", else: "solver_port"
+  @binary Path.join([@worker_dir, "target", "release", @worker_binary])
 
   setup_all do
     cond do
