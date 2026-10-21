@@ -1,0 +1,542 @@
+version: 1
+
+metadata:
+  ota:
+    minimum_version: "1.6.27"
+
+project:
+  name: pythialabs
+  description: PythiaLabs contributor execution contract; all declared lanes require maintainer review before agent execution.
+
+execution:
+  default_context: host
+  contexts:
+    host:
+      backend: native
+    node:
+      backend: container
+      lifecycle: ephemeral
+      container:
+        image: node:20-bookworm@sha256:cacf10e99285cbbc891452e31249c1b5ec3ba225f40028fae946b75aeaf1b66a
+        platform: linux/amd64
+        engines:
+          - docker
+
+toolchains:
+  node:
+    version: "20"
+    package_managers:
+      npm: "*"
+  python:
+    version: "3.12"
+
+tasks:
+  setup:elixir:hex:
+    description: Install the Elixir package manager after maintainer review.
+    category: setup
+    command:
+      exe: mix
+      args:
+        - local.hex
+        - --force
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  setup:elixir:rebar:
+    description: Install Rebar after the Elixir package manager is available.
+    category: setup
+    depends_on:
+      - setup:elixir:hex
+    command:
+      exe: mix
+      args:
+        - local.rebar
+        - --force
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  setup:elixir:deps:
+    description: Hydrate Elixir dependencies from mix.exs and mix.lock.
+    notes: |
+      Mix hydration is intentionally modeled as a reviewed networked setup lane. Ota does not yet
+      provide a typed Mix source carrier, so this command remains explicit and non-agent-safe.
+    category: setup
+    depends_on:
+      - setup:elixir:rebar
+    command:
+      exe: mix
+      args:
+        - deps.get
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+    effects:
+      writes:
+        - deps
+      network: true
+      network_kind: dependency_hydration
+
+  setup:elixir:compile:
+    description: Compile the Elixir project after dependency hydration.
+    category: setup
+    depends_on:
+      - setup:elixir:deps
+    command:
+      exe: mix
+      args:
+        - compile
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+    effects:
+      writes:
+        - _build
+
+  verify:elixir-format:
+    description: Verify Elixir formatting after the reviewed setup closure.
+    category: verify
+    depends_on:
+      - setup:elixir:compile
+    command:
+      exe: mix
+      args:
+        - format
+        - --check-formatted
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+
+  verify:elixir-test:
+    description: Run the Elixir test suite after the reviewed setup closure.
+    category: verify
+    depends_on:
+      - setup:elixir:compile
+    command:
+      exe: mix
+      args:
+        - test
+    requirements:
+      runtimes:
+        elixir: ">=1.15,<2"
+      tools:
+        mix: "*"
+
+  verify:mcp-server-syntax:
+    description: Check the MCP server JavaScript syntax.
+    category: verify
+    command:
+      exe: node
+      args:
+        - --check
+        - integrations/mcp/server.mjs
+    requirements:
+      toolchains:
+        - node
+    execution:
+      default_mode: native
+      modes:
+        native:
+          context: host
+        container:
+          context: node
+
+  verify:mcp-smoke-syntax:
+    description: Check the MCP smoke harness JavaScript syntax.
+    category: verify
+    command:
+      exe: node
+      args:
+        - --check
+        - integrations/mcp/smoke.mjs
+    requirements:
+      toolchains:
+        - node
+    execution:
+      default_mode: native
+      modes:
+        native:
+          context: host
+        container:
+          context: node
+
+  verify:mcp-smoke:
+    description: Exercise the MCP smoke harness with its test-owned fake Mix executable.
+    notes: |
+      This proves only the repository-owned JavaScript harness protocol against its fake Mix
+      executable. It does not prove a real Mix runtime, MCP host loading, provider authority, or
+      an agent-executable integration lane.
+    category: verify
+    depends_on:
+      - verify:mcp-server-syntax
+      - verify:mcp-smoke-syntax
+    command:
+      exe: node
+      args:
+        - integrations/mcp/smoke.mjs
+    requirements:
+      toolchains:
+        - node
+    execution:
+      default_mode: native
+      modes:
+        native:
+          context: host
+        container:
+          context: node
+
+  setup:worker:
+    description: Fetch Rust port-worker dependencies from the current Cargo resolution.
+    notes: |
+      This networked hydration follows the repository's current Cargo resolution. It remains a
+      maintainer-reviewed setup lane until its dependency source and write effects are eligible for
+      a narrower agent boundary.
+    category: setup
+    command:
+      exe: cargo
+      args:
+        - fetch
+      cwd: workers/solver_port
+    requirements:
+      tools:
+        cargo: "*"
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  verify:worker-build:
+    description: Build the Rust port worker after reviewed Cargo hydration.
+    category: verify
+    depends_on:
+      - setup:worker
+    command:
+      exe: cargo
+      args:
+        - build
+        - --release
+      cwd: workers/solver_port
+    requirements:
+      tools:
+        cargo: "*"
+    effects:
+      writes:
+        - workers/solver_port/target
+
+  verify:worker-test:
+    description: Run Rust port-worker tests after reviewed Cargo hydration.
+    category: verify
+    depends_on:
+      - setup:worker
+    command:
+      exe: cargo
+      args:
+        - test
+      cwd: workers/solver_port
+    requirements:
+      tools:
+        cargo: "*"
+
+  setup:site:
+    description: Hydrate the static site's npm dependencies from its package lockfile.
+    notes: |
+      The typed npm CI source owns the lockfile-respecting installation in `site`. It is still a
+      networked setup action and is deliberately outside `agent.safe_tasks`.
+    category: setup
+    prepare:
+      kind: dependency_hydration
+      medium: package_dependencies
+      source:
+        kind: node_package_manager
+        cwd: site
+        manager: npm
+        mode: ci
+    requirements:
+      toolchains:
+        - node
+    effects:
+      writes:
+        - site/node_modules
+      network: true
+      network_kind: dependency_hydration
+    execution:
+      default_mode: native
+      modes:
+        native:
+          context: host
+        container:
+          context: node
+
+  verify:site-build:
+    description: Build the static site from its workflow-owned working directory.
+    category: verify
+    depends_on:
+      - setup:site
+    command:
+      exe: npm
+      args:
+        - run
+        - build
+      cwd: site
+    requirements:
+      toolchains:
+        - node
+    effects:
+      writes:
+        - site/dist
+    execution:
+      default_mode: native
+      modes:
+        native:
+          context: host
+        container:
+          context: node
+
+  verify:site-format:
+    description: Verify static-site formatting from its workflow-owned working directory.
+    category: verify
+    depends_on:
+      - setup:site
+    command:
+      exe: npm
+      args:
+        - run
+        - format:check
+      cwd: site
+    requirements:
+      toolchains:
+        - node
+
+  setup:action-envelope-conformance:
+    description: Install Action Envelope conformance dependencies into the CI Python environment.
+    category: setup
+    command:
+      exe: python
+      args:
+        - -m
+        - pip
+        - install
+        - --disable-pip-version-check
+        - -r
+        - standards/agent-actions/conformance/requirements.txt
+    requirements:
+      toolchains:
+        - python
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  verify:action-envelope-conformance:
+    description: Run the Action Envelope conformance suite.
+    category: verify
+    depends_on:
+      - setup:action-envelope-conformance
+    command:
+      exe: python
+      args:
+        - -m
+        - unittest
+        - discover
+        - -s
+        - standards/agent-actions/conformance
+        - -p
+        - test_*.py
+        - -v
+    requirements:
+      toolchains:
+        - python
+
+  setup:vce-conformance:
+    description: Install VCE conformance dependencies into the CI Python environment.
+    category: setup
+    command:
+      exe: python
+      args:
+        - -m
+        - pip
+        - install
+        - --disable-pip-version-check
+        - -r
+        - standards/agent-continuity/conformance/requirements.txt
+    requirements:
+      toolchains:
+        - python
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  verify:vce-conformance:
+    description: Run the VCE conformance suite.
+    category: verify
+    depends_on:
+      - setup:vce-conformance
+    command:
+      exe: python
+      args:
+        - -m
+        - unittest
+        - discover
+        - -s
+        - standards/agent-continuity/conformance
+        - -p
+        - test_*.py
+        - -v
+    requirements:
+      toolchains:
+        - python
+
+  setup:aci-conformance:
+    description: Install ACI conformance dependencies into the CI Python environment.
+    category: setup
+    command:
+      exe: python
+      args:
+        - -m
+        - pip
+        - install
+        - --disable-pip-version-check
+        - -r
+        - standards/agent-continuity/authority-causality/conformance/requirements.txt
+    requirements:
+      toolchains:
+        - python
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  verify:aci-conformance:
+    description: Run the ACI conformance suite.
+    category: verify
+    depends_on:
+      - setup:aci-conformance
+    command:
+      exe: python
+      args:
+        - -m
+        - unittest
+        - discover
+        - -s
+        - standards/agent-continuity/authority-causality/conformance
+        - -p
+        - test_*.py
+        - -v
+    requirements:
+      toolchains:
+        - python
+
+  setup:caep-evidence:
+    description: Install local CAEP cryptographic verifier dependencies without provider credentials.
+    notes: |
+      This lane is limited to local cryptographic conformance. Credentialed CAEP delivery,
+      provider calls, external mutation, and production identity remain outside this contract.
+    category: setup
+    command:
+      exe: python
+      args:
+        - -m
+        - pip
+        - install
+        - -r
+        - protocols/caep/requirements-crypto.txt
+    requirements:
+      toolchains:
+        - python
+    effects:
+      network: true
+      network_kind: dependency_hydration
+
+  verify:caep-evidence:
+    description: Run local CAEP verified-evidence tests without provider credentials.
+    category: verify
+    depends_on:
+      - setup:caep-evidence
+    command:
+      exe: python
+      args:
+        - -m
+        - unittest
+        - discover
+        - -s
+        - protocols/caep/tests
+        - -v
+    requirements:
+      toolchains:
+        - python
+
+workflows:
+  default: core
+  core:
+    intent: ci_verification
+    description: Elixir setup and test flow.
+    notes: |
+      Use this only after the reviewed Mix setup closure is available. It does not make networked
+      setup or Elixir execution agent-safe.
+    setup:
+      task: setup:elixir:compile
+    run:
+      task: verify:elixir-test
+  mcp:
+    intent: ci_verification
+    description: Node-hosted MCP smoke flow using its test-owned fake Mix executable.
+    notes: |
+      This workflow is a harness smoke check, not evidence that a real MCP host loaded the server.
+    run:
+      task: verify:mcp-smoke
+  worker:
+    intent: ci_verification
+    description: Rust port-worker hydration and test flow.
+    setup:
+      task: setup:worker
+    run:
+      task: verify:worker-test
+  site:
+    intent: ci_verification
+    description: Static-site npm hydration and build flow.
+    notes: |
+      The workflow preserves the CI working directory and typed npm CI hydration, but remains
+      maintainer-reviewed because dependency installation uses the network.
+    setup:
+      task: setup:site
+    run:
+      task: verify:site-build
+
+agent:
+  safe_tasks: []
+  verify_after_changes: []
+  writable_paths: []
+  protected_paths:
+    - ota.yaml
+    - .github/workflows/ota-adoption.yml
+  bootstrap:
+    ota:
+      source:
+        kind: version
+        version: v1.6.27
+  notes: |
+    Discover the canonical agent surface with `ota tasks --safe --use` first. An agent may run
+    only a lane reported callable for agent use, and must invoke that lane through
+    `ota run --agent <task>`.
+    This contract currently declares no agent-safe tasks: setup hydrates dependencies or
+    writes build state, and verification depends on those setup closures. Do not omit `--agent`,
+    invoke raw repository commands, or treat ordinary `ota run` as agent authorization.
+    No `entrypoint`, `default_task`, or `verify_after_changes` is declared because there is no
+    finite safe closure to name. Their absence is intentional, not an incomplete configuration.
+    Pythia's own ALLOW decisions are repository input evidence, never Ota execution authority.
+    Widen this boundary only after a separate review proves the full selected closure, effects,
+    writable/protected paths, prerequisites, and refusal behavior.
