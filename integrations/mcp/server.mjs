@@ -129,6 +129,10 @@ function runMixTask(task, jsonBody) {
       cwd: repoRoot,
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env },
+      // Windows distributes Mix through a command shim, which CreateProcess
+      // cannot launch directly. The command and argument are fixed here.
+      shell: process.platform === "win32",
+      windowsHide: true,
     });
     let out = "";
     let err = "";
